@@ -37,7 +37,7 @@ jobs:
         run: ./gradlew :shared:assembleSharedDebugXCFramework --no-daemon
 
       - name: Upload XCFramework artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: Shared-debug-xcframework
           path: shared/build/XCFrameworks/debug/
