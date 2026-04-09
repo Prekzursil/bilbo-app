@@ -41,7 +41,7 @@ final class DashboardViewModel: ObservableObject {
     @Published var weeklyData: [WeeklyBarDatum] = []
     @Published var isLoading: Bool = false
 
-    private let defaults = UserDefaults(suiteName: "group.dev.spark.app") ?? .standard
+    private let defaults = UserDefaults(suiteName: "group.dev.bilbo.app") ?? .standard
 
     func load() async {
         isLoading = true

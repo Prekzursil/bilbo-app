@@ -10,7 +10,7 @@ import ManagedSettings
 
 // MARK: - App Group constant (must match entitlements)
 
-private let kAppGroup = "group.dev.spark.app"
+private let kAppGroup = "group.dev.bilbo.app"
 
 // MARK: - Shared keys (read by main app)
 

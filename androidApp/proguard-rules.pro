@@ -1,4 +1,4 @@
-# Spark Android ProGuard rules
+# Bilbo Android ProGuard rules
 
 # Kotlin
 -keep class kotlin.Metadata { *; }
@@ -15,11 +15,11 @@
 -keepclasseswithmembers class kotlinx.serialization.json.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
--keep,includedescriptorclasses class dev.spark.**$$serializer { *; }
--keepclassmembers class dev.spark.** {
+-keep,includedescriptorclasses class dev.bilbo.**$$serializer { *; }
+-keepclassmembers class dev.bilbo.** {
     *** Companion;
 }
--keepclasseswithmembers class dev.spark.** {
+-keepclasseswithmembers class dev.bilbo.** {
     kotlinx.serialization.KSerializer serializer(...);
 }
 

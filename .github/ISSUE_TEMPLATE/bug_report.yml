@@ -109,12 +109,12 @@ body:
     attributes:
       label: Logs & Stack Traces
       description: |
-        Paste relevant log output here. For Android, use Logcat filtered to `dev.spark`. For iOS, use the Console app or Xcode logs.
+        Paste relevant log output here. For Android, use Logcat filtered to `dev.bilbo`. For iOS, use the Console app or Xcode logs.
         This will be automatically formatted as code.
       render: text
       placeholder: |
         E/BilboApp: Fatal Exception: java.lang.NullPointerException
-            at dev.spark.app.service.BilboAccessibilityService.onAccessibilityEvent(BilboAccessibilityService.kt:87)
+            at dev.bilbo.app.service.BilboAccessibilityService.onAccessibilityEvent(BilboAccessibilityService.kt:87)
             ...
     validations:
       required: false

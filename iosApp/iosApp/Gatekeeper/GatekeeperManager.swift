@@ -50,8 +50,8 @@ final class GatekeeperManager: ObservableObject {
 
     // ── Constants ─────────────────────────────────────────────────────────────
 
-    private static let storageKey = "spark.gatekeeper.declarations"
-    private static let reminderCategory = "SPARK_TIMER_EXPIRY"
+    private static let storageKey = "bilbo.gatekeeper.declarations"
+    private static let reminderCategory = "BILBO_TIMER_EXPIRY"
 
     /// Apps that should never trigger the gatekeeper on iOS.
     private static let defaultBypassBundleIds: Set<String> = [
@@ -63,7 +63,7 @@ final class GatekeeperManager: ObservableObject {
         "com.apple.mobilecal",
         "com.apple.calculator",
         "com.apple.clock",
-        "dev.spark.app",
+        "dev.bilbo.app",
     ]
 
     // ── Published state ───────────────────────────────────────────────────────
@@ -180,7 +180,7 @@ final class GatekeeperManager: ObservableObject {
 
         let trigger = UNTimeIntervalNotificationTrigger(timeInterval: interval, repeats: false)
         let request = UNNotificationRequest(
-            identifier: "spark.reminder.\(declaration.id.uuidString)",
+            identifier: "bilbo.reminder.\(declaration.id.uuidString)",
             content: content,
             trigger: trigger
         )

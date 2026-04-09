@@ -77,7 +77,7 @@ kotlin {
 }
 
 android {
-    namespace = "dev.spark.shared"
+    namespace = "dev.bilbo.shared"
     compileSdk = 35
 
     defaultConfig {
@@ -93,7 +93,7 @@ android {
 sqldelight {
     databases {
         create("BilboDatabase") {
-            packageName.set("dev.spark.data")
+            packageName.set("dev.bilbo.data")
             srcDirs.setFrom("src/commonMain/sqldelight")
         }
     }
@@ -105,87 +105,87 @@ kover {
             excludes {
                 classes(
                     // Platform-specific code
-                    "dev.spark.data.AndroidDatabaseDriver*",
-                    "dev.spark.data.IosDatabaseDriver*",
-                    "dev.spark.platform.*",
-                    "dev.spark.preferences.AndroidBilboPreferences*",
-                    "dev.spark.preferences.IosBilboPreferences*",
-                    "dev.spark.preferences.BilboPreferencesKt*",
-                    "dev.spark.util.NetworkAvailability*",
+                    "dev.bilbo.data.AndroidDatabaseDriver*",
+                    "dev.bilbo.data.IosDatabaseDriver*",
+                    "dev.bilbo.platform.*",
+                    "dev.bilbo.preferences.AndroidBilboPreferences*",
+                    "dev.bilbo.preferences.IosBilboPreferences*",
+                    "dev.bilbo.preferences.BilboPreferencesKt*",
+                    "dev.bilbo.util.NetworkAvailability*",
                     // Remote / network / auth
-                    "dev.spark.shared.data.remote.SupabaseClient*",
-                    "dev.spark.shared.data.remote.BilboApiService*",
-                    "dev.spark.shared.util.FlowExtensions*",
-                    "dev.spark.shared.util.FlowExtensionsKt*",
-                    "dev.spark.auth.AuthManager*",
-                    "dev.spark.intelligence.tier3.CloudInsightClient*",
+                    "dev.bilbo.shared.data.remote.SupabaseClient*",
+                    "dev.bilbo.shared.data.remote.BilboApiService*",
+                    "dev.bilbo.shared.util.FlowExtensions*",
+                    "dev.bilbo.shared.util.FlowExtensionsKt*",
+                    "dev.bilbo.auth.AuthManager*",
+                    "dev.bilbo.intelligence.tier3.CloudInsightClient*",
                     // SQLDelight generated code
-                    "dev.spark.data.BilboDatabase*",
-                    "dev.spark.data.AppUsage*",
-                    "dev.spark.data.WellnessGoal*",
-                    "dev.spark.data.DatabaseDriverFactory*",
-                    "dev.spark.data.shared.*",
+                    "dev.bilbo.data.BilboDatabase*",
+                    "dev.bilbo.data.AppUsage*",
+                    "dev.bilbo.data.WellnessGoal*",
+                    "dev.bilbo.data.DatabaseDriverFactory*",
+                    "dev.bilbo.data.shared.*",
                     // Generated DTOs / table types
-                    "dev.spark.data.Analog_suggestions*",
-                    "dev.spark.data.App_profiles*",
-                    "dev.spark.data.Dopamine_budgets*",
-                    "dev.spark.data.Emotional_checkins*",
-                    "dev.spark.data.Heuristic_insights*",
-                    "dev.spark.data.Intent_declarations*",
-                    "dev.spark.data.Usage_sessions*",
-                    "dev.spark.data.Weekly_insights*",
-                    "dev.spark.data.SumDurationByCategory*",
-                    "dev.spark.data.SumFpEarnedByDateRange*",
-                    "dev.spark.data.AnalogSuggestionDto*",
-                    "dev.spark.data.AppClassificationDto*",
+                    "dev.bilbo.data.Analog_suggestions*",
+                    "dev.bilbo.data.App_profiles*",
+                    "dev.bilbo.data.Dopamine_budgets*",
+                    "dev.bilbo.data.Emotional_checkins*",
+                    "dev.bilbo.data.Heuristic_insights*",
+                    "dev.bilbo.data.Intent_declarations*",
+                    "dev.bilbo.data.Usage_sessions*",
+                    "dev.bilbo.data.Weekly_insights*",
+                    "dev.bilbo.data.SumDurationByCategory*",
+                    "dev.bilbo.data.SumFpEarnedByDateRange*",
+                    "dev.bilbo.data.AnalogSuggestionDto*",
+                    "dev.bilbo.data.AppClassificationDto*",
                     // Repositories with suspend + Flow (interface + default impls)
-                    "dev.spark.data.IntentRepository\$DefaultImpls*",
+                    "dev.bilbo.data.IntentRepository\$DefaultImpls*",
                     // Use cases / data repositories
-                    "dev.spark.shared.domain.usecase.GetDailyInsightsUseCase*",
-                    "dev.spark.shared.data.repository.InsightRepository*",
+                    "dev.bilbo.shared.domain.usecase.GetDailyInsightsUseCase*",
+                    "dev.bilbo.shared.data.repository.InsightRepository*",
                     // Session tracker (uses coroutine scope internally)
-                    "dev.spark.tracking.SessionTracker*",
+                    "dev.bilbo.tracking.SessionTracker*",
                     // Decision engine (depends on cloud client + many injected deps)
-                    "dev.spark.intelligence.DecisionEngine*",
+                    "dev.bilbo.intelligence.DecisionEngine*",
                     // Seed data loader (needs mock repos + resource reader)
-                    "dev.spark.data.SeedDataLoader*",
-                    "dev.spark.data.SeedDataLoaderKt*",
+                    "dev.bilbo.data.SeedDataLoader*",
+                    "dev.bilbo.data.SeedDataLoaderKt*",
                     // Preferences expect/actual
-                    "dev.spark.preferences.BilboPreferences*",
+                    "dev.bilbo.preferences.BilboPreferences*",
                     // Serialization-generated code (branch-heavy generated equals/serialization)
-                    "dev.spark.preferences.NotificationPreferences*",
+                    "dev.bilbo.preferences.NotificationPreferences*",
                     // Shared domain model serialization companions
-                    "dev.spark.shared.domain.model.*",
+                    "dev.bilbo.shared.domain.model.*",
                     // Extension functions with synthetic $default bridges
-                    "dev.spark.social.BuddyManagerKt*",
-                    "dev.spark.analog.SuggestionEngineKt*",
+                    "dev.bilbo.social.BuddyManagerKt*",
+                    "dev.bilbo.analog.SuggestionEngineKt*",
                     // Heuristic engine: contains unreachable dead-code branches
                     // (buildEmotionCorrelationMessage is called only when per-emotion
                     //  correlation >= 0.6, but per-emotion groups have constant X → r=0)
-                    "dev.spark.intelligence.tier2.HeuristicEngine*",
+                    "dev.bilbo.intelligence.tier2.HeuristicEngine*",
                     // Social layer classes with extensive test suites (>93% coverage)
                     // Remaining branches are in deep state machine paths and
                     // synthetic $default bridge methods from default parameters
-                    "dev.spark.social.BuddyManager*",
-                    "dev.spark.social.ChallengeEngine*",
-                    "dev.spark.social.CircleManager*",
-                    "dev.spark.social.LeaderboardCalculator*",
+                    "dev.bilbo.social.BuddyManager*",
+                    "dev.bilbo.social.ChallengeEngine*",
+                    "dev.bilbo.social.CircleManager*",
+                    "dev.bilbo.social.LeaderboardCalculator*",
                     // CooldownManager: remaining 3 branches are race-condition guards
                     // (second null check after isLocked + map access)
-                    "dev.spark.enforcement.CooldownManager*",
+                    "dev.bilbo.enforcement.CooldownManager*",
                     // Intelligence tier2/3: remaining lines are $default bridge methods
-                    "dev.spark.intelligence.tier2.GamingDetector*",
-                    "dev.spark.intelligence.tier2.TrendDetector*",
-                    "dev.spark.intelligence.tier3.InsightPromptBuilder*",
+                    "dev.bilbo.intelligence.tier2.GamingDetector*",
+                    "dev.bilbo.intelligence.tier2.TrendDetector*",
+                    "dev.bilbo.intelligence.tier3.InsightPromptBuilder*",
                     // Remaining unreachable branches in utility code:
                     // - DefaultErrorHandler.map: NetworkException null-message branch
                     // - toUserMessage: BilboError null-message coalescing (all subclasses have defaults)
-                    "dev.spark.util.DefaultErrorHandler*",
-                    "dev.spark.util.ErrorHandlerKt*",
+                    "dev.bilbo.util.DefaultErrorHandler*",
+                    "dev.bilbo.util.ErrorHandlerKt*",
                     // AppClassifier.inferFromPackageName: .any lambda early-exit branches
-                    "dev.spark.economy.AppClassifier*",
+                    "dev.bilbo.economy.AppClassifier*",
                     // ResultKt.map: compiler-generated Error vs Loading discrimination
-                    "dev.spark.shared.util.ResultKt*"
+                    "dev.bilbo.shared.util.ResultKt*"
                 )
             }
         }

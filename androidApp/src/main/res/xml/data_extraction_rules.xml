@@ -5,12 +5,12 @@
 -->
 <data-extraction-rules>
     <cloud-backup>
-        <exclude domain="database" path="spark.db" />
-        <exclude domain="sharedpref" path="dev.spark.app_preferences.xml" />
+        <exclude domain="database" path="bilbo.db" />
+        <exclude domain="sharedpref" path="dev.bilbo.app_preferences.xml" />
         <exclude domain="sharedpref" path="supabase_session.xml" />
     </cloud-backup>
     <device-transfer>
-        <exclude domain="database" path="spark.db" />
+        <exclude domain="database" path="bilbo.db" />
         <exclude domain="sharedpref" path="supabase_session.xml" />
     </device-transfer>
 </data-extraction-rules>

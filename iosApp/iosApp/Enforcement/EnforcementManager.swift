@@ -57,8 +57,8 @@ final class EnforcementManager: ObservableObject {
     /// Cooldown expiry timestamps: bundleId → Unix epoch seconds
     private var cooldowns: [String: TimeInterval] = [:]
 
-    private let cooldownKey = "spark.enforcement.cooldowns"
-    private let notifCategory = "SPARK_TIMER_EXPIRY"
+    private let cooldownKey = "bilbo.enforcement.cooldowns"
+    private let notifCategory = "BILBO_TIMER_EXPIRY"
 
     // ── Timer management ──────────────────────────────────────────────────────
 
@@ -200,14 +200,14 @@ final class EnforcementManager: ObservableObject {
     /// Determines whether NUDGE or HARD_LOCK should apply for [bundleId].
     /// Currently reads from UserDefaults; wire to AppProfileRepository for full integration.
     private func determineEnforcementMode(for bundleId: String) -> AppEnforcementMode {
-        let key = "spark.enforcementMode.\(bundleId)"
+        let key = "bilbo.enforcementMode.\(bundleId)"
         let stored = UserDefaults.standard.string(forKey: key) ?? "NUDGE"
         return stored == "HARD_LOCK" ? .hardLock : .nudge
     }
 
     /// Sets the enforcement mode for a bundle ID (called from settings).
     func setEnforcementMode(_ mode: AppEnforcementMode, for bundleId: String) {
-        let key = "spark.enforcementMode.\(bundleId)"
+        let key = "bilbo.enforcementMode.\(bundleId)"
         UserDefaults.standard.set(mode == .hardLock ? "HARD_LOCK" : "NUDGE", forKey: key)
     }
 
@@ -227,7 +227,7 @@ final class EnforcementManager: ObservableObject {
             repeats: false
         )
         let request = UNNotificationRequest(
-            identifier: "spark.expiry.\(bundleId)",
+            identifier: "bilbo.expiry.\(bundleId)",
             content: content,
             trigger: trigger
         )
@@ -236,7 +236,7 @@ final class EnforcementManager: ObservableObject {
 
     private func cancelExpiryNotification(bundleId: String) {
         UNUserNotificationCenter.current()
-            .removePendingNotificationRequests(withIdentifiers: ["spark.expiry.\(bundleId)"])
+            .removePendingNotificationRequests(withIdentifiers: ["bilbo.expiry.\(bundleId)"])
     }
 
     private func postWarningNotification(appName: String, remainingSecs: Int) {
@@ -246,7 +246,7 @@ final class EnforcementManager: ObservableObject {
         content.body = "Your session ends in about 2 minutes. Time to wrap up."
         content.sound = .default
         let request = UNNotificationRequest(
-            identifier: "spark.warning.\(appName)",
+            identifier: "bilbo.warning.\(appName)",
             content: content,
             trigger: nil  // immediate
         )

@@ -654,7 +654,7 @@ erDiagram
 bilbo-app/
 ├── androidApp/                      # Android Jetpack Compose application
 │   ├── src/main/
-│   │   ├── kotlin/dev/spark/app/
+│   │   ├── kotlin/dev/bilbo/app/
 │   │   │   ├── MainActivity.kt
 │   │   │   ├── BilboApplication.kt
 │   │   │   ├── di/                  # Hilt DI modules
@@ -665,7 +665,7 @@ bilbo-app/
 │   └── build.gradle.kts             # Android module build — playstore + github flavors
 ├── shared/                          # KMP shared module
 │   └── src/
-│       ├── commonMain/kotlin/dev/spark/
+│       ├── commonMain/kotlin/dev/bilbo/
 │       │   ├── domain/              # Core models: UsageSession, IntentDeclaration, etc.
 │       │   │   └── social/          # BuddyPair, Circle, CircleMember, Challenge
 │       │   ├── data/                # Repositories, DatabaseDriverFactory, SeedDataLoader
@@ -742,8 +742,8 @@ bilbo-app/
 
 | Flavor | Application ID | Screen Time Method | Distribution |
 |--------|---------------|---------------------|--------------|
-| `playstore` | `dev.spark.app` | `UsageStatsManager` (no special permission required) | Google Play Store |
-| `github` | `dev.spark.app.github` | `AccessibilityService` (full app-switch detection) | GitHub Releases / F-Droid |
+| `playstore` | `dev.bilbo.app` | `UsageStatsManager` (no special permission required) | Google Play Store |
+| `github` | `dev.bilbo.app.github` | `AccessibilityService` (full app-switch detection) | GitHub Releases / F-Droid |
 
 The `github` flavor provides more precise enforcement because `AccessibilityService` fires on every window change, whereas `UsageStatsManager` is polled on a timer. Google Play policies restrict `AccessibilityService` to assistive-technology use cases, hence the separate flavor.
 

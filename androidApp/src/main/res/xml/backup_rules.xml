@@ -4,7 +4,7 @@
     Exclude local SQLite DB (sensitive usage data) and shared prefs with tokens.
 -->
 <full-backup-content>
-    <exclude domain="database" path="spark.db" />
-    <exclude domain="sharedpref" path="dev.spark.app_preferences.xml" />
+    <exclude domain="database" path="bilbo.db" />
+    <exclude domain="sharedpref" path="dev.bilbo.app_preferences.xml" />
     <exclude domain="sharedpref" path="supabase_session.xml" />
 </full-backup-content>

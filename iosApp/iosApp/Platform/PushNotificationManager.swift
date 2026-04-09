@@ -14,10 +14,10 @@ import UIKit
 // MARK: - Notification category identifiers
 
 enum BilboNotificationCategory: String {
-    case nudge           = "SPARK_NUDGE"
-    case weeklyInsight   = "SPARK_WEEKLY_INSIGHT"
-    case challengeUpdate = "SPARK_CHALLENGE_UPDATE"
-    case checkInReminder = "SPARK_CHECK_IN"
+    case nudge           = "BILBO_NUDGE"
+    case weeklyInsight   = "BILBO_WEEKLY_INSIGHT"
+    case challengeUpdate = "BILBO_CHALLENGE_UPDATE"
+    case checkInReminder = "BILBO_CHECK_IN"
 }
 
 // MARK: - Notification action identifiers
@@ -80,7 +80,7 @@ final class PushNotificationManager: NSObject, ObservableObject {
     private let supabaseAnonKey: String = {
         Bundle.main.object(forInfoDictionaryKey: "SUPABASE_ANON_KEY") as? String ?? ""
     }()
-    private let defaults = UserDefaults(suiteName: "group.dev.spark.app") ?? .standard
+    private let defaults = UserDefaults(suiteName: "group.dev.bilbo.app") ?? .standard
     private let tokenKey = "apns_device_token"
 
     // MARK: - Init
@@ -135,7 +135,7 @@ final class PushNotificationManager: NSObject, ObservableObject {
 
     private func uploadTokenToSupabase(token: String) async {
         guard !supabaseUrl.isEmpty, !supabaseAnonKey.isEmpty else { return }
-        guard let userId = defaults.string(forKey: "spark_user_id") else { return }
+        guard let userId = defaults.string(forKey: "bilbo_user_id") else { return }
 
         let urlStr = "\(supabaseUrl)/rest/v1/device_tokens"
         guard let url = URL(string: urlStr) else { return }
@@ -274,17 +274,17 @@ final class PushNotificationManager: NSObject, ObservableObject {
 
         switch action {
         case .nudgeAccept:
-            NotificationCenter.default.post(name: .sparkNudgeAccepted, object: userInfo)
+            NotificationCenter.default.post(name: .bilboNudgeAccepted, object: userInfo)
         case .nudgeDismiss:
-            NotificationCenter.default.post(name: .sparkNudgeDismissed, object: userInfo)
+            NotificationCenter.default.post(name: .bilboNudgeDismissed, object: userInfo)
         case .nudgeSnooze:
-            NotificationCenter.default.post(name: .sparkNudgeSnoozed, object: userInfo)
+            NotificationCenter.default.post(name: .bilboNudgeSnoozed, object: userInfo)
         case .viewInsight:
-            NotificationCenter.default.post(name: .sparkOpenInsight, object: userInfo)
+            NotificationCenter.default.post(name: .bilboOpenInsight, object: userInfo)
         case .shareInsight:
-            NotificationCenter.default.post(name: .sparkShareInsight, object: userInfo)
+            NotificationCenter.default.post(name: .bilboShareInsight, object: userInfo)
         case .viewChallenge:
-            NotificationCenter.default.post(name: .sparkOpenChallenge, object: userInfo)
+            NotificationCenter.default.post(name: .bilboOpenChallenge, object: userInfo)
         case .skipChallenge:
             break
         }
@@ -293,19 +293,19 @@ final class PushNotificationManager: NSObject, ObservableObject {
     // MARK: - Category handlers
 
     private func handleNudge(userInfo: [AnyHashable: Any]) {
-        NotificationCenter.default.post(name: .sparkNudgeReceived, object: userInfo)
+        NotificationCenter.default.post(name: .bilboNudgeReceived, object: userInfo)
     }
 
     private func handleWeeklyInsight(userInfo: [AnyHashable: Any]) {
-        NotificationCenter.default.post(name: .sparkWeeklyInsightReady, object: userInfo)
+        NotificationCenter.default.post(name: .bilboWeeklyInsightReady, object: userInfo)
     }
 
     private func handleChallengeUpdate(userInfo: [AnyHashable: Any]) {
-        NotificationCenter.default.post(name: .sparkChallengeUpdated, object: userInfo)
+        NotificationCenter.default.post(name: .bilboChallengeUpdated, object: userInfo)
     }
 
     private func handleCheckInReminder() {
-        NotificationCenter.default.post(name: .sparkCheckInReminder, object: nil)
+        NotificationCenter.default.post(name: .bilboCheckInReminder, object: nil)
     }
 }
 
@@ -341,14 +341,14 @@ extension PushNotificationManager: UNUserNotificationCenterDelegate {
 // MARK: - Notification.Name extensions
 
 extension Notification.Name {
-    static let sparkNudgeReceived     = Notification.Name("spark.nudge.received")
-    static let sparkNudgeAccepted     = Notification.Name("spark.nudge.accepted")
-    static let sparkNudgeDismissed    = Notification.Name("spark.nudge.dismissed")
-    static let sparkNudgeSnoozed      = Notification.Name("spark.nudge.snoozed")
-    static let sparkWeeklyInsightReady = Notification.Name("spark.insight.weekly_ready")
-    static let sparkOpenInsight        = Notification.Name("spark.insight.open")
-    static let sparkShareInsight       = Notification.Name("spark.insight.share")
-    static let sparkChallengeUpdated  = Notification.Name("spark.challenge.updated")
-    static let sparkOpenChallenge     = Notification.Name("spark.challenge.open")
-    static let sparkCheckInReminder   = Notification.Name("spark.checkin.reminder")
+    static let bilboNudgeReceived     = Notification.Name("bilbo.nudge.received")
+    static let bilboNudgeAccepted     = Notification.Name("bilbo.nudge.accepted")
+    static let bilboNudgeDismissed    = Notification.Name("bilbo.nudge.dismissed")
+    static let bilboNudgeSnoozed      = Notification.Name("bilbo.nudge.snoozed")
+    static let bilboWeeklyInsightReady = Notification.Name("bilbo.insight.weekly_ready")
+    static let bilboOpenInsight        = Notification.Name("bilbo.insight.open")
+    static let bilboShareInsight       = Notification.Name("bilbo.insight.share")
+    static let bilboChallengeUpdated  = Notification.Name("bilbo.challenge.updated")
+    static let bilboOpenChallenge     = Notification.Name("bilbo.challenge.open")
+    static let bilboCheckInReminder   = Notification.Name("bilbo.checkin.reminder")
 }

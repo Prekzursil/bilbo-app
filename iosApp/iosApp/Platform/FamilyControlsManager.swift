@@ -33,7 +33,7 @@ final class FamilyControlsManager: ObservableObject {
 
     // MARK: - Private
 
-    private let defaults = UserDefaults(suiteName: "group.dev.spark.app") ?? .standard
+    private let defaults = UserDefaults(suiteName: "group.dev.bilbo.app") ?? .standard
     private let authStateKey = "familyControlsAuthState"
     private let center = AuthorizationCenter.shared
 

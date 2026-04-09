@@ -65,7 +65,7 @@ final class SettingsViewModel: ObservableObject {
 
     func deleteAllData() {
         // Calls shared KMP repository clear methods in production.
-        UserDefaults(suiteName: "group.dev.spark.app")?.removePersistentDomain(forName: "group.dev.spark.app")
+        UserDefaults(suiteName: "group.dev.bilbo.app")?.removePersistentDomain(forName: "group.dev.bilbo.app")
     }
 
     func deleteAccount() {
@@ -314,7 +314,7 @@ struct SettingsView: View {
                 LicensesView()
             }
 
-            Link(destination: URL(string: "https://getspark.app/privacy")!) {
+            Link(destination: URL(string: "https://getbilbo.app/privacy")!) {
                 HStack {
                     Text("Privacy Policy")
                     Spacer()

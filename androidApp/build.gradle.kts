@@ -8,11 +8,11 @@ plugins {
 }
 
 android {
-    namespace = "dev.spark.app"
+    namespace = "dev.bilbo.app"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "dev.spark.app"
+        applicationId = "dev.bilbo.app"
         minSdk = 26
         targetSdk = 35
         versionCode = 1
