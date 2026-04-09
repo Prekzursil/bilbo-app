@@ -28,15 +28,6 @@ keystore.properties
 # Android Studio / IntelliJ IDEA
 *.iml
 .idea/
-*.xml
-!.idea/runConfigurations/
-!.idea/codeStyles/
-.idea/caches/
-.idea/libraries/
-.idea/modules.xml
-.idea/workspace.xml
-.idea/navEditor.xml
-.idea/assetWizardSettings.xml
 
 # Android output directories
 out/

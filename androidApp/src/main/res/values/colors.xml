@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Splash background matches DarkColorScheme background -->
+    <color name="splash_background">#0D1B2A</color>
+    <!-- Brand -->
+    <color name="spark_orange">#FF7200</color>
+    <color name="spark_deep_blue">#0D1B2A</color>
+</resources>

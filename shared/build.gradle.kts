@@ -18,6 +18,7 @@ kotlin {
         }
     }
 
+    val xcf = XCFramework("Shared")
     listOf(
         iosX64(),
         iosArm64(),
@@ -26,6 +27,7 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "Shared"
             isStatic = true
+            xcf.add(this)
         }
     }
 

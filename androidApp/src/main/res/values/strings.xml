@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Bilbo</string>
+    <string name="app_tagline">Your digital wellness companion</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_get_started">Get Started</string>
+    <string name="onboarding_sign_in">Sign In</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Bilbo</string>
+    <string name="dashboard_screen_time_today">Today\'s Screen Time</string>
+    <string name="dashboard_top_apps">Today\'s Apps</string>
+
+    <!-- Insights -->
+    <string name="insights_title">Insights</string>
+
+    <!-- Settings -->
+    <string name="settings_title">Settings</string>
+
+    <!-- Notifications -->
+    <string name="notification_monitoring_title">Bilbo is tracking screen time</string>
+    <string name="notification_monitoring_text">Helping you build mindful habits</string>
+    <string name="notification_channel_usage_monitor">Usage Monitor</string>
+    <string name="notification_channel_usage_monitor_desc">Tracks your app usage to provide wellness insights</string>
+
+    <!-- Accessibility -->
+    <string name="accessibility_service_description">Bilbo uses Accessibility Services to monitor which apps you use and for how long. This data is stored locally and optionally synced to your private account. No data is sold or shared with third parties.</string>
+
+    <!-- Permissions -->
+    <string name="permission_usage_stats_rationale">Bilbo needs Usage Stats permission to track screen time accurately.</string>
+    <string name="permission_overlay_rationale">Bilbo needs the Display Over Other Apps permission to show focus reminders.</string>
+    <string name="permission_notification_rationale">Bilbo needs notification permission to alert you when you approach your screen time goals.</string>
+</resources>
