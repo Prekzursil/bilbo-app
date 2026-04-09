@@ -15,11 +15,8 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      # Required for all workflows
       security-events: write
-      # Required to fetch internal or private CodeQL packs
       packages: read
-      # Required for workflows in private repositories
       actions: read
       contents: read
 
@@ -27,8 +24,6 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - language: kotlin
-            build-mode: none
           - language: javascript-typescript
             build-mode: none
 
@@ -41,12 +36,7 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.build-mode }}
-          # Use the default CodeQL query suite for security-focused analysis.
-          # Upgrade to 'security-extended' or 'security-and-quality' for broader coverage.
           queries: security-extended
-
-      # No autobuild step — CodeQL's 'none' build mode analyses source files directly.
-      # This is sufficient for Kotlin and TypeScript/JavaScript without compilation.
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
