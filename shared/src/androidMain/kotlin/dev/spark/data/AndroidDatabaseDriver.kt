@@ -3,7 +3,7 @@ package dev.spark.data
 import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import dev.spark.data.db.SparkDatabase
+import dev.spark.shared.db.SparkDatabase
 
 /**
  * Provides the SQLDelight [SqlDriver] for Android using [AndroidSqliteDriver],

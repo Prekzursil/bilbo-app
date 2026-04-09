@@ -6,6 +6,8 @@
 
 package dev.spark.preferences
 
+import kotlinx.serialization.Serializable
+
 // MARK: - Enforcement mode enum (shared)
 
 enum class DefaultEnforcementMode {
@@ -25,6 +27,7 @@ enum class SharingLevelPref {
 
 // MARK: - Notification preference model
 
+@Serializable
 data class NotificationPreferences(
     val nudgeEnabled: Boolean = true,
     val weeklyInsightEnabled: Boolean = true,

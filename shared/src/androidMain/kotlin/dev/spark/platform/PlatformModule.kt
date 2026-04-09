@@ -4,7 +4,7 @@ import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import dev.spark.data.AndroidDatabaseDriver
 import dev.spark.data.DatabaseDriverFactory
-import dev.spark.data.db.SparkDatabase
+import dev.spark.shared.db.SparkDatabase
 
 /**
  * Android-specific dependency wiring for the shared module.

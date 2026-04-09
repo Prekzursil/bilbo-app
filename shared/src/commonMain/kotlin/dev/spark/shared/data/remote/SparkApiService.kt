@@ -5,11 +5,12 @@ import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.functions.functions
 import io.github.jan.supabase.postgrest.postgrest
 import io.github.jan.supabase.postgrest.query.Order
+import io.ktor.client.statement.bodyAsText
 import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 
 /**
- * Wraps Supabase data-access calls for Spark features.
+ * Wraps Supabase data-access calls for Bilbo features.
  *
  * All suspend functions must be called from a coroutine.
  */
@@ -47,9 +48,7 @@ class SparkApiService(private val client: SupabaseClient) {
                 put("date", date)
             }
         )
-        return response.body.let {
-            // Decode using the shared serializer
-            kotlinx.serialization.json.Json.decodeFromString(it)
-        }
+        val text = response.bodyAsText()
+        return kotlinx.serialization.json.Json.decodeFromString(text)
     }
 }

@@ -20,21 +20,19 @@ class AppClassifier(
         val defaultEnforcementMode: EnforcementMode
     )
 
-    companion object {
-        // Package-name prefix heuristics for unknown apps
-        private val KNOWN_SOCIAL_PREFIXES = listOf(
-            "com.facebook", "com.instagram", "com.twitter", "com.snapchat",
-            "com.tiktok", "com.reddit", "com.tumblr", "com.pinterest"
-        )
-        private val KNOWN_PRODUCTIVITY_PREFIXES = listOf(
-            "com.google.android.apps.docs", "com.microsoft", "com.slack",
-            "com.notion", "com.todoist", "com.evernote"
-        )
-        private val KNOWN_LEARNING_PREFIXES = listOf(
-            "com.duolingo", "com.coursera", "org.khanacademy",
-            "com.audible", "com.amazon.kindle"
-        )
-    }
+    // Package-name prefix heuristics for unknown apps
+    private val knownSocialPrefixes = listOf(
+        "com.facebook", "com.instagram", "com.twitter", "com.snapchat",
+        "com.tiktok", "com.reddit", "com.tumblr", "com.pinterest"
+    )
+    private val knownProductivityPrefixes = listOf(
+        "com.google.android.apps.docs", "com.microsoft", "com.slack",
+        "com.notion", "com.todoist", "com.evernote"
+    )
+    private val knownLearningPrefixes = listOf(
+        "com.duolingo", "com.coursera", "org.khanacademy",
+        "com.audible", "com.amazon.kindle"
+    )
 
     // -------------------------------------------------------------------------
     // Classification lookup
@@ -128,10 +126,7 @@ class AppClassifier(
     // Factory / seed loading
     // -------------------------------------------------------------------------
 
-    /**
-     * Constructs an [AppClassifier] from a list of default classifications.
-     */
-    companion object Factory {
+    companion object {
         fun fromDefaults(defaults: List<AppClassification>): AppClassifier {
             val map = defaults.associateBy { it.packageName }
             return AppClassifier(builtInDefaults = map)
@@ -155,9 +150,9 @@ class AppClassifier(
         val lower = packageName.lowercase()
 
         val category = when {
-            KNOWN_SOCIAL_PREFIXES.any { lower.startsWith(it) } -> AppCategory.EMPTY_CALORIES
-            KNOWN_LEARNING_PREFIXES.any { lower.startsWith(it) } -> AppCategory.NUTRITIVE
-            KNOWN_PRODUCTIVITY_PREFIXES.any { lower.startsWith(it) } -> AppCategory.NEUTRAL
+            knownSocialPrefixes.any { lower.startsWith(it) } -> AppCategory.EMPTY_CALORIES
+            knownLearningPrefixes.any { lower.startsWith(it) } -> AppCategory.NUTRITIVE
+            knownProductivityPrefixes.any { lower.startsWith(it) } -> AppCategory.NEUTRAL
             else -> return null
         }
 

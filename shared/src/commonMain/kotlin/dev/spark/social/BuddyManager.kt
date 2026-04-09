@@ -246,5 +246,5 @@ class BuddyManager {
         (1..6).map { codeChars.random() }.joinToString("")
 }
 
-private operator fun SharingLevel.compareTo(other: SharingLevel): Int =
+private operator fun BuddyManager.SharingLevel.compareTo(other: BuddyManager.SharingLevel): Int =
     this.ordinal.compareTo(other.ordinal)
