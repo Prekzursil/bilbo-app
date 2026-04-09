@@ -139,7 +139,7 @@ kover {
                     "dev.bilbo.data.AnalogSuggestionDto*",
                     "dev.bilbo.data.AppClassificationDto*",
                     // Repositories with suspend + Flow (interface + default impls)
-                    "dev.bilbo.data.IntentRepository\$DefaultImpls*",
+                    "dev.bilbo.data.IntentRepository*",
                     // Use cases / data repositories
                     "dev.bilbo.shared.domain.usecase.GetDailyInsightsUseCase*",
                     "dev.bilbo.shared.data.repository.InsightRepository*",
