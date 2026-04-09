@@ -64,12 +64,14 @@ class IosBilboPreferences : BilboPreferences {
 
     private fun setInt(key: String, value: Int) = defaults.setInteger(value.toLong(), key)
 
-    private inline fun <reified T> getJson(key: String, default: T): T =
-        try {
-            json.decodeFromString(getString(key) ?: return default)
-        } catch (e: Exception) {
+    private inline fun <reified T> getJson(key: String, default: T): T {
+        val raw = getString(key) ?: return default
+        return try {
+            json.decodeFromString(raw)
+        } catch (_: Exception) {
             default
         }
+    }
 
     private inline fun <reified T> setJson(key: String, value: T) =
         setString(key, json.encodeToString(value))
