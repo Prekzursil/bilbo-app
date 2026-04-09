@@ -26,7 +26,7 @@ import dev.bilbo.intelligence.tier2.HeuristicEngine
 import dev.bilbo.intelligence.tier3.CloudInsightClient
 import dev.bilbo.intelligence.tier3.InsightPromptBuilder
 import dev.bilbo.shared.data.repository.InsightRepository
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn

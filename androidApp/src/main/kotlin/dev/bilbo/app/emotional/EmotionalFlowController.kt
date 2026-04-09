@@ -23,7 +23,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.toLocalDateTime
 import timber.log.Timber
 import javax.inject.Inject
@@ -253,7 +253,7 @@ class EmotionalFlowController @Inject constructor(
 
     private suspend fun awardBreathingBonus() {
         try {
-            val now = kotlinx.datetime.Clock.System.now()
+            val now = Clock.System.now()
             val tz = kotlinx.datetime.TimeZone.currentSystemDefault()
             val today = now.toLocalDateTime(tz).date
             budgetRepository.incrementFpBonus(today, FPEconomy.BONUS_BREATHING_EXERCISE)

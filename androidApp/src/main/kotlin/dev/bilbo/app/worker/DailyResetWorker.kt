@@ -13,7 +13,7 @@ import dev.bilbo.data.BudgetRepository
 import dev.bilbo.data.UsageRepository
 import dev.bilbo.economy.BudgetEnforcer
 import dev.bilbo.intelligence.tier2.HeuristicEngine
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
