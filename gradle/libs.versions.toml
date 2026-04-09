@@ -7,7 +7,7 @@ sqldelight = "2.0.2"
 ktor = "3.0.3"
 coroutines = "1.9.0"
 serialization = "1.7.3"
-hilt = "2.53.1"
+hilt = "2.59.2"
 ksp = "2.1.0-1.0.29"
 supabase-kt = "3.1.1"
 posthog = "3.9.3"
@@ -61,7 +61,7 @@ supabase-functions = { group = "io.github.jan-tennert.supabase", name = "functio
 # Hilt
 hilt-android = { group = "com.google.dagger", name = "hilt-android", version.ref = "hilt" }
 hilt-android-compiler = { group = "com.google.dagger", name = "hilt-android-compiler", version.ref = "hilt" }
-hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.2.0" }
+hilt-navigation-compose = { group = "androidx.hilt", name = "hilt-navigation-compose", version = "1.3.0" }
 
 # Compose
 compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "compose-bom" }
@@ -87,8 +87,8 @@ lifecycle-runtime-compose = { group = "androidx.lifecycle", name = "lifecycle-ru
 
 # WorkManager
 workmanager-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workmanager" }
-workmanager-hilt = { group = "androidx.hilt", name = "hilt-work", version = "1.2.0" }
-workmanager-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version = "1.2.0" }
+workmanager-hilt = { group = "androidx.hilt", name = "hilt-work", version = "1.3.0" }
+workmanager-hilt-compiler = { group = "androidx.hilt", name = "hilt-compiler", version = "1.3.0" }
 
 # DataStore
 datastore-preferences = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore" }
