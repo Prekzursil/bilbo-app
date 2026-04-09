@@ -10,7 +10,7 @@ serialization = "1.7.3"
 hilt = "2.53.1"
 ksp = "2.3.6"
 supabase-kt = "3.1.1"
-posthog = "3.9.3"
+posthog = "3.9.4"
 sentry = "7.19.1"
 detekt = "1.23.7"
 kotlinx-datetime = "0.6.1"
@@ -125,3 +125,4 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
+sentry = { id = "io.sentry.android.gradle", version = "4.14.1" }
