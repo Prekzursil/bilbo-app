@@ -1,0 +1,580 @@
+-- ============================================================
+-- SparkDatabase.sq
+-- SQLDelight schema for the Spark digital-wellness app.
+--
+-- Type mapping conventions:
+--   Long / auto-increment PK  -> INTEGER
+--   String / enum             -> TEXT
+--   Boolean                   -> INTEGER  (0 = false, 1 = true)
+--   kotlinx.datetime.Instant  -> TEXT     (ISO-8601 string, e.g. "2024-06-01T08:30:00Z")
+--   kotlinx.datetime.LocalDate-> TEXT     (ISO-8601 date, e.g. "2024-06-01")
+--   Float                     -> REAL
+-- ============================================================
+
+
+-- ============================================================
+-- TABLE: usage_sessions
+-- ============================================================
+CREATE TABLE IF NOT EXISTS usage_sessions (
+    id                  INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    package_name        TEXT    NOT NULL,
+    app_label           TEXT    NOT NULL,
+    category            TEXT    NOT NULL,   -- AppCategory enum
+    start_time          TEXT    NOT NULL,   -- Instant ISO-8601
+    end_time            TEXT,               -- Instant ISO-8601 (nullable)
+    duration_seconds    INTEGER NOT NULL,
+    was_tracked         INTEGER NOT NULL DEFAULT 1
+);
+
+CREATE INDEX IF NOT EXISTS idx_usage_sessions_package_name
+    ON usage_sessions (package_name);
+
+CREATE INDEX IF NOT EXISTS idx_usage_sessions_start_time
+    ON usage_sessions (start_time);
+
+CREATE INDEX IF NOT EXISTS idx_usage_sessions_category
+    ON usage_sessions (category);
+
+-- Queries -------------------------------------------------------
+
+selectAllUsageSessions:
+SELECT * FROM usage_sessions
+ORDER BY start_time DESC;
+
+selectUsageSessionById:
+SELECT * FROM usage_sessions
+WHERE id = ?;
+
+selectUsageSessionsByPackageName:
+SELECT * FROM usage_sessions
+WHERE package_name = ?
+ORDER BY start_time DESC;
+
+selectUsageSessionsByDateRange:
+SELECT * FROM usage_sessions
+WHERE start_time >= :from AND start_time <= :to
+ORDER BY start_time DESC;
+
+selectUsageSessionsByCategory:
+SELECT * FROM usage_sessions
+WHERE category = ?
+ORDER BY start_time DESC;
+
+selectUsageSessionsByDateRangeAndCategory:
+SELECT * FROM usage_sessions
+WHERE start_time >= :from
+  AND start_time <= :to
+  AND category = :category
+ORDER BY start_time DESC;
+
+insertUsageSession:
+INSERT INTO usage_sessions (
+    package_name, app_label, category, start_time, end_time, duration_seconds, was_tracked
+) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+updateUsageSessionEndTime:
+UPDATE usage_sessions
+SET end_time = :end_time,
+    duration_seconds = :duration_seconds
+WHERE id = :id;
+
+deleteUsageSessionById:
+DELETE FROM usage_sessions WHERE id = ?;
+
+deleteUsageSessionsOlderThan:
+DELETE FROM usage_sessions WHERE start_time < ?;
+
+countUsageSessionsByPackageName:
+SELECT COUNT(*) FROM usage_sessions WHERE package_name = ?;
+
+sumDurationByCategory:
+SELECT category, SUM(duration_seconds) AS total_seconds
+FROM usage_sessions
+WHERE start_time >= :from AND start_time <= :to
+GROUP BY category;
+
+
+-- ============================================================
+-- TABLE: emotional_checkins
+-- ============================================================
+CREATE TABLE IF NOT EXISTS emotional_checkins (
+    id                    INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    timestamp             TEXT    NOT NULL,  -- Instant ISO-8601
+    pre_session_emotion   TEXT    NOT NULL,  -- Emotion enum
+    post_session_mood     TEXT,              -- Emotion enum (nullable)
+    linked_intent_id      INTEGER            -- FK -> intent_declarations.id (nullable)
+);
+
+CREATE INDEX IF NOT EXISTS idx_emotional_checkins_timestamp
+    ON emotional_checkins (timestamp);
+
+CREATE INDEX IF NOT EXISTS idx_emotional_checkins_linked_intent_id
+    ON emotional_checkins (linked_intent_id);
+
+-- Queries -------------------------------------------------------
+
+selectAllEmotionalCheckIns:
+SELECT * FROM emotional_checkins
+ORDER BY timestamp DESC;
+
+selectEmotionalCheckInById:
+SELECT * FROM emotional_checkins WHERE id = ?;
+
+selectEmotionalCheckInsByDateRange:
+SELECT * FROM emotional_checkins
+WHERE timestamp >= :from AND timestamp <= :to
+ORDER BY timestamp DESC;
+
+selectEmotionalCheckInByIntentId:
+SELECT * FROM emotional_checkins WHERE linked_intent_id = ?;
+
+insertEmotionalCheckIn:
+INSERT INTO emotional_checkins (
+    timestamp, pre_session_emotion, post_session_mood, linked_intent_id
+) VALUES (?, ?, ?, ?);
+
+updateEmotionalCheckInPostMood:
+UPDATE emotional_checkins
+SET post_session_mood = ?
+WHERE id = ?;
+
+deleteEmotionalCheckInById:
+DELETE FROM emotional_checkins WHERE id = ?;
+
+
+-- ============================================================
+-- TABLE: app_profiles
+-- ============================================================
+CREATE TABLE IF NOT EXISTS app_profiles (
+    package_name              TEXT NOT NULL PRIMARY KEY,
+    app_label                 TEXT NOT NULL,
+    category                  TEXT NOT NULL,   -- AppCategory enum
+    enforcement_mode          TEXT NOT NULL,   -- EnforcementMode enum
+    cooling_off_enabled       INTEGER NOT NULL DEFAULT 0,
+    is_bypassed               INTEGER NOT NULL DEFAULT 0,
+    is_custom_classification  INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_app_profiles_category
+    ON app_profiles (category);
+
+CREATE INDEX IF NOT EXISTS idx_app_profiles_enforcement_mode
+    ON app_profiles (enforcement_mode);
+
+-- Queries -------------------------------------------------------
+
+selectAllAppProfiles:
+SELECT * FROM app_profiles ORDER BY app_label ASC;
+
+selectAppProfileByPackageName:
+SELECT * FROM app_profiles WHERE package_name = ?;
+
+selectAppProfilesByCategory:
+SELECT * FROM app_profiles WHERE category = ? ORDER BY app_label ASC;
+
+selectAppProfilesByEnforcementMode:
+SELECT * FROM app_profiles WHERE enforcement_mode = ? ORDER BY app_label ASC;
+
+selectBypassedAppProfiles:
+SELECT * FROM app_profiles WHERE is_bypassed = 1 ORDER BY app_label ASC;
+
+selectCustomClassifiedAppProfiles:
+SELECT * FROM app_profiles WHERE is_custom_classification = 1 ORDER BY app_label ASC;
+
+insertAppProfile:
+INSERT INTO app_profiles (
+    package_name, app_label, category, enforcement_mode,
+    cooling_off_enabled, is_bypassed, is_custom_classification
+) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+updateAppProfile:
+UPDATE app_profiles
+SET app_label                = :app_label,
+    category                 = :category,
+    enforcement_mode         = :enforcement_mode,
+    cooling_off_enabled      = :cooling_off_enabled,
+    is_bypassed              = :is_bypassed,
+    is_custom_classification = :is_custom_classification
+WHERE package_name = :package_name;
+
+updateAppProfileCategory:
+UPDATE app_profiles
+SET category = :category,
+    is_custom_classification = 1
+WHERE package_name = :package_name;
+
+updateAppProfileBypass:
+UPDATE app_profiles
+SET is_bypassed = :is_bypassed
+WHERE package_name = :package_name;
+
+deleteAppProfileByPackageName:
+DELETE FROM app_profiles WHERE package_name = ?;
+
+upsertAppProfile:
+INSERT OR REPLACE INTO app_profiles (
+    package_name, app_label, category, enforcement_mode,
+    cooling_off_enabled, is_bypassed, is_custom_classification
+) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+
+-- ============================================================
+-- TABLE: intent_declarations
+-- ============================================================
+CREATE TABLE IF NOT EXISTS intent_declarations (
+    id                       INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    timestamp                TEXT    NOT NULL,  -- Instant ISO-8601
+    declared_app             TEXT    NOT NULL,
+    declared_duration_minutes INTEGER NOT NULL,
+    actual_duration_minutes  INTEGER,           -- nullable
+    was_enforced             INTEGER NOT NULL DEFAULT 0,
+    enforcement_type         TEXT,              -- EnforcementMode enum (nullable)
+    was_overridden           INTEGER NOT NULL DEFAULT 0,
+    emotional_check_in_id    INTEGER            -- FK -> emotional_checkins.id (nullable)
+);
+
+CREATE INDEX IF NOT EXISTS idx_intent_declarations_timestamp
+    ON intent_declarations (timestamp);
+
+CREATE INDEX IF NOT EXISTS idx_intent_declarations_declared_app
+    ON intent_declarations (declared_app);
+
+CREATE INDEX IF NOT EXISTS idx_intent_declarations_emotional_check_in_id
+    ON intent_declarations (emotional_check_in_id);
+
+-- Queries -------------------------------------------------------
+
+selectAllIntentDeclarations:
+SELECT * FROM intent_declarations ORDER BY timestamp DESC;
+
+selectIntentDeclarationById:
+SELECT * FROM intent_declarations WHERE id = ?;
+
+selectIntentDeclarationsByApp:
+SELECT * FROM intent_declarations
+WHERE declared_app = ?
+ORDER BY timestamp DESC;
+
+selectIntentDeclarationsByDateRange:
+SELECT * FROM intent_declarations
+WHERE timestamp >= :from AND timestamp <= :to
+ORDER BY timestamp DESC;
+
+selectOverriddenIntentDeclarations:
+SELECT * FROM intent_declarations
+WHERE was_overridden = 1
+ORDER BY timestamp DESC;
+
+insertIntentDeclaration:
+INSERT INTO intent_declarations (
+    timestamp, declared_app, declared_duration_minutes, actual_duration_minutes,
+    was_enforced, enforcement_type, was_overridden, emotional_check_in_id
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?);
+
+updateIntentDeclarationActualDuration:
+UPDATE intent_declarations
+SET actual_duration_minutes = :actual_duration_minutes
+WHERE id = :id;
+
+updateIntentDeclarationEnforcement:
+UPDATE intent_declarations
+SET was_enforced     = :was_enforced,
+    enforcement_type = :enforcement_type,
+    was_overridden   = :was_overridden
+WHERE id = :id;
+
+deleteIntentDeclarationById:
+DELETE FROM intent_declarations WHERE id = ?;
+
+countAccurateIntentsByDateRange:
+SELECT COUNT(*) FROM intent_declarations
+WHERE timestamp >= :from
+  AND timestamp <= :to
+  AND actual_duration_minutes IS NOT NULL
+  AND ABS(actual_duration_minutes - declared_duration_minutes) <= 2;
+
+countIntentsByDateRange:
+SELECT COUNT(*) FROM intent_declarations
+WHERE timestamp >= :from AND timestamp <= :to;
+
+
+-- ============================================================
+-- TABLE: dopamine_budgets
+-- ============================================================
+CREATE TABLE IF NOT EXISTS dopamine_budgets (
+    date                    TEXT    NOT NULL PRIMARY KEY,  -- LocalDate ISO-8601
+    fp_earned               INTEGER NOT NULL DEFAULT 0,
+    fp_spent                INTEGER NOT NULL DEFAULT 0,
+    fp_bonus                INTEGER NOT NULL DEFAULT 0,
+    fp_rollover_in          INTEGER NOT NULL DEFAULT 0,
+    fp_rollover_out         INTEGER NOT NULL DEFAULT 0,
+    nutritive_minutes       INTEGER NOT NULL DEFAULT 0,
+    empty_calorie_minutes   INTEGER NOT NULL DEFAULT 0,
+    neutral_minutes         INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_dopamine_budgets_date
+    ON dopamine_budgets (date);
+
+-- Queries -------------------------------------------------------
+
+selectAllDopamineBudgets:
+SELECT * FROM dopamine_budgets ORDER BY date DESC;
+
+selectDopamineBudgetByDate:
+SELECT * FROM dopamine_budgets WHERE date = ?;
+
+selectDopamineBudgetsByDateRange:
+SELECT * FROM dopamine_budgets
+WHERE date >= :from AND date <= :to
+ORDER BY date ASC;
+
+selectRecentDopamineBudgets:
+SELECT * FROM dopamine_budgets
+ORDER BY date DESC
+LIMIT ?;
+
+insertDopamineBudget:
+INSERT INTO dopamine_budgets (
+    date, fp_earned, fp_spent, fp_bonus, fp_rollover_in, fp_rollover_out,
+    nutritive_minutes, empty_calorie_minutes, neutral_minutes
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateDopamineBudget:
+UPDATE dopamine_budgets
+SET fp_earned             = :fp_earned,
+    fp_spent              = :fp_spent,
+    fp_bonus              = :fp_bonus,
+    fp_rollover_in        = :fp_rollover_in,
+    fp_rollover_out       = :fp_rollover_out,
+    nutritive_minutes     = :nutritive_minutes,
+    empty_calorie_minutes = :empty_calorie_minutes,
+    neutral_minutes       = :neutral_minutes
+WHERE date = :date;
+
+upsertDopamineBudget:
+INSERT OR REPLACE INTO dopamine_budgets (
+    date, fp_earned, fp_spent, fp_bonus, fp_rollover_in, fp_rollover_out,
+    nutritive_minutes, empty_calorie_minutes, neutral_minutes
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+incrementFpEarned:
+UPDATE dopamine_budgets
+SET fp_earned = fp_earned + :amount
+WHERE date = :date;
+
+incrementFpSpent:
+UPDATE dopamine_budgets
+SET fp_spent = fp_spent + :amount
+WHERE date = :date;
+
+incrementFpBonus:
+UPDATE dopamine_budgets
+SET fp_bonus = fp_bonus + :amount
+WHERE date = :date;
+
+deleteDopamineBudgetByDate:
+DELETE FROM dopamine_budgets WHERE date = ?;
+
+sumFpEarnedByDateRange:
+SELECT SUM(fp_earned) FROM dopamine_budgets
+WHERE date >= :from AND date <= :to;
+
+
+-- ============================================================
+-- TABLE: analog_suggestions
+-- ============================================================
+CREATE TABLE IF NOT EXISTS analog_suggestions (
+    id              INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    text            TEXT    NOT NULL,
+    category        TEXT    NOT NULL,  -- SuggestionCategory enum
+    tags            TEXT    NOT NULL,  -- JSON array serialized as TEXT
+    time_of_day     TEXT,              -- TimeOfDay enum (nullable)
+    times_shown     INTEGER NOT NULL DEFAULT 0,
+    times_accepted  INTEGER NOT NULL DEFAULT 0,
+    is_custom       INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_analog_suggestions_category
+    ON analog_suggestions (category);
+
+CREATE INDEX IF NOT EXISTS idx_analog_suggestions_time_of_day
+    ON analog_suggestions (time_of_day);
+
+CREATE INDEX IF NOT EXISTS idx_analog_suggestions_is_custom
+    ON analog_suggestions (is_custom);
+
+-- Queries -------------------------------------------------------
+
+selectAllAnalogSuggestions:
+SELECT * FROM analog_suggestions ORDER BY category ASC, text ASC;
+
+selectAnalogSuggestionById:
+SELECT * FROM analog_suggestions WHERE id = ?;
+
+selectAnalogSuggestionsByCategory:
+SELECT * FROM analog_suggestions
+WHERE category = ?
+ORDER BY times_accepted DESC;
+
+selectAnalogSuggestionsByTimeOfDay:
+SELECT * FROM analog_suggestions
+WHERE time_of_day = ? OR time_of_day IS NULL
+ORDER BY times_accepted DESC;
+
+selectAnalogSuggestionsByCategoryAndTimeOfDay:
+SELECT * FROM analog_suggestions
+WHERE category = :category
+  AND (time_of_day = :time_of_day OR time_of_day IS NULL)
+ORDER BY times_accepted DESC;
+
+selectCustomAnalogSuggestions:
+SELECT * FROM analog_suggestions WHERE is_custom = 1;
+
+selectTopAcceptedAnalogSuggestions:
+SELECT * FROM analog_suggestions
+ORDER BY times_accepted DESC
+LIMIT ?;
+
+insertAnalogSuggestion:
+INSERT INTO analog_suggestions (
+    text, category, tags, time_of_day, times_shown, times_accepted, is_custom
+) VALUES (?, ?, ?, ?, ?, ?, ?);
+
+updateAnalogSuggestion:
+UPDATE analog_suggestions
+SET text           = :text,
+    category       = :category,
+    tags           = :tags,
+    time_of_day    = :time_of_day
+WHERE id = :id;
+
+incrementTimesShown:
+UPDATE analog_suggestions
+SET times_shown = times_shown + 1
+WHERE id = ?;
+
+incrementTimesAccepted:
+UPDATE analog_suggestions
+SET times_accepted = times_accepted + 1
+WHERE id = ?;
+
+deleteAnalogSuggestionById:
+DELETE FROM analog_suggestions WHERE id = ?;
+
+
+-- ============================================================
+-- TABLE: weekly_insights
+-- ============================================================
+CREATE TABLE IF NOT EXISTS weekly_insights (
+    id                        INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    week_start                TEXT    NOT NULL UNIQUE,  -- LocalDate ISO-8601
+    tier3_narrative           TEXT,
+    total_screen_time_minutes INTEGER NOT NULL DEFAULT 0,
+    nutritive_minutes         INTEGER NOT NULL DEFAULT 0,
+    empty_calorie_minutes     INTEGER NOT NULL DEFAULT 0,
+    fp_earned                 INTEGER NOT NULL DEFAULT 0,
+    fp_spent                  INTEGER NOT NULL DEFAULT 0,
+    intent_accuracy_percent   REAL    NOT NULL DEFAULT 0.0,
+    streak_days               INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE INDEX IF NOT EXISTS idx_weekly_insights_week_start
+    ON weekly_insights (week_start);
+
+-- Queries -------------------------------------------------------
+
+selectAllWeeklyInsights:
+SELECT * FROM weekly_insights ORDER BY week_start DESC;
+
+selectWeeklyInsightById:
+SELECT * FROM weekly_insights WHERE id = ?;
+
+selectWeeklyInsightByWeekStart:
+SELECT * FROM weekly_insights WHERE week_start = ?;
+
+selectWeeklyInsightsByDateRange:
+SELECT * FROM weekly_insights
+WHERE week_start >= :from AND week_start <= :to
+ORDER BY week_start DESC;
+
+selectRecentWeeklyInsights:
+SELECT * FROM weekly_insights
+ORDER BY week_start DESC
+LIMIT ?;
+
+insertWeeklyInsight:
+INSERT INTO weekly_insights (
+    week_start, tier3_narrative, total_screen_time_minutes,
+    nutritive_minutes, empty_calorie_minutes,
+    fp_earned, fp_spent, intent_accuracy_percent, streak_days
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+updateWeeklyInsight:
+UPDATE weekly_insights
+SET tier3_narrative           = :tier3_narrative,
+    total_screen_time_minutes = :total_screen_time_minutes,
+    nutritive_minutes         = :nutritive_minutes,
+    empty_calorie_minutes     = :empty_calorie_minutes,
+    fp_earned                 = :fp_earned,
+    fp_spent                  = :fp_spent,
+    intent_accuracy_percent   = :intent_accuracy_percent,
+    streak_days               = :streak_days
+WHERE id = :id;
+
+upsertWeeklyInsight:
+INSERT OR REPLACE INTO weekly_insights (
+    week_start, tier3_narrative, total_screen_time_minutes,
+    nutritive_minutes, empty_calorie_minutes,
+    fp_earned, fp_spent, intent_accuracy_percent, streak_days
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+deleteWeeklyInsightById:
+DELETE FROM weekly_insights WHERE id = ?;
+
+
+-- ============================================================
+-- TABLE: heuristic_insights
+-- Stores the Tier-2 insights embedded in a WeeklyInsight.
+-- ============================================================
+CREATE TABLE IF NOT EXISTS heuristic_insights (
+    id                INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    weekly_insight_id INTEGER NOT NULL,  -- FK -> weekly_insights.id
+    insight_type      TEXT    NOT NULL,  -- InsightType enum
+    message           TEXT    NOT NULL,
+    confidence        REAL    NOT NULL DEFAULT 1.0,
+    FOREIGN KEY (weekly_insight_id) REFERENCES weekly_insights(id)
+        ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_heuristic_insights_weekly_insight_id
+    ON heuristic_insights (weekly_insight_id);
+
+CREATE INDEX IF NOT EXISTS idx_heuristic_insights_type
+    ON heuristic_insights (insight_type);
+
+-- Queries -------------------------------------------------------
+
+selectHeuristicInsightsByWeeklyInsightId:
+SELECT * FROM heuristic_insights
+WHERE weekly_insight_id = ?
+ORDER BY confidence DESC;
+
+selectHeuristicInsightsByType:
+SELECT * FROM heuristic_insights
+WHERE insight_type = ?
+ORDER BY confidence DESC;
+
+selectHeuristicInsightById:
+SELECT * FROM heuristic_insights WHERE id = ?;
+
+insertHeuristicInsight:
+INSERT INTO heuristic_insights (
+    weekly_insight_id, insight_type, message, confidence
+) VALUES (?, ?, ?, ?);
+
+deleteHeuristicInsightsByWeeklyInsightId:
+DELETE FROM heuristic_insights WHERE weekly_insight_id = ?;
+
+deleteHeuristicInsightById:
+DELETE FROM heuristic_insights WHERE id = ?;

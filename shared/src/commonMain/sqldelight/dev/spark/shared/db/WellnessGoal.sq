@@ -1,0 +1,48 @@
+-- SQLDelight schema for locally cached wellness goals
+
+CREATE TABLE IF NOT EXISTS WellnessGoalEntry (
+    id TEXT NOT NULL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    description TEXT NOT NULL DEFAULT '',
+    type TEXT NOT NULL,
+    target_apps TEXT NOT NULL DEFAULT '[]',  -- JSON array of package names
+    daily_limit_minutes INTEGER NOT NULL DEFAULT 60,
+    is_active INTEGER NOT NULL DEFAULT 1,    -- 0 = inactive, 1 = active
+    created_at TEXT NOT NULL
+);
+
+CREATE INDEX IF NOT EXISTS idx_goal_user_id ON WellnessGoalEntry(user_id);
+CREATE INDEX IF NOT EXISTS idx_goal_is_active ON WellnessGoalEntry(is_active);
+
+-- Queries
+
+insertGoal:
+INSERT OR REPLACE INTO WellnessGoalEntry(
+    id, user_id, name, description, type, target_apps,
+    daily_limit_minutes, is_active, created_at
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+selectActiveGoalsForUser:
+SELECT * FROM WellnessGoalEntry
+WHERE user_id = ? AND is_active = 1
+ORDER BY created_at DESC;
+
+selectAllGoalsForUser:
+SELECT * FROM WellnessGoalEntry
+WHERE user_id = ?
+ORDER BY created_at DESC;
+
+selectGoalById:
+SELECT * FROM WellnessGoalEntry
+WHERE id = ? LIMIT 1;
+
+updateGoalActiveState:
+UPDATE WellnessGoalEntry
+SET is_active = ?
+WHERE id = ?;
+
+deleteGoal:
+DELETE FROM WellnessGoalEntry
+WHERE id = ?;

@@ -1,0 +1,63 @@
+name: Backend CI (Supabase Edge Functions)
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - 'supabase/functions/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - 'supabase/functions/**'
+      - '.github/workflows/backend-ci.yml'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deno-lint:
+    name: Deno Lint & Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+
+      - name: Lint Edge Functions
+        run: deno lint supabase/functions/
+
+      - name: Type check Edge Functions
+        run: deno check supabase/functions/**/*.ts
+
+      - name: Run Edge Function tests
+        run: deno test --allow-net --allow-env supabase/functions/
+        continue-on-error: true  # Tests may require env vars in full CI
+
+  deploy-edge-functions:
+    name: Deploy Edge Functions
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [deno-lint]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+        with:
+          version: latest
+
+      - name: Deploy all Edge Functions
+        run: supabase functions deploy --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}

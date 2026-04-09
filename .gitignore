@@ -1,0 +1,184 @@
+# ============================================================
+# Gradle
+# ============================================================
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# Gradle wrapper (keep properties, ignore binary)
+gradle/wrapper/gradle-wrapper.jar
+
+# Local Gradle properties (contain machine-specific settings)
+local.properties
+
+# ============================================================
+# Android
+# ============================================================
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Keystore files (NEVER commit)
+*.jks
+*.keystore
+keystore.properties
+
+# Android Studio / IntelliJ IDEA
+*.iml
+.idea/
+*.xml
+!.idea/runConfigurations/
+!.idea/codeStyles/
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navEditor.xml
+.idea/assetWizardSettings.xml
+
+# Android output directories
+out/
+release/
+
+# ============================================================
+# Kotlin Multiplatform
+# ============================================================
+# KMP generated Xcode framework
+shared/build/
+
+# ============================================================
+# iOS / Xcode
+# ============================================================
+# Build artifacts
+DerivedData/
+*.xcarchive
+*.xcresult
+build/
+
+# Xcode user-specific files
+xcuserdata/
+*.xcuserstate
+*.xcworkspace/xcuserdata/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Xcode auto-generated
+*.moved-aside
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/
+Package.resolved
+
+# CocoaPods
+Pods/
+*.xcworkspace
+!default.xcworkspace
+Podfile.lock
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# ============================================================
+# Environment / Secrets
+# ============================================================
+.env
+.env.*
+!.env.example
+secrets.yml
+google-services.json
+GoogleService-Info.plist
+supabase/.env
+
+# ============================================================
+# Node / Deno (for Edge Functions)
+# ============================================================
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnp/
+.pnp.js
+dist/
+.deno/
+
+# ============================================================
+# macOS
+# ============================================================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+
+# ============================================================
+# Linux
+# ============================================================
+*~
+
+# ============================================================
+# Windows
+# ============================================================
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.lnk
+
+# ============================================================
+# IDE / Editor
+# ============================================================
+.vscode/
+*.swp
+*.swo
+.fleet/
+
+# ============================================================
+# Detekt / SonarCloud
+# ============================================================
+.sonar/
+.sonarcloud.properties
+
+# ============================================================
+# Sentry
+# ============================================================
+sentry.properties
+
+# ============================================================
+# Misc
+# ============================================================
+*.log
+*.tmp
+*.bak
+*.orig
+*.rej
+crash-reports/

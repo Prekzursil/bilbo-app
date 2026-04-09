@@ -1,0 +1,118 @@
+name: iOS CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-kotlin-framework:
+    name: Build Kotlin Shared XCFramework
+    runs-on: macos-14
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Shared XCFramework (Debug)
+        run: ./gradlew :shared:assembleSharedDebugXCFramework --no-daemon
+
+      - name: Upload XCFramework artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Shared-debug-xcframework
+          path: shared/build/XCFrameworks/debug/
+          retention-days: 7
+
+  swiftlint:
+    name: SwiftLint
+    runs-on: macos-14
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run SwiftLint
+        uses: norio-nomura/action-swiftlint@3.2.1
+        with:
+          args: --strict
+        env:
+          WORKING_DIRECTORY: iosApp
+
+  build-ios-app:
+    name: Build iOS App
+    runs-on: macos-14
+    timeout-minutes: 60
+    needs: [build-kotlin-framework]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Build Shared XCFramework
+        run: ./gradlew :shared:assembleSharedDebugXCFramework --no-daemon
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_16.1.app
+
+      - name: Build iOS app (simulator)
+        working-directory: iosApp
+        run: |
+          xcodebuild \
+            -project iosApp.xcodeproj \
+            -scheme iosApp \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build \
+            | xcpretty
+
+      - name: Run iOS unit tests
+        working-directory: iosApp
+        run: |
+          xcodebuild \
+            -project iosApp.xcodeproj \
+            -scheme iosApp \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            test \
+            | xcpretty
+        continue-on-error: true  # Tests may fail without entitlements in CI

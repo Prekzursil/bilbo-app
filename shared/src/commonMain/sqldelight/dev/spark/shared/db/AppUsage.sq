@@ -1,0 +1,58 @@
+-- SQLDelight schema for local app usage caching
+
+CREATE TABLE IF NOT EXISTS AppUsageEntry (
+    id TEXT NOT NULL PRIMARY KEY,
+    user_id TEXT NOT NULL,
+    package_name TEXT NOT NULL,
+    app_name TEXT NOT NULL,
+    start_time INTEGER NOT NULL,      -- epoch milliseconds
+    end_time INTEGER,                 -- epoch milliseconds, NULL if session still active
+    duration_ms INTEGER NOT NULL DEFAULT 0,
+    category TEXT NOT NULL DEFAULT 'other',
+    synced INTEGER NOT NULL DEFAULT 0 -- 0 = pending sync, 1 = synced to Supabase
+);
+
+CREATE INDEX IF NOT EXISTS idx_app_usage_user_id ON AppUsageEntry(user_id);
+CREATE INDEX IF NOT EXISTS idx_app_usage_start_time ON AppUsageEntry(start_time DESC);
+CREATE INDEX IF NOT EXISTS idx_app_usage_synced ON AppUsageEntry(synced);
+
+-- Queries
+
+insertAppUsageEntry:
+INSERT OR REPLACE INTO AppUsageEntry(
+    id, user_id, package_name, app_name,
+    start_time, end_time, duration_ms, category, synced
+)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0);
+
+selectAllForUser:
+SELECT * FROM AppUsageEntry
+WHERE user_id = ?
+ORDER BY start_time DESC;
+
+selectForUserSince:
+SELECT * FROM AppUsageEntry
+WHERE user_id = ? AND start_time >= ?
+ORDER BY start_time DESC;
+
+selectUnsyncedForUser:
+SELECT * FROM AppUsageEntry
+WHERE user_id = ? AND synced = 0
+ORDER BY start_time ASC;
+
+markSynced:
+UPDATE AppUsageEntry
+SET synced = 1
+WHERE id = ?;
+
+deleteOlderThan:
+DELETE FROM AppUsageEntry
+WHERE user_id = ? AND start_time < ?;
+
+totalDurationForPackageOnDate:
+SELECT COALESCE(SUM(duration_ms), 0) AS total_ms
+FROM AppUsageEntry
+WHERE user_id = ?
+  AND package_name = ?
+  AND start_time >= ?
+  AND start_time < ?;

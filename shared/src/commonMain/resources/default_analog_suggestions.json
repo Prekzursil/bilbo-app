@@ -1,0 +1,247 @@
+[
+  {
+    "id": 1,
+    "text": "Step outside for a 10-minute walk around the block.",
+    "category": "EXERCISE",
+    "tags": ["outdoors", "low-intensity", "quick"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 2,
+    "text": "Do a 5-minute stretching routine — try hip circles, neck rolls, and a forward fold.",
+    "category": "EXERCISE",
+    "tags": ["flexibility", "desk break", "quick"],
+    "timeOfDay": "AFTERNOON"
+  },
+  {
+    "id": 3,
+    "text": "Go for a 20-minute jog or brisk walk in your neighbourhood.",
+    "category": "EXERCISE",
+    "tags": ["cardio", "outdoors", "solo"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 4,
+    "text": "Do 3 sets of bodyweight exercises: push-ups, squats, and lunges.",
+    "category": "EXERCISE",
+    "tags": ["strength", "home", "no-equipment"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 5,
+    "text": "Grab your bike and ride to a destination you'd normally drive to.",
+    "category": "EXERCISE",
+    "tags": ["cycling", "transport", "outdoors"],
+    "timeOfDay": "AFTERNOON"
+  },
+  {
+    "id": 6,
+    "text": "Spend 15 minutes drawing or doodling whatever comes to mind.",
+    "category": "CREATIVE",
+    "tags": ["art", "freeform", "solo"],
+    "timeOfDay": "AFTERNOON"
+  },
+  {
+    "id": 7,
+    "text": "Write 3 pages in a journal about anything you're feeling right now.",
+    "category": "CREATIVE",
+    "tags": ["journaling", "self-reflection", "solo"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 8,
+    "text": "Pick up an instrument and play for 20 minutes — no pressure to be perfect.",
+    "category": "MUSIC",
+    "tags": ["instrument", "practice", "home"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 9,
+    "text": "Write a short poem or haiku about something you noticed today.",
+    "category": "CREATIVE",
+    "tags": ["writing", "poetry", "mindful"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 10,
+    "text": "Try your hand at origami — fold a paper crane or a simple boat.",
+    "category": "CREATIVE",
+    "tags": ["craft", "focus", "hands-on"],
+    "timeOfDay": "AFTERNOON"
+  },
+  {
+    "id": 11,
+    "text": "Call or text a friend you haven't spoken to in a while.",
+    "category": "SOCIAL",
+    "tags": ["connection", "friendship", "quick"],
+    "timeOfDay": "AFTERNOON"
+  },
+  {
+    "id": 12,
+    "text": "Plan a meal or outing with someone you care about for this week.",
+    "category": "SOCIAL",
+    "tags": ["planning", "connection", "anticipation"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 13,
+    "text": "Write a handwritten note or card to someone who made a difference in your life.",
+    "category": "SOCIAL",
+    "tags": ["gratitude", "connection", "writing"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 14,
+    "text": "Invite a neighbour or colleague for a short walk or coffee.",
+    "category": "SOCIAL",
+    "tags": ["community", "face-to-face", "low-key"],
+    "timeOfDay": "AFTERNOON"
+  },
+  {
+    "id": 15,
+    "text": "Play a board game or card game with whoever is nearby.",
+    "category": "GAMING_PHYSICAL",
+    "tags": ["games", "social", "fun"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 16,
+    "text": "Sit comfortably and try a 5-minute breathing exercise: 4 counts in, 4 hold, 4 out.",
+    "category": "MINDFULNESS",
+    "tags": ["breathing", "stress-relief", "quick"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 17,
+    "text": "Spend 10 minutes in a body scan meditation — notice sensations from head to toe.",
+    "category": "MINDFULNESS",
+    "tags": ["meditation", "body-awareness", "calm"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 18,
+    "text": "Write down 3 things you're genuinely grateful for right now.",
+    "category": "MINDFULNESS",
+    "tags": ["gratitude", "journaling", "positive"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 19,
+    "text": "Step outside and observe 5 things you can see, 4 you can touch, 3 you can hear.",
+    "category": "MINDFULNESS",
+    "tags": ["grounding", "5-senses", "outdoors"],
+    "timeOfDay": null
+  },
+  {
+    "id": 20,
+    "text": "Brew a cup of tea mindfully — smell it, feel the warmth, sip slowly.",
+    "category": "MINDFULNESS",
+    "tags": ["tea", "sensory", "ritual"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 21,
+    "text": "Read a physical book for 20 minutes — no bookmarks on your phone.",
+    "category": "READING",
+    "tags": ["books", "focus", "offline"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 22,
+    "text": "Pick up a magazine or newspaper and read one full article without skimming.",
+    "category": "READING",
+    "tags": ["articles", "attention", "analog"],
+    "timeOfDay": "AFTERNOON"
+  },
+  {
+    "id": 23,
+    "text": "Learn 5 new words in a language you've always wanted to speak.",
+    "category": "LEARNING",
+    "tags": ["language", "vocabulary", "quick"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 24,
+    "text": "Watch a documentary on a topic outside your usual interests.",
+    "category": "LEARNING",
+    "tags": ["documentary", "curiosity", "passive"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 25,
+    "text": "Sit in a park or garden and observe the natural world around you for 15 minutes.",
+    "category": "NATURE",
+    "tags": ["outdoors", "observation", "calm"],
+    "timeOfDay": "AFTERNOON"
+  },
+  {
+    "id": 26,
+    "text": "Water your plants — or start a small herb garden on your windowsill.",
+    "category": "NATURE",
+    "tags": ["plants", "home", "nurturing"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 27,
+    "text": "Watch the sunrise or sunset for at least 5 minutes without your phone.",
+    "category": "NATURE",
+    "tags": ["sky", "mindfulness", "beauty"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 28,
+    "text": "Cook a meal from scratch — no meal kit, no shortcuts.",
+    "category": "COOKING",
+    "tags": ["cooking", "home", "creative"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 29,
+    "text": "Try baking something simple: banana bread, muffins, or cookies.",
+    "category": "COOKING",
+    "tags": ["baking", "home", "sweet"],
+    "timeOfDay": "AFTERNOON"
+  },
+  {
+    "id": 30,
+    "text": "Prep your meals for tomorrow — chop veggies, cook grains, pack snacks.",
+    "category": "COOKING",
+    "tags": ["meal-prep", "planning", "health"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 31,
+    "text": "Put on an album you love and listen from start to finish without multitasking.",
+    "category": "MUSIC",
+    "tags": ["listening", "intentional", "solo"],
+    "timeOfDay": "EVENING"
+  },
+  {
+    "id": 32,
+    "text": "Sing along to your favourite songs for 10 minutes — alone is fine!",
+    "category": "MUSIC",
+    "tags": ["singing", "mood-lift", "fun"],
+    "timeOfDay": "AFTERNOON"
+  },
+  {
+    "id": 33,
+    "text": "Go for a late-night walk under the stars — bring a jacket and leave your phone at home.",
+    "category": "NATURE",
+    "tags": ["stars", "night", "outdoors"],
+    "timeOfDay": "NIGHT"
+  },
+  {
+    "id": 34,
+    "text": "Do a 10-minute yoga flow — child's pose, cat-cow, downward dog.",
+    "category": "EXERCISE",
+    "tags": ["yoga", "flexibility", "calm"],
+    "timeOfDay": "MORNING"
+  },
+  {
+    "id": 35,
+    "text": "Challenge a friend to a physical game: frisbee, basketball, or a race.",
+    "category": "GAMING_PHYSICAL",
+    "tags": ["competitive", "social", "outdoor"],
+    "timeOfDay": "AFTERNOON"
+  }
+]
