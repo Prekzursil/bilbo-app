@@ -1,6 +1,7 @@
 package dev.bilbo.economy
 
 import dev.bilbo.domain.*
+import kotlin.time.Clock
 import kotlinx.datetime.*
 import kotlin.test.*
 
@@ -666,7 +667,7 @@ class BudgetEnforcerDefaultTzTest {
 
     @Test fun isTodayBudgetDefaultTz() {
         val enforcer = BudgetEnforcer()
-        val today = kotlinx.datetime.Clock.System.now()
+        val today = Clock.System.now()
             .toLocalDateTime(TimeZone.currentSystemDefault()).date
         val budget = DopamineBudget(
             date = today, fpEarned = 0, fpSpent = 0, fpBonus = 0,
@@ -684,7 +685,7 @@ class BudgetEnforcerDefaultTzTest {
 
     @Test fun evaluateGateDefaultTz() {
         val enforcer = BudgetEnforcer()
-        val today = kotlinx.datetime.Clock.System.now()
+        val today = Clock.System.now()
             .toLocalDateTime(TimeZone.currentSystemDefault()).date
         val budget = DopamineBudget(
             date = today, fpEarned = 10, fpSpent = 0, fpBonus = 0,

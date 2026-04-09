@@ -1,5 +1,6 @@
 package dev.bilbo.enforcement
 
+import kotlin.time.Clock
 import kotlin.test.*
 
 // =============================================================================
@@ -148,7 +149,7 @@ class CooldownManagerPersistenceTest {
 
     @Test fun restoreFromPersistenceLoadsActive() {
         val persistence = FakeCooldownPersistence()
-        val futureExpiry = kotlinx.datetime.Clock.System.now().epochSeconds + 3600
+        val futureExpiry = Clock.System.now().epochSeconds + 3600
         persistence.saved["com.persisted"] = futureExpiry
 
         val manager = CooldownManager(persistence)
@@ -158,7 +159,7 @@ class CooldownManagerPersistenceTest {
 
     @Test fun restoreFromPersistenceIgnoresExpired() {
         val persistence = FakeCooldownPersistence()
-        val pastExpiry = kotlinx.datetime.Clock.System.now().epochSeconds - 3600
+        val pastExpiry = Clock.System.now().epochSeconds - 3600
         persistence.saved["com.expired"] = pastExpiry
 
         val manager = CooldownManager(persistence)
@@ -168,7 +169,7 @@ class CooldownManagerPersistenceTest {
 
     @Test fun restoreFromPersistenceClearsExpired() {
         val persistence = FakeCooldownPersistence()
-        val pastExpiry = kotlinx.datetime.Clock.System.now().epochSeconds - 3600
+        val pastExpiry = Clock.System.now().epochSeconds - 3600
         persistence.saved["com.expired"] = pastExpiry
 
         val manager = CooldownManager(persistence)

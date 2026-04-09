@@ -1,6 +1,6 @@
 package dev.bilbo.enforcement
 
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
 
 /**

@@ -6,7 +6,7 @@ import dev.bilbo.domain.AnalogSuggestion
 import dev.bilbo.domain.FPEconomy
 import dev.bilbo.domain.SuggestionCategory
 import dev.bilbo.domain.TimeOfDay
-import kotlinx.datetime.Clock
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 

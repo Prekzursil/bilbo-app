@@ -10,6 +10,7 @@ import dev.bilbo.intelligence.tier2.HeuristicEngine
 import dev.bilbo.intelligence.tier2.TrendDetector
 import dev.bilbo.intelligence.tier3.CloudInsightClient
 import dev.bilbo.intelligence.tier3.InsightPromptBuilder
+import kotlin.time.Clock
 import kotlinx.datetime.*
 
 /**
