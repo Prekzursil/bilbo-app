@@ -1,6 +1,6 @@
-# Contributing to Spark ⚡🧠
+# Contributing to Bilbo ⚡🧠
 
-Thank you for your interest in contributing to Spark! This document describes how to report bugs, suggest features, set up a development environment, and submit pull requests.
+Thank you for your interest in contributing to Bilbo! This document describes how to report bugs, suggest features, set up a development environment, and submit pull requests.
 
 ---
 
@@ -31,7 +31,7 @@ By participating in this project you agree to treat all contributors with respec
    - A clear, descriptive title
    - Steps to reproduce (numbered, minimal reproduction preferred)
    - Expected behavior vs. actual behavior
-   - Device model, OS version, Spark version / build flavor
+   - Device model, OS version, Bilbo version / build flavor
    - Relevant logs (from Android Logcat or iOS Console), stack traces, or screenshots
    - Whether the issue is reproducible on both platforms or only one
 
@@ -72,11 +72,11 @@ Large architectural changes should be proposed as an **RFC (Request for Comments
 
 ```bash
 # 1. Fork and clone
-git clone https://github.com/<your-username>/spark.git
-cd spark
+git clone https://github.com/<your-username>/bilbo-app.git
+cd bilbo-app
 
 # 2. Add upstream remote
-git remote add upstream https://github.com/prekzursil/spark.git
+git remote add upstream https://github.com/Prekzursil/bilbo-app.git
 
 # 3. Copy config template
 cp androidApp/src/main/assets/config.template.json \
@@ -196,7 +196,7 @@ Branch names should be lowercase, use hyphens (not underscores), and be ≤ 60 c
 
 ## Commit Message Format
 
-Spark uses **[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)**.
+Bilbo uses **[Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/)**.
 
 ### Structure
 
@@ -289,4 +289,4 @@ BREAKING CHANGE: rate_limit_tokens column removed from user_preferences
 
 ---
 
-Thank you for helping make Spark better! 🙏
+Thank you for helping make Bilbo better! 🙏

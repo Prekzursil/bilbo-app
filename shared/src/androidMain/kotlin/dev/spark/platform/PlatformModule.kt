@@ -4,7 +4,7 @@ import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import dev.spark.data.AndroidDatabaseDriver
 import dev.spark.data.DatabaseDriverFactory
-import dev.spark.data.db.SparkDatabase
+import dev.spark.data.BilboDatabase
 
 /**
  * Android-specific dependency wiring for the shared module.
@@ -14,7 +14,7 @@ import dev.spark.data.db.SparkDatabase
  *
  * Example (Application subclass):
  * ```kotlin
- * class SparkApp : Application() {
+ * class BilboApp : Application() {
  *     val platformModule by lazy { PlatformModule(this) }
  * }
  * ```
@@ -34,11 +34,11 @@ class PlatformModule(context: Context) {
     }
 
     /**
-     * Fully initialised [SparkDatabase] instance for use by repositories.
+     * Fully initialised [BilboDatabase] instance for use by repositories.
      * Lazily created — the database file is opened on first access.
      */
-    val database: SparkDatabase by lazy {
-        SparkDatabase(databaseDriverFactory.createDriver())
+    val database: BilboDatabase by lazy {
+        BilboDatabase(databaseDriverFactory.createDriver())
     }
 
     /**

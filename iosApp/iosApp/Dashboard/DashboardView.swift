@@ -1,5 +1,5 @@
 // DashboardView.swift
-// Spark — iOS Dashboard
+// Bilbo — iOS Dashboard
 //
 // Today's overview:
 //   • Large FP balance display
@@ -117,7 +117,7 @@ struct DashboardView: View {
                     .font(.system(size: 36))
                 Text("\(vm.fpBalance)")
                     .font(.system(size: 72, weight: .black, design: .rounded))
-                    .foregroundStyle(Color("SparkPurple"))
+                    .foregroundStyle(Color("BilboPurple"))
             }
             .animation(.spring(response: 0.4), value: vm.fpBalance)
 
@@ -148,7 +148,7 @@ struct DashboardView: View {
                 label: "Intent Accuracy",
                 value: "\(Int(vm.intentAccuracyPercent * 100))%",
                 icon: "target",
-                color: Color("SparkTeal")
+                color: Color("BilboTeal")
             )
             QuickStatCard(
                 label: "Streak",
@@ -170,7 +170,7 @@ struct DashboardView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.borderedProminent)
-            .tint(Color("SparkPurple"))
+            .tint(Color("BilboPurple"))
 
             Button {
                 showSuggestions = true
@@ -179,7 +179,7 @@ struct DashboardView: View {
                     .frame(maxWidth: .infinity)
             }
             .buttonStyle(.bordered)
-            .tint(Color("SparkTeal"))
+            .tint(Color("BilboTeal"))
         }
     }
 
@@ -219,8 +219,8 @@ struct DashboardView: View {
                 )
                 .foregroundStyle(
                     datum.screenMinutes < 120
-                        ? Color("SparkTeal").gradient
-                        : Color("SparkPurple").gradient
+                        ? Color("BilboTeal").gradient
+                        : Color("BilboPurple").gradient
                 )
                 .cornerRadius(6)
             }
@@ -302,11 +302,11 @@ struct ActivityRow: View {
         HStack(spacing: 12) {
             // App icon placeholder
             RoundedRectangle(cornerRadius: 10)
-                .fill(session.wasIntentional ? Color("SparkTeal").opacity(0.15) : Color.orange.opacity(0.15))
+                .fill(session.wasIntentional ? Color("BilboTeal").opacity(0.15) : Color.orange.opacity(0.15))
                 .frame(width: 40, height: 40)
                 .overlay {
                     Image(systemName: session.wasIntentional ? "checkmark.circle" : "exclamationmark.circle")
-                        .foregroundStyle(session.wasIntentional ? Color("SparkTeal") : .orange)
+                        .foregroundStyle(session.wasIntentional ? Color("BilboTeal") : .orange)
                 }
 
             VStack(alignment: .leading, spacing: 2) {
@@ -314,7 +314,7 @@ struct ActivityRow: View {
                     .font(.subheadline).bold()
                 Text(session.wasIntentional ? "Intentional" : "Unintentional")
                     .font(.caption)
-                    .foregroundStyle(session.wasIntentional ? Color("SparkTeal") : .orange)
+                    .foregroundStyle(session.wasIntentional ? Color("BilboTeal") : .orange)
             }
 
             Spacer()

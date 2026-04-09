@@ -33,7 +33,7 @@ private let allInterests: [InterestEntry] = [
 /// Displays a flow grid of selectable chips — one per `SuggestionCategory`.
 /// "Continue" is enabled once at least `minSelections` categories are chosen.
 /// Calls `onContinue` with the final selection set, which should be persisted
-/// to `UserDefaults` (iOS equivalent of `SparkPreferences`).
+/// to `UserDefaults` (iOS equivalent of `BilboPreferences`).
 struct InterestsOnboardingView: View {
 
     /// Categories pre-selected (pass populated set when re-entering this screen).

@@ -159,7 +159,7 @@ private fun DigestHeroBanner(weekLabel: String) {
         ) {
             Text(text = "🌍", fontSize = 36.sp)
             Text(
-                text = "This Week in the Spark Community",
+                text = "This Week in the Bilbo Community",
                 style = MaterialTheme.typography.titleLarge,
                 fontWeight = FontWeight.Bold,
                 textAlign = TextAlign.Center,

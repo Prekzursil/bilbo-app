@@ -1,5 +1,5 @@
 // PushNotificationManager.swift
-// Spark — iOS Platform
+// Bilbo — iOS Platform
 //
 // Handles:
 //   • APNs registration & device token lifecycle
@@ -13,7 +13,7 @@ import UIKit
 
 // MARK: - Notification category identifiers
 
-enum SparkNotificationCategory: String {
+enum BilboNotificationCategory: String {
     case nudge           = "SPARK_NUDGE"
     case weeklyInsight   = "SPARK_WEEKLY_INSIGHT"
     case challengeUpdate = "SPARK_CHALLENGE_UPDATE"
@@ -22,7 +22,7 @@ enum SparkNotificationCategory: String {
 
 // MARK: - Notification action identifiers
 
-enum SparkNotificationAction: String {
+enum BilboNotificationAction: String {
     // Nudge actions
     case nudgeAccept   = "NUDGE_ACCEPT"
     case nudgeDismiss  = "NUDGE_DISMISS"
@@ -113,7 +113,7 @@ final class PushNotificationManager: NSObject, ObservableObject {
             let settings = await center.notificationSettings()
             authorizationStatus = settings.authorizationStatus
         } catch {
-            print("[Spark][PushNotification] Authorization error: \(error)")
+            print("[Bilbo][PushNotification] Authorization error: \(error)")
         }
     }
 
@@ -127,7 +127,7 @@ final class PushNotificationManager: NSObject, ObservableObject {
 
     /// Called by AppDelegate when APNs registration fails.
     func handleRegistrationError(_ error: Error) {
-        print("[Spark][PushNotification] Registration failed: \(error)")
+        print("[Bilbo][PushNotification] Registration failed: \(error)")
         authorizationStatus = .denied
     }
 
@@ -160,10 +160,10 @@ final class PushNotificationManager: NSObject, ObservableObject {
         do {
             let (_, response) = try await URLSession.shared.data(for: request)
             if let http = response as? HTTPURLResponse, http.statusCode >= 400 {
-                print("[Spark][PushNotification] Token upload HTTP \(http.statusCode)")
+                print("[Bilbo][PushNotification] Token upload HTTP \(http.statusCode)")
             }
         } catch {
-            print("[Spark][PushNotification] Token upload error: \(error)")
+            print("[Bilbo][PushNotification] Token upload error: \(error)")
         }
     }
 
@@ -172,20 +172,20 @@ final class PushNotificationManager: NSObject, ObservableObject {
     private func buildCategories() -> Set<UNNotificationCategory> {
         // Nudge
         let nudgeCategory = UNNotificationCategory(
-            identifier: SparkNotificationCategory.nudge.rawValue,
+            identifier: BilboNotificationCategory.nudge.rawValue,
             actions: [
                 UNNotificationAction(
-                    identifier: SparkNotificationAction.nudgeAccept.rawValue,
+                    identifier: BilboNotificationAction.nudgeAccept.rawValue,
                     title: "Accept Nudge",
                     options: [.foreground]
                 ),
                 UNNotificationAction(
-                    identifier: SparkNotificationAction.nudgeSnooze.rawValue,
+                    identifier: BilboNotificationAction.nudgeSnooze.rawValue,
                     title: "Snooze 15 min",
                     options: []
                 ),
                 UNNotificationAction(
-                    identifier: SparkNotificationAction.nudgeDismiss.rawValue,
+                    identifier: BilboNotificationAction.nudgeDismiss.rawValue,
                     title: "Dismiss",
                     options: [.destructive]
                 )
@@ -196,15 +196,15 @@ final class PushNotificationManager: NSObject, ObservableObject {
 
         // Weekly insight
         let insightCategory = UNNotificationCategory(
-            identifier: SparkNotificationCategory.weeklyInsight.rawValue,
+            identifier: BilboNotificationCategory.weeklyInsight.rawValue,
             actions: [
                 UNNotificationAction(
-                    identifier: SparkNotificationAction.viewInsight.rawValue,
+                    identifier: BilboNotificationAction.viewInsight.rawValue,
                     title: "View Insight",
                     options: [.foreground]
                 ),
                 UNNotificationAction(
-                    identifier: SparkNotificationAction.shareInsight.rawValue,
+                    identifier: BilboNotificationAction.shareInsight.rawValue,
                     title: "Share",
                     options: [.foreground]
                 )
@@ -215,15 +215,15 @@ final class PushNotificationManager: NSObject, ObservableObject {
 
         // Challenge update
         let challengeCategory = UNNotificationCategory(
-            identifier: SparkNotificationCategory.challengeUpdate.rawValue,
+            identifier: BilboNotificationCategory.challengeUpdate.rawValue,
             actions: [
                 UNNotificationAction(
-                    identifier: SparkNotificationAction.viewChallenge.rawValue,
+                    identifier: BilboNotificationAction.viewChallenge.rawValue,
                     title: "See Challenge",
                     options: [.foreground]
                 ),
                 UNNotificationAction(
-                    identifier: SparkNotificationAction.skipChallenge.rawValue,
+                    identifier: BilboNotificationAction.skipChallenge.rawValue,
                     title: "Skip",
                     options: [.destructive]
                 )
@@ -234,7 +234,7 @@ final class PushNotificationManager: NSObject, ObservableObject {
 
         // Check-in reminder (no custom actions — tap to open app)
         let checkInCategory = UNNotificationCategory(
-            identifier: SparkNotificationCategory.checkInReminder.rawValue,
+            identifier: BilboNotificationCategory.checkInReminder.rawValue,
             actions: [],
             intentIdentifiers: [],
             options: []
@@ -248,7 +248,7 @@ final class PushNotificationManager: NSObject, ObservableObject {
     func handleNotification(userInfo: [AnyHashable: Any]) {
         lastReceivedNotification = userInfo
         guard let categoryId = (userInfo["aps"] as? [String: Any])?["category"] as? String,
-              let category = SparkNotificationCategory(rawValue: categoryId) else {
+              let category = BilboNotificationCategory(rawValue: categoryId) else {
             return
         }
 
@@ -270,7 +270,7 @@ final class PushNotificationManager: NSObject, ObservableObject {
         completionHandler: @escaping () -> Void
     ) {
         defer { completionHandler() }
-        guard let action = SparkNotificationAction(rawValue: identifier) else { return }
+        guard let action = BilboNotificationAction(rawValue: identifier) else { return }
 
         switch action {
         case .nudgeAccept:

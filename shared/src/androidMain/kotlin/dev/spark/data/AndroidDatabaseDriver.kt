@@ -3,7 +3,7 @@ package dev.spark.data
 import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.android.AndroidSqliteDriver
-import dev.spark.data.db.SparkDatabase
+import dev.spark.data.BilboDatabase
 
 /**
  * Provides the SQLDelight [SqlDriver] for Android using [AndroidSqliteDriver],
@@ -15,11 +15,11 @@ class AndroidDatabaseDriver(private val context: Context) : DatabaseDriverFactor
 
     /**
      * Create (or open) the "spark.db" SQLite database and return a configured driver.
-     * The [SparkDatabase.Schema] callback handles CREATE TABLE / migration statements.
+     * The [BilboDatabase.Schema] callback handles CREATE TABLE / migration statements.
      */
     override fun createDriver(): SqlDriver {
         return AndroidSqliteDriver(
-            schema = SparkDatabase.Schema,
+            schema = BilboDatabase.Schema,
             context = context,
             name = DATABASE_NAME
         )

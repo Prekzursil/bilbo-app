@@ -1,4 +1,5 @@
 [versions]
+kover = "0.9.1"
 kotlin = "2.1.0"
 agp = "8.7.3"
 compose-bom = "2024.12.01"
@@ -9,7 +10,7 @@ serialization = "1.7.3"
 hilt = "2.53.1"
 ksp = "2.1.0-1.0.29"
 supabase-kt = "3.1.1"
-posthog = "3.9.4"
+posthog = "3.9.3"
 sentry = "7.19.1"
 detekt = "1.23.7"
 kotlinx-datetime = "0.6.1"
@@ -113,6 +114,7 @@ mockk = { group = "io.mockk", name = "mockk", version = "1.13.13" }
 turbine = { group = "app.cash.turbine", name = "turbine", version = "1.2.0" }
 
 [plugins]
+kover = { id = "org.jetbrains.kotlinx.kover", version.ref = "kover" }
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
@@ -123,4 +125,3 @@ sqldelight = { id = "app.cash.sqldelight", version.ref = "sqldelight" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 detekt = { id = "io.gitlab.arturbosch.detekt", version.ref = "detekt" }
-sentry = { id = "io.sentry.android.gradle", version = "4.14.1" }

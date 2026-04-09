@@ -29,7 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.spark.app.ui.theme.SparkTheme
+import dev.spark.app.ui.theme.BilboTheme
 import dev.spark.domain.AnalogSuggestion
 import dev.spark.domain.SuggestionCategory
 import dev.spark.domain.TimeOfDay
@@ -231,7 +231,7 @@ fun CustomSuggestionDialog(
 @Preview(showBackground = true)
 @Composable
 private fun CustomSuggestionDialogPreview() {
-    SparkTheme {
+    BilboTheme {
         CustomSuggestionDialog(
             onSave = {},
             onDismiss = {},

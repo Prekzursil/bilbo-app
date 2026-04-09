@@ -13,9 +13,9 @@ import javax.inject.Singleton
 /**
  * GitHub flavor — binds [AccessibilityAppMonitor] as the [AppMonitor] singleton.
  *
- * Driven by [dev.spark.app.service.SparkAccessibilityService] events.
+ * Driven by [dev.spark.app.service.BilboAccessibilityService] events.
  * No `PACKAGE_USAGE_STATS` permission required; the user enables the service
- * under Settings → Accessibility → Spark.
+ * under Settings → Accessibility → Bilbo.
  */
 @Module
 @InstallIn(SingletonComponent::class)

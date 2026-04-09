@@ -1,7 +1,6 @@
 package dev.spark.app.tracking
 
 import android.content.Context
-import androidx.lifecycle.MutableLiveData
 import dev.spark.tracking.AppInfo
 import dev.spark.tracking.AppMonitor
 import timber.log.Timber
@@ -11,13 +10,13 @@ import javax.inject.Singleton
 /**
  * GitHub flavor implementation of [AppMonitor].
  *
- * Delegates foreground-app detection to [SparkAccessibilityService], which
+ * Delegates foreground-app detection to [BilboAccessibilityService], which
  * fires [TYPE_WINDOW_STATE_CHANGED] events.  Because an
  * [android.accessibilityservice.AccessibilityService] runs in the same process
  * but in a different component, communication uses a companion-object singleton
  * holding a [MutableLiveData].
  *
- * The user must manually enable "Spark" under
+ * The user must manually enable "Bilbo" under
  * Settings → Accessibility → Downloaded apps before this monitor becomes
  * functional.  [getCurrentForegroundApp] returns null until the service fires
  * its first event.
@@ -26,16 +25,6 @@ import javax.inject.Singleton
 class AccessibilityAppMonitor @Inject constructor(
     private val context: Context,
 ) : AppMonitor {
-
-    companion object {
-        /**
-         * Bridge between [SparkAccessibilityService] and this monitor.
-         *
-         * [SparkAccessibilityService] posts new [AppInfo] values here on every
-         * [android.view.accessibility.AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED].
-         */
-        val foregroundAppLiveData: MutableLiveData<AppInfo> = MutableLiveData()
-    }
 
     private var appChangedCallback: ((AppInfo) -> Unit)? = null
     private var isMonitoring = false
@@ -53,7 +42,7 @@ class AccessibilityAppMonitor @Inject constructor(
 
         // Observe LiveData on the main thread; callback is forwarded on every
         // distinct package change.
-        foregroundAppLiveData.observeForever { appInfo ->
+        ForegroundAppBridge.foregroundAppLiveData.observeForever { appInfo ->
             if (!isMonitoring) return@observeForever
             if (appInfo == null) return@observeForever
             if (appInfo.packageName == lastKnownApp?.packageName) return@observeForever

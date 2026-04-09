@@ -1,5 +1,5 @@
 // FamilyControlsManager.swift
-// Spark — iOS Platform
+// Bilbo — iOS Platform
 //
 // Manages FamilyControls authorization lifecycle:
 //   • Requests .individual authorization on first launch

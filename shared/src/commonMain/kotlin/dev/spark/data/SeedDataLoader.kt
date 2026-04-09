@@ -50,7 +50,7 @@ private val json = Json {
  *    [SuggestionRepository] (skips duplicates via id uniqueness constraint).
  * 4. Set [SeedPreferenceStore.isSeeded] = `true`.
  *
- * Call [load] once at startup (e.g. from `SparkApplication.onCreate` or a
+ * Call [load] once at startup (e.g. from `BilboApplication.onCreate` or a
  * dedicated Hilt-injected `AppInitializer`).
  *
  * @param appProfileRepository Target repository for app classifications.

@@ -52,7 +52,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.spark.app.ui.components.FPBalanceWidget
-import dev.spark.app.ui.theme.SparkTheme
+import dev.spark.app.ui.theme.BilboTheme
 import dev.spark.domain.DopamineBudget
 import dev.spark.domain.FPEconomy
 import kotlinx.datetime.LocalDate
@@ -407,7 +407,7 @@ private fun SectionCard(
 @Preview(showBackground = true)
 @Composable
 private fun BudgetDashboardPreview() {
-    SparkTheme {
+    BilboTheme {
         BudgetDashboardScreen(
             uiState = BudgetDashboardUiState(
                 currentBalance = 38,

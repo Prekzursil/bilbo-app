@@ -24,7 +24,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.spark.app.ui.theme.SparkTheme
+import dev.spark.app.ui.theme.BilboTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,7 +35,7 @@ fun DashboardScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Spark") },
+                title = { Text("Bilbo") },
                 actions = {
                     IconButton(onClick = onNavigateToInsights) {
                         Icon(Icons.Filled.Insights, contentDescription = "Insights")
@@ -116,7 +116,7 @@ private fun AppUsageRow(appName: String, durationMinutes: Int) {
 @Preview(showBackground = true)
 @Composable
 private fun DashboardScreenPreview() {
-    SparkTheme {
+    BilboTheme {
         DashboardScreen(onNavigateToInsights = {}, onNavigateToSettings = {})
     }
 }

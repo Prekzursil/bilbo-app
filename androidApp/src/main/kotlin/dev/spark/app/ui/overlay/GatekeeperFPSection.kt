@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.spark.app.ui.components.FPBalanceWidget
-import dev.spark.app.ui.theme.SparkTheme
+import dev.spark.app.ui.theme.BilboTheme
 
 // ── Colours reused from the gatekeeper palette ────────────────────────────────
 private val GkPrimary   = Color(0xFF48B8A0)
@@ -158,7 +158,7 @@ private fun FpStatusBanner(message: String, color: Color) {
 @Preview(showBackground = true, backgroundColor = 0xFF1A2C3D)
 @Composable
 private fun FPSectionEmptyPreview() {
-    SparkTheme {
+    BilboTheme {
         GatekeeperFPSection(
             currentBalance = 0,
             fpEarned = 5,
@@ -172,7 +172,7 @@ private fun FPSectionEmptyPreview() {
 @Preview(showBackground = true, backgroundColor = 0xFF1A2C3D)
 @Composable
 private fun FPSectionLowPreview() {
-    SparkTheme {
+    BilboTheme {
         GatekeeperFPSection(
             currentBalance = 7,
             fpEarned = 12,
@@ -186,7 +186,7 @@ private fun FPSectionLowPreview() {
 @Preview(showBackground = true, backgroundColor = 0xFF1A2C3D)
 @Composable
 private fun FPSectionOkPreview() {
-    SparkTheme {
+    BilboTheme {
         GatekeeperFPSection(
             currentBalance = 42,
             fpEarned = 30,

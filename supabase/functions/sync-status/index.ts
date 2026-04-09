@@ -1,5 +1,5 @@
 /**
- * sync-status — Spark Edge Function
+ * sync-status — Bilbo Edge Function
  *
  * Receives a compact status summary from the device and upserts it into
  * the `status_summaries` table. Called periodically by the mobile app

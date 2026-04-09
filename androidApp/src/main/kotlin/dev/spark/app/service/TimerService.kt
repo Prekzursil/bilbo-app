@@ -294,7 +294,7 @@ class TimerService : Service() {
 
     private fun buildForegroundNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_TIMER)
-            .setContentTitle("Spark is tracking your session")
+            .setContentTitle("Bilbo is tracking your session")
             .setContentText("Timer active — stay intentional.")
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)

@@ -25,8 +25,9 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateSetOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,7 +35,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.spark.app.ui.theme.SparkTheme
+import dev.spark.app.ui.theme.BilboTheme
 import dev.spark.domain.SuggestionCategory
 
 // ── Chip palette ───────────────────────────────────────────────────────────────
@@ -82,8 +83,8 @@ fun InterestsOnboardingScreen(
     initialSelections: Set<SuggestionCategory> = emptySet(),
     onContinue: (Set<SuggestionCategory>) -> Unit,
 ) {
-    val selected = remember {
-        mutableStateSetOf<SuggestionCategory>().also { it.addAll(initialSelections) }
+    var selected by remember {
+        mutableStateOf(initialSelections.toSet())
     }
 
     Scaffold(
@@ -98,7 +99,7 @@ fun InterestsOnboardingScreen(
                 val canContinue = selectionCount >= MIN_SELECTIONS
 
                 Button(
-                    onClick  = { onContinue(selected.toSet()) },
+                    onClick  = { onContinue(selected) },
                     enabled  = canContinue,
                     modifier = Modifier.fillMaxWidth(),
                     shape    = RoundedCornerShape(14.dp),
@@ -175,8 +176,8 @@ fun InterestsOnboardingScreen(
                     FilterChip(
                         selected = isSelected,
                         onClick  = {
-                            if (isSelected) selected.remove(entry.category)
-                            else selected.add(entry.category)
+                            selected = if (isSelected) selected - entry.category
+                                       else selected + entry.category
                         },
                         label = {
                             Text(
@@ -208,7 +209,7 @@ fun InterestsOnboardingScreen(
 @Preview(showBackground = true)
 @Composable
 private fun InterestsOnboardingScreenPreview() {
-    SparkTheme {
+    BilboTheme {
         InterestsOnboardingScreen(
             initialSelections = setOf(
                 SuggestionCategory.READING,

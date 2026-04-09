@@ -1,5 +1,5 @@
 // MainTabView.swift
-// Spark — iOS Root Navigation
+// Bilbo — iOS Root Navigation
 //
 // Root SwiftUI TabView with 5 tabs:
 //   1. Dashboard   — today's overview
@@ -12,7 +12,7 @@ import SwiftUI
 
 // MARK: - Tab identifiers
 
-enum SparkTab: Int, CaseIterable {
+enum BilboTab: Int, CaseIterable {
     case dashboard
     case focus
     case insights
@@ -45,7 +45,7 @@ enum SparkTab: Int, CaseIterable {
 struct MainTabView: View {
 
     @StateObject private var familyControls = FamilyControlsManager.shared
-    @State private var selectedTab: SparkTab = .dashboard
+    @State private var selectedTab: BilboTab = .dashboard
 
     var body: some View {
         TabView(selection: $selectedTab) {
@@ -55,7 +55,7 @@ struct MainTabView: View {
             socialTab
             settingsTab
         }
-        .tint(Color("SparkTeal"))
+        .tint(Color("BilboTeal"))
         .task {
             await familyControls.requestAuthorizationIfNeeded()
         }
@@ -69,8 +69,8 @@ struct MainTabView: View {
                 .navigationTitle("Dashboard")
                 .navigationBarTitleDisplayMode(.large)
         }
-        .tabItem { Label(SparkTab.dashboard.title, systemImage: SparkTab.dashboard.icon) }
-        .tag(SparkTab.dashboard)
+        .tabItem { Label(BilboTab.dashboard.title, systemImage: BilboTab.dashboard.icon) }
+        .tag(BilboTab.dashboard)
     }
 
     private var focusTab: some View {
@@ -79,8 +79,8 @@ struct MainTabView: View {
                 .navigationTitle("Focus")
                 .navigationBarTitleDisplayMode(.large)
         }
-        .tabItem { Label(SparkTab.focus.title, systemImage: SparkTab.focus.icon) }
-        .tag(SparkTab.focus)
+        .tabItem { Label(BilboTab.focus.title, systemImage: BilboTab.focus.icon) }
+        .tag(BilboTab.focus)
     }
 
     private var insightsTab: some View {
@@ -89,8 +89,8 @@ struct MainTabView: View {
                 .navigationTitle("Insights")
                 .navigationBarTitleDisplayMode(.large)
         }
-        .tabItem { Label(SparkTab.insights.title, systemImage: SparkTab.insights.icon) }
-        .tag(SparkTab.insights)
+        .tabItem { Label(BilboTab.insights.title, systemImage: BilboTab.insights.icon) }
+        .tag(BilboTab.insights)
     }
 
     private var socialTab: some View {
@@ -99,8 +99,8 @@ struct MainTabView: View {
                 .navigationTitle("Social")
                 .navigationBarTitleDisplayMode(.large)
         }
-        .tabItem { Label(SparkTab.social.title, systemImage: SparkTab.social.icon) }
-        .tag(SparkTab.social)
+        .tabItem { Label(BilboTab.social.title, systemImage: BilboTab.social.icon) }
+        .tag(BilboTab.social)
     }
 
     private var settingsTab: some View {
@@ -109,8 +109,8 @@ struct MainTabView: View {
                 .navigationTitle("Settings")
                 .navigationBarTitleDisplayMode(.large)
         }
-        .tabItem { Label(SparkTab.settings.title, systemImage: SparkTab.settings.icon) }
-        .tag(SparkTab.settings)
+        .tabItem { Label(BilboTab.settings.title, systemImage: BilboTab.settings.icon) }
+        .tag(BilboTab.settings)
     }
 }
 

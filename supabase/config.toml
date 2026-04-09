@@ -1,8 +1,8 @@
-# Supabase project configuration for Spark
+# Supabase project configuration for Bilbo
 # Reference: https://supabase.com/docs/guides/local-development/cli/config
 
 [project]
-id = "spark"
+id = "bilbo"
 
 [api]
 # Port for the local Supabase API (PostgREST)
@@ -95,12 +95,12 @@ port = 2500
 user = "fake@example.com"
 pass = "fake"
 admin_email = "admin@example.com"
-sender_name = "Spark"
+sender_name = "Bilbo"
 
 [auth.sms]
 enable_signup = false
 enable_confirmations = false
-template = "Your Spark verification code is {{ .Code }}"
+template = "Your Bilbo verification code is {{ .Code }}"
 
 [auth.external.apple]
 enabled = false

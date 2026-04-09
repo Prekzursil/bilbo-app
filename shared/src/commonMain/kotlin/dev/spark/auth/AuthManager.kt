@@ -13,7 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.map
 
 /**
- * Manages Supabase Auth state for the Spark social layer.
+ * Manages Supabase Auth state for the Bilbo social layer.
  *
  * Auth is *lazy* — the user is never prompted to log in until they explicitly tap
  * "Find a Focus Buddy" (or any other social entry point). Before that point,
@@ -168,7 +168,7 @@ class AuthManager(
      */
     suspend fun handleOAuthCallback(url: String): AuthResult {
         return runCatching {
-            supabaseClient.auth.parseFragmentAndImportSession(url)
+            supabaseClient.auth.importAuthToken(url)
             val user = supabaseClient.auth.retrieveUserForCurrentSession(updateSession = true)
             _authState.value = AuthState.Authenticated(user)
             AuthResult.Success

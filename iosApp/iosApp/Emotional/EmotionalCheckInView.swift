@@ -3,7 +3,7 @@ import SwiftUI
 // MARK: - Emotion
 
 /// Maps to the shared KMP `Emotion` enum.
-enum SparkEmotion: String, CaseIterable, Identifiable {
+enum BilboEmotion: String, CaseIterable, Identifiable {
     case happy    = "HAPPY"
     case calm     = "CALM"
     case bored    = "BORED"
@@ -52,10 +52,10 @@ enum SparkEmotion: String, CaseIterable, Identifiable {
 /// Inserted between the gatekeeper and app launch.
 struct EmotionalCheckInView: View {
 
-    let onEmotionSelected: (SparkEmotion) -> Void
+    let onEmotionSelected: (BilboEmotion) -> Void
     let onSkip: () -> Void
 
-    @State private var selectedEmotion: SparkEmotion? = nil
+    @State private var selectedEmotion: BilboEmotion? = nil
     @State private var isVisible = false
 
     // Palette
@@ -100,7 +100,7 @@ struct EmotionalCheckInView: View {
 
                     Spacer().frame(height: 8)
 
-                    Text("Be honest — it helps Spark support you better.")
+                    Text("Be honest — it helps Bilbo support you better.")
                         .font(.system(size: 14))
                         .foregroundColor(subtle)
                         .multilineTextAlignment(.center)
@@ -110,7 +110,7 @@ struct EmotionalCheckInView: View {
 
                     // Emotion grid
                     LazyVGrid(columns: columns, spacing: 12) {
-                        ForEach(SparkEmotion.allCases) { emotion in
+                        ForEach(BilboEmotion.allCases) { emotion in
                             EmotionGridCard(
                                 emotion: emotion,
                                 isSelected: selectedEmotion == emotion,
@@ -157,7 +157,7 @@ struct EmotionalCheckInView: View {
 // MARK: - EmotionGridCard
 
 private struct EmotionGridCard: View {
-    let emotion: SparkEmotion
+    let emotion: BilboEmotion
     let isSelected: Bool
     let cardBg: Color
     let selectedBg: Color

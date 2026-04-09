@@ -28,7 +28,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Manages system-level overlay windows for Spark using [WindowManager] with
+ * Manages system-level overlay windows for Bilbo using [WindowManager] with
  * [WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY].
  *
  * ### Permissions
@@ -67,7 +67,7 @@ class OverlayManager @Inject constructor(
 
     /**
      * Open the system Settings screen where the user can grant
-     * SYSTEM_ALERT_WINDOW to Spark.
+     * SYSTEM_ALERT_WINDOW to Bilbo.
      */
     fun requestOverlayPermission() {
         val intent = Intent(
@@ -159,8 +159,8 @@ class OverlayManager @Inject constructor(
         ).apply {
             gravity = Gravity.BOTTOM or Gravity.CENTER_HORIZONTAL
             // Allow soft keyboard if the intention text field is focused
-            softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE
-                    or WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
+            softInputMode = WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or
+                    WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
         }
     }
 

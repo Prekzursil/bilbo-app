@@ -24,6 +24,7 @@ import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.toLocalDateTime
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -106,7 +107,7 @@ class EmotionalFlowController @Inject constructor(
 
         android.os.Handler(android.os.Looper.getMainLooper()).post {
             overlayManager.showGatekeeper(
-                appInfo = AppInfo(packageName = "post_session_mood", appLabel = ""),
+                appInfo = AppInfo(packageName = "post_session_mood", appLabel = "", category = null),
             ) { _, onDismiss ->
                 PostSessionMoodScreen(
                     checkInId = checkInId,

@@ -1,5 +1,5 @@
 // AppClassificationScreen.kt
-// Spark — Onboarding Screen 4: App Classification
+// Bilbo — Onboarding Screen 4: App Classification
 //
 // Presents the user's top 10 installed apps and lets them classify
 // each as Nutritive, Neutral, or Empty Calories.

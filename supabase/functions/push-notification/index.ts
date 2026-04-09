@@ -43,12 +43,13 @@ serve(async (req: Request) => {
     }
 
     const results = await Promise.allSettled(
-      tokens.map(async (tokenEntry: { token: string; platform: string }) => {
+      tokens.map((tokenEntry: { token: string; platform: string }) => {
         if (tokenEntry.platform === "android") {
           return sendFcmNotification(tokenEntry.token, payload);
         } else if (tokenEntry.platform === "ios") {
           return sendApnsNotification(tokenEntry.token, payload);
         }
+        return Promise.resolve({ status: "unknown_platform" });
       })
     );
 
@@ -88,9 +89,9 @@ async function sendFcmNotification(token: string, payload: PushPayload) {
   return response.json();
 }
 
-async function sendApnsNotification(token: string, payload: PushPayload) {
+function sendApnsNotification(_token: string, payload: PushPayload) {
   // In production, use APNs HTTP/2 with JWT authentication.
-  // This is a simplified placeholder.
-  console.log(`APNs notification to ${token}: ${payload.title}`);
-  return { status: "queued" };
+  // This is a simplified placeholder that returns a resolved promise.
+  console.log(`APNs notification queued: ${payload.title}`);
+  return Promise.resolve({ status: "queued" });
 }

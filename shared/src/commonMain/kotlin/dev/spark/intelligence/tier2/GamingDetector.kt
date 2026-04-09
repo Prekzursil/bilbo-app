@@ -112,7 +112,7 @@ class GamingDetector {
         var cumulativeFP = 0
 
         for (session in nutritiveSessions) {
-            val currentLaunches = launchCounts.getOrDefault(session.packageName, 0)
+            val currentLaunches = launchCounts[session.packageName] ?: 0
             val hadScreenOff = session.packageName in screenOffPackages
 
             val result = auditSession(

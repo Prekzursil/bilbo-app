@@ -1,8 +1,8 @@
 // OnboardingNavHost.kt
-// Spark — Android Onboarding Navigation
+// Bilbo — Android Onboarding Navigation
 //
 // Manages the onboarding flow navigation graph.
-// Entry point is called from SparkNavHost when onboarding is not completed.
+// Entry point is called from BilboNavHost when onboarding is not completed.
 
 package dev.spark.app.ui.screen.onboarding
 

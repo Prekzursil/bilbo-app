@@ -1,5 +1,5 @@
 /**
- * generate-digest — Spark Edge Function
+ * generate-digest — Bilbo Edge Function
  *
  * Aggregates anonymous global statistics from the current week's
  * `status_summaries` table and returns a weekly digest payload.

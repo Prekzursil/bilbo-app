@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.sentry)
 }
 
 android {
@@ -22,10 +21,14 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         // Supabase config — override with CI secrets or local.properties
-        buildConfigField("String", "SUPABASE_URL", "\"${project.findProperty("SUPABASE_URL") ?: System.getenv("SUPABASE_URL") ?: "\"}\"")
-        buildConfigField("String", "SUPABASE_ANON_KEY", "\"${project.findProperty("SUPABASE_ANON_KEY") ?: System.getenv("SUPABASE_ANON_KEY") ?: "\"}\"")
-        buildConfigField("String", "SENTRY_DSN", "\"${project.findProperty("SENTRY_DSN") ?: System.getenv("SENTRY_DSN") ?: "\"}\"")
-        buildConfigField("String", "POSTHOG_API_KEY", "\"${project.findProperty("POSTHOG_API_KEY") ?: System.getenv("POSTHOG_API_KEY") ?: "\"}\"")
+        val supabaseUrl = project.findProperty("SUPABASE_URL")?.toString() ?: System.getenv("SUPABASE_URL") ?: ""
+        val supabaseAnonKey = project.findProperty("SUPABASE_ANON_KEY")?.toString() ?: System.getenv("SUPABASE_ANON_KEY") ?: ""
+        val sentryDsn = project.findProperty("SENTRY_DSN")?.toString() ?: System.getenv("SENTRY_DSN") ?: ""
+        val posthogApiKey = project.findProperty("POSTHOG_API_KEY")?.toString() ?: System.getenv("POSTHOG_API_KEY") ?: ""
+        buildConfigField("String", "SUPABASE_URL", "\"$supabaseUrl\"")
+        buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
+        buildConfigField("String", "SENTRY_DSN", "\"$sentryDsn\"")
+        buildConfigField("String", "POSTHOG_API_KEY", "\"$posthogApiKey\"")
 
         vectorDrawables {
             useSupportLibrary = true
@@ -93,17 +96,6 @@ android {
     }
 }
 
-sentry {
-    org.set("spark-wellness")
-    projectName.set("spark-android")
-    authToken.set(System.getenv("SENTRY_AUTH_TOKEN") ?: "")
-    uploadNativeSymbols.set(false)
-    includeNativeSources.set(false)
-    tracingInstrumentation {
-        enabled.set(true)
-    }
-}
-
 dependencies {
     implementation(project(":shared"))
 
@@ -148,9 +140,21 @@ dependencies {
     // Serialization
     implementation(libs.kotlinx.serialization.json)
 
+    // DateTime
+    implementation(libs.kotlinx.datetime)
+
     // Sentry
     implementation(libs.sentry.android)
     implementation(libs.sentry.kotlin.extensions)
+
+    // Ktor (needed for DI module HttpClient)
+    implementation(libs.ktor.client.android)
+
+    // Supabase (needed for DI module to reference SupabaseClient type)
+    implementation(libs.supabase.postgrest)
+
+    // LocalBroadcastManager
+    implementation("androidx.localbroadcastmanager:localbroadcastmanager:1.1.0")
 
     // PostHog
     implementation(libs.posthog.android)

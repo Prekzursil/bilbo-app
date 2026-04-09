@@ -1,5 +1,5 @@
 // ErrorHandler.kt
-// Spark — Shared Error Handler
+// Bilbo — Shared Error Handler
 //
 // Provides:
 //   • Global error handler interface
@@ -13,28 +13,28 @@ import kotlinx.coroutines.delay
 
 // MARK: - Error categories
 
-sealed class SparkError : Exception() {
+sealed class BilboError : Exception() {
 
     /** No internet connection. */
-    data class Offline(override val message: String = "You're offline. Check your connection.") : SparkError()
+    data class Offline(override val message: String = "You're offline. Check your connection.") : BilboError()
 
     /** Server-side error (5xx). */
-    data class ServerError(val statusCode: Int, override val message: String = "Server error ($statusCode). Try again shortly.") : SparkError()
+    data class ServerError(val statusCode: Int, override val message: String = "Server error ($statusCode). Try again shortly.") : BilboError()
 
     /** Client-side error (4xx). */
-    data class ClientError(val statusCode: Int, override val message: String) : SparkError()
+    data class ClientError(val statusCode: Int, override val message: String) : BilboError()
 
     /** Authentication / session expired. */
-    data class Unauthorized(override val message: String = "Session expired. Please sign in again.") : SparkError()
+    data class Unauthorized(override val message: String = "Session expired. Please sign in again.") : BilboError()
 
     /** Data not found. */
-    data class NotFound(override val message: String = "The requested data was not found.") : SparkError()
+    data class NotFound(override val message: String = "The requested data was not found.") : BilboError()
 
     /** Local database or parsing error. */
-    data class DataError(override val cause: Throwable? = null, override val message: String = "A data error occurred. Try reopening Spark.") : SparkError()
+    data class DataError(override val cause: Throwable? = null, override val message: String = "A data error occurred. Try reopening Bilbo.") : BilboError()
 
     /** Unexpected / unknown error. */
-    data class Unknown(override val cause: Throwable? = null, override val message: String = "Something went wrong. Please try again.") : SparkError()
+    data class Unknown(override val cause: Throwable? = null, override val message: String = "Something went wrong. Please try again.") : BilboError()
 }
 
 // MARK: - ErrorHandler interface
@@ -45,14 +45,14 @@ sealed class SparkError : Exception() {
  */
 interface ErrorHandler {
 
-    /** Map any throwable to a user-friendly [SparkError]. */
-    fun map(throwable: Throwable): SparkError
+    /** Map any throwable to a user-friendly [BilboError]. */
+    fun map(throwable: Throwable): BilboError
 
     /**
      * Handle an error — maps it and notifies registered listeners.
-     * Returns the mapped [SparkError] for callers that need it.
+     * Returns the mapped [BilboError] for callers that need it.
      */
-    fun handle(throwable: Throwable): SparkError
+    fun handle(throwable: Throwable): BilboError
 
     /** Register a callback to receive user-visible error messages. */
     fun addListener(listener: ErrorListener)
@@ -62,7 +62,7 @@ interface ErrorHandler {
 }
 
 fun interface ErrorListener {
-    fun onError(error: SparkError)
+    fun onError(error: BilboError)
 }
 
 // MARK: - Default implementation
@@ -71,29 +71,29 @@ class DefaultErrorHandler : ErrorHandler {
 
     private val listeners = mutableListOf<ErrorListener>()
 
-    override fun map(throwable: Throwable): SparkError {
+    override fun map(throwable: Throwable): BilboError {
         return when (throwable) {
-            is SparkError -> throwable  // Already mapped
-            is OfflineException       -> SparkError.Offline()
+            is BilboError -> throwable  // Already mapped
+            is OfflineException       -> BilboError.Offline()
             is NetworkException -> when {
-                throwable.statusCode == 401 || throwable.statusCode == 403 -> SparkError.Unauthorized()
-                throwable.statusCode == 404 -> SparkError.NotFound()
-                throwable.statusCode in 400..499 -> SparkError.ClientError(
+                throwable.statusCode == 401 || throwable.statusCode == 403 -> BilboError.Unauthorized()
+                throwable.statusCode == 404 -> BilboError.NotFound()
+                throwable.statusCode in 400..499 -> BilboError.ClientError(
                     statusCode = throwable.statusCode,
                     message = throwable.message ?: "Request failed (${throwable.statusCode})."
                 )
-                throwable.statusCode in 500..599 -> SparkError.ServerError(throwable.statusCode)
-                else -> SparkError.Unknown(cause = throwable)
+                throwable.statusCode in 500..599 -> BilboError.ServerError(throwable.statusCode)
+                else -> BilboError.Unknown(cause = throwable)
             }
-            is kotlinx.serialization.SerializationException -> SparkError.DataError(
+            is kotlinx.serialization.SerializationException -> BilboError.DataError(
                 cause = throwable,
                 message = "Failed to read data. The app may need updating."
             )
-            else -> SparkError.Unknown(cause = throwable)
+            else -> BilboError.Unknown(cause = throwable)
         }
     }
 
-    override fun handle(throwable: Throwable): SparkError {
+    override fun handle(throwable: Throwable): BilboError {
         val error = map(throwable)
         notifyListeners(error)
         return error
@@ -107,7 +107,7 @@ class DefaultErrorHandler : ErrorHandler {
         listeners.remove(listener)
     }
 
-    private fun notifyListeners(error: SparkError) {
+    private fun notifyListeners(error: BilboError) {
         listeners.forEach { it.onError(error) }
     }
 }
@@ -128,12 +128,12 @@ expect fun isNetworkAvailable(): Boolean
 
 /**
  * Retry a suspend block up to [maxAttempts] times with exponential back-off.
- * Only retries on [SparkError.Offline] or [SparkError.ServerError].
+ * Only retries on [BilboError.Offline] or [BilboError.ServerError].
  *
  * @param maxAttempts  Maximum total attempts (default 3).
  * @param initialDelay Initial delay in ms before first retry (default 500 ms).
  * @param factor       Multiplier applied to delay on each retry (default 2.0).
- * @param errorHandler Used to map exceptions to [SparkError].
+ * @param errorHandler Used to map exceptions to [BilboError].
  * @param block        The suspending operation to execute.
  */
 suspend fun <T> withRetry(
@@ -149,7 +149,7 @@ suspend fun <T> withRetry(
             return block()
         } catch (e: Exception) {
             val mapped = errorHandler.map(e)
-            val shouldRetry = mapped is SparkError.Offline || mapped is SparkError.ServerError
+            val shouldRetry = mapped is BilboError.Offline || mapped is BilboError.ServerError
             if (!shouldRetry || attempt == maxAttempts - 2) throw mapped
         }
         delay(currentDelay)
@@ -163,7 +163,7 @@ suspend fun <T> withRetry(
 
 /**
  * Execute [block] and wrap success/failure in [Result].
- * Maps failures through [errorHandler] to typed [SparkError].
+ * Maps failures through [errorHandler] to typed [BilboError].
  */
 suspend fun <T> safeCall(
     errorHandler: ErrorHandler = DefaultErrorHandler(),
@@ -179,7 +179,7 @@ suspend fun <T> safeCall(
 /** Returns a user-friendly display message for any [Throwable]. */
 fun Throwable.toUserMessage(): String {
     return when (this) {
-        is SparkError -> this.message ?: "An error occurred."
+        is BilboError -> this.message ?: "An error occurred."
         else -> DefaultErrorHandler().map(this).message ?: "An error occurred."
     }
 }

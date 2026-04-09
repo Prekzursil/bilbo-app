@@ -6,9 +6,17 @@ import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyItemScope
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import dev.spark.social.BuddyManager
@@ -156,7 +164,7 @@ private fun BuddiesTab(
     onEnterCode: () -> Unit,
     onPairTap: (String) -> Unit,
 ) {
-    androidx.compose.foundation.lazy.LazyColumn(
+    LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -202,7 +210,7 @@ private fun BuddyPairListItem(pair: BuddyPairUiItem, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
@@ -214,7 +222,7 @@ private fun BuddyPairListItem(pair: BuddyPairUiItem, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Surface(
-                shape = androidx.compose.foundation.shape.CircleShape,
+                shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer,
                 modifier = Modifier.size(44.dp),
             ) {
@@ -244,12 +252,12 @@ private fun BuddyPairListItem(pair: BuddyPairUiItem, onClick: () -> Unit) {
 private fun SharingLevelChip(level: BuddyManager.SharingLevel) {
     val (label, color) = when (level) {
         BuddyManager.SharingLevel.MINIMAL  -> "Minimal"  to MaterialTheme.colorScheme.outline
-        BuddyManager.SharingLevel.BASIC    -> "Basic"    to androidx.compose.ui.graphics.Color(0xFF2196F3)
+        BuddyManager.SharingLevel.BASIC    -> "Basic"    to Color(0xFF2196F3)
         BuddyManager.SharingLevel.STANDARD -> "Standard" to MaterialTheme.colorScheme.primary
-        BuddyManager.SharingLevel.DETAILED -> "Detailed" to androidx.compose.ui.graphics.Color(0xFF4CAF50)
+        BuddyManager.SharingLevel.DETAILED -> "Detailed" to Color(0xFF4CAF50)
     }
     Surface(
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(8.dp),
+        shape = RoundedCornerShape(8.dp),
         color = color.copy(alpha = 0.12f),
     ) {
         Text(
@@ -270,7 +278,7 @@ private fun CirclesTab(
     onJoin: () -> Unit,
     onCircleTap: (String) -> Unit,
 ) {
-    androidx.compose.foundation.lazy.LazyColumn(
+    LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -308,7 +316,7 @@ private fun CircleListItem(circle: CircleUiItem, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
@@ -320,7 +328,7 @@ private fun CircleListItem(circle: CircleUiItem, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Surface(
-                shape = androidx.compose.foundation.shape.RoundedCornerShape(10.dp),
+                shape = RoundedCornerShape(10.dp),
                 color = MaterialTheme.colorScheme.secondaryContainer,
                 modifier = Modifier.size(44.dp),
             ) {
@@ -351,7 +359,7 @@ private fun ChallengesTab(
     onCreate: () -> Unit,
     onChallengeTap: (String) -> Unit,
 ) {
-    androidx.compose.foundation.lazy.LazyColumn(
+    LazyColumn(
         modifier = Modifier.fillMaxSize(),
         contentPadding = PaddingValues(16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp),
@@ -379,7 +387,7 @@ private fun ChallengeListItem(challenge: ChallengeUiItem, onClick: () -> Unit) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
-        shape = androidx.compose.foundation.shape.RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(14.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
@@ -410,7 +418,7 @@ private fun ChallengeListItem(challenge: ChallengeUiItem, onClick: () -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(6.dp)
-                    .androidx.compose.ui.draw.clip(androidx.compose.foundation.shape.RoundedCornerShape(3.dp)),
+                    .clip(RoundedCornerShape(3.dp)),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
             )
@@ -445,7 +453,7 @@ private fun SocialEmptyState(icon: ImageVector, message: String) {
             text = message,
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 24.dp),
         )
     }
@@ -453,10 +461,10 @@ private fun SocialEmptyState(icon: ImageVector, message: String) {
 
 // ── Extension items for LazyColumn ───────────────────────────────────────────
 
-private fun <T : Any> androidx.compose.foundation.lazy.LazyListScope.items(
+private fun <T : Any> LazyListScope.items(
     items: List<T>,
     key: ((T) -> Any)? = null,
-    content: @Composable androidx.compose.foundation.lazy.LazyItemScope.(T) -> Unit,
+    content: @Composable LazyItemScope.(T) -> Unit,
 ) {
     items(count = items.size, key = key?.let { k -> { k(items[it]) } }) { index ->
         content(items[index])

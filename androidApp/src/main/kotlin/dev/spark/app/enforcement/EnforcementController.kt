@@ -24,6 +24,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -132,11 +134,9 @@ class EnforcementController @Inject constructor(
                 // Mark declaration as enforced with the correct mode
                 markDeclarationEnforced(declarationId, enforcementMode)
 
-                val today = kotlinx.datetime.Clock.System.now().let { now ->
-                    kotlinx.datetime.TimeZone.currentSystemDefault().let { tz ->
-                        now.toLocalDateTime(tz).date
-                    }
-                }
+                val today = Clock.System.now()
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
                 val budget = budgetRepository.getByDate(today)
                 val fpBalance = budget?.let { focusPointsEngine.getBalance(it) } ?: 0
 
@@ -175,7 +175,7 @@ class EnforcementController @Inject constructor(
     ) {
         android.os.Handler(android.os.Looper.getMainLooper()).post {
             overlayManager.showGatekeeper(
-                appInfo = AppInfo(packageName = appPackage, appLabel = appLabel),
+                appInfo = AppInfo(packageName = appPackage, appLabel = appLabel, category = null),
             ) { _, onDismiss ->
                 NudgeOverlayScreen(
                     appName         = appLabel,
@@ -187,7 +187,7 @@ class EnforcementController @Inject constructor(
                         onDismiss()
                     },
                     onExtend5Min    = {
-                        handleNudgeExtension(appPackage, appLabel)
+                        scope.launch { handleNudgeExtension(appPackage, appLabel) }
                         onDismiss()
                     },
                 )
@@ -215,7 +215,7 @@ class EnforcementController @Inject constructor(
         fpBalance: Int = 0,
     ) {
         overlayManager.showGatekeeper(
-            appInfo = AppInfo(packageName = appPackage, appLabel = appLabel),
+            appInfo = AppInfo(packageName = appPackage, appLabel = appLabel, category = null),
         ) { _, onDismiss ->
             HardLockOverlayScreen(
                 appName          = appLabel,
@@ -263,9 +263,9 @@ class EnforcementController @Inject constructor(
     }
 
     private fun todayDate(): kotlinx.datetime.LocalDate {
-        val now = Clock.System.now()
-        val tz = kotlinx.datetime.TimeZone.currentSystemDefault()
-        return now.toLocalDateTime(tz).date
+        return Clock.System.now()
+            .toLocalDateTime(TimeZone.currentSystemDefault())
+            .date
     }
 
     // ── Navigation ────────────────────────────────────────────────────────────
@@ -312,7 +312,7 @@ class EnforcementController @Inject constructor(
 
     private suspend fun getSuggestion(): String {
         return try {
-            suggestionRepository.getRandom()?.text ?: "Take a short walk outside 🚶"
+            suggestionRepository.getAll().randomOrNull()?.text ?: "Take a short walk outside 🚶"
         } catch (e: Exception) {
             "Take a short walk outside 🚶"
         }

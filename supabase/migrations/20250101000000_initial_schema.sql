@@ -1,5 +1,5 @@
 -- ============================================================
--- Spark Initial Database Schema
+-- Bilbo Initial Database Schema
 -- Supabase / PostgreSQL
 -- ============================================================
 

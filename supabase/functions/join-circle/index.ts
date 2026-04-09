@@ -1,5 +1,5 @@
 /**
- * join-circle — Spark Edge Function
+ * join-circle — Bilbo Edge Function
  *
  * Validates a circle invite code, checks that the circle is not full,
  * and adds the authenticated user as a member.

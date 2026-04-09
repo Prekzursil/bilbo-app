@@ -353,10 +353,10 @@ class WeeklyInsightWorker @AssistedInject constructor(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val channel = NotificationChannel(
                 NOTIFICATION_CHANNEL_ID,
-                "Spark Insights",
+                "Bilbo Insights",
                 NotificationManager.IMPORTANCE_DEFAULT,
             ).apply {
-                description = "Weekly wellness summary from Spark"
+                description = "Weekly wellness summary from Bilbo"
             }
             notificationManager.createNotificationChannel(channel)
         }

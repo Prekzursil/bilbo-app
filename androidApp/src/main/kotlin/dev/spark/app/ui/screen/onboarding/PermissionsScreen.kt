@@ -1,5 +1,5 @@
 // PermissionsScreen.kt
-// Spark — Onboarding Screen 2: Permissions
+// Bilbo — Onboarding Screen 2: Permissions
 //
 // Lists required permissions with explanations, grant buttons,
 // and green checkmarks when granted.
@@ -83,7 +83,7 @@ fun PermissionsScreen(
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold)
         )
         Text(
-            text = "Spark needs these to protect your focus.",
+            text = "Bilbo needs these to protect your focus.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -203,7 +203,7 @@ private fun buildPermissionItems(context: Context): List<PermissionItem> = listO
         id = "usage_access",
         icon = Icons.Filled.Visibility,
         title = "Usage Access",
-        rationale = "So Spark can see which apps are running",
+        rationale = "So Bilbo can see which apps are running",
         isGranted = { hasUsageAccess(context) },
         onGrant = { ctx ->
             ctx.startActivity(Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
@@ -215,7 +215,7 @@ private fun buildPermissionItems(context: Context): List<PermissionItem> = listO
         id = "overlay",
         icon = Icons.Filled.Layers,
         title = "Display Over Other Apps",
-        rationale = "So Spark can show you the Intent Gatekeeper",
+        rationale = "So Bilbo can show you the Intent Gatekeeper",
         isGranted = { Settings.canDrawOverlays(context) },
         onGrant = { ctx ->
             ctx.startActivity(
@@ -229,7 +229,7 @@ private fun buildPermissionItems(context: Context): List<PermissionItem> = listO
         id = "notifications",
         icon = Icons.Filled.Notifications,
         title = "Notifications",
-        rationale = "So Spark can remind you when time is up",
+        rationale = "So Bilbo can remind you when time is up",
         isGranted = {
             if (Build.VERSION.SDK_INT >= 33) {
                 ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) ==

@@ -1,5 +1,5 @@
 // SettingsView.swift
-// Spark — iOS Settings
+// Bilbo — iOS Settings
 //
 // Full settings screen covering all configuration sections:
 //   Enforcement · Economy · Emotional · AI · Social
@@ -145,7 +145,7 @@ struct SettingsView: View {
                         .foregroundStyle(.secondary)
                 }
                 Slider(value: $vm.cooldownMinutes, in: 5...60, step: 5)
-                    .tint(Color("SparkPurple"))
+                    .tint(Color("BilboPurple"))
             }
 
             NavigationLink("Per-App Overrides") {
@@ -163,14 +163,14 @@ struct SettingsView: View {
     private var economySection: some View {
         Section {
             Toggle("Enable Focus Points", isOn: $vm.fpEnabled)
-                .tint(Color("SparkTeal"))
+                .tint(Color("BilboTeal"))
 
             if vm.fpEnabled {
                 Stepper("Daily Baseline: \(vm.dailyBaselineFP) FP",
                         value: $vm.dailyBaselineFP, in: 0...200, step: 10)
 
                 Toggle("Anti-Gaming Protection", isOn: $vm.antiGamingEnabled)
-                    .tint(Color("SparkTeal"))
+                    .tint(Color("BilboTeal"))
             }
         } header: {
             Text("Economy")
@@ -184,16 +184,16 @@ struct SettingsView: View {
     private var emotionalSection: some View {
         Section {
             Toggle("Enable Emotional Check-In", isOn: $vm.checkInEnabled)
-                .tint(Color("SparkTeal"))
+                .tint(Color("BilboTeal"))
 
             if vm.checkInEnabled {
                 Toggle("Cooling-Off Mode", isOn: $vm.coolingOffEnabled)
-                    .tint(Color("SparkTeal"))
+                    .tint(Color("BilboTeal"))
             }
         } header: {
             Text("Emotional")
         } footer: {
-            Text("Check-ins help Spark understand your mood before and after phone use.")
+            Text("Check-ins help Bilbo understand your mood before and after phone use.")
         }
     }
 
@@ -202,11 +202,11 @@ struct SettingsView: View {
     private var aiSection: some View {
         Section {
             Toggle("Cloud AI Insights", isOn: $vm.cloudInsightsEnabled)
-                .tint(Color("SparkTeal"))
+                .tint(Color("BilboTeal"))
 
             if vm.cloudInsightsEnabled {
                 Toggle("Anonymize Before Sending", isOn: $vm.viewAnonymization)
-                    .tint(Color("SparkTeal"))
+                    .tint(Color("BilboTeal"))
 
                 NavigationLink("Preview Data Sent to AI") {
                     DataSentPreviewView(anonymized: vm.viewAnonymization)
@@ -246,14 +246,14 @@ struct SettingsView: View {
     private var notificationsSection: some View {
         Section {
             Toggle("Nudge Notifications", isOn: $vm.nudgeNotifications)
-                .tint(Color("SparkTeal"))
+                .tint(Color("BilboTeal"))
             Toggle("Weekly Insight Ready", isOn: $vm.insightNotifications)
-                .tint(Color("SparkTeal"))
+                .tint(Color("BilboTeal"))
             Toggle("Challenge Updates", isOn: $vm.challengeNotifications)
-                .tint(Color("SparkTeal"))
+                .tint(Color("BilboTeal"))
 
             Toggle("Quiet Hours", isOn: $vm.quietHoursEnabled)
-                .tint(Color("SparkTeal"))
+                .tint(Color("BilboTeal"))
 
             if vm.quietHoursEnabled {
                 DatePicker("Start", selection: $vm.quietHoursStart, displayedComponents: .hourAndMinute)

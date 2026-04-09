@@ -17,7 +17,7 @@ import io.github.jan.supabase.realtime.Realtime
  * @param supabaseUrl  Your project's Supabase URL, e.g. https://xyz.supabase.co
  * @param supabaseKey  The project's public anon key.
  */
-fun createSparkSupabaseClient(
+fun createBilboSupabaseClient(
     supabaseUrl: String,
     supabaseKey: String,
 ): SupabaseClient = createSupabaseClient(

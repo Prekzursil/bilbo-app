@@ -1,5 +1,5 @@
 /**
- * ai-weekly-insight — Spark Edge Function
+ * ai-weekly-insight — Bilbo Edge Function
  *
  * Receives an anonymized weekly summary from the mobile app, calls the
  * Anthropic API (claude-sonnet-4-20250514) to generate a personalized
@@ -92,7 +92,7 @@ function buildPrompt(summary: WeeklySummary, weekStart: string): string {
       `Change: ${(summary.avg_screen_time_hours - summary.prev_week_screen_time_hours).toFixed(1)}h.`
     : "";
 
-  return `You are Spark, a compassionate AI wellness coach helping someone reclaim their focus and mental health by reducing phone addiction.
+  return `You are Bilbo, a compassionate AI wellness coach helping someone reclaim their focus and mental health by reducing phone addiction.
 
 Below is an anonymized summary of the user's digital wellness for the week starting ${weekStart}. Write a warm, personalized, actionable weekly insight of exactly 200 words. Be encouraging but honest. Celebrate wins. Name 1-2 specific improvement opportunities. End with a concrete micro-habit to try next week. Do not use bullet points — write in natural paragraphs.
 

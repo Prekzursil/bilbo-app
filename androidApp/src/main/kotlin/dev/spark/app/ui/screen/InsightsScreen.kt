@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
-import dev.spark.app.ui.theme.SparkTheme
+import dev.spark.app.ui.theme.BilboTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -50,7 +50,7 @@ fun InsightsScreen(
 @Preview(showBackground = true)
 @Composable
 private fun InsightsScreenPreview() {
-    SparkTheme {
+    BilboTheme {
         InsightsScreen(onNavigateBack = {})
     }
 }

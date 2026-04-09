@@ -49,7 +49,7 @@ class BypassManager {
             "com.google.android.calculator",
             "com.samsung.android.app.calculator",
 
-            // Spark itself
+            // Bilbo itself
             "dev.spark.app",
             "dev.spark.app.github",
             "dev.spark.app.debug",

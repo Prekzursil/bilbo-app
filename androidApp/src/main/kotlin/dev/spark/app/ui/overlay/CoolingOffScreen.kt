@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.graphics.lerp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -206,7 +207,7 @@ private fun BreathingCircle(scale: Float, phase: BreathPhase) {
     val circleColor = when (phase) {
         BreathPhase.INHALE -> CoCircleIn
         BreathPhase.EXHALE -> CoCircleOut
-        BreathPhase.HOLD   -> Color.lerp(CoCircleIn, CoCircleOut, 0.5f)
+        BreathPhase.HOLD   -> lerp(CoCircleIn, CoCircleOut, 0.5f)
     }
 
     Canvas(

@@ -1,5 +1,5 @@
 /**
- * send-nudge — Spark Edge Function
+ * send-nudge — Bilbo Edge Function
  *
  * Creates a nudge_event record and triggers a push notification to the
  * recipient via FCM (Android) or APNs (iOS) using the platform-appropriate
@@ -202,7 +202,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // Resolve the notification message
   const notificationBody = message?.trim() || DEFAULT_MESSAGES[resolvedType];
-  const notificationTitle = "Spark — Buddy Nudge ⚡";
+  const notificationTitle = "Bilbo — Buddy Nudge";
 
   // Create nudge_event record
   const { data: nudgeEvent, error: nudgeError } = await supabaseAdmin

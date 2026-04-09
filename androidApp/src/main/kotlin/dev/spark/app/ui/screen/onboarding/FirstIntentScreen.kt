@@ -1,5 +1,5 @@
 // FirstIntentScreen.kt
-// Spark — Onboarding Screen 5: First Intent Demo
+// Bilbo — Onboarding Screen 5: First Intent Demo
 //
 // Guided walkthrough of the Intent Gatekeeper with coaching text.
 // Simulates the gatekeeper experience step by step.
@@ -31,7 +31,7 @@ import kotlinx.coroutines.delay
 
 private enum class DemoStep(val coaching: String, val buttonLabel: String) {
     INTRO(
-        coaching = "When you open a tracked app, Spark pauses and asks: why are you here?",
+        coaching = "When you open a tracked app, Bilbo pauses and asks: why are you here?",
         buttonLabel = "Try it"
     ),
     GATEKEEPER_SHOWN(
@@ -39,7 +39,7 @@ private enum class DemoStep(val coaching: String, val buttonLabel: String) {
         buttonLabel = "I see it"
     ),
     INTENT_ENTERED(
-        coaching = "You stated your intent. Spark notes this and tracks if you followed through.",
+        coaching = "You stated your intent. Bilbo notes this and tracks if you followed through.",
         buttonLabel = "Got it"
     ),
     TIMER_SHOWN(
@@ -47,7 +47,7 @@ private enum class DemoStep(val coaching: String, val buttonLabel: String) {
         buttonLabel = "Makes sense"
     ),
     COMPLETE(
-        coaching = "You're all set! Spark will now help you stay intentional every day.",
+        coaching = "You're all set! Bilbo will now help you stay intentional every day.",
         buttonLabel = "Complete Setup"
     )
 }

@@ -1,4 +1,4 @@
-# Spark iOS App
+# Bilbo iOS App
 
 ## Overview
 
@@ -39,9 +39,9 @@ Link the following Apple frameworks:
 
 | Extension | Type | Purpose |
 |-----------|------|---------|
-| `SparkDeviceActivityMonitor` | DeviceActivityMonitor | Track app usage events |
-| `SparkShieldConfiguration` | ShieldConfigurationDataSource | Custom shield UI |
-| `SparkShieldAction` | ShieldActionDelegate | Handle shield tap actions |
+| `BilboDeviceActivityMonitor` | DeviceActivityMonitor | Track app usage events |
+| `BilboShieldConfiguration` | ShieldConfigurationDataSource | Custom shield UI |
+| `BilboShieldAction` | ShieldActionDelegate | Handle shield tap actions |
 
 ## Architecture
 

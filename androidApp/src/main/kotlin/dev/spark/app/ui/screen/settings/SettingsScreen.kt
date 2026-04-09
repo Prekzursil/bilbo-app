@@ -1,5 +1,5 @@
 // SettingsScreen.kt
-// Spark — Android Settings
+// Bilbo — Android Settings
 //
 // Complete settings screen matching all iOS SettingsView sections:
 //   Enforcement · Economy · Emotional · AI · Social
@@ -108,7 +108,7 @@ fun SettingsScreen(
         AlertDialog(
             onDismissRequest = { viewModel.showDeleteDialog = false },
             title = { Text("Delete All Data") },
-            text = { Text("This will permanently delete all your Spark data. This cannot be undone.") },
+            text = { Text("This will permanently delete all your Bilbo data. This cannot be undone.") },
             confirmButton = {
                 TextButton(
                     onClick = {

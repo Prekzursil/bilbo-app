@@ -1,0 +1,14 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: Ask a Question or Start a Discussion
+    url: https://github.com/Prekzursil/bilbo-app/discussions
+    about: |
+      For general questions, "how do I…" queries, ideas you'd like to discuss before filing an issue,
+      and RFCs for large architectural changes — please use GitHub Discussions instead of opening an issue.
+
+  - name: Report a Security Vulnerability
+    url: https://github.com/Prekzursil/bilbo-app/security/policy
+    about: |
+      Do NOT open a public issue for security vulnerabilities. Please review our Security Policy
+      and email prekzursil1993@gmail.com with your report.

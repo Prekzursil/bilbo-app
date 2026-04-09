@@ -108,7 +108,7 @@ fun EmotionalCheckInScreen(
             Spacer(Modifier.height(8.dp))
 
             Text(
-                text = "Be honest — it helps Spark support you better.",
+                text = "Be honest — it helps Bilbo support you better.",
                 style = MaterialTheme.typography.bodyMedium.copy(color = CiSubtle),
                 textAlign = TextAlign.Center,
             )

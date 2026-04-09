@@ -1,0 +1,142 @@
+name: Bug Report
+description: Report a reproducible bug or regression in Bilbo.
+title: "[Bug]: "
+labels: ["bug", "triage"]
+assignees:
+  - Prekzursil
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for taking the time to report a bug! Please fill in as much detail as possible.
+        Before submitting, search [existing issues](https://github.com/Prekzursil/bilbo-app/issues) to avoid duplicates.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: A clear and concise description of the bug. What went wrong?
+      placeholder: "When I open the Intent Gatekeeper overlay on Instagram, the app crashes immediately..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps-to-reproduce
+    attributes:
+      label: Steps to Reproduce
+      description: Numbered steps that reliably reproduce the issue.
+      placeholder: |
+        1. Open Bilbo and go to Settings → Enforcement
+        2. Set Instagram to Hard Lock mode
+        3. Open Instagram from the home screen
+        4. The overlay appears but immediately dismisses, crashing the app
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected-behavior
+    attributes:
+      label: Expected Behavior
+      description: What did you expect to happen?
+      placeholder: "The Intent Gatekeeper overlay should stay visible, ask for intent, and enforce the time limit."
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual-behavior
+    attributes:
+      label: Actual Behavior
+      description: What actually happened? Include any error messages.
+      placeholder: "The app crashes with a NullPointerException / the overlay flashes and disappears."
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform
+    attributes:
+      label: Platform
+      description: Which platform are you experiencing this on?
+      options:
+        - Android
+        - iOS
+        - Backend / Supabase Edge Functions
+        - Multiple platforms
+    validations:
+      required: true
+
+  - type: dropdown
+    id: build-flavor
+    attributes:
+      label: Build Flavor (Android only)
+      description: Which Android build flavor are you using?
+      options:
+        - "playstore (Google Play, uses UsageStatsManager)"
+        - "github (GitHub Releases / F-Droid, uses AccessibilityService)"
+        - "N/A — iOS or Backend"
+    validations:
+      required: false
+
+  - type: input
+    id: app-version
+    attributes:
+      label: Bilbo Version
+      description: "Find this in Settings → About. Example: 1.2.0 (build 47)"
+      placeholder: "1.2.0 (build 47)"
+    validations:
+      required: true
+
+  - type: input
+    id: device
+    attributes:
+      label: Device Model
+      description: "Example: Google Pixel 9 Pro / Apple iPhone 16 Pro"
+      placeholder: "Google Pixel 9 Pro"
+    validations:
+      required: true
+
+  - type: input
+    id: os-version
+    attributes:
+      label: OS Version
+      description: "Example: Android 15 (API 35) / iOS 18.3"
+      placeholder: "Android 15 (API 35)"
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Logs & Stack Traces
+      description: |
+        Paste relevant log output here. For Android, use Logcat filtered to `dev.spark`. For iOS, use the Console app or Xcode logs.
+        This will be automatically formatted as code.
+      render: text
+      placeholder: |
+        E/BilboApp: Fatal Exception: java.lang.NullPointerException
+            at dev.spark.app.service.BilboAccessibilityService.onAccessibilityEvent(BilboAccessibilityService.kt:87)
+            ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshots or Screen Recording
+      description: |
+        Drag and drop screenshots or a screen recording here if applicable.
+        For crashes, a screenshot of the crash dialog is helpful.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I searched existing issues and this is not a duplicate.
+          required: true
+        - label: I am using the latest version of Bilbo.
+          required: true
+        - label: I have included all information needed to reproduce this bug.
+          required: true

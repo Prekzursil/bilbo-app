@@ -1,9 +1,9 @@
 // ShieldConfigurationExtension.swift
-// Spark — Shield Configuration Extension
+// Bilbo — Shield Configuration Extension
 //
-// Provides branded Spark shield UI for Hard Lock mode.
+// Provides branded Bilbo shield UI for Hard Lock mode.
 // Deep blue/purple palette matching the Android brand.
-// Two actions: override with FP cost, or navigate to Spark.
+// Two actions: override with FP cost, or navigate to Bilbo.
 
 import ManagedSettings
 import ManagedSettingsUI
@@ -12,11 +12,11 @@ import UIKit
 // MARK: - Colors
 
 private extension UIColor {
-    /// Spark deep navy — primary shield background
+    /// Bilbo deep navy — primary shield background
     static let sparkNavy = UIColor(red: 0.094, green: 0.133, blue: 0.259, alpha: 1)
-    /// Spark deep purple — accent
+    /// Bilbo deep purple — accent
     static let sparkPurple = UIColor(red: 0.345, green: 0.204, blue: 0.635, alpha: 1)
-    /// Spark teal — CTA accent
+    /// Bilbo teal — CTA accent
     static let sparkTeal = UIColor(red: 0.000, green: 0.537, blue: 0.482, alpha: 1)
     /// Off-white text
     static let sparkWhite = UIColor(red: 0.980, green: 0.980, blue: 0.996, alpha: 1)
@@ -26,9 +26,9 @@ private extension UIColor {
 
 // MARK: - Shield action names
 
-enum SparkShieldAction: String {
+enum BilboShieldAction: String {
     case overrideFP   = "override_fp"       // "Override (10 FP)"
-    case goToSpark    = "go_to_spark"       // "Go to Spark"
+    case goToBilbo    = "go_to_bilbo"       // "Go to Bilbo"
 }
 
 // MARK: - Extension principal class
@@ -77,15 +77,15 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             ),
             primaryButtonBackgroundColor: .sparkPurple,
             secondaryButtonLabel: ShieldConfiguration.Label(
-                text: "Go to Spark",
+                text: "Go to Bilbo",
                 color: .sparkTeal
             )
         )
     }
 
-    // MARK: - Spark icon
+    // MARK: - Bilbo icon
 
-    /// Returns a simple programmatic Spark "spark bolt" icon.
+    /// Returns a simple programmatic Bilbo icon.
     /// Falls back to a system bolt symbol if image generation fails.
     private func sparkIcon() -> UIImage {
         let size = CGSize(width: 80, height: 80)
@@ -119,7 +119,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
 
 extension ShieldConfigurationExtension {
     /// Encodes action info for the companion ShieldActionExtension.
-    static func actionIdentifier(for action: SparkShieldAction) -> String {
+    static func actionIdentifier(for action: BilboShieldAction) -> String {
         action.rawValue
     }
 }

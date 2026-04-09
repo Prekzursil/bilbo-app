@@ -1,319 +1,288 @@
-// SuggestionEngineTest.kt
-// Spark — Unit Tests: SuggestionEngine
-//
-// Tests: filtering (by category, interests, duration), sorting,
-//        acceptance tracking, empty-state handling
-
 package dev.spark.analog
 
+import dev.spark.data.BudgetRepository
+import dev.spark.data.SuggestionRepository
+import dev.spark.domain.*
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.*
 import kotlin.test.*
 
-// MARK: - Domain types
+// =============================================================================
+//  Fake repositories
+// =============================================================================
 
-enum class SuggestionCategory {
-    OUTDOORS, CREATIVE, SOCIAL, MINDFULNESS, LEARNING, PHYSICAL
-}
+private class FakeSuggestionRepo : SuggestionRepository {
+    val suggestions = mutableListOf<AnalogSuggestion>()
+    var shownIds = mutableListOf<Long>()
+    var acceptedIds = mutableListOf<Long>()
+    var deletedIds = mutableListOf<Long>()
+    private var nextId = 100L
 
-data class AnalogSuggestion(
-    val id: String,
-    val title: String,
-    val description: String,
-    val category: SuggestionCategory,
-    val estimatedMinutes: Int,
-    val interests: List<String> = emptyList()
-)
-
-data class SuggestionEngineResult(
-    val suggestions: List<AnalogSuggestion>,
-    val isEmpty: Boolean = suggestions.isEmpty()
-)
-
-// MARK: - SuggestionEngine under test
-
-class SuggestionEngine(private val catalog: List<AnalogSuggestion>) {
-
-    private val accepted = mutableSetOf<String>()   // IDs of accepted suggestions
-    private val dismissed = mutableSetOf<String>()  // IDs of dismissed suggestions
-
-    /**
-     * Filter and sort suggestions.
-     *
-     * @param categories  Only include these categories (empty = all).
-     * @param interests   Only include suggestions matching at least one interest (empty = all).
-     * @param maxMinutes  Only include suggestions ≤ this duration (null = no limit).
-     * @param excludeAccepted Exclude previously accepted suggestions.
-     * @param excludeDismissed Exclude dismissed suggestions.
-     */
-    fun query(
-        categories: List<SuggestionCategory> = emptyList(),
-        interests: List<String> = emptyList(),
-        maxMinutes: Int? = null,
-        excludeAccepted: Boolean = true,
-        excludeDismissed: Boolean = true
-    ): SuggestionEngineResult {
-        var filtered = catalog.asSequence()
-
-        // Filter: accepted
-        if (excludeAccepted) filtered = filtered.filter { it.id !in accepted }
-
-        // Filter: dismissed
-        if (excludeDismissed) filtered = filtered.filter { it.id !in dismissed }
-
-        // Filter: category
-        if (categories.isNotEmpty()) filtered = filtered.filter { it.category in categories }
-
-        // Filter: interests
-        if (interests.isNotEmpty()) filtered = filtered.filter { s ->
-            s.interests.any { it in interests }
-        }
-
-        // Filter: duration
-        if (maxMinutes != null) filtered = filtered.filter { it.estimatedMinutes <= maxMinutes }
-
-        // Sort: shorter suggestions first, then alphabetically
-        val sorted = filtered.sortedWith(
-            compareBy({ it.estimatedMinutes }, { it.title })
-        ).toList()
-
-        return SuggestionEngineResult(sorted)
+    override fun observeAll(): Flow<List<AnalogSuggestion>> = flowOf(suggestions)
+    override suspend fun getAll(): List<AnalogSuggestion> = suggestions.toList()
+    override suspend fun getById(id: Long): AnalogSuggestion? = suggestions.find { it.id == id }
+    override suspend fun getByCategory(category: SuggestionCategory): List<AnalogSuggestion> =
+        suggestions.filter { it.category == category }
+    override suspend fun getByTimeOfDay(timeOfDay: TimeOfDay): List<AnalogSuggestion> =
+        suggestions.filter { it.timeOfDay == null || it.timeOfDay == timeOfDay }
+    override suspend fun getByCategoryAndTimeOfDay(category: SuggestionCategory, timeOfDay: TimeOfDay): List<AnalogSuggestion> =
+        suggestions.filter { it.category == category && (it.timeOfDay == null || it.timeOfDay == timeOfDay) }
+    override suspend fun getCustom(): List<AnalogSuggestion> = suggestions.filter { it.isCustom }
+    override suspend fun getTopAccepted(limit: Long): List<AnalogSuggestion> =
+        suggestions.sortedByDescending { it.timesAccepted }.take(limit.toInt())
+    override suspend fun insert(suggestion: AnalogSuggestion): Long {
+        val id = nextId++
+        suggestions.add(suggestion.copy(id = id))
+        return id
     }
-
-    fun accept(id: String) { accepted.add(id) }
-    fun dismiss(id: String) { dismissed.add(id) }
-    fun clearHistory() { accepted.clear(); dismissed.clear() }
-
-    fun isAccepted(id: String) = id in accepted
-    fun isDismissed(id: String) = id in dismissed
+    override suspend fun update(suggestion: AnalogSuggestion) {
+        val idx = suggestions.indexOfFirst { it.id == suggestion.id }
+        if (idx >= 0) suggestions[idx] = suggestion
+    }
+    override suspend fun recordShown(id: Long) { shownIds.add(id) }
+    override suspend fun recordAccepted(id: Long) { acceptedIds.add(id) }
+    override suspend fun deleteById(id: Long) {
+        deletedIds.add(id)
+        suggestions.removeAll { it.id == id }
+    }
 }
 
-// MARK: - Test catalog
+private class FakeBudgetRepo : BudgetRepository {
+    var bonusIncrements = mutableListOf<Pair<LocalDate, Int>>()
 
-private val testCatalog = listOf(
-    AnalogSuggestion("1", "Go for a walk",       "Step outside for fresh air.",            SuggestionCategory.OUTDOORS,     20, listOf("nature", "fitness")),
-    AnalogSuggestion("2", "Draw something",       "Sketch anything that comes to mind.",    SuggestionCategory.CREATIVE,     30, listOf("art", "creativity")),
-    AnalogSuggestion("3", "Call a friend",        "Reconnect with someone you care about.", SuggestionCategory.SOCIAL,       15, listOf("social", "connection")),
-    AnalogSuggestion("4", "Meditate",             "5 minutes of mindful breathing.",        SuggestionCategory.MINDFULNESS,   5, listOf("mindfulness", "calm")),
-    AnalogSuggestion("5", "Read a book chapter",  "Pick up where you left off.",            SuggestionCategory.LEARNING,     30, listOf("reading", "learning")),
-    AnalogSuggestion("6", "Do push-ups",          "A quick upper-body workout.",            SuggestionCategory.PHYSICAL,     10, listOf("fitness", "health")),
-    AnalogSuggestion("7", "Water your plants",    "Check in on your green friends.",        SuggestionCategory.OUTDOORS,      5, listOf("nature", "home")),
-    AnalogSuggestion("8", "Write in a journal",   "Capture your thoughts on paper.",        SuggestionCategory.CREATIVE,     15, listOf("writing", "creativity")),
-    AnalogSuggestion("9", "Cook a new recipe",    "Try something from your saved list.",    SuggestionCategory.CREATIVE,     60, listOf("cooking", "creativity")),
-    AnalogSuggestion("10","Stretch for 5 min",    "Relieve tension with gentle stretches.", SuggestionCategory.PHYSICAL,      5, listOf("fitness", "mindfulness"))
-)
+    override fun observeAll(): Flow<List<DopamineBudget>> = flowOf(emptyList())
+    override suspend fun getAll(): List<DopamineBudget> = emptyList()
+    override suspend fun getByDate(date: LocalDate): DopamineBudget? = null
+    override fun observeByDate(date: LocalDate): Flow<DopamineBudget?> = flowOf(null)
+    override suspend fun getByDateRange(from: LocalDate, to: LocalDate): List<DopamineBudget> = emptyList()
+    override suspend fun getRecent(limit: Long): List<DopamineBudget> = emptyList()
+    override suspend fun insert(budget: DopamineBudget) {}
+    override suspend fun update(budget: DopamineBudget) {}
+    override suspend fun upsert(budget: DopamineBudget) {}
+    override suspend fun incrementFpEarned(date: LocalDate, amount: Int) {}
+    override suspend fun incrementFpSpent(date: LocalDate, amount: Int) {}
+    override suspend fun incrementFpBonus(date: LocalDate, amount: Int) {
+        bonusIncrements.add(date to amount)
+    }
+    override suspend fun deleteByDate(date: LocalDate) {}
+    override suspend fun sumFpEarned(from: LocalDate, to: LocalDate): Long = 0
+}
 
-// MARK: - Tests
+// =============================================================================
+//  SuggestionEngine Tests
+// =============================================================================
 
-class SuggestionEngineTest {
-
-    private lateinit var engine: SuggestionEngine
+class SuggestionEngineGetSuggestionsTest {
+    private lateinit var repo: FakeSuggestionRepo
+    private lateinit var budgetRepo: FakeBudgetRepo
 
     @BeforeTest
-    fun setUp() {
-        engine = SuggestionEngine(testCatalog)
+    fun setup() {
+        repo = FakeSuggestionRepo()
+        budgetRepo = FakeBudgetRepo()
     }
 
-    // ── No filters ────────────────────────────────────────────────────────
-
-    @Test
-    fun testNoFilterReturnsAllSuggestions() {
-        val result = engine.query()
-        assertEquals(testCatalog.size, result.suggestions.size)
+    @Test fun getSuggestionsEmpty() = runTest {
+        val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
+        val result = engine.getSuggestions()
+        assertTrue(result.isEmpty())
     }
 
-    @Test
-    fun testIsEmptyFalseWhenResultsExist() {
-        val result = engine.query()
-        assertFalse(result.isEmpty)
+    @Test fun getSuggestionsFiltersbyTime() = runTest {
+        repo.suggestions.add(AnalogSuggestion(id = 1, text = "Morning Walk", category = SuggestionCategory.EXERCISE, tags = emptyList(), timeOfDay = TimeOfDay.MORNING))
+        repo.suggestions.add(AnalogSuggestion(id = 2, text = "Night Read", category = SuggestionCategory.READING, tags = emptyList(), timeOfDay = TimeOfDay.NIGHT))
+
+        val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE, SuggestionCategory.READING) }, { TimeOfDay.MORNING })
+        val result = engine.getSuggestions()
+        assertEquals(1, result.size)
+        assertEquals("Morning Walk", result[0].text)
     }
 
-    // ── Category filter ───────────────────────────────────────────────────
+    @Test fun getSuggestionsIncludesNullTimeOfDay() = runTest {
+        repo.suggestions.add(AnalogSuggestion(id = 1, text = "Anytime", category = SuggestionCategory.EXERCISE, tags = emptyList(), timeOfDay = null))
 
-    @Test
-    fun testFilterBySingleCategory() {
-        val result = engine.query(categories = listOf(SuggestionCategory.OUTDOORS))
-        assertTrue(result.suggestions.all { it.category == SuggestionCategory.OUTDOORS })
+        val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.EVENING })
+        val result = engine.getSuggestions()
+        assertEquals(1, result.size)
     }
 
-    @Test
-    fun testFilterByMultipleCategories() {
-        val result = engine.query(categories = listOf(SuggestionCategory.MINDFULNESS, SuggestionCategory.PHYSICAL))
-        assertTrue(result.suggestions.all {
-            it.category == SuggestionCategory.MINDFULNESS || it.category == SuggestionCategory.PHYSICAL
-        })
+    @Test fun getSuggestionsFallsBackIfFewInterests() = runTest {
+        // Add 3 exercise suggestions but user interested only in CREATIVE
+        repeat(3) { i ->
+            repo.suggestions.add(AnalogSuggestion(id = i.toLong() + 1, text = "Ex $i", category = SuggestionCategory.EXERCISE, tags = emptyList()))
+        }
+
+        val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.CREATIVE) }, { TimeOfDay.MORNING })
+        // interest filter yields 0, which < count(3), falls back to time-filtered
+        val result = engine.getSuggestions(3)
+        assertEquals(3, result.size)
     }
 
-    @Test
-    fun testFilterByNonExistentCategoryReturnsEmpty() {
-        // SOCIAL category but all social suggestions excluded via acceptance
-        engine.accept("3")
-        val result = engine.query(categories = listOf(SuggestionCategory.SOCIAL))
-        assertTrue(result.isEmpty)
+    @Test fun getSuggestionsSortsByTimesShownThenAcceptanceRate() = runTest {
+        repo.suggestions.add(AnalogSuggestion(id = 1, text = "A", category = SuggestionCategory.EXERCISE, tags = emptyList(), timesShown = 10, timesAccepted = 5))
+        repo.suggestions.add(AnalogSuggestion(id = 2, text = "B", category = SuggestionCategory.EXERCISE, tags = emptyList(), timesShown = 1, timesAccepted = 0))
+
+        val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
+        val result = engine.getSuggestions(2)
+        assertEquals("B", result[0].text) // least shown first
+        assertEquals("A", result[1].text)
     }
 
-    @Test
-    fun testOutdoorsCategoryReturnsCorrectCount() {
-        val result = engine.query(categories = listOf(SuggestionCategory.OUTDOORS))
-        assertEquals(2, result.suggestions.size) // "Go for a walk" + "Water your plants"
+    @Test fun getSuggestionsTakesTopN() = runTest {
+        repeat(10) { i ->
+            repo.suggestions.add(AnalogSuggestion(id = i.toLong() + 1, text = "S$i", category = SuggestionCategory.EXERCISE, tags = emptyList()))
+        }
+
+        val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
+        val result = engine.getSuggestions(3)
+        assertEquals(3, result.size)
+    }
+}
+
+class SuggestionEngineAcceptTest {
+    @Test fun acceptSuggestionRecordsAndAwardsFP() = runTest {
+        val repo = FakeSuggestionRepo()
+        val budgetRepo = FakeBudgetRepo()
+        repo.suggestions.add(AnalogSuggestion(id = 1, text = "Walk", category = SuggestionCategory.EXERCISE, tags = emptyList()))
+
+        val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
+        engine.acceptSuggestion(1)
+        assertTrue(repo.acceptedIds.contains(1))
+        assertEquals(1, budgetRepo.bonusIncrements.size)
+        assertEquals(FPEconomy.BONUS_ANALOG_ACCEPTED, budgetRepo.bonusIncrements[0].second)
     }
 
-    // ── Interest filter ───────────────────────────────────────────────────
+    @Test fun showAnotherRecordsShown() = runTest {
+        val repo = FakeSuggestionRepo()
+        val budgetRepo = FakeBudgetRepo()
+        repo.suggestions.add(AnalogSuggestion(id = 1, text = "Walk", category = SuggestionCategory.EXERCISE, tags = emptyList()))
 
-    @Test
-    fun testFilterByInterestMatchesSuggestions() {
-        val result = engine.query(interests = listOf("fitness"))
-        assertTrue(result.suggestions.all { s -> "fitness" in s.interests })
+        val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
+        engine.showAnother(1)
+        assertTrue(repo.shownIds.contains(1))
+    }
+}
+
+class SuggestionEngineCustomTest {
+    @Test fun addCustomSuggestion() = runTest {
+        val repo = FakeSuggestionRepo()
+        val budgetRepo = FakeBudgetRepo()
+
+        val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
+        val suggestion = AnalogSuggestion(text = "My idea", category = SuggestionCategory.CREATIVE, tags = listOf("fun"))
+        val id = engine.addCustomSuggestion(suggestion)
+        assertTrue(id > 0)
+        assertTrue(repo.suggestions.last().isCustom)
     }
 
-    @Test
-    fun testFilterByMultipleInterestsUnion() {
-        // "art" matches draw; "reading" matches book chapter
-        val result = engine.query(interests = listOf("art", "reading"))
-        assertEquals(2, result.suggestions.size)
+    @Test fun addCustomSuggestionBlankTextFails() = runTest {
+        val repo = FakeSuggestionRepo()
+        val budgetRepo = FakeBudgetRepo()
+
+        val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
+        val suggestion = AnalogSuggestion(text = "  ", category = SuggestionCategory.CREATIVE, tags = emptyList())
+        assertFailsWith<IllegalArgumentException> {
+            engine.addCustomSuggestion(suggestion)
+        }
     }
 
-    @Test
-    fun testFilterByUnknownInterestReturnsEmpty() {
-        val result = engine.query(interests = listOf("underwater_basket_weaving"))
-        assertTrue(result.isEmpty)
+    @Test fun deleteCustomSuggestion() = runTest {
+        val repo = FakeSuggestionRepo()
+        val budgetRepo = FakeBudgetRepo()
+        repo.suggestions.add(AnalogSuggestion(id = 1, text = "Custom", category = SuggestionCategory.CREATIVE, tags = emptyList(), isCustom = true))
+
+        val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
+        engine.deleteCustomSuggestion(1)
+        assertTrue(repo.deletedIds.contains(1))
     }
 
-    // ── Duration filter ───────────────────────────────────────────────────
+    @Test fun deleteNonCustomFails() = runTest {
+        val repo = FakeSuggestionRepo()
+        val budgetRepo = FakeBudgetRepo()
+        repo.suggestions.add(AnalogSuggestion(id = 1, text = "Built-in", category = SuggestionCategory.EXERCISE, tags = emptyList(), isCustom = false))
 
-    @Test
-    fun testFilterByMaxMinutesExcludesLonger() {
-        val result = engine.query(maxMinutes = 10)
-        assertTrue(result.suggestions.all { it.estimatedMinutes <= 10 })
+        val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
+        assertFailsWith<IllegalStateException> {
+            engine.deleteCustomSuggestion(1)
+        }
     }
 
-    @Test
-    fun testFilterByMaxFiveMinutes() {
-        val result = engine.query(maxMinutes = 5)
-        assertEquals(3, result.suggestions.size) // meditate(5), water plants(5), stretch(5)
+    @Test fun deleteNonExistentFails() = runTest {
+        val repo = FakeSuggestionRepo()
+        val budgetRepo = FakeBudgetRepo()
+
+        val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
+        assertFailsWith<IllegalStateException> {
+            engine.deleteCustomSuggestion(999)
+        }
+    }
+}
+
+class SuggestionEngineResolveTimeOfDayTest {
+    // Test helper: create a fake clock at a specific hour (UTC)
+    private fun clockAt(hour: Int): Clock = object : Clock {
+        override fun now(): Instant =
+            LocalDateTime(2025, 6, 15, hour, 30).toInstant(TimeZone.currentSystemDefault())
     }
 
-    @Test
-    fun testFilterByMaxOneMinuteReturnsEmpty() {
-        val result = engine.query(maxMinutes = 1)
-        assertTrue(result.isEmpty)
+    @Test fun resolveTimeOfDayDefaultClock() {
+        // Call without clock parameter to cover the $default bridge
+        val tod = SuggestionEngine.resolveTimeOfDay()
+        assertNotNull(tod)
     }
 
-    @Test
-    fun testNullMaxMinutesDoesNotFilter() {
-        val result = engine.query(maxMinutes = null)
-        assertEquals(testCatalog.size, result.suggestions.size)
+    @Test fun resolveMorning5am() {
+        assertEquals(TimeOfDay.MORNING, SuggestionEngine.resolveTimeOfDay(clockAt(5)))
     }
 
-    // ── Sorting ───────────────────────────────────────────────────────────
-
-    @Test
-    fun testResultsSortedByDurationAscending() {
-        val result = engine.query()
-        val durations = result.suggestions.map { it.estimatedMinutes }
-        assertEquals(durations.sorted(), durations)
+    @Test fun resolveMorning11am() {
+        assertEquals(TimeOfDay.MORNING, SuggestionEngine.resolveTimeOfDay(clockAt(11)))
     }
 
-    @Test
-    fun testTieBrokenAlphabetically() {
-        // Several 5-min suggestions: "Meditate", "Stretch for 5 min", "Water your plants"
-        val fiveMin = engine.query(maxMinutes = 5).suggestions.filter { it.estimatedMinutes == 5 }
-        assertEquals(fiveMin.sortedBy { it.title }, fiveMin)
+    @Test fun resolveAfternoon12pm() {
+        assertEquals(TimeOfDay.AFTERNOON, SuggestionEngine.resolveTimeOfDay(clockAt(12)))
     }
 
-    // ── Acceptance ────────────────────────────────────────────────────────
-
-    @Test
-    fun testAcceptedSuggestionExcludedByDefault() {
-        engine.accept("1") // Go for a walk
-        val result = engine.query()
-        assertFalse(result.suggestions.any { it.id == "1" })
+    @Test fun resolveAfternoon16pm() {
+        assertEquals(TimeOfDay.AFTERNOON, SuggestionEngine.resolveTimeOfDay(clockAt(16)))
     }
 
-    @Test
-    fun testAcceptedSuggestionIncludedWhenFlagOff() {
-        engine.accept("1")
-        val result = engine.query(excludeAccepted = false)
-        assertTrue(result.suggestions.any { it.id == "1" })
+    @Test fun resolveEvening17pm() {
+        assertEquals(TimeOfDay.EVENING, SuggestionEngine.resolveTimeOfDay(clockAt(17)))
     }
 
-    @Test
-    fun testIsAcceptedReturnsTrueAfterAccept() {
-        engine.accept("1")
-        assertTrue(engine.isAccepted("1"))
+    @Test fun resolveEvening20pm() {
+        assertEquals(TimeOfDay.EVENING, SuggestionEngine.resolveTimeOfDay(clockAt(20)))
     }
 
-    @Test
-    fun testIsAcceptedReturnsFalseBeforeAccept() {
-        assertFalse(engine.isAccepted("99"))
+    @Test fun resolveNight21pm() {
+        assertEquals(TimeOfDay.NIGHT, SuggestionEngine.resolveTimeOfDay(clockAt(21)))
     }
 
-    // ── Dismissal ─────────────────────────────────────────────────────────
-
-    @Test
-    fun testDismissedSuggestionExcludedByDefault() {
-        engine.dismiss("4") // Meditate
-        val result = engine.query()
-        assertFalse(result.suggestions.any { it.id == "4" })
+    @Test fun resolveNight0am() {
+        assertEquals(TimeOfDay.NIGHT, SuggestionEngine.resolveTimeOfDay(clockAt(0)))
     }
 
-    @Test
-    fun testDismissedSuggestionIncludedWhenFlagOff() {
-        engine.dismiss("4")
-        val result = engine.query(excludeDismissed = false)
-        assertTrue(result.suggestions.any { it.id == "4" })
+    @Test fun resolveNight4am() {
+        assertEquals(TimeOfDay.NIGHT, SuggestionEngine.resolveTimeOfDay(clockAt(4)))
     }
+}
 
-    @Test
-    fun testIsDismissedReturnsTrueAfterDismiss() {
-        engine.dismiss("4")
-        assertTrue(engine.isDismissed("4"))
-    }
+class SuggestionEngineAcceptanceRateTest {
+    @Test fun acceptanceRateZeroShown() = runTest {
+        val repo = FakeSuggestionRepo()
+        val budgetRepo = FakeBudgetRepo()
+        // timesShown=0, timesAccepted=0 -> acceptanceRate = 0
+        repo.suggestions.add(AnalogSuggestion(id = 1, text = "A", category = SuggestionCategory.EXERCISE, tags = emptyList(), timesShown = 0, timesAccepted = 0))
+        // timesShown=10, timesAccepted=5 -> acceptanceRate = 0.5
+        repo.suggestions.add(AnalogSuggestion(id = 2, text = "B", category = SuggestionCategory.EXERCISE, tags = emptyList(), timesShown = 10, timesAccepted = 5))
 
-    // ── Combined filters ──────────────────────────────────────────────────
-
-    @Test
-    fun testCategoryAndDurationFilter() {
-        val result = engine.query(
-            categories = listOf(SuggestionCategory.PHYSICAL),
-            maxMinutes = 5
-        )
-        assertTrue(result.suggestions.all {
-            it.category == SuggestionCategory.PHYSICAL && it.estimatedMinutes <= 5
-        })
-    }
-
-    @Test
-    fun testInterestAndDurationFilter() {
-        val result = engine.query(interests = listOf("creativity"), maxMinutes = 20)
-        assertTrue(result.suggestions.all {
-            "creativity" in it.interests && it.estimatedMinutes <= 20
-        })
-    }
-
-    // ── Clear history ─────────────────────────────────────────────────────
-
-    @Test
-    fun testClearHistoryRestoresAcceptedSuggestions() {
-        engine.accept("1")
-        engine.clearHistory()
-        val result = engine.query()
-        assertTrue(result.suggestions.any { it.id == "1" })
-    }
-
-    @Test
-    fun testClearHistoryRestoresDismissedSuggestions() {
-        engine.dismiss("4")
-        engine.clearHistory()
-        val result = engine.query()
-        assertTrue(result.suggestions.any { it.id == "4" })
-    }
-
-    // ── Empty catalog ─────────────────────────────────────────────────────
-
-    @Test
-    fun testEmptyCatalogReturnsEmptyResult() {
-        val emptyEngine = SuggestionEngine(emptyList())
-        val result = emptyEngine.query()
-        assertTrue(result.isEmpty)
-        assertTrue(result.suggestions.isEmpty())
+        val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
+        val result = engine.getSuggestions(2)
+        // Both have timesShown so A (0) is shown first, then B (10)
+        assertEquals("A", result[0].text)
+        assertEquals("B", result[1].text)
     }
 }

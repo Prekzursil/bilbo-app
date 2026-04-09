@@ -7,8 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
-import dev.spark.app.ui.SparkNavHost
-import dev.spark.app.ui.theme.SparkTheme
+import dev.spark.app.ui.BilboNavHost
+import dev.spark.app.ui.theme.BilboTheme
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -17,8 +17,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            SparkTheme {
-                SparkNavHost()
+            BilboTheme {
+                BilboNavHost(onboardingCompleted = false)
             }
         }
     }
@@ -27,7 +27,7 @@ class MainActivity : ComponentActivity() {
 @Preview(showBackground = true)
 @Composable
 private fun DefaultPreview() {
-    SparkTheme {
-        SparkNavHost()
+    BilboTheme {
+        BilboNavHost(onboardingCompleted = false)
     }
 }

@@ -229,7 +229,7 @@ private struct CircleDetailView: View {
                         .fontWeight(.bold)
                         .tracking(2)
                     Spacer()
-                    ShareLink(item: "Join my Spark circle '\(circle.name)' using code \(circle.inviteCode)") {
+                    ShareLink(item: "Join my Bilbo circle '\(circle.name)' using code \(circle.inviteCode)") {
                         Image(systemName: "square.and.arrow.up")
                             .foregroundStyle(.orange)
                     }

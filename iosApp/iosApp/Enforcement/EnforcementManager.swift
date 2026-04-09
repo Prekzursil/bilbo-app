@@ -21,10 +21,10 @@ struct EnforcementState {
 /// ### iOS Strategy
 /// Because iOS does not support full foreground interception like Android, enforcement
 /// is delivered via:
-/// 1. **In-app**: When the user taps a tracked-app shortcut inside Spark, the timer fires
+/// 1. **In-app**: When the user taps a tracked-app shortcut inside Bilbo, the timer fires
 ///    inside the app and this manager shows an overlay via SwiftUI sheet/fullScreenCover.
 /// 2. **Background notifications**: A local notification fires when a timer expires while
-///    Spark is backgrounded; tapping it opens Spark and triggers the enforcement UI.
+///    Bilbo is backgrounded; tapping it opens Bilbo and triggers the enforcement UI.
 /// 3. **Cooldown re-check**: On every `scenePhase` foreground event, active cooldowns
 ///    are checked and the hard-lock UI re-presents if needed.
 @MainActor
@@ -217,7 +217,7 @@ final class EnforcementManager: ObservableObject {
         let center = UNUserNotificationCenter.current()
         let content = UNMutableNotificationContent()
         content.title = "⏰ Time's up — \(appName)"
-        content.body = "Your \(durationMinutes)-min session has ended. Open Spark to review."
+        content.body = "Your \(durationMinutes)-min session has ended. Open Bilbo to review."
         content.sound = .default
         content.categoryIdentifier = notifCategory
         content.userInfo = ["bundleId": bundleId, "appName": appName]

@@ -1,5 +1,5 @@
 /**
- * compute-leaderboard — Spark Edge Function
+ * compute-leaderboard — Bilbo Edge Function
  *
  * Computes the leaderboard for a Focus Circle across four categories:
  *   - most_fp         : Highest total Focus Points earned this week

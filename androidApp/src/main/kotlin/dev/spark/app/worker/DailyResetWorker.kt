@@ -14,7 +14,11 @@ import dev.spark.data.UsageRepository
 import dev.spark.economy.BudgetEnforcer
 import dev.spark.intelligence.tier2.HeuristicEngine
 import kotlinx.datetime.Clock
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.minus
+import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 import java.util.Calendar
 import java.util.concurrent.TimeUnit
@@ -129,11 +133,15 @@ class DailyResetWorker @AssistedInject constructor(
      * Data is fetched from the repositories; results are logged (or could be persisted).
      */
     private suspend fun triggerWeeklyAnalysis(today: kotlinx.datetime.LocalDate) {
-        val weekStart = today.minus(kotlinx.datetime.DatePeriod(days = 6))
+        val tz = TimeZone.currentSystemDefault()
+        val weekStart = today.minus(DatePeriod(days = 6))
 
-        val sessions = usageRepository.getByDateRange(weekStart, today)
-        val priorWeekStart = weekStart.minus(kotlinx.datetime.DatePeriod(days = 7))
-        val priorSessions = usageRepository.getByDateRange(priorWeekStart, weekStart)
+        val fromInstant = weekStart.atStartOfDayIn(tz)
+        val toInstant = today.plus(DatePeriod(days = 1)).atStartOfDayIn(tz)
+        val sessions = usageRepository.getByDateRange(fromInstant, toInstant)
+        val priorWeekStart = weekStart.minus(DatePeriod(days = 7))
+        val priorFromInstant = priorWeekStart.atStartOfDayIn(tz)
+        val priorSessions = usageRepository.getByDateRange(priorFromInstant, fromInstant)
 
         heuristicEngine.analyzeWeek(
             weekStart = weekStart,

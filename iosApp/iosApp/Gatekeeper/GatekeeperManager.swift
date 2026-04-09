@@ -30,13 +30,13 @@ struct IntentDeclarationiOS: Codable {
 ///
 /// ### Strategy
 /// On iOS, apps cannot intercept foreground-app transitions the way Android
-/// does.  Instead `GatekeeperManager` hooks into the Spark app's own lifecycle:
-/// - When Spark comes to the foreground via a tapped local notification, the
+/// does.  Instead `GatekeeperManager` hooks into the Bilbo app's own lifecycle:
+/// - When Bilbo comes to the foreground via a tapped local notification, the
 ///   manager inspects the notification payload to decide if a gatekeeper should
 ///   be shown.
 /// - `scheduleReminder` fires a local notification N seconds before a declared
 ///   window expires, prompting a mindfulness check.
-/// - Direct "open app" shortcuts within Spark also call `shouldShowGatekeeper`
+/// - Direct "open app shortcuts within Bilbo also call `shouldShowGatekeeper`
 ///   before navigation.
 ///
 /// All declarations are stored in `UserDefaults` for simplicity (can be

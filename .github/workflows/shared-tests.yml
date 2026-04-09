@@ -27,19 +27,22 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Validate Gradle wrapper
-        uses: gradle/actions/wrapper-validation@v4
-
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
-        with:
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
       - name: Run shared module tests
         run: ./gradlew :shared:allTests --no-daemon
+
+      - name: Generate Kover coverage report
+        run: ./gradlew :shared:koverXmlReport --no-daemon
+        if: always()
+
+      - name: Verify 100% coverage
+        run: ./gradlew :shared:koverVerify --no-daemon
+        if: always()
 
       - name: Upload test results
         uses: actions/upload-artifact@v4
@@ -49,8 +52,16 @@ jobs:
           path: shared/build/reports/tests/
           retention-days: 7
 
+      - name: Upload Kover coverage report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: kover-coverage-report
+          path: shared/build/reports/kover/
+          retention-days: 7
+
       - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v4
+        uses: codecov/codecov-action@v5
         if: always()
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

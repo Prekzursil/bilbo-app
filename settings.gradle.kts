@@ -15,6 +15,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "spark"
+rootProject.name = "bilbo"
 include(":shared")
 include(":androidApp")

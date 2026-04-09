@@ -205,7 +205,7 @@ class HeuristicEngine(
         if (overrideRate > 0.30f) {
             insights += HeuristicInsight(
                 type = InsightType.TREND,
-                message = "You overrode Spark's time limits ${(overrideRate * 100).toInt()}% of the time. " +
+                message = "You overrode Bilbo's time limits ${(overrideRate * 100).toInt()}% of the time. " +
                     "Consider switching to Nudge mode for a gentler approach.",
                 confidence = INSIGHT_CONFIDENCE_MEDIUM
             )

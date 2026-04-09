@@ -1,0 +1,72 @@
+version: 2
+
+updates:
+  # ─── Gradle (Android + KMP shared module) ────────────────────────────────────
+  - package-ecosystem: "gradle"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Bucharest"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "gradle"
+    open-pull-requests-limit: 10
+    # Group patch and minor updates to reduce noise
+    groups:
+      kotlin-ecosystem:
+        patterns:
+          - "org.jetbrains.kotlin*"
+          - "org.jetbrains.kotlinx*"
+      compose-bom:
+        patterns:
+          - "androidx.compose*"
+          - "androidx.activity*"
+      ktor:
+        patterns:
+          - "io.ktor*"
+      supabase-kotlin:
+        patterns:
+          - "io.github.jan-tennert.supabase*"
+      hilt:
+        patterns:
+          - "com.google.dagger*"
+          - "androidx.hilt*"
+      sqldelight:
+        patterns:
+          - "app.cash.sqldelight*"
+
+  # ─── GitHub Actions ───────────────────────────────────────────────────────────
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Bucharest"
+    commit-message:
+      prefix: "ci(deps)"
+    labels:
+      - "dependencies"
+      - "ci"
+    open-pull-requests-limit: 5
+
+  # ─── npm / Deno (Supabase Edge Functions) ────────────────────────────────────
+  # Dependabot monitors package.json for any npm-compatible imports.
+  # Deno import maps and lock files are picked up from supabase/functions/.
+  - package-ecosystem: "npm"
+    directory: "/supabase/functions"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "08:00"
+      timezone: "Europe/Bucharest"
+    commit-message:
+      prefix: "chore(deps)"
+    labels:
+      - "dependencies"
+      - "edge-functions"
+    open-pull-requests-limit: 5

@@ -1,0 +1,102 @@
+name: Feature Request
+description: Propose a new feature or enhancement for Bilbo.
+title: "[Feature]: "
+labels: ["enhancement", "triage"]
+assignees:
+  - Prekzursil
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for suggesting an improvement to Bilbo!
+        Before submitting, search [existing issues and discussions](https://github.com/Prekzursil/bilbo-app/discussions) to avoid duplicates.
+        For large architectural changes, please open a Discussion (RFC) before filing an issue.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem Description
+      description: |
+        What problem are you trying to solve? Use the user story format if possible:
+        *"As a [type of user], I want to [do something] so that [benefit]."*
+      placeholder: |
+        As a user who frequently checks social media late at night, I want Bilbo to automatically tighten
+        my enforcement rules after 10 PM so that I can protect my sleep without having to remember to
+        change settings manually.
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: Proposed Solution
+      description: Describe your proposed feature or change. Be as specific as possible.
+      placeholder: |
+        Add a "Time-Based Rules" section in Settings where users can define time windows (e.g., 10 PM–7 AM)
+        and automatically switch all apps with Nudge enforcement to Hard Lock during those windows.
+        The rule engine in the Gatekeeper should check the current time against these windows before
+        deciding which enforcement mode to apply.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives Considered
+      description: Have you considered any alternative approaches? Why do you prefer the proposed solution?
+      placeholder: |
+        Alternatively, a "Do Not Disturb"-style toggle that users manually enable at bedtime would work,
+        but that requires the user to remember — the whole point of Bilbo is to reduce the cognitive
+        overhead of managing screen time.
+    validations:
+      required: false
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      description: Which part of Bilbo does this feature belong to?
+      options:
+        - "Intent Gatekeeper — intent overlay, session timer, bypass management"
+        - "Enforcement Engine — Nudge mode, Hard Lock mode, cooldown system"
+        - "Focus Points Economy — FP earning/spending, budget, streaks"
+        - "Social — Focus Buddies, Circles, Challenges, Leaderboards"
+        - "AI Intelligence — Tier 1 rules, Tier 2 heuristics, Tier 3 Cloud insights"
+        - "Other / Cross-cutting"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: platform-scope
+    attributes:
+      label: Platform Scope
+      description: Which platforms would this feature affect?
+      options:
+        - Android only
+        - iOS only
+        - Both Android and iOS
+        - Backend (Supabase / Edge Functions)
+        - All platforms including backend
+    validations:
+      required: true
+
+  - type: textarea
+    id: mockups
+    attributes:
+      label: Mockups or References
+      description: |
+        Attach any wireframes, sketches, screenshots from other apps, or links to similar implementations.
+        Drag and drop images directly into this field.
+    validations:
+      required: false
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Pre-submission Checklist
+      options:
+        - label: I searched existing issues and discussions and this is not a duplicate.
+          required: true
+        - label: This is a feature request, not a bug report or question.
+          required: true

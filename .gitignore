@@ -7,8 +7,7 @@ build/
 !**/src/main/**/build/
 !**/src/test/**/build/
 
-# Gradle wrapper (keep properties, ignore binary)
-gradle/wrapper/gradle-wrapper.jar
+# Gradle wrapper JAR is intentionally committed (required for CI)
 
 # Local Gradle properties (contain machine-specific settings)
 local.properties

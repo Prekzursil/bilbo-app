@@ -80,7 +80,7 @@ struct DashboardView: View {
     var body: some View {
         NavigationStack {
             Text("Dashboard")
-                .navigationTitle("Spark")
+                .navigationTitle("Bilbo")
         }
     }
 }
@@ -119,7 +119,7 @@ struct OnboardingView: View {
             Image(systemName: "bolt.circle.fill")
                 .font(.system(size: 80))
                 .foregroundStyle(.orange)
-            Text("Spark")
+            Text("Bilbo")
                 .font(.largeTitle.bold())
             Text("Your digital wellness companion")
                 .font(.subheadline)

@@ -18,7 +18,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.spark.social.ChallengeEngine
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 
 // ── UI models ─────────────────────────────────────────────────────────────────
 
@@ -448,9 +453,9 @@ private fun CreateChallengeForm(
         }
 
         item {
-            val today = kotlinx.datetime.Clock.System.now()
-                .toLocalDateTime(kotlinx.datetime.TimeZone.currentSystemDefault()).date
-            val endDate = today.plus(kotlinx.datetime.DatePeriod(days = durationDays))
+            val today = Clock.System.now()
+                .toLocalDateTime(TimeZone.currentSystemDefault()).date
+            val endDate = today.plus(DatePeriod(days = durationDays))
 
             Button(
                 onClick = {

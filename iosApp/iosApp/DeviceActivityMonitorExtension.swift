@@ -1,5 +1,5 @@
 // DeviceActivityMonitorExtension.swift
-// Spark — DeviceActivityMonitor Extension
+// Bilbo — DeviceActivityMonitor Extension
 //
 // Monitors app usage schedules and bridges events back to the main app
 // via a shared App Group UserDefaults container.
@@ -59,7 +59,7 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
             try center.startMonitoring(activityName, during: schedule, events: events)
         } catch {
             // Log; the main app should surface this.
-            print("[Spark][DAMonitor] Failed to schedule \(activityName.rawValue): \(error)")
+            print("[Bilbo][DAMonitor] Failed to schedule \(activityName.rawValue): \(error)")
         }
     }
 

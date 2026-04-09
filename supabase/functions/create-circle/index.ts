@@ -1,5 +1,5 @@
 /**
- * create-circle — Spark Edge Function
+ * create-circle — Bilbo Edge Function
  *
  * Creates a new Focus Circle, generates a unique 8-character circle invite code,
  * and adds the creator as the first member with role 'admin'.

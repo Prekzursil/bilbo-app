@@ -11,10 +11,10 @@ import SwiftUI
 /// - "Continue to {app}" → proceeds normally (with optional cooling-off)
 struct AIInterventionView: View {
 
-    let emotion: SparkEmotion
+    let emotion: BilboEmotion
     let appName: String
     let avgDurationMins: Int
-    let postMood: SparkEmotion?
+    let postMood: BilboEmotion?
     let onBreathe: () -> Void
     let onContinue: () -> Void
 

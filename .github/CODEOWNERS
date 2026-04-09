@@ -1,0 +1,27 @@
+# CODEOWNERS — Bilbo Digital Wellness App
+# https://docs.github.com/en/repositories/managing-your-repositorys-settings-and-features/customizing-your-repository/about-code-owners
+#
+# Each line specifies a pattern and the owner(s) responsible for that path.
+# The last matching pattern takes precedence.
+
+# Default owner for everything in the repository
+* @Prekzursil
+
+# Shared KMP module (domain models, repositories, intelligence engines)
+/shared/ @Prekzursil
+
+# Android application (Jetpack Compose UI, services, workers)
+/androidApp/ @Prekzursil
+
+# iOS application (SwiftUI, FamilyControls extensions)
+/iosApp/ @Prekzursil
+
+# Supabase backend (Edge Functions, database migrations)
+/supabase/ @Prekzursil
+
+# CI/CD pipelines, GitHub Actions workflows, templates, and community files
+/.github/ @Prekzursil
+
+# Documentation
+/docs/ @Prekzursil
+*.md @Prekzursil

@@ -1,5 +1,5 @@
 /**
- * create-invite — Spark Edge Function
+ * create-invite — Bilbo Edge Function
  *
  * Generates a 6-character alphanumeric invite code, stores it in the
  * `invite_codes` table with a 24-hour expiry, and returns the code to the caller.

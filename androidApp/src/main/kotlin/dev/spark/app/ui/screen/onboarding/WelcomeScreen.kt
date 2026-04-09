@@ -1,5 +1,5 @@
 // WelcomeScreen.kt
-// Spark — Onboarding Screen 1: Welcome
+// Bilbo — Onboarding Screen 1: Welcome
 
 package dev.spark.app.ui.screen.onboarding
 
@@ -74,7 +74,7 @@ fun WelcomeScreen(
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Logo / brand mark
-            SparkLogoMark()
+            BilboLogoMark()
 
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -92,7 +92,7 @@ fun WelcomeScreen(
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(
-                text = "Spark helps you build intentional digital habits.",
+                text = "Bilbo helps you build intentional digital habits.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White.copy(alpha = 0.7f),
                 textAlign = TextAlign.Center
@@ -116,7 +116,7 @@ fun WelcomeScreen(
                     .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFFB300) // Spark amber
+                    containerColor = Color(0xFFFFB300) // Bilbo amber
                 )
             ) {
                 Text(
@@ -132,7 +132,7 @@ fun WelcomeScreen(
 }
 
 @Composable
-private fun SparkLogoMark() {
+private fun BilboLogoMark() {
     Box(
         modifier = Modifier
             .size(96.dp)
@@ -142,7 +142,7 @@ private fun SparkLogoMark() {
     ) {
         Icon(
             imageVector = Icons.Filled.FlashOn,
-            contentDescription = "Spark logo",
+            contentDescription = "Bilbo logo",
             tint = Color(0xFFFFB300),
             modifier = Modifier.size(56.dp)
         )

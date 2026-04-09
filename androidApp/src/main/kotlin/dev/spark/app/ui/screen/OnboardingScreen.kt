@@ -22,7 +22,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.spark.app.ui.theme.SparkTheme
+import dev.spark.app.ui.theme.BilboTheme
 
 @Composable
 fun OnboardingScreen(
@@ -45,7 +45,7 @@ fun OnboardingScreen(
             )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
-                text = "Spark",
+                text = "Bilbo",
                 style = MaterialTheme.typography.displaySmall,
             )
             Spacer(modifier = Modifier.height(8.dp))
@@ -76,7 +76,7 @@ fun OnboardingScreen(
 @Preview(showBackground = true)
 @Composable
 private fun OnboardingScreenPreview() {
-    SparkTheme {
+    BilboTheme {
         OnboardingScreen(onNavigateToDashboard = {})
     }
 }

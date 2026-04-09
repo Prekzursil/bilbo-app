@@ -2,7 +2,7 @@ package dev.spark.shared.data.repository
 
 import dev.spark.domain.HeuristicInsight
 import dev.spark.domain.WeeklyInsight
-import dev.spark.shared.data.remote.SparkApiService
+import dev.spark.shared.data.remote.BilboApiService
 import dev.spark.shared.domain.model.DailyInsight
 import dev.spark.shared.util.Result
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +19,7 @@ import kotlinx.datetime.LocalDate
  * produced by [NightlyAnalysisWorker] and [WeeklyInsightWorker].
  */
 class InsightRepository(
-    private val apiService: SparkApiService,
+    private val apiService: BilboApiService,
 ) {
 
     // ── In-memory caches (production would use SQLDelight / DataStore) ─────────

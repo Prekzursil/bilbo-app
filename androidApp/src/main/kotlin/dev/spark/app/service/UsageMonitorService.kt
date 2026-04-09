@@ -105,7 +105,7 @@ class UsageMonitorService : Service() {
 
     private fun buildNotification(): Notification {
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Spark is tracking screen time")
+            .setContentTitle("Bilbo is tracking screen time")
             .setContentText("Helping you build mindful habits")
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)

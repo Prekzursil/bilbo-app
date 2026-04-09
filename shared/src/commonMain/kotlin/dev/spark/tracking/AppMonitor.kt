@@ -5,7 +5,7 @@ package dev.spark.tracking
  *
  * @param packageName The Android package name (e.g. "com.instagram.android").
  * @param appLabel    The human-readable app name resolved via PackageManager.
- * @param category    Spark's classification of this app, or null if not yet
+ * @param category    Bilbo's classification of this app, or null if not yet
  *                    profiled.
  */
 data class AppInfo(
@@ -21,7 +21,7 @@ data class AppInfo(
  *  - `PollingAppMonitor`  (playstore flavor) — polls [UsageStatsManager] every
  *    5 seconds.
  *  - `AccessibilityAppMonitor` (github flavor) — driven by
- *    [SparkAccessibilityService] events.
+ *    [BilboAccessibilityService] events.
  *
  * Both are injected via Hilt in [UsageTrackingService]; callers should only
  * interact with this interface.

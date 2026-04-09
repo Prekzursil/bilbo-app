@@ -1,5 +1,5 @@
 /**
- * create-challenge — Spark Edge Function
+ * create-challenge — Bilbo Edge Function
  *
  * Creates a new Challenge linked to a Focus Circle. Only circle admins
  * or members can create challenges for their circle. The challenge becomes

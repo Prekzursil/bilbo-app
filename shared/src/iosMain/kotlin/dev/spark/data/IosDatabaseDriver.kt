@@ -2,7 +2,7 @@ package dev.spark.data
 
 import app.cash.sqldelight.db.SqlDriver
 import app.cash.sqldelight.driver.native.NativeSqliteDriver
-import dev.spark.data.db.SparkDatabase
+import dev.spark.data.BilboDatabase
 
 /**
  * Provides the SQLDelight [SqlDriver] for iOS/macOS using [NativeSqliteDriver],
@@ -15,11 +15,11 @@ class IosDatabaseDriver : DatabaseDriverFactory {
 
     /**
      * Create (or open) the "spark.db" SQLite database and return a configured driver.
-     * The [SparkDatabase.Schema] callback handles CREATE TABLE / migration statements.
+     * The [BilboDatabase.Schema] callback handles CREATE TABLE / migration statements.
      */
     override fun createDriver(): SqlDriver {
         return NativeSqliteDriver(
-            schema = SparkDatabase.Schema,
+            schema = BilboDatabase.Schema,
             name = DATABASE_NAME
         )
     }

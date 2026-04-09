@@ -7,11 +7,12 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.spark.app.BuildConfig
-import dev.spark.shared.DatabaseDriverFactory
-import dev.spark.shared.data.remote.SparkApiService
-import dev.spark.shared.data.remote.createSparkSupabaseClient
+import dev.spark.data.AndroidDatabaseDriver
+import dev.spark.data.DatabaseDriverFactory
+import dev.spark.shared.data.remote.BilboApiService
+import dev.spark.shared.data.remote.createBilboSupabaseClient
 import dev.spark.shared.data.repository.InsightRepository
-import dev.spark.shared.db.SparkDatabase
+import dev.spark.data.BilboDatabase
 import dev.spark.shared.domain.usecase.GetDailyInsightsUseCase
 import io.github.jan.supabase.SupabaseClient
 import javax.inject.Singleton
@@ -23,7 +24,7 @@ object AppModule {
     @Provides
     @Singleton
     fun provideSupabaseClient(): SupabaseClient =
-        createSparkSupabaseClient(
+        createBilboSupabaseClient(
             supabaseUrl = BuildConfig.SUPABASE_URL,
             supabaseKey = BuildConfig.SUPABASE_ANON_KEY,
         )
@@ -32,21 +33,21 @@ object AppModule {
     @Singleton
     fun provideDatabaseDriverFactory(
         @ApplicationContext context: Context,
-    ): DatabaseDriverFactory = DatabaseDriverFactory(context)
+    ): DatabaseDriverFactory = AndroidDatabaseDriver(context)
 
     @Provides
     @Singleton
-    fun provideSparkDatabase(driverFactory: DatabaseDriverFactory): SparkDatabase =
-        SparkDatabase(driverFactory.createDriver())
+    fun provideBilboDatabase(driverFactory: DatabaseDriverFactory): BilboDatabase =
+        BilboDatabase(driverFactory.createDriver())
 
     @Provides
     @Singleton
-    fun provideSparkApiService(client: SupabaseClient): SparkApiService =
-        SparkApiService(client)
+    fun provideBilboApiService(client: SupabaseClient): BilboApiService =
+        BilboApiService(client)
 
     @Provides
     @Singleton
-    fun provideInsightRepository(apiService: SparkApiService): InsightRepository =
+    fun provideInsightRepository(apiService: BilboApiService): InsightRepository =
         InsightRepository(apiService)
 
     @Provides

@@ -1,8 +1,8 @@
-# Spark — Implementation Plan
+# Bilbo — Implementation Plan
 
 > **For Claude:** REQUIRED SUB-SKILL: Use superpowers:executing-plans to implement this plan task-by-task.
 
-**Goal:** Build Spark, a cross-platform mobile app (Android + iOS) that combats phone addiction and promotes mental health through intentional usage, emotional intelligence, dopamine budgeting, and social accountability.
+**Goal:** Build Bilbo, a cross-platform mobile app (Android + iOS) that combats phone addiction and promotes mental health through intentional usage, emotional intelligence, dopamine budgeting, and social accountability.
 
 **Architecture:** Kotlin Multiplatform (KMP) monorepo with shared business logic, Jetpack Compose for Android UI, SwiftUI for iOS UI, Supabase backend for social features, and a hybrid AI system (local heuristics + optional Anthropic cloud API for weekly narrative insights).
 
@@ -37,7 +37,7 @@ spark/
 │       │   │   └── WeeklyInsight.kt
 │       │   ├── data/                # Repositories + SQLDelight
 │       │   │   ├── db/
-│       │   │   │   └── SparkDatabase.sq
+│       │   │   │   └── BilboDatabase.sq
 │       │   │   ├── repository/
 │       │   │   │   ├── UsageRepository.kt
 │       │   │   │   ├── EmotionRepository.kt
@@ -46,7 +46,7 @@ spark/
 │       │   │   │   ├── SuggestionRepository.kt
 │       │   │   │   └── SocialRepository.kt
 │       │   │   └── preferences/
-│       │   │       └── SparkPreferences.kt
+│       │   │       └── BilboPreferences.kt
 │       │   ├── intelligence/        # AI / heuristic engine
 │       │   │   ├── tier1/
 │       │   │   │   └── RuleEngine.kt           # Deterministic enforcement rules
@@ -84,7 +84,7 @@ spark/
 │   └── src/
 │       ├── main/
 │       │   ├── kotlin/dev/spark/android/
-│       │   │   ├── SparkApp.kt
+│       │   │   ├── BilboApp.kt
 │       │   │   ├── di/              # Hilt modules
 │       │   │   ├── ui/
 │       │   │   │   ├── home/        # Dashboard, FP balance, quick stats
@@ -115,11 +115,11 @@ spark/
 │           ├── kotlin/dev/spark/android/monitor/
 │           │   └── AccessibilityAppMonitor.kt       # Full power monitoring
 │           ├── kotlin/dev/spark/android/service/
-│           │   └── SparkAccessibilityService.kt
+│           │   └── BilboAccessibilityService.kt
 │           └── AndroidManifest.xml                  # Includes AccessibilityService
 ├── iosApp/                          # iOS application
-│   ├── Spark/
-│   │   ├── SparkApp.swift
+│   ├── Bilbo/
+│   │   ├── BilboApp.swift
 │   │   ├── Views/
 │   │   │   ├── HomeView.swift
 │   │   │   ├── GatekeeperView.swift
@@ -693,9 +693,9 @@ Write a weekly reflection addressing the most important pattern you notice.
 
 **Task 0.3 — SQLDelight Setup**
 - Add SQLDelight Gradle plugin and dependencies
-- Create empty `SparkDatabase.sq` in `shared/src/commonMain/sqldelight/`
+- Create empty `BilboDatabase.sq` in `shared/src/commonMain/sqldelight/`
 - Configure Android and iOS database drivers in platform-specific source sets
-- Verify database generation: `./gradlew generateCommonMainSparkDatabaseInterface`
+- Verify database generation: `./gradlew generateCommonMainBilboDatabaseInterface`
 
 **Task 0.4 — CI Pipeline**
 - Create `.github/workflows/shared-tests.yml` — runs `shared` module tests
@@ -729,7 +729,7 @@ Write a weekly reflection addressing the most important pattern you notice.
 - Create SQLDelight-backed implementations
 
 **Task 1.3 — Preferences / Settings**
-- Implement `SparkPreferences` using DataStore (Android) / NSUserDefaults (iOS)
+- Implement `BilboPreferences` using DataStore (Android) / NSUserDefaults (iOS)
 - Settings: enforcement mode defaults, FP economy toggles, sharing levels, cloud AI toggle, notification preferences, bypass list
 
 **Task 1.4 — Seed Data**
@@ -766,7 +766,7 @@ Write a weekly reflection addressing the most important pattern you notice.
 - Handle edge cases: no permission, no data, screen off
 
 **Task 2.3 — AccessibilityAppMonitor (GitHub flavor)**
-- Implement `SparkAccessibilityService` extending `AccessibilityService`
+- Implement `BilboAccessibilityService` extending `AccessibilityService`
 - Listen for `TYPE_WINDOW_STATE_CHANGED` events
 - Extract package name from `AccessibilityEvent`
 - Implement `AccessibilityAppMonitor` wrapping the service
@@ -822,7 +822,7 @@ Write a weekly reflection addressing the most important pattern you notice.
 **Task 3.5 — iOS Gatekeeper**
 - Implement as full-screen notification → app redirect flow
 - Local notification with custom category + actions on app launch detection
-- Notification tap opens Spark's GatekeeperView with same UI
+- Notification tap opens Bilbo's GatekeeperView with same UI
 
 **Task 3.6 — Tests**
 - Test IntentDeclaration creation with all fields
@@ -1153,7 +1153,7 @@ Write a weekly reflection addressing the most important pattern you notice.
 **Task 10.4 — iOS Intent Gatekeeper**
 - Notification-based flow: detect app launch via DeviceActivityMonitor
 - Show local notification with custom UI
-- Notification action opens GatekeeperView in Spark
+- Notification action opens GatekeeperView in Bilbo
 - After declaration, unshield the target app temporarily
 
 **Task 10.5 — iOS Push Notifications**
@@ -1204,7 +1204,7 @@ Write a weekly reflection addressing the most important pattern you notice.
 - Reduced motion option (simplified breathing animation)
 
 **Task 11.4 — Branding & Identity**
-- App icon: Spark logo (lightning bolt + brain motif)
+- App icon: Bilbo logo (lightning bolt + brain motif)
 - Splash screen with brand animation
 - Consistent color system: calming palette (soft blues, greens, warm neutrals)
 - Typography: clean, readable, friendly

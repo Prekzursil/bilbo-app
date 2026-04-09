@@ -1,5 +1,5 @@
 /**
- * accept-invite — Spark Edge Function
+ * accept-invite — Bilbo Edge Function
  *
  * Validates a buddy invite code, checks expiry, creates a buddy_pair record,
  * and marks the invite code as used.

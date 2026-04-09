@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.spark.app.ui.theme.SparkTheme
+import dev.spark.app.ui.theme.BilboTheme
 import dev.spark.domain.FPEconomy
 
 // ── Semantic colour thresholds ─────────────────────────────────────────────────
@@ -131,7 +131,7 @@ fun FPBalanceWidget(
 @Preview(showBackground = true)
 @Composable
 private fun FPBalanceWidgetHighPreview() {
-    SparkTheme {
+    BilboTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             FPBalanceWidget(currentBalance = 45, fpEarned = 30)
         }
@@ -141,7 +141,7 @@ private fun FPBalanceWidgetHighPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun FPBalanceWidgetMidPreview() {
-    SparkTheme {
+    BilboTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             FPBalanceWidget(currentBalance = 18, fpEarned = 20)
         }
@@ -151,7 +151,7 @@ private fun FPBalanceWidgetMidPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun FPBalanceWidgetLowPreview() {
-    SparkTheme {
+    BilboTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             FPBalanceWidget(currentBalance = 4, fpEarned = 5, size = 160.dp)
         }

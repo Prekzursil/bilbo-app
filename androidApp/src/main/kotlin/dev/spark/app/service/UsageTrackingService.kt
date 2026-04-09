@@ -33,10 +33,10 @@ import javax.inject.Inject
 
 /**
  * Long-running foreground service that orchestrates real-time app-usage
- * tracking for Spark.
+ * tracking for Bilbo.
  *
  * ### Responsibilities
- * 1. Creates the "Spark Tracking" notification channel and shows a persistent
+ * 1. Creates the "Bilbo Tracking" notification channel and shows a persistent
  *    notification.
  * 2. Injects the correct [AppMonitor] implementation — [PollingAppMonitor] for
  *    the Play Store flavor, [AccessibilityAppMonitor] for the GitHub flavor —
@@ -47,7 +47,7 @@ import javax.inject.Inject
  *
  * ### Battery optimisation
  * Call [requestBatteryOptimisationExemption] once (e.g. from Onboarding) to
- * ask the user to whitelist Spark from battery optimisation; otherwise Android
+ * ask the user to whitelist Bilbo from battery optimisation; otherwise Android
  * may kill the service aggressively on some OEMs.
  */
 @AndroidEntryPoint
@@ -62,7 +62,7 @@ class UsageTrackingService : android.app.Service() {
         const val ACTION_SCREEN_ON = "dev.spark.app.action.SCREEN_ON"
 
         /**
-         * Helper: launch the system dialog to exempt Spark from battery
+         * Helper: launch the system dialog to exempt Bilbo from battery
          * optimisation.  Must be called from a UI context.
          */
         fun requestBatteryOptimisationExemption(context: Context) {
@@ -208,7 +208,7 @@ class UsageTrackingService : android.app.Service() {
         )
 
         return NotificationCompat.Builder(this, CHANNEL_ID)
-            .setContentTitle("Spark is monitoring your screen time")
+            .setContentTitle("Bilbo is monitoring your screen time")
             .setContentText("Helping you build mindful digital habits")
             .setSmallIcon(R.drawable.ic_notification)
             .setOngoing(true)
@@ -222,7 +222,7 @@ class UsageTrackingService : android.app.Service() {
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "Spark Tracking",
+            "Bilbo Tracking",
             NotificationManager.IMPORTANCE_LOW,
         ).apply {
             description = "Tracks your app usage to provide wellness insights"

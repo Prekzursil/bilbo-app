@@ -399,7 +399,7 @@ private struct InviteCodeSheet: View {
                     .frame(maxWidth: .infinity)
                     .background(Color.orange.opacity(0.1), in: RoundedRectangle(cornerRadius: 16))
 
-                ShareLink(item: "Join me on Spark! Use code \(code) to connect as accountability buddies.") {
+                ShareLink(item: "Join me on Bilbo! Use code \(code) to connect as accountability buddies.") {
                     Label("Share Code", systemImage: "square.and.arrow.up")
                         .frame(maxWidth: .infinity)
                 }
