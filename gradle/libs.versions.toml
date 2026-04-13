@@ -110,7 +110,7 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 junit = { group = "junit", name = "junit", version = "4.13.2" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-mockk = { group = "io.mockk", name = "mockk", version = "1.13.13" }
+mockk = { group = "io.mockk", name = "mockk", version = "1.14.9" }
 turbine = { group = "app.cash.turbine", name = "turbine", version = "1.2.0" }
 
 [plugins]
