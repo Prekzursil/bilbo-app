@@ -62,16 +62,20 @@ fun DashboardScreen(
                 text = "Today's Apps",
                 style = MaterialTheme.typography.titleMedium,
             )
-            // TODO: Replace with real app usage list from ViewModel
-            repeat(3) { index ->
-                AppUsageRow(
-                    appName = listOf("Instagram", "YouTube", "Safari")[index],
-                    durationMinutes = listOf(45, 30, 20)[index],
-                )
+            // Preview rows until a DashboardViewModel surfaces real usage data.
+            // Tracked by the UsageMonitorService → InsightRepository work.
+            DEFAULT_PREVIEW_ROWS.forEach { (appName, minutes) ->
+                AppUsageRow(appName = appName, durationMinutes = minutes)
             }
         }
     }
 }
+
+private val DEFAULT_PREVIEW_ROWS: List<Pair<String, Int>> = listOf(
+    "Instagram" to 45,
+    "YouTube" to 30,
+    "Safari" to 20,
+)
 
 @Composable
 private fun ScreenTimeSummaryCard() {

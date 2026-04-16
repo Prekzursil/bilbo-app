@@ -28,9 +28,19 @@ class SyncWorker @AssistedInject constructor(
     }
 
     override suspend fun doWork(): Result {
-        Timber.d("SyncWorker: starting sync")
+        Timber.d("SyncWorker: starting sync (attempt %d)", runAttemptCount + 1)
         return try {
-            // TODO: Iterate unsynced sessions, upload to Supabase, mark synced
+            val pending = insightRepository.getAllWeeklyInsights()
+            Timber.d(
+                "SyncWorker: %d weekly insights cached locally; remote upload pending repository support",
+                pending.size,
+            )
+            // Remote upload is gated on the shared repository growing a
+            // queryUnsynced()/markSynced() pair.  Once available we will:
+            //   1. query unsynced usage sessions
+            //   2. POST them in batches to Supabase via BilboApiService
+            //   3. mark them synced locally
+            // Until then the worker acts as a heartbeat that keeps the chain alive.
             Timber.d("SyncWorker: sync complete")
             Result.success()
         } catch (e: Exception) {

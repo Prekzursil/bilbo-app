@@ -4,6 +4,8 @@ import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.Service
+import android.app.usage.UsageStatsManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Binder
@@ -97,10 +99,23 @@ class UsageMonitorService : Service() {
         }
     }
 
-    private suspend fun pollUsageStats() {
-        // TODO: Query UsageStatsManager for app usage in the last minute
-        // and forward to InsightRepository for local storage and sync.
-        Timber.d("Polling usage stats…")
+    private fun pollUsageStats() {
+        val usageStatsManager =
+            getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager
+        if (usageStatsManager == null) {
+            Timber.w("UsageStatsManager not available on this device")
+            return
+        }
+        val now = System.currentTimeMillis()
+        val stats = usageStatsManager.queryUsageStats(
+            UsageStatsManager.INTERVAL_BEST,
+            now - POLL_INTERVAL_MS,
+            now,
+        )
+        val totalMs = stats?.sumOf { it.totalTimeInForeground } ?: 0L
+        Timber.d("Polled %d usage records (%d ms foreground)", stats?.size ?: 0, totalMs)
+        // TODO: Forward `stats` to InsightRepository for local storage and sync
+        //       once the repository exposes a batch-insert entry point.
     }
 
     private fun buildNotification(): Notification {

@@ -6,7 +6,7 @@
 [![CI — Android](https://github.com/Prekzursil/bilbo-app/actions/workflows/android-ci.yml/badge.svg)](https://github.com/Prekzursil/bilbo-app/actions/workflows/android-ci.yml)
 [![CI — iOS](https://github.com/Prekzursil/bilbo-app/actions/workflows/ios-ci.yml/badge.svg)](https://github.com/Prekzursil/bilbo-app/actions/workflows/ios-ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.0-purple.svg)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.3.20-purple.svg)](https://kotlinlang.org)
 [![codecov](https://codecov.io/gh/Prekzursil/bilbo-app/branch/main/graph/badge.svg)](https://codecov.io/gh/Prekzursil/bilbo-app)
 
 ---

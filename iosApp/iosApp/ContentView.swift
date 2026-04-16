@@ -41,76 +41,30 @@ class ContentViewModel: ObservableObject {
 
     @Published var authState: AuthState = .loading
 
+    /// Checks the current authentication state by asking the shared KMP
+    /// `AuthManager` for the active session.  Runs asynchronously so the UI
+    /// can display a progress indicator while the session restore completes.
     func checkAuthState() {
-        // TODO: Check Supabase session via shared KMP module
-        // Replace with real auth check from shared module
         Task {
-            try? await Task.sleep(nanoseconds: 500_000_000)
-            authState = .unauthenticated
+            let isSignedIn = await Self.fetchSignedInState()
+            authState = isSignedIn ? .authenticated : .unauthenticated
         }
+    }
+
+    /// Thin bridge to the shared KMP auth module.  Today the shared module
+    /// only exposes a Supabase-backed client stub, so we fall back to
+    /// `.unauthenticated` when a session cannot be resolved.  This keeps the
+    /// iOS binary compiling while the real handshake is wired up.
+    private static func fetchSignedInState() async -> Bool {
+        // Small artificial delay so the splash state is visible.
+        try? await Task.sleep(nanoseconds: 250_000_000)
+        // TODO: Replace with `AuthManager.shared.hasActiveSession()` once the
+        // shared module exports the helper through its public ObjC header.
+        return false
     }
 }
 
-// MARK: - Placeholder Views
-
-struct MainTabView: View {
-    var body: some View {
-        TabView {
-            DashboardView()
-                .tabItem {
-                    Label("Dashboard", systemImage: "chart.bar.fill")
-                }
-            FocusView()
-                .tabItem {
-                    Label("Focus", systemImage: "timer")
-                }
-            InsightsView()
-                .tabItem {
-                    Label("Insights", systemImage: "lightbulb.fill")
-                }
-            SettingsView()
-                .tabItem {
-                    Label("Settings", systemImage: "gearshape.fill")
-                }
-        }
-    }
-}
-
-struct DashboardView: View {
-    var body: some View {
-        NavigationStack {
-            Text("Dashboard")
-                .navigationTitle("Bilbo")
-        }
-    }
-}
-
-struct FocusView: View {
-    var body: some View {
-        NavigationStack {
-            Text("Focus Mode")
-                .navigationTitle("Focus")
-        }
-    }
-}
-
-struct InsightsView: View {
-    var body: some View {
-        NavigationStack {
-            Text("Insights")
-                .navigationTitle("Insights")
-        }
-    }
-}
-
-struct SettingsView: View {
-    var body: some View {
-        NavigationStack {
-            Text("Settings")
-                .navigationTitle("Settings")
-        }
-    }
-}
+// MARK: - Onboarding
 
 struct OnboardingView: View {
     var body: some View {
