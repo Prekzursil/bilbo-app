@@ -348,7 +348,7 @@ private struct CustomSuggestionSheet: View {
                             .padding(12)
                             .background(Color(.secondarySystemBackground))
                             .clipShape(RoundedRectangle(cornerRadius: 12))
-                            .onChange(of: text) { _, _ in textError = nil }
+                            .onChange(of: text) { _ in textError = nil }
 
                         if let err = textError {
                             Text(err).font(.caption).foregroundColor(.red)

@@ -124,8 +124,15 @@ struct SettingsView: View {
             Button("Delete Account", role: .destructive) { vm.deleteAccount() }
             Button("Cancel", role: .cancel) {}
         }
-        .sheet(item: $vm.exportedData.optionalBinding()) { data in
-            ShareSheet(items: [data])
+        .sheet(
+            isPresented: Binding(
+                get: { vm.exportedData != nil },
+                set: { presented in if !presented { vm.exportedData = nil } }
+            )
+        ) {
+            if let data = vm.exportedData {
+                ShareSheet(items: [data])
+            }
         }
     }
 
@@ -401,17 +408,6 @@ struct ShareSheet: UIViewControllerRepresentable {
     }
 
     func updateUIViewController(_ vc: UIActivityViewController, context: Context) {}
-}
-
-// MARK: - Optional Binding extension
-
-extension Optional where Wrapped == String {
-    func optionalBinding() -> Binding<Wrapped?> {
-        Binding<Wrapped?>(
-            get: { self },
-            set: { _ in }
-        )
-    }
 }
 
 // MARK: - Preview

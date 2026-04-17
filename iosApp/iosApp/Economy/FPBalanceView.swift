@@ -83,12 +83,12 @@ struct FPBalanceView: View {
             animatedProgress = progressFraction
             animatedBalance  = currentBalance
         }
-        .onChange(of: currentBalance) { _, newValue in
+        .onChange(of: currentBalance) { newValue in
             withAnimation(.easeInOut(duration: 0.6)) {
                 animatedBalance = newValue
             }
         }
-        .onChange(of: fpEarned) { _, _ in
+        .onChange(of: fpEarned) { _ in
             withAnimation(.easeInOut(duration: 0.8)) {
                 animatedProgress = progressFraction
             }
