@@ -174,23 +174,30 @@ struct FamilyControlsStatusRow: View {
     }
 }
 
-/// Weekly analytics placeholder
+/// Weekly analytics placeholder tab. Real `WeeklyInsightView` requires a
+/// populated `WeeklyInsightData` and is presented from other entry points;
+/// wiring a live repository is tracked as a follow-up.
 struct InsightsView: View {
     var body: some View {
-        Text("Insights coming soon")
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        VStack(spacing: 12) {
+            Image(systemName: "chart.bar.fill")
+                .font(.system(size: 48))
+                .foregroundStyle(.secondary)
+            Text("Insights coming soon")
+                .font(.headline)
+            Text("Weekly analytics will appear here once usage data has been collected.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+                .padding(.horizontal)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }
 
-/// Social hub placeholder
-struct SocialHubView: View {
-    var body: some View {
-        Text("Social hub coming soon")
-            .foregroundStyle(.secondary)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
+// NOTE: The real `SocialHubView` lives in Social/SocialHubView.swift and is
+// resolved here by name; no placeholder is defined here to avoid a duplicate
+// symbol at link time.
 
 // MARK: - Preview
 

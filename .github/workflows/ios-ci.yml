@@ -93,9 +93,17 @@ jobs:
       - name: Select Xcode version
         run: sudo xcode-select -s /Applications/Xcode_16.1.app
 
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate iosApp.xcodeproj
+        working-directory: iosApp
+        run: xcodegen generate
+
       - name: Build iOS app (simulator)
         working-directory: iosApp
         run: |
+          set -o pipefail
           xcodebuild \
             -project iosApp.xcodeproj \
             -scheme iosApp \
@@ -107,7 +115,6 @@ jobs:
             CODE_SIGNING_ALLOWED=NO \
             build \
             | xcpretty
-        continue-on-error: true
 
       - name: Package unsigned iOS .app bundle
         working-directory: iosApp
@@ -115,14 +122,14 @@ jobs:
           set -e
           APP_PATH=$(find build/Build/Products -maxdepth 4 -type d -name 'iosApp.app' | head -n 1)
           if [ -z "$APP_PATH" ]; then
-            echo "::warning::iosApp.app bundle not found; skipping zip"
-            exit 0
+            echo "::error::iosApp.app bundle not found after build"
+            find build -maxdepth 4 -type d || true
+            exit 1
           fi
           mkdir -p release-artifacts
           # Preserve symlinks inside the .app bundle with -y
           (cd "$(dirname "$APP_PATH")" && zip -ry "../../../../release-artifacts/Bilbo-iOS-unsigned.zip" "$(basename "$APP_PATH")")
           ls -la release-artifacts/
-        continue-on-error: true
 
       - name: Upload iOS app artifact
         if: always()
@@ -133,20 +140,8 @@ jobs:
           retention-days: 14
           if-no-files-found: warn
 
-      - name: Run iOS unit tests
-        working-directory: iosApp
-        run: |
-          xcodebuild \
-            -project iosApp.xcodeproj \
-            -scheme iosApp \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
-            -configuration Debug \
-            CODE_SIGN_IDENTITY="" \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGNING_ALLOWED=NO \
-            test \
-            | xcpretty
-        continue-on-error: true
+      # Unit tests are disabled until an actual test target is added to project.yml.
+      # The CI just needs to produce a valid unsigned .app artifact for the release.
 
   attach-ios-release-artifact:
     name: Attach iOS build to GitHub Release

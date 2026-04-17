@@ -31,7 +31,7 @@ final class SettingsViewModel: ObservableObject {
     @Published var viewAnonymization: Bool = true
 
     // Social
-    @Published var sharingLevel: SharingLevel = .friends
+    @Published var sharingLevel: SettingsSharingLevel = .friends
     @Published var buddies: [String] = []
     @Published var circles: [String] = []
 
@@ -81,7 +81,9 @@ enum EnforcementMode: String, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-enum SharingLevel: String, CaseIterable, Identifiable {
+/// Settings-scoped sharing level (display-only strings). Distinct from the
+/// domain `SharingLevel` enum used by the Social feature.
+enum SettingsSharingLevel: String, CaseIterable, Identifiable {
     case `private` = "Private"
     case friends   = "Friends"
     case circle    = "Circle"
@@ -224,7 +226,7 @@ struct SettingsView: View {
     private var socialSection: some View {
         Section {
             Picker("Sharing Level", selection: $vm.sharingLevel) {
-                ForEach(SharingLevel.allCases) { level in
+                ForEach(SettingsSharingLevel.allCases) { level in
                     Text(level.rawValue).tag(level)
                 }
             }
