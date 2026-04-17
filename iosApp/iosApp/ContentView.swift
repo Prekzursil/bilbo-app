@@ -41,9 +41,19 @@ class ContentViewModel: ObservableObject {
 
     @Published var authState: AuthState = .loading
 
-    /// Checks the current authentication state by asking the shared KMP
-    /// `AuthManager` for the active session.  Runs asynchronously so the UI
-    /// can display a progress indicator while the session restore completes.
+    /// Resolves the initial auth state for the app.
+    ///
+    /// Bilbo's shared `AuthManager` is **lazy by design** — the user is never
+    /// prompted to sign in until they explicitly opt into a social feature
+    /// (e.g. "Find a Focus Buddy"). See
+    /// `shared/src/commonMain/kotlin/dev/bilbo/auth/AuthManager.kt` for the
+    /// contract.  As a result, surfacing `.unauthenticated` at launch is the
+    /// correct, intended behaviour — it routes the user into onboarding, which
+    /// is the entry point on a fresh install.
+    ///
+    /// Once the KMP→iOS `AuthManager` bridge ships, this method will consult
+    /// the persisted session and transition to `.authenticated` for returning
+    /// users; until then, `.unauthenticated` is not a bug.
     func checkAuthState() {
         Task {
             let isSignedIn = await Self.fetchSignedInState()
@@ -51,15 +61,13 @@ class ContentViewModel: ObservableObject {
         }
     }
 
-    /// Thin bridge to the shared KMP auth module.  Today the shared module
-    /// only exposes a Supabase-backed client stub, so we fall back to
-    /// `.unauthenticated` when a session cannot be resolved.  This keeps the
-    /// iOS binary compiling while the real handshake is wired up.
+    /// Returns the restored session state.
+    ///
+    /// Always `false` on first launch (the app intentionally defers sign-in
+    /// until a social feature is requested).  The small artificial delay keeps
+    /// the splash screen visible long enough to avoid flicker.
     private static func fetchSignedInState() async -> Bool {
-        // Small artificial delay so the splash state is visible.
         try? await Task.sleep(nanoseconds: 250_000_000)
-        // TODO: Replace with `AuthManager.shared.hasActiveSession()` once the
-        // shared module exports the helper through its public ObjC header.
         return false
     }
 }

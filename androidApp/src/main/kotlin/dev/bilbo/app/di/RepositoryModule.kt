@@ -28,7 +28,10 @@ import dev.bilbo.domain.TimeOfDay
 import dev.bilbo.domain.UsageSession
 import dev.bilbo.enforcement.CooldownPersistence
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import javax.inject.Singleton
@@ -102,12 +105,21 @@ object RepositoryModule {
 
 private class InMemoryUsageRepository : UsageRepository {
 
-    private val sessions = mutableListOf<UsageSession>()
+    // Hot state — every write re-emits so collectors (e.g. DashboardViewModel) update live.
+    private val state = MutableStateFlow<List<UsageSession>>(emptyList())
     private var nextId = 1L
 
-    override fun observeAll(): Flow<List<UsageSession>> = flowOf(sessions.toList())
+    private val sessions: List<UsageSession> get() = state.value
 
-    override suspend fun getAll(): List<UsageSession> = sessions.toList()
+    private fun mutate(block: (MutableList<UsageSession>) -> Unit) {
+        val draft = state.value.toMutableList()
+        block(draft)
+        state.value = draft.toList()
+    }
+
+    override fun observeAll(): Flow<List<UsageSession>> = state.asStateFlow()
+
+    override suspend fun getAll(): List<UsageSession> = sessions
 
     override suspend fun getById(id: Long): UsageSession? =
         sessions.firstOrNull { it.id == id }
@@ -130,23 +142,25 @@ private class InMemoryUsageRepository : UsageRepository {
 
     override suspend fun insert(session: UsageSession): Long {
         val id = nextId++
-        sessions += session.copy(id = id)
+        mutate { it += session.copy(id = id) }
         return id
     }
 
     override suspend fun updateEndTime(id: Long, endTime: Instant, durationSeconds: Long) {
-        val idx = sessions.indexOfFirst { it.id == id }
-        if (idx >= 0) {
-            sessions[idx] = sessions[idx].copy(endTime = endTime, durationSeconds = durationSeconds)
+        mutate { list ->
+            val idx = list.indexOfFirst { it.id == id }
+            if (idx >= 0) {
+                list[idx] = list[idx].copy(endTime = endTime, durationSeconds = durationSeconds)
+            }
         }
     }
 
     override suspend fun deleteById(id: Long) {
-        sessions.removeAll { it.id == id }
+        mutate { it.removeAll { s -> s.id == id } }
     }
 
     override suspend fun deleteOlderThan(before: Instant) {
-        sessions.removeAll { it.startTime < before }
+        mutate { it.removeAll { s -> s.startTime < before } }
     }
 
     override suspend fun countByPackageName(packageName: String): Long =
@@ -163,9 +177,17 @@ private class InMemoryUsageRepository : UsageRepository {
 
 private class InMemoryAppProfileRepository : AppProfileRepository {
 
-    private val profiles = mutableMapOf<String, AppProfile>()
+    private val state = MutableStateFlow<Map<String, AppProfile>>(emptyMap())
+    private val profiles: Map<String, AppProfile> get() = state.value
 
-    override fun observeAll(): Flow<List<AppProfile>> = flowOf(profiles.values.toList())
+    private fun mutate(block: (MutableMap<String, AppProfile>) -> Unit) {
+        val draft = state.value.toMutableMap()
+        block(draft)
+        state.value = draft.toMap()
+    }
+
+    override fun observeAll(): Flow<List<AppProfile>> =
+        state.asStateFlow().map { it.values.toList() }
 
     override suspend fun getAll(): List<AppProfile> = profiles.values.toList()
 
@@ -173,7 +195,7 @@ private class InMemoryAppProfileRepository : AppProfileRepository {
         profiles[packageName]
 
     override fun observeByPackageName(packageName: String): Flow<AppProfile?> =
-        flowOf(profiles[packageName])
+        state.asStateFlow().map { it[packageName] }
 
     override suspend fun getByCategory(category: AppCategory): List<AppProfile> =
         profiles.values.filter { it.category == category }
@@ -191,31 +213,38 @@ private class InMemoryAppProfileRepository : AppProfileRepository {
         require(!profiles.containsKey(profile.packageName)) {
             "Profile already exists for ${profile.packageName}"
         }
-        profiles[profile.packageName] = profile
+        mutate { it[profile.packageName] = profile }
     }
 
     override suspend fun update(profile: AppProfile) {
-        profiles[profile.packageName] = profile
+        mutate { it[profile.packageName] = profile }
     }
 
     override suspend fun upsert(profile: AppProfile) {
-        profiles[profile.packageName] = profile
+        mutate { it[profile.packageName] = profile }
     }
 
     override suspend fun updateCategory(packageName: String, category: AppCategory) {
-        profiles[packageName]?.let {
-            profiles[packageName] = it.copy(category = category, isCustomClassification = true)
+        mutate { map ->
+            map[packageName]?.let { existing ->
+                map[packageName] = existing.copy(
+                    category = category,
+                    isCustomClassification = true,
+                )
+            }
         }
     }
 
     override suspend fun updateBypass(packageName: String, isBypassed: Boolean) {
-        profiles[packageName]?.let {
-            profiles[packageName] = it.copy(isBypassed = isBypassed)
+        mutate { map ->
+            map[packageName]?.let { existing ->
+                map[packageName] = existing.copy(isBypassed = isBypassed)
+            }
         }
     }
 
     override suspend fun deleteByPackageName(packageName: String) {
-        profiles.remove(packageName)
+        mutate { it.remove(packageName) }
     }
 }
 

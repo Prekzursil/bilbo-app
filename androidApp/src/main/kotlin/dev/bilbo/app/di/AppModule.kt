@@ -13,6 +13,8 @@ import dev.bilbo.shared.data.remote.BilboApiService
 import dev.bilbo.shared.data.remote.createBilboSupabaseClient
 import dev.bilbo.shared.data.repository.InsightRepository
 import dev.bilbo.data.BilboDatabase
+import dev.bilbo.preferences.AndroidBilboPreferences
+import dev.bilbo.preferences.BilboPreferences
 import dev.bilbo.shared.domain.usecase.GetDailyInsightsUseCase
 import io.github.jan.supabase.SupabaseClient
 import javax.inject.Singleton
@@ -53,4 +55,9 @@ object AppModule {
     @Provides
     fun provideGetDailyInsightsUseCase(repository: InsightRepository): GetDailyInsightsUseCase =
         GetDailyInsightsUseCase(repository)
+
+    @Provides
+    @Singleton
+    fun provideBilboPreferences(@ApplicationContext context: Context): BilboPreferences =
+        AndroidBilboPreferences(context)
 }

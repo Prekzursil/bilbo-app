@@ -39,15 +39,11 @@
             </intent-filter>
         </activity>
 
-        <!-- Usage Tracking Foreground Service (replaces UsageMonitorService) -->
+        <!-- Usage tracking foreground service — polls UsageStatsManager or observes
+             the accessibility stream (flavor-dependent) and persists sessions via
+             UsageRepository. -->
         <service
             android:name=".service.UsageTrackingService"
-            android:exported="false"
-            android:foregroundServiceType="dataSync" />
-
-        <!-- Legacy monitor service kept for reference; superseded by UsageTrackingService -->
-        <service
-            android:name=".service.UsageMonitorService"
             android:exported="false"
             android:foregroundServiceType="dataSync" />
 

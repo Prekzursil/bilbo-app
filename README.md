@@ -17,6 +17,28 @@ Bilbo is a Kotlin Multiplatform (KMP) digital wellness app for Android and iOS t
 
 ---
 
+## Current Status
+
+Bilbo is in **active early development (v1.0.1)**. The product vision below describes the full target experience; this section is a candid summary of what the codebase actually ships today.
+
+**What works end-to-end:**
+- Kotlin Multiplatform shared module with domain models, repository interfaces, tier-1/tier-2 intelligence engines, Focus Points economy, and social/challenge logic — all covered by commonTest.
+- Android Jetpack Compose UI scaffold: bottom-nav NavHost, Dashboard (live-wired to `UsageRepository`), Insights, Social hub, Budget dashboard, Analog suggestions, Settings, onboarding flow, and the Intent Gatekeeper overlay.
+- Android `UsageTrackingService` (foreground service) + `AppMonitor` + `SessionTracker` persist `UsageSession`s into the repository, which the Dashboard observes live.
+- iOS SwiftUI skeleton (`ContentView`, `MainTabView`, `OnboardingView`) bundled against the shared Kotlin XCFramework.
+- CI on every push: shared-module tests, Android lint/unit tests/APK builds (`playstore` + `github` flavors), iOS XCFramework + simulator build, Deno Edge Function checks, CodeQL.
+
+**What is stubbed or out-of-scope for v1.0.x:**
+- Repository implementations on Android are **in-memory** (a hot `MutableStateFlow` — data survives process lifetime but not restarts). The SQLDelight schema ships in the shared module and wiring it up is the top v1.1 item.
+- Supabase backend is **not configured** — edge functions and migrations exist but `SUPABASE_URL`/`SUPABASE_ANON_KEY` are empty. Buddies, circles, challenges, and the Tier-3 AI narrative therefore show UI but do not transact real data.
+- iOS `.unauthenticated` at launch is **intentional**: the shared `AuthManager` is lazy-by-design (sign-in only prompted when a social feature is tapped).
+- Released artifacts (`.apk` + iOS simulator `.app`) are **unsigned debug builds**. A signed `.ipa` requires an Apple Developer Program certificate that is not attached to this repo.
+- Some Settings sub-routes are placeholders ("Enforcement settings coming soon"); the core Settings screen itself is real.
+
+See [CHANGELOG.md](CHANGELOG.md) for the per-release details.
+
+---
+
 ## Architecture Overview
 
 ```mermaid
@@ -635,7 +657,7 @@ erDiagram
 
 | Layer | Technology |
 |-------|------------|
-| **Shared KMP** | Kotlin 2.1.0, SQLDelight 2.0.2, Ktor 3.0.3, kotlinx.coroutines 1.9.0, kotlinx.serialization 1.7.3 |
+| **Shared KMP** | Kotlin 2.3.20, SQLDelight 2.3.2, Ktor 3.4.2, kotlinx.coroutines 1.10.2, kotlinx.serialization 1.11.0 |
 | **Android** | Jetpack Compose, Material 3, Hilt, WorkManager, ForegroundService, WindowManager overlays |
 | **iOS** | SwiftUI, FamilyControls, DeviceActivityMonitor, ShieldConfigurationDataSource |
 | **Backend** | Supabase (Auth, PostgreSQL, Realtime, Edge Functions, Storage) |
@@ -725,7 +747,7 @@ bilbo-app/
 ├── gradle/
 │   ├── libs.versions.toml            # Version catalog
 │   └── wrapper/
-│       └── gradle-wrapper.properties # Gradle 8.11.1
+│       └── gradle-wrapper.properties # Gradle 9.4.1
 ├── build.gradle.kts                  # Root build — plugin declarations
 ├── settings.gradle.kts               # Project settings + module includes
 ├── gradle.properties                 # JVM args, Android, KMP flags
@@ -757,7 +779,7 @@ The `github` flavor provides more precise enforcement because `AccessibilityServ
 |------|---------|-------|
 | JDK | 17+ | [Adoptium](https://adoptium.net) |
 | Android Studio | Ladybug 2024.2.1+ | [developer.android.com](https://developer.android.com/studio) |
-| Kotlin Multiplatform Plugin | 2.1.0 | Android Studio → Plugins |
+| Kotlin Multiplatform Plugin | 2.3.20 | Android Studio → Plugins |
 | Xcode | 16+ | macOS only — required for iOS |
 | Supabase CLI | Latest | `brew install supabase/tap/supabase` |
 | Deno | 1.40+ | For local Edge Function development |
