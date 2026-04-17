@@ -461,8 +461,8 @@ private struct CustomSuggestionSheet: View {
 
 // MARK: - FlowLayout helper
 
-/// Simple flow (wrap) layout for chips.
-private struct FlowLayout: Layout {
+/// Simple flow (wrap) layout for chips. Shared with `InterestsOnboardingView`.
+struct FlowLayout: Layout {
     var spacing: CGFloat = 8
 
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
