@@ -415,7 +415,9 @@ private struct JoinCircleSheet: View {
                     .textCase(.uppercase)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.characters)
-                    .onChange(of: code) { code = String($0.prefix(8)).uppercased() }
+                    .onChange(of: code) { newValue in
+                        code = String(newValue.prefix(8)).uppercased()
+                    }
                     .padding()
                     .background(Color(.secondarySystemGroupedBackground), in: RoundedRectangle(cornerRadius: 12))
                     .padding(.horizontal)

@@ -489,7 +489,9 @@ private struct EncouragementSheet: View {
                             .foregroundStyle(.secondary)
                             .padding(6)
                     }
-                    .onChange(of: text) { if text.count > 100 { text = String(text.prefix(100)) } }
+                    .onChange(of: text) { newValue in
+                        if newValue.count > 100 { text = String(newValue.prefix(100)) }
+                    }
 
                 Button("Send", action: { onSend(); dismiss() })
                     .buttonStyle(.borderedProminent)
@@ -501,11 +503,11 @@ private struct EncouragementSheet: View {
             .padding(20)
             .navigationTitle("Send Encouragement")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
+            .toolbar(content: {
                 ToolbarItem(placement: .cancellationAction) {
                     Button("Cancel") { onCancel(); dismiss() }
                 }
-            }
+            })
         }
     }
 }
