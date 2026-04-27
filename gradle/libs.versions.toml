@@ -5,7 +5,7 @@
 # All three are fixed in 1.84. See: WU-B12.dependabot.
 bouncycastle = "1.84"
 kover = "0.9.8"
-kotlin = "2.3.20"
+kotlin = "2.3.21"
 agp = "9.2.0"
 compose-bom = "2026.03.01"
 sqldelight = "2.3.2"
