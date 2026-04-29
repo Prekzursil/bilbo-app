@@ -100,8 +100,37 @@ android {
     }
 }
 
+// Force Bouncy Castle to a non-vulnerable version on every configuration.
+// Transitive pulls (via supabase-kt / Ktor / others) would otherwise resolve
+// to versions < 1.84 that contain CVEs:
+//   - Covert timing channel (HIGH)
+//   - LDAP injection (MEDIUM)
+//   - Broken cryptographic algorithm (MEDIUM)
+// All three are fixed in 1.84. WU-B12.dependabot.
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.bouncycastle" &&
+            (requested.name == "bcprov-jdk18on" || requested.name == "bcpkix-jdk18on")
+        ) {
+            useVersion(libs.versions.bouncycastle.get())
+            because("WU-B12.dependabot — pin to >= 1.84 to mitigate 3 CVEs")
+        }
+    }
+}
+
 dependencies {
     implementation(project(":shared"))
+
+    // Explicit constraint pin so Dependabot tracks this dependency directly
+    // and reports any future CVEs against the version we're using.
+    constraints {
+        implementation(libs.bouncycastle.bcprov) {
+            because("WU-B12.dependabot — pin to >= 1.84")
+        }
+        implementation(libs.bouncycastle.bcpkix) {
+            because("WU-B12.dependabot — pin to >= 1.84")
+        }
+    }
 
     // Compose BOM
     implementation(platform(libs.compose.bom))

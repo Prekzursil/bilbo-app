@@ -1,4 +1,9 @@
 [versions]
+# Security: pinned to >= 1.84 to mitigate three CVEs reported by Dependabot
+# against transitive dependencies pulled in via supabase-kt / ktor-client-auth
+# (covert timing channel, LDAP injection, broken cryptographic algorithm).
+# All three are fixed in 1.84. See: WU-B12.dependabot.
+bouncycastle = "1.84"
 kover = "0.9.8"
 kotlin = "2.3.20"
 agp = "9.1.0"
@@ -105,6 +110,10 @@ posthog-android = { group = "com.posthog", name = "posthog-android", version.ref
 
 # Timber
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
+
+# Security pins (transitive — declared explicitly so Dependabot tracks fixes)
+bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
+bouncycastle-bcpkix = { group = "org.bouncycastle", name = "bcpkix-jdk18on", version.ref = "bouncycastle" }
 
 # Test
 junit = { group = "junit", name = "junit", version = "4.13.2" }

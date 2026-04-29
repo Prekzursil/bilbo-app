@@ -76,6 +76,19 @@ kotlin {
     }
 }
 
+// Force Bouncy Castle to a non-vulnerable version on every configuration
+// (transitive pulls via supabase-kt / Ktor / others). WU-B12.dependabot.
+configurations.all {
+    resolutionStrategy.eachDependency {
+        if (requested.group == "org.bouncycastle" &&
+            (requested.name == "bcprov-jdk18on" || requested.name == "bcpkix-jdk18on")
+        ) {
+            useVersion(libs.versions.bouncycastle.get())
+            because("WU-B12.dependabot — pin to >= 1.84 to mitigate 3 CVEs")
+        }
+    }
+}
+
 android {
     namespace = "dev.bilbo.shared"
     compileSdk = 36
