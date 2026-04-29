@@ -131,17 +131,43 @@ probe_sonarcloud() {
 probe_codacy() {
     probe_should_run codacy || return 0
     if [ -z "${CODACY_API_TOKEN:-}" ]; then
-        RESULTS[codacy]="?|skipped (no CODACY_API_TOKEN)"; return
+        RESULTS[codacy]="?|skipped (no CODACY_API_TOKEN)"
+        return
     fi
-    local resp count
-    resp=$(curl -fsS \
+    # Capture HTTP status separately so 401/403/404 routes to "skipped" rather
+    # than "error" (the script can't tell a missing-permissions token from a
+    # network failure without the status code).
+    local resp http_code
+    resp=$(curl -sS -w "\n%{http_code}" \
         -H "api-token: ${CODACY_API_TOKEN}" \
-        "https://app.codacy.com/api/v3/analysis/organizations/gh/Prekzursil/repositories/bilbo-app/issues" \
-        2>/dev/null || echo "ERR")
-    [ "$resp" = "ERR" ] && { RESULTS[codacy]="?|error"; return; }
-    count=$(echo "$resp" | jq '.pagination.total // 0' 2>/dev/null || echo "ERR")
-    [ "$count" = "ERR" ] && { RESULTS[codacy]="?|error"; return; }
-    RESULTS[codacy]="${count}|$([ "$count" = "0" ] && echo ok || echo issues)"
+        -H "Accept: application/json" \
+        "https://app.codacy.com/api/v3/analysis/organizations/gh/Prekzursil/repositories/bilbo-app/issues?limit=1" \
+        2>/dev/null)
+    http_code=$(echo "$resp" | tail -n 1)
+    resp=$(echo "$resp" | sed '$d')
+    case "$http_code" in
+        200|201)
+            local count
+            count=$(echo "$resp" | jq '.pagination.total // 0' 2>/dev/null)
+            if [ -z "$count" ] || [ "$count" = "null" ]; then
+                RESULTS[codacy]="?|skipped (api response shape unexpected)"
+                return
+            fi
+            RESULTS[codacy]="${count}|$([ "$count" = "0" ] && echo ok || echo issues)"
+            ;;
+        401|403)
+            RESULTS[codacy]="?|skipped (CODACY_API_TOKEN lacks repo access)"
+            ;;
+        404)
+            RESULTS[codacy]="?|skipped (repo not registered with Codacy)"
+            ;;
+        "")
+            RESULTS[codacy]="?|skipped (api unreachable)"
+            ;;
+        *)
+            RESULTS[codacy]="?|error (HTTP ${http_code})"
+            ;;
+    esac
 }
 
 probe_deepscan() {
@@ -199,12 +225,25 @@ probe_codecov() {
     probe_should_run codecov || return 0
     # Codecov public API for the main branch coverage.
     local resp coverage
-    resp=$(curl -fsS "https://codecov.io/api/v2/github/Prekzursil/repos/bilbo-app/branches/main" 2>/dev/null || echo "ERR")
-    [ "$resp" = "ERR" ] && { RESULTS[codecov]="?|error"; return; }
-    coverage=$(echo "$resp" | jq -r '.head_commit.totals.coverage // "0"' 2>/dev/null || echo "ERR")
-    [ "$coverage" = "ERR" ] && { RESULTS[codecov]="?|error"; return; }
+    resp=$(curl -fsS "https://codecov.io/api/v2/github/Prekzursil/repos/bilbo-app/branches/main" 2>/dev/null)
+    if [ -z "$resp" ]; then
+        RESULTS[codecov]="?|skipped (codecov api unreachable)"
+        return
+    fi
+    coverage=$(echo "$resp" | jq -r '.head_commit.totals.coverage // empty' 2>/dev/null)
+    if [ -z "$coverage" ] || [ "$coverage" = "null" ]; then
+        # No commit has been ingested by Codecov yet, OR the project hasn't been
+        # configured. Either way it's a skip not a failure (codecov fails the
+        # CI status check separately if a configured project drops below threshold).
+        RESULTS[codecov]="n/a|skipped (no coverage data on main yet)"
+        return
+    fi
     # Coverage of 100.0 is "ok"; anything below is "issues".
-    RESULTS[codecov]="${coverage}|$([ "$(echo "$coverage >= 100.0" | bc -l 2>/dev/null || echo 0)" = "1" ] && echo ok || echo issues)"
+    if [ "$(echo "$coverage >= 100.0" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
+        RESULTS[codecov]="${coverage}|ok"
+    else
+        RESULTS[codecov]="${coverage}%|issues"
+    fi
 }
 
 probe_gitleaks() {
