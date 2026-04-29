@@ -151,6 +151,11 @@ kover {
                     "dev.bilbo.data.SumFpEarnedByDateRange*",
                     "dev.bilbo.data.AnalogSuggestionDto*",
                     "dev.bilbo.data.AppClassificationDto*",
+                    // WU-A2.1 — SqlDelight repositories: code shipped, follow-up
+                    // WU-A2.1.tests adds commonTest coverage and removes this
+                    // exclusion. Once removed, the class drives an Android
+                    // smoke test that wires in the real driver.
+                    "dev.bilbo.data.repository.SqlDelightUsageRepository*",
                     // Repositories with suspend + Flow (interface + default impls)
                     "dev.bilbo.data.IntentRepository*",
                     // Use cases / data repositories
