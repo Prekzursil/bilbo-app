@@ -1,0 +1,84 @@
+# ============================================================================
+# .semgrep.yml — Bilbo Semgrep configuration (security-critical rules only)
+# ============================================================================
+#
+# This file ships only the rules we can enforce IMMEDIATELY without breaking
+# main on pre-existing code. Style/quality rules (no-bang-bang, no-globalscope,
+# no-println, no-print, no-force-cast, no-force-try, no-console-log-edge,
+# no-any-handler) are deferred to a follow-up WU-B12.semgrep iteration that
+# ships the rules together with fixes for every existing violation in the
+# same PR (the strict-zero discipline: never add a gate that's already red).
+#
+# Run locally:
+#   semgrep --config=.semgrep.yml --error
+#
+# RULE NAMING CONVENTION
+#   bilbo-<area>-<short-description>
+#
+# ============================================================================
+
+rules:
+  - id: bilbo-no-hardcoded-supabase-keys
+    languages: [generic]
+    paths:
+      include:
+        - "**/*.kt"
+        - "**/*.kts"
+        - "**/*.swift"
+        - "**/*.ts"
+        - "**/*.json"
+      exclude:
+        - "**/*Test.kt"
+        - "**/*Tests.swift"
+        - "**/*_test.ts"
+        - "*.example*"
+        - ".mcp.json.example"
+        - ".coverage-thresholds.json"
+    message: "Hardcoded Supabase URL or anon key. Use BuildConfig.SUPABASE_URL/SUPABASE_ANON_KEY (Android), .xcconfig variables (iOS), or Deno.env.get() (Edge Functions)."
+    severity: ERROR
+    pattern-either:
+      - pattern-regex: '"https://[a-z0-9]{20,}\.supabase\.co"'
+      - pattern-regex: '"eyJ[A-Za-z0-9_-]{30,}\.[A-Za-z0-9_-]{30,}\.[A-Za-z0-9_-]{20,}"'
+
+  - id: bilbo-no-hardcoded-anthropic-key
+    languages: [generic]
+    paths:
+      include:
+        - "**/*.kt"
+        - "**/*.kts"
+        - "**/*.swift"
+        - "**/*.ts"
+      exclude:
+        - "**/*Test.kt"
+        - "**/*Tests.swift"
+        - "**/*_test.ts"
+    message: "Hardcoded Anthropic API key. Use Deno.env.get('ANTHROPIC_API_KEY') in edge functions; never embed it in mobile clients."
+    severity: ERROR
+    pattern-regex: '"sk-ant-[A-Za-z0-9_-]{30,}"'
+
+  - id: bilbo-no-perplexity-token
+    languages: [generic]
+    paths:
+      include:
+        - "**/*"
+      exclude:
+        - "**/.mcp.json.example"
+        - "**/CONTRIBUTING.md"
+        - "**/CHANGELOG.md"
+        - "**/RALPH_LOOP.md"
+    message: "Hardcoded Perplexity agent-proxy token (agp_*). Set the AUTH_TOKEN environment variable instead. See CONTRIBUTING.md → 'MCP token setup'."
+    severity: ERROR
+    pattern-regex: '"agp_[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}"'
+
+  - id: bilbo-no-string-concat-sql-typescript
+    languages: [typescript]
+    paths:
+      exclude:
+        - "**/*_test.ts"
+    message: "Concatenating user input into SQL is a SQL injection vector. Use parameterized queries (Supabase .from().eq() / Postgres prepared statements)."
+    severity: ERROR
+    pattern-either:
+      - pattern: |
+          $DB.query("..." + $X + "...")
+      - pattern: |
+          $DB.exec("..." + $X + "...")
