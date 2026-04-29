@@ -172,3 +172,12 @@ sentry.properties
 *.orig
 *.rej
 crash-reports/
+
+# ============================================================
+# Local Claude Code / plugin runtime state
+# ============================================================
+# remember plugin's local logs and cache
+.remember/
+# ralph-loop session state
+.claude/.ralph-loop.local.md
+.claude/scheduled_tasks.lock

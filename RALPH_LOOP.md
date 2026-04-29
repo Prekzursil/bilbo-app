@@ -89,22 +89,70 @@ If `.beads/plans/active-plan.md` does not exist yet, create it on the first iter
        ./gradlew :androidApp:detekt :androidApp:lintPlaystoreDebug :androidApp:testPlaystoreDebugUnitTest
        (skip iOS / Deno / semgrep / lizard if scripts/verify missing).
 
+5b. DASHBOARD CROSS-CHECK (every gate, every iteration after the gate exists)
+    For every gate already wired, hit its source-of-truth dashboard API and
+    cross-check that local-gate-exit-0 matches dashboard-shows-0. Workflow
+    conclusion alone is NOT proof of cleanliness.
+
+    - SonarCloud: GET https://sonarcloud.io/api/issues/search?componentKeys=Prekzursil_bilbo-app&statuses=OPEN
+                  Header: Authorization: Bearer $SONAR_TOKEN. Assert .total == 0.
+    - Codacy:     GET https://app.codacy.com/api/v3/analysis/organizations/gh/Prekzursil/repositories/bilbo-app/issues
+                  Header: api-token: $CODACY_API_TOKEN. Assert pagination.total == 0.
+    - DeepScan:   GET https://deepscan.io/api/teams/<id>/projects/<pid>/issues?status=open
+                  Header: Authorization: Bearer $DEEPSCAN_API_TOKEN. Assert [].length == 0.
+    - DeepSource: GET https://api.deepsource.io/v1/analysis/repositories/<repo-id>/issues/?state=open
+                  Header: Authorization: Bearer $DEEPSOURCE_DSN. Assert .count == 0.
+    - Sentry:     GET https://sentry.io/api/0/projects/$SENTRY_ORG/$SENTRY_PROJECT/issues/?query=is:unresolved
+                  Header: Authorization: Bearer $SENTRY_AUTH_TOKEN. Assert [].length == 0.
+    - CodeQL:     gh api repos/Prekzursil/bilbo-app/code-scanning/alerts?state=open --paginate. Assert [].length == 0.
+    - Codecov:    gh api repos/Prekzursil/bilbo-app/commits/<sha>/check-runs --jq '.check_runs[] | select(.name == "codecov/project") | .conclusion' must == "success".
+    - QLTY:       qlty status --json | jq '.findings.total' must == 0.
+    - Dependabot: gh api /repos/Prekzursil/bilbo-app/dependabot/alerts?state=open --paginate. Assert [].length == 0.
+    - Gitleaks:   gitleaks detect --no-git --source . --redact. Exit 0.
+    - Semgrep:    semgrep --config=.semgrep.yml --error. Exit 0.
+    - Socket:     gh api /repos/Prekzursil/bilbo-app/socket-pr-alerts. Assert [].length == 0.
+
+    GATE SELF-AUDIT: if a gate's local check exits 0 BUT the dashboard reports
+    >0 open findings, the gate is broken. STOP, fix the script so it reports
+    the truth, commit the fix, re-run. Don't proceed past a lying gate.
+
+    PRE-EXISTING ISSUES: if any gate's dashboard reports >0 open issues that
+    pre-date this loop (legacy backlog from v1.0.x), they MUST be fixed —
+    not grandfathered. WU-B12 is dedicated to the burndown. Schedule per-gate
+    burndown sub-iterations: WU-B12.sonar, WU-B12.codacy, WU-B12.deepscan,
+    WU-B12.deepsource, WU-B12.sentry, WU-B12.codeql, WU-B12.dependabot, etc.
+    Each sub-iteration drives ONE gate's dashboard count to 0 via real fixes
+    or filed bugs against the gate config (e.g., raising a finding's severity
+    threshold above what makes sense → that's a config-bug → fix the config).
+
 6. COMMIT
    - Stage only files relevant to this WU (no `git add -A`).
    - Conventional commit + WU id, e.g.:
      git commit -m "feat(shared): wire SQLDelight driver factory across platforms [WU-A1]"
    - NEVER use --no-verify. NEVER use --no-gpg-sign. NEVER amend an upstream commit.
 
-7. PUSH + OPEN PR (or merge if you're on main)
+7. PUSH + OPEN PR (the user has authorized push + auto-merge; never manual approve)
    - git push -u origin wu/<wu-id>-<slug>
    - gh pr create --base main --head wu/<wu-id>-<slug> \
                   --title "$(git log -1 --pretty=%s)" \
-                  --body-file <(printf '## Summary\n%s\n\n## Test plan\n- [x] bash scripts/verify\n- [x] gh run list shows quality-zero-gate green on this PR\n' "$(git log -1 --pretty=%b)")
+                  --body-file <(printf '## Summary\n%s\n\n## Dashboard cross-check (per gate)\n%s\n\n## Test plan\n- [x] bash scripts/verify exits 0\n- [x] all dashboards verified per Step 5b\n- [x] gh run list shows quality-zero-gate green on this PR\n' "$(git log -1 --pretty=%b)" "$(cat .beads/last-dashboard-check.json 2>/dev/null || echo 'see scripts/verify output')")
    - Watch CI: gh pr checks --watch (or poll: gh pr view --json statusCheckRollup)
-   - If any required check goes red, RETURN to step 4 (fix root cause; new commit; do NOT close the PR).
-   - When all required checks green, merge via squash:
+   - DASHBOARD CROSS-CHECK (per Step 5b): re-run on the PR commit SHA. If any
+     dashboard shows issues that the gate's check_*_zero.py missed, the gate
+     is broken — fix it before merging.
+   - If any required check goes red OR any dashboard shows issues,
+     RETURN to step 4 (fix root cause; new commit; do NOT close the PR).
+   - When ALL required checks green AND ALL dashboards 0, merge via squash:
      gh pr merge --squash --delete-branch --auto
    - git checkout main && git pull --ff-only
+
+   AUTHORIZATION:
+   - git push origin wu/<branch> — yes
+   - gh pr create — yes
+   - gh pr merge --squash --auto — yes (auto-merges after CI green)
+   - gh pr review --approve — NEVER (cannot approve own PR)
+   - git push origin main directly — NEVER (only via merged PR)
+   - git push --force to main — NEVER
 
 8. UPDATE STATE
    - Mark the WU [x] in .beads/plans/active-plan.md.
@@ -164,7 +212,11 @@ TAG_SHA=$(git rev-parse v2.0.0 2>/dev/null || echo "no-tag")
 HEAD_SHA=$(git rev-parse origin/main 2>/dev/null || echo "no-head")
 [ "$TAG_SHA" = "$HEAD_SHA" ] || { echo "STOP-CHECK 4/4: v2.0.0 ($TAG_SHA) != origin/main ($HEAD_SHA)"; exit 0; }
 
-# All 4 conditions met
+# 5. Every dashboard reports 0 open findings (script wraps each vendor's API)
+bash scripts/quality/dashboard_zero_audit.sh \
+  || { echo "STOP-CHECK 5/5: at least one dashboard reports >0 open findings"; exit 0; }
+
+# All 5 conditions met
 echo "ALL STOP CONDITIONS MET"
 ```
 

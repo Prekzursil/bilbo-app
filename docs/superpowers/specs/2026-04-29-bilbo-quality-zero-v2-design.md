@@ -220,3 +220,78 @@ If any are false, the loop reschedules itself with a brief delay and continues. 
 ## 11. Approval
 
 This document is the binding contract. Implementation deviates from it only if a deviation is committed to a follow-up commit on this file with a clear `## Deviation YYYY-MM-DD` header.
+
+---
+
+## Deviation 2026-04-29 — WU-A1 scope reduction
+
+**Discovered:** `shared/src/commonMain/kotlin/dev/bilbo/data/DatabaseDriverFactory.kt` is already a real interface, and `shared/src/androidMain/kotlin/dev/bilbo/data/AndroidDatabaseDriver.kt` + `shared/src/iosMain/kotlin/dev/bilbo/data/IosDatabaseDriver.kt` are real implementations using `AndroidSqliteDriver` and `NativeSqliteDriver` respectively. The pre-loop gap analysis ("SQLDelight schema defined but not wired") was incorrect about the factory layer — the factory is wired; only the **repositories** that should consume it are still in-memory stubs (in `androidApp/src/main/kotlin/dev/bilbo/app/di/RepositoryModule.kt`).
+
+**Impact on WU-A1:** Reduced from "implement driver factory across platforms" to "add test coverage for the existing factory + remove `AndroidDatabaseDriver*` and `IosDatabaseDriver*` from the Kover exclusion list (currently in `shared/build.gradle.kts:108-189`)."
+
+**Impact on WU-A2:** Unchanged — repositories must still migrate from in-memory `MutableStateFlow` (in `androidApp/.../di/RepositoryModule.kt`) to SQLDelight-backed implementations consuming the existing factory.
+
+**Impact on WU-B6:** The factory classes can be removed from the Kover exclusion list earlier (in WU-A1 itself rather than waiting for WU-B6).
+
+**Why deviate rather than redefine:** The spec's success criteria §2.1 ("All 6 repositories on Android persist via SQLDelight `AndroidSqliteDriver`") is unchanged. Only the *attribution* of work between WU-A1 and WU-A2 shifts. The end state is identical.
+
+---
+
+## Deviation 2026-04-29 (2) — Strict-zero-on-existing + dashboard verification + auto-tightening
+
+The user clarified the gate model after the spec was first written. Three new requirements bind the loop:
+
+### (a) Strict-zero applies to PRE-EXISTING issues, not just new
+
+The original spec §2.2 referenced `issue_policy.mode: zero` and `pr_behavior: absolute` / `main_behavior: absolute`, which is correct in form. The clarification: this applies to **every existing finding on every gate's dashboard**, not just new findings introduced by a PR. The platform's `quality-zero-phase1-common.yml` `phase: absolute` is correct. There is **no `ratchet`-style grandfathering** for bilbo-app. Pre-existing Sonar issues, Codacy issues, DeepSource visible issues, etc. must be **fixed**, not legacy-allowed.
+
+This expands WU scope: any pre-existing finding the SonarCloud / Codacy / DeepScan / DeepSource / Sentry / CodeQL / Codecov / QLTY dashboards report on `main` (under the previous v1.0.x posture) must be addressed before the gate can flip to blocking. Captured as new **WU-B12 — Pre-existing issue burndown**.
+
+### (b) Dashboard verification — workflow conclusion is necessary but not sufficient
+
+A green CI workflow run is not proof that a gate is actually clean. Each gate's `check_<vendor>_zero.py` must hit the **vendor's source-of-truth dashboard API** and assert 0 open findings. The Stop Condition Verification Suite is upgraded to also fetch:
+
+- SonarCloud — `GET https://sonarcloud.io/api/issues/search?componentKeys=Prekzursil_bilbo-app&statuses=OPEN` → `total == 0`
+- Codacy — `GET https://app.codacy.com/api/v3/analysis/organizations/gh/Prekzursil/repositories/bilbo-app/issues` → `pagination.total == 0`
+- DeepScan — `GET https://deepscan.io/api/teams/<id>/projects/<pid>/issues?status=open` → `[].length == 0`
+- DeepSource — `GET https://api.deepsource.io/v1/analysis/repositories/<id>/issues/?state=open` → `count == 0`
+- Sentry — `GET https://sentry.io/api/0/projects/<org>/<bilbo-app>/issues/?statsPeriod=24h&query=is:unresolved` → `[].length == 0`
+- CodeQL — `gh api repos/Prekzursil/bilbo-app/code-scanning/alerts?state=open --paginate` → `[].length == 0`
+- Codecov — `gh api /repos/Prekzursil/bilbo-app/branches/main` then Codecov status check → must be `success` AND coverage 100%
+- QLTY — `qlty status --json` → `findings.total == 0`
+- Dependabot — `gh api /repos/Prekzursil/bilbo-app/dependabot/alerts?state=open --paginate` → `[].length == 0`
+- Gitleaks — local `gitleaks detect --no-git --source . --redact` exit 0
+- Semgrep — local `semgrep --config=.semgrep.yml --error` exit 0
+- Socket — `gh api /repos/Prekzursil/bilbo-app/.../socket/...` → 0 alerts
+
+Captured as new **WU-B11 — Dashboard verification + gate self-audit**.
+
+### (c) Gate self-audit — if a gate passes green but the dashboard shows issues, the gate is broken
+
+If `check_sonar_zero.py` exits 0 but the SonarCloud dashboard for `Prekzursil_bilbo-app` shows 47 open issues, the script's query is wrong (e.g., querying the wrong project, wrong status filter, or swallowing API errors). The loop's procedure when this happens:
+
+1. **STOP**. Do not pretend the gate is clean.
+2. Inspect the script (`scripts/quality/check_sonar_zero.py`) and find the bug.
+3. Fix the script so it correctly reports the dashboard's count.
+4. Commit the fix.
+5. Re-run; the gate is now reporting (and likely failing). Address the actual findings via WU-B12.
+6. Loop continues only when both the script AND the dashboard agree on 0.
+
+This is captured by augmenting WU-B11's acceptance: each gate is verified to **fail when issues are present** by injecting a synthetic issue (in a feature branch, then rolling back) and confirming the gate reports red.
+
+### Operational changes to the ralph-loop prompt (`RALPH_LOOP.md`)
+
+The prompt's stop condition + step-7 must be updated:
+- Step 5 (RUN ALL 12 LOCAL GATES): add **Step 5b: dashboard cross-check** — for each remote gate, hit the dashboard API and confirm count matches local-script's report.
+- Step 7 (PUSH + PR): the PR now opens automatically (the loop has push authorization). The merge gate is `gh pr merge --squash --delete-branch --auto` AND the PR body includes a **dashboard-verification table** screenshot (or JSON dump) so the merge proof is auditable.
+- Stop Condition #5 (new): every dashboard URL listed in (b) returns 0 open findings. Without this, conditions 1–4 alone don't prove "0 issues across all platforms."
+
+### Push authorization (general)
+
+The user has authorized the loop to:
+- `git push origin <feature-branch>` — yes.
+- `gh pr create` — yes.
+- `gh pr merge --squash --auto` — yes (auto-merge after CI green).
+- `git push origin main` — only via merged PR; never direct.
+- `git push --force` to main — never.
+- `gh pr review --approve` — never (the loop cannot approve its own PRs; rely on auto-merge after CI green).

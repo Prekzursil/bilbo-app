@@ -32,6 +32,8 @@ The ralph-loop reads this file to pick the next work unit. Mark `[x]` only when 
 - [ ] **WU-B8** — Add iOS test target + XCTest suite to 100% via `xccov` (depends on A5, A6, A7)
 - [ ] **WU-B9** — Deno tests for every supabase function to 100% line (depends on A9 for push-notification rewrite)
 - [ ] **WU-B10** — Local `scripts/verify` mirroring event-link's gate (depends on B6, B7, B8, B9)
+- [ ] **WU-B11** — Dashboard verification + gate self-audit. Author `scripts/quality/dashboard_zero_audit.sh` that hits each vendor's dashboard API (Sonar, Codacy, DeepScan, DeepSource, Sentry, CodeQL, Codecov, QLTY, Dependabot, Socket, Semgrep, Gitleaks) and asserts 0 open findings. Inject a synthetic finding per gate to verify each gate FAILS when it should. (depends on B2)
+- [ ] **WU-B12** — Pre-existing issue burndown. For every gate, drive its dashboard count to 0 via real fixes. Sub-iterations: B12.sonar, B12.codacy, B12.deepscan, B12.deepsource, B12.sentry, B12.codeql, B12.dependabot, B12.semgrep, B12.gitleaks, B12.qlty, B12.socket. Each sub-iteration's PR fixes one gate's pre-existing findings. (depends on B11)
 
 ## Track C — Release Polish
 
@@ -45,4 +47,11 @@ The ralph-loop reads this file to pick the next work unit. Mark `[x]` only when 
 
 ## Stop Condition
 
-When ALL 28 work units are `[x]` AND the four-condition Stop Condition Verification Suite in `RALPH_LOOP.md` returns success, the loop emits `<promise>BILBO_V2_DONE</promise>` and stops.
+When ALL 30 work units are `[x]` AND the FIVE-condition Stop Condition Verification Suite in `RALPH_LOOP.md` returns success (the new condition #5 is `dashboard_zero_audit.sh` exit 0 across every vendor), the loop emits `<promise>BILBO_V2_DONE</promise>` and stops.
+
+## Iteration 1 deviations (2026-04-29)
+
+Two deviations applied to the spec mid-iteration; both committed atomically with the planning files in the same bootstrap PR:
+
+1. **WU-A1 reduced** — driver factories already exist; WU-A1 narrows to coverage backfill + Kover-exclusion removal.
+2. **Strict-zero on pre-existing + dashboard verification + auto-tighten** — added WU-B11 (dashboard audit script + per-gate self-test) and WU-B12 (per-gate burndown). The Stop Condition Verification Suite gains a 5th condition.
