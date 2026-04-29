@@ -1,0 +1,53 @@
+# ============================================================================
+# .gitleaks.toml — Bilbo gitleaks configuration
+# ============================================================================
+#
+# Inherits the default gitleaks ruleset and adds project-specific allowlists.
+# This file is the source of truth for what gitleaks considers a finding;
+# it is consulted by both `bash scripts/quality/dashboard_zero_audit.sh`
+# (the WU-B11 audit script) and by CI's gitleaks scan.
+#
+# RULES FOR ADDITIONS
+#   - Every allowlist entry MUST have a "reason" comment explaining why the
+#     match is a false positive.
+#   - Never allowlist a real secret. Real secrets must be:
+#       1. Rotated immediately (the secret is ALREADY public).
+#       2. Removed from disk.
+#       3. Filtered from git history if practical.
+#       4. Re-issued from the vendor's portal.
+#
+# ============================================================================
+
+# Use the default rules as the starting point.
+[extend]
+useDefault = true
+
+# ----------------------------------------------------------------------------
+# Project-wide allowlist
+# ----------------------------------------------------------------------------
+[allowlist]
+description = "Bilbo project allowlist for false positives"
+
+# Per-rule: false-positive matches of the `linkedin-client-id` regex against
+# Kotlin identifier names like `linkedIntentId`, which contain the substring
+# "linkedin" (a sequence of characters from "linkedIntentId" being misread as
+# "linkedin"). Confirmed visually as variable assignments in test data
+# builders.
+regexes = [
+    # `linkedIntentId = linkedIntentId` etc. — Kotlin variable assignment
+    '''linkedIntentId\s*=\s*linkedIntentId''',
+]
+
+# Path-based allowlist: test fixtures with synthetic data
+paths = [
+    # commonTest test data files frequently contain placeholder UUIDs and
+    # ID-shaped strings that gitleaks misreads as secrets. None of these
+    # files connect to a live API or contain rotation-worthy secrets.
+    '''shared/src/commonTest/.*Test\.kt$''',
+    # Example template for .mcp.json — uses a placeholder token string by
+    # design ("agp_REPLACE_WITH_YOUR_PERPLEXITY_AGENT_PROXY_TOKEN").
+    '''\.mcp\.json\.example$''',
+    # CHANGELOG entries describe past fixes; may contain tokens-shaped strings
+    # in commit refs or version IDs.
+    '''^CHANGELOG\.md$''',
+]

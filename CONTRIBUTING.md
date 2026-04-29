@@ -107,6 +107,21 @@ supabase functions serve --env-file supabase/.env.local
 
 Set `SUPABASE_URL=http://10.0.2.2:54321` in `config.json` to route Android Emulator traffic to the local stack.
 
+### MCP token setup (Claude Code users)
+
+Bilbo's repository ships a `.mcp.json` (the Claude Code Model Context Protocol manifest) with the `agent_handler` server pointing at Perplexity's agent proxy. The auth token is **deliberately empty** in the committed file — set it locally one of two ways:
+
+```bash
+# Option A — environment variable (recommended; survives across clones)
+export AUTH_TOKEN="agp_REPLACE_WITH_YOUR_PERPLEXITY_AGENT_PROXY_TOKEN"
+
+# Option B — copy the example file and edit it (your edits stay local; .mcp.json is in CI's gitleaks allowlist for this exact case)
+cp .mcp.json.example .mcp.json
+# then edit .mcp.json and set the AUTH_TOKEN value
+```
+
+Never commit a real token. CI's `gitleaks` step blocks PRs that contain Perplexity-shaped tokens (`agp_*`) and similar secrets. If you accidentally commit one, **rotate the token at the vendor's portal immediately**, remove it from the file, and (if practical) filter it from history with `git filter-repo`.
+
 ---
 
 ## Coding Standards
