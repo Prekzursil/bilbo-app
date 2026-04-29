@@ -1,0 +1,49 @@
+{
+  "$schema": "https://raw.githubusercontent.com/Prekzursil/quality-zero-platform/main/schema/coverage-thresholds.schema.json",
+  "lines": 100,
+  "branches": 100,
+  "functions": 100,
+  "statements": 100,
+  "blockPRCreation": true,
+  "blockTaskCompletion": true,
+  "policy": "whole-project-100",
+  "enforcementCommand": "bash scripts/verify",
+  "componentInputs": [
+    {
+      "format": "xml",
+      "name": "shared",
+      "path": "shared/build/reports/kover/report.xml",
+      "flag": "shared",
+      "requireSources": ["shared/src/commonMain"],
+      "minPercent": 100.0,
+      "branchMinPercent": 100.0
+    },
+    {
+      "format": "xml",
+      "name": "android",
+      "path": "androidApp/build/reports/kover/report.xml",
+      "flag": "android",
+      "requireSources": ["androidApp/src/main"],
+      "minPercent": 100.0,
+      "branchMinPercent": 100.0
+    },
+    {
+      "format": "lcov",
+      "name": "ios",
+      "path": "coverage/ios.lcov",
+      "flag": "ios",
+      "requireSources": ["iosApp/iosApp"],
+      "minPercent": 100.0,
+      "branchMinPercent": 100.0
+    },
+    {
+      "format": "lcov",
+      "name": "deno",
+      "path": "coverage/deno.lcov",
+      "flag": "deno",
+      "requireSources": ["supabase/functions"],
+      "minPercent": 100.0,
+      "branchMinPercent": 100.0
+    }
+  ]
+}
