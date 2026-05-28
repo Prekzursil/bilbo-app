@@ -65,6 +65,12 @@ class TimerService : Service() {
         const val CHANNEL_WARNING = "bilbo_timer_warning"
         private const val NOTIF_FOREGROUND_ID = 1001
 
+        // ── Time conversions ────────────────────────────────────────────────
+        private const val SECONDS_PER_MINUTE = 60L
+        private const val MILLIS_PER_SECOND = 1_000L
+        private const val WARNING_THRESHOLD_SECS = 120L
+        private const val TICK_INTERVAL_MS = 1_000L
+
         // ── Prefs ─────────────────────────────────────────────────────────────
         private const val PREFS_NAME = "bilbo_timer_state"
         private const val PREFS_ACTIVE_IDS = "active_declaration_ids"
@@ -108,7 +114,7 @@ class TimerService : Service() {
                 val appLabel = intent.getStringExtra(EXTRA_APP_LABEL) ?: appPackage
 
                 if (declarationId != -1L && durationMins > 0) {
-                    startTimer(declarationId, durationMins * 60L, appPackage, appLabel)
+                    startTimer(declarationId, durationMins * SECONDS_PER_MINUTE, appPackage, appLabel)
                 }
             }
             ACTION_STOP_TIMER -> {
@@ -138,7 +144,7 @@ class TimerService : Service() {
         // Cancel any existing timer for this declaration
         activeTimers[declarationId]?.cancel()
 
-        val endEpochSecs = System.currentTimeMillis() / 1000L + durationSeconds
+        val endEpochSecs = System.currentTimeMillis() / MILLIS_PER_SECOND + durationSeconds
         persistTimerState(declarationId, endEpochSecs, appPackage, appLabel)
 
         Timber.d("TimerService: starting timer for declaration $declarationId ($durationSeconds s) — $appLabel")
@@ -152,13 +158,13 @@ class TimerService : Service() {
                     broadcastTick(declarationId, remainingSecs, appPackage)
 
                     // 2-minute warning
-                    if (!warningFired && remainingSecs <= 120) {
+                    if (!warningFired && remainingSecs <= WARNING_THRESHOLD_SECS) {
                         warningFired = true
                         postWarningNotification(declarationId, appLabel, remainingSecs)
                         broadcastWarning(declarationId, remainingSecs, appPackage)
                     }
 
-                    delay(1_000L)
+                    delay(TICK_INTERVAL_MS)
                     remainingSecs--
                 }
 
@@ -269,7 +275,7 @@ class TimerService : Service() {
      */
     private fun resumePersistedTimers() {
         val ids = prefs.getStringSet(PREFS_ACTIVE_IDS, emptySet()) ?: return
-        val nowSecs = System.currentTimeMillis() / 1000L
+        val nowSecs = System.currentTimeMillis() / MILLIS_PER_SECOND
 
         ids.forEach { idStr ->
             val declarationId = idStr.toLongOrNull() ?: return@forEach
@@ -332,8 +338,8 @@ class TimerService : Service() {
         appLabel: String,
         remainingSecs: Long,
     ) {
-        val mins = (remainingSecs / 60).toInt()
-        val secs = (remainingSecs % 60).toInt()
+        val mins = (remainingSecs / SECONDS_PER_MINUTE).toInt()
+        val secs = (remainingSecs % SECONDS_PER_MINUTE).toInt()
         val timeStr = if (mins > 0) "${mins}m ${secs}s" else "${secs}s"
 
         val notification =

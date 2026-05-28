@@ -9,7 +9,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.tooling.preview.Preview
 import dagger.hilt.android.AndroidEntryPoint
 import dev.bilbo.app.ui.BilboNavHost
 import dev.bilbo.app.ui.theme.BilboTheme
@@ -39,13 +38,5 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun DefaultPreview() {
-    BilboTheme {
-        BilboNavHost(onboardingCompleted = false, onOnboardingFinished = {})
     }
 }

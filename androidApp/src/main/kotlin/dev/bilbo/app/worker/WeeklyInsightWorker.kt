@@ -47,25 +47,57 @@ import kotlin.time.Clock
  *  5. Persist the final [WeeklyInsight] in the repository.
  *  6. Post a "Your weekly insight is ready" notification.
  */
+/**
+ * Bundles the repositories and intelligence collaborators the weekly worker needs,
+ * so the worker's assisted constructor stays within the parameter-count budget.
+ */
+class WeeklyInsightDependencies
+    @javax.inject.Inject
+    constructor(
+        val usageRepository: UsageRepository,
+        val emotionRepository: EmotionRepository,
+        val intentRepository: IntentRepository,
+        val budgetRepository: BudgetRepository,
+        val insightRepository: InsightRepository,
+        val heuristicEngine: HeuristicEngine,
+        val cloudInsightClient: CloudInsightClient,
+        val promptBuilder: InsightPromptBuilder,
+    )
+
 @HiltWorker
 class WeeklyInsightWorker
     @AssistedInject
     constructor(
         @Assisted appContext: Context,
         @Assisted workerParams: WorkerParameters,
-        private val usageRepository: UsageRepository,
-        private val emotionRepository: EmotionRepository,
-        private val intentRepository: IntentRepository,
-        private val budgetRepository: BudgetRepository,
-        private val insightRepository: InsightRepository,
-        private val heuristicEngine: HeuristicEngine,
-        private val cloudInsightClient: CloudInsightClient,
-        private val promptBuilder: InsightPromptBuilder,
+        private val deps: WeeklyInsightDependencies,
     ) : CoroutineWorker(appContext, workerParams) {
+        private val usageRepository get() = deps.usageRepository
+        private val emotionRepository get() = deps.emotionRepository
+        private val intentRepository get() = deps.intentRepository
+        private val budgetRepository get() = deps.budgetRepository
+        private val insightRepository get() = deps.insightRepository
+        private val heuristicEngine get() = deps.heuristicEngine
+        private val cloudInsightClient get() = deps.cloudInsightClient
+        private val promptBuilder get() = deps.promptBuilder
+
         companion object {
             const val WORK_NAME = "bilbo_weekly_insight"
             private const val NOTIFICATION_CHANNEL_ID = "bilbo_insights"
             private const val NOTIFICATION_ID = 1002
+
+            private const val DAYS_PER_WEEK = 7
+            private const val DAYS_PER_WEEK_L = 7L
+            private const val WINDOW_DAYS = 6
+            private const val SECONDS_PER_MINUTE = 60L
+            private const val MINUTES_PER_HOUR = 60
+            private const val RECENT_BUDGET_LIMIT = 7L
+            private const val SUNDAY_EVENING_HOUR = 20
+            private const val MIN_STREAK_FOR_MENTION = 3
+            private const val ACCURACY_TOLERANCE = 0.20
+            private const val IMPROVEMENT_THRESHOLD = -0.05
+            private const val REGRESSION_THRESHOLD = 0.10
+            private const val PERCENT_SCALE = 100
 
             /**
              * Schedules the weekly insight worker to run Sunday evening (~8 PM).
@@ -76,7 +108,7 @@ class WeeklyInsightWorker
 
                 val request =
                     PeriodicWorkRequestBuilder<WeeklyInsightWorker>(
-                        repeatInterval = 7L,
+                        repeatInterval = DAYS_PER_WEEK_L,
                         repeatIntervalTimeUnit = TimeUnit.DAYS,
                     ).setInitialDelay(initialDelayMs, TimeUnit.MILLISECONDS)
                         .build()
@@ -99,7 +131,7 @@ class WeeklyInsightWorker
                 val now = Calendar.getInstance()
                 val target =
                     Calendar.getInstance().apply {
-                        set(Calendar.HOUR_OF_DAY, 20)
+                        set(Calendar.HOUR_OF_DAY, SUNDAY_EVENING_HOUR)
                         set(Calendar.MINUTE, 0)
                         set(Calendar.SECOND, 0)
                         set(Calendar.MILLISECOND, 0)
@@ -110,17 +142,29 @@ class WeeklyInsightWorker
                     if (currentDow == Calendar.SUNDAY) {
                         0
                     } else {
-                        (Calendar.SUNDAY + 7 - currentDow) % 7
+                        (Calendar.SUNDAY + DAYS_PER_WEEK - currentDow) % DAYS_PER_WEEK
                     }
                 target.add(Calendar.DAY_OF_MONTH, daysUntilSunday)
 
-                // If this Sunday 8 PM has already passed, advance 7 more days
+                // If this Sunday 8 PM has already passed, advance a full week more
                 if (target.timeInMillis <= now.timeInMillis) {
-                    target.add(Calendar.DAY_OF_MONTH, 7)
+                    target.add(Calendar.DAY_OF_MONTH, DAYS_PER_WEEK)
                 }
                 return target.timeInMillis - now.timeInMillis
             }
         }
+
+        /** Aggregated weekly statistics derived from the trailing 7-day window. */
+        private data class WeekStats(
+            val totalScreenTimeMinutes: Int,
+            val nutritiveMinutes: Int,
+            val emptyCalorieMinutes: Int,
+            val intentAccuracy: Float,
+            val fpEarned: Int,
+            val fpSpent: Int,
+            val streakDays: Int,
+            val weekOverWeekChange: Double?,
+        )
 
         // ── Worker entry point ────────────────────────────────────────────────────
 
@@ -140,12 +184,12 @@ class WeeklyInsightWorker
                     .now()
                     .toLocalDateTime(tz)
                     .date
-            val weekStart = today.minus(DatePeriod(days = 6))
+            val weekStart = today.minus(DatePeriod(days = WINDOW_DAYS))
 
             // Convert LocalDate boundaries to Instant for repository queries
             val fromInstant = weekStart.atStartOfDayIn(tz)
             val toInstant = today.plus(DatePeriod(days = 1)).atStartOfDayIn(tz)
-            val priorWeekStart = weekStart.minus(DatePeriod(days = 7))
+            val priorWeekStart = weekStart.minus(DatePeriod(days = DAYS_PER_WEEK))
             val priorFromInstant = priorWeekStart.atStartOfDayIn(tz)
 
             // 1. Load trailing 7-day data
@@ -153,6 +197,7 @@ class WeeklyInsightWorker
             val checkIns = emotionRepository.getByDateRange(fromInstant, toInstant)
             val intents = intentRepository.getByDateRange(fromInstant, toInstant)
             val priorSessions = usageRepository.getByDateRange(priorFromInstant, fromInstant)
+            val budgets = budgetRepository.getRecent(limit = RECENT_BUDGET_LIMIT)
 
             // 2. Run Tier-2 heuristic analysis (always — used as fallback and for cloud payload)
             val heuristicInsights =
@@ -165,105 +210,90 @@ class WeeklyInsightWorker
                 )
 
             // 3. Compute aggregate stats
-            val totalScreenTimeMinutes = (sessions.sumOf { it.durationSeconds } / 60L).toInt()
-            val nutritiveMinutes =
-                sessions
-                    .filter { it.category == dev.bilbo.domain.AppCategory.NUTRITIVE }
-                    .sumOf { it.durationSeconds / 60L }
-                    .toInt()
-            val emptyCalorieMinutes =
-                sessions
-                    .filter { it.category == dev.bilbo.domain.AppCategory.EMPTY_CALORIES }
-                    .sumOf { it.durationSeconds / 60L }
-                    .toInt()
+            val stats = computeWeekStats(sessions, priorSessions, intents, budgets)
 
-            // Compute intent accuracy
+            // 4. Build the narrative (cloud if enabled and available, else Tier-2 template)
+            val tier3Narrative =
+                takeIf { isCloudAiEnabled() }
+                    ?.tryFetchCloudNarrative(weekStart, budgets, heuristicInsights, checkIns, sessions, stats)
+                    ?: buildTier2Narrative(heuristicInsights, stats)
+
+            // 5. Build and persist WeeklyInsight
+            insightRepository.storeWeeklyInsight(
+                buildWeeklyInsight(weekStart, heuristicInsights, tier3Narrative, stats),
+            )
+
+            // 6. Post notification
+            postWeeklyInsightNotification()
+        }
+
+        private fun computeWeekStats(
+            sessions: List<dev.bilbo.domain.UsageSession>,
+            priorSessions: List<dev.bilbo.domain.UsageSession>,
+            intents: List<dev.bilbo.domain.IntentDeclaration>,
+            budgets: List<dev.bilbo.domain.DopamineBudget>,
+        ): WeekStats {
+            val totalScreenTimeMinutes = (sessions.sumOf { it.durationSeconds } / SECONDS_PER_MINUTE).toInt()
+            val nutritiveMinutes = minutesInCategory(sessions, dev.bilbo.domain.AppCategory.NUTRITIVE)
+            val emptyCalorieMinutes = minutesInCategory(sessions, dev.bilbo.domain.AppCategory.EMPTY_CALORIES)
+
             val completedIntents = intents.filter { it.actualDurationMinutes != null }
-            val accurateIntents =
-                completedIntents.count { intent ->
-                    val delta =
-                        kotlin.math
-                            .abs(
-                                (intent.actualDurationMinutes ?: 0) - intent.declaredDurationMinutes,
-                            ).toDouble() / intent.declaredDurationMinutes.coerceAtLeast(1)
-                    delta <= 0.20
-                }
+            val accurateIntents = completedIntents.count(::isAccurateIntent)
             val intentAccuracy =
-                if (completedIntents.isNotEmpty()) {
-                    accurateIntents.toFloat() / completedIntents.size
-                } else {
-                    0f
-                }
+                if (completedIntents.isNotEmpty()) accurateIntents.toFloat() / completedIntents.size else 0f
 
-            val budgets = budgetRepository.getRecent(limit = 7)
-            val fpEarned = budgets.sumOf { it.fpEarned }
-            val fpSpent = budgets.sumOf { it.fpSpent }
-            val streakDays = computeStreak(budgets)
-
-            // Week-over-week change
             val thisWeekTotal = sessions.sumOf { it.durationSeconds }
             val priorWeekTotal = priorSessions.sumOf { it.durationSeconds }
             val weekOverWeekChange =
-                if (priorWeekTotal > 0) {
-                    (thisWeekTotal - priorWeekTotal).toDouble() / priorWeekTotal
-                } else {
-                    null
-                }
+                if (priorWeekTotal > 0) (thisWeekTotal - priorWeekTotal).toDouble() / priorWeekTotal else null
 
-            // 4. Check if cloud AI is enabled
-            val cloudEnabled = isCloudAiEnabled()
-            var tier3Narrative: String? = null
-
-            if (cloudEnabled) {
-                tier3Narrative =
-                    tryFetchCloudNarrative(
-                        weekStart = weekStart,
-                        budgets = budgets,
-                        heuristicInsights = heuristicInsights,
-                        checkIns = checkIns,
-                        sessions = sessions,
-                        weekOverWeekChange = weekOverWeekChange,
-                        totalScreenTimeMinutes = totalScreenTimeMinutes,
-                        nutritiveMinutes = nutritiveMinutes,
-                        emptyCalorieMinutes = emptyCalorieMinutes,
-                        fpEarned = fpEarned,
-                        fpSpent = fpSpent,
-                        intentAccuracy = intentAccuracy,
-                        streakDays = streakDays,
-                    )
-            }
-
-            // 5. If cloud disabled or failed, build Tier-2 template narrative
-            if (tier3Narrative == null) {
-                tier3Narrative =
-                    buildTier2Narrative(
-                        heuristicInsights = heuristicInsights,
-                        totalMinutes = totalScreenTimeMinutes,
-                        streakDays = streakDays,
-                        weekOverWeekChange = weekOverWeekChange,
-                    )
-            }
-
-            // 6. Build and persist WeeklyInsight
-            val weeklyInsight =
-                WeeklyInsight(
-                    weekStart = weekStart,
-                    tier2Insights = heuristicInsights,
-                    tier3Narrative = tier3Narrative,
-                    totalScreenTimeMinutes = totalScreenTimeMinutes,
-                    nutritiveMinutes = nutritiveMinutes,
-                    emptyCalorieMinutes = emptyCalorieMinutes,
-                    fpEarned = fpEarned,
-                    fpSpent = fpSpent,
-                    intentAccuracyPercent = intentAccuracy,
-                    streakDays = streakDays,
-                )
-
-            insightRepository.storeWeeklyInsight(weeklyInsight)
-
-            // 7. Post notification
-            postWeeklyInsightNotification()
+            return WeekStats(
+                totalScreenTimeMinutes = totalScreenTimeMinutes,
+                nutritiveMinutes = nutritiveMinutes,
+                emptyCalorieMinutes = emptyCalorieMinutes,
+                intentAccuracy = intentAccuracy,
+                fpEarned = budgets.sumOf { it.fpEarned },
+                fpSpent = budgets.sumOf { it.fpSpent },
+                streakDays = computeStreak(budgets),
+                weekOverWeekChange = weekOverWeekChange,
+            )
         }
+
+        private fun minutesInCategory(
+            sessions: List<dev.bilbo.domain.UsageSession>,
+            category: dev.bilbo.domain.AppCategory,
+        ): Int =
+            sessions
+                .filter { it.category == category }
+                .sumOf { it.durationSeconds / SECONDS_PER_MINUTE }
+                .toInt()
+
+        private fun isAccurateIntent(intent: dev.bilbo.domain.IntentDeclaration): Boolean {
+            val delta =
+                kotlin.math
+                    .abs((intent.actualDurationMinutes ?: 0) - intent.declaredDurationMinutes)
+                    .toDouble() / intent.declaredDurationMinutes.coerceAtLeast(1)
+            return delta <= ACCURACY_TOLERANCE
+        }
+
+        private fun buildWeeklyInsight(
+            weekStart: kotlinx.datetime.LocalDate,
+            heuristicInsights: List<HeuristicInsight>,
+            narrative: String?,
+            stats: WeekStats,
+        ): WeeklyInsight =
+            WeeklyInsight(
+                weekStart = weekStart,
+                tier2Insights = heuristicInsights,
+                tier3Narrative = narrative,
+                totalScreenTimeMinutes = stats.totalScreenTimeMinutes,
+                nutritiveMinutes = stats.nutritiveMinutes,
+                emptyCalorieMinutes = stats.emptyCalorieMinutes,
+                fpEarned = stats.fpEarned,
+                fpSpent = stats.fpSpent,
+                intentAccuracyPercent = stats.intentAccuracy,
+                streakDays = stats.streakDays,
+            )
 
         // ── Cloud AI fetch ────────────────────────────────────────────────────────
 
@@ -273,39 +303,20 @@ class WeeklyInsightWorker
             heuristicInsights: List<HeuristicInsight>,
             checkIns: List<dev.bilbo.domain.EmotionalCheckIn>,
             sessions: List<dev.bilbo.domain.UsageSession>,
-            weekOverWeekChange: Double?,
-            totalScreenTimeMinutes: Int,
-            nutritiveMinutes: Int,
-            emptyCalorieMinutes: Int,
-            fpEarned: Int,
-            fpSpent: Int,
-            intentAccuracy: Float,
-            streakDays: Int,
+            stats: WeekStats,
         ): String? {
             if (!cloudInsightClient.canRequest()) return null
 
             return try {
                 val budget = budgets.firstOrNull() ?: return null
-                val weeklyInsightForPayload =
-                    WeeklyInsight(
-                        weekStart = weekStart,
-                        tier2Insights = heuristicInsights,
-                        totalScreenTimeMinutes = totalScreenTimeMinutes,
-                        nutritiveMinutes = nutritiveMinutes,
-                        emptyCalorieMinutes = emptyCalorieMinutes,
-                        fpEarned = fpEarned,
-                        fpSpent = fpSpent,
-                        intentAccuracyPercent = intentAccuracy,
-                        streakDays = streakDays,
-                    )
                 val payload =
                     promptBuilder.buildPayload(
                         weekStart = weekStart,
                         budget = budget,
-                        insight = weeklyInsightForPayload,
+                        insight = buildWeeklyInsight(weekStart, heuristicInsights, null, stats),
                         checkIns = checkIns,
                         sessions = sessions,
-                        weekOverWeekChange = weekOverWeekChange,
+                        weekOverWeekChange = stats.weekOverWeekChange,
                     )
 
                 val anonymousUserId = getAnonymousUserId()
@@ -324,12 +335,10 @@ class WeeklyInsightWorker
 
         private fun buildTier2Narrative(
             heuristicInsights: List<HeuristicInsight>,
-            totalMinutes: Int,
-            streakDays: Int,
-            weekOverWeekChange: Double?,
+            stats: WeekStats,
         ): String {
-            val hours = totalMinutes / 60
-            val mins = totalMinutes % 60
+            val hours = stats.totalScreenTimeMinutes / MINUTES_PER_HOUR
+            val mins = stats.totalScreenTimeMinutes % MINUTES_PER_HOUR
             val timeStr = if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
 
             val topInsight =
@@ -339,14 +348,14 @@ class WeeklyInsightWorker
 
             return buildString {
                 append("This week you spent $timeStr on your phone.")
-                if (streakDays >= 3) {
-                    append(" You kept a $streakDays-day streak — great consistency!")
+                if (stats.streakDays >= MIN_STREAK_FOR_MENTION) {
+                    append(" You kept a ${stats.streakDays}-day streak — great consistency!")
                 }
-                weekOverWeekChange?.let { change ->
-                    val pct = (kotlin.math.abs(change) * 100).toInt()
-                    if (change < -0.05) {
+                stats.weekOverWeekChange?.let { change ->
+                    val pct = (kotlin.math.abs(change) * PERCENT_SCALE).toInt()
+                    if (change < IMPROVEMENT_THRESHOLD) {
                         append(" That's $pct% less than last week — nice progress!")
-                    } else if (change > 0.10) {
+                    } else if (change > REGRESSION_THRESHOLD) {
                         append(" Usage was up $pct% from last week — worth watching.")
                     }
                 }

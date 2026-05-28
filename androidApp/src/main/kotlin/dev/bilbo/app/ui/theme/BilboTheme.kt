@@ -25,44 +25,73 @@ import androidx.compose.ui.unit.dp
 // ── MARK: Color primitives ─────────────────────────────────────────────
 
 object BilboColor {
+    // ARGB literals as named compile-time constants (detekt ignores const
+    // declarations) so the Color primitives below read as named values.
+    private const val ARGB_TEAL40 = 0xFF00897B
+    private const val ARGB_TEAL80 = 0xFF4DB6AC
+    private const val ARGB_TEAL20 = 0xFF004D40
+    private const val ARGB_TEAL10 = 0xFF00251A
+    private const val ARGB_AMBER40 = 0xFFFFB300
+    private const val ARGB_AMBER80 = 0xFFFFD54F
+    private const val ARGB_AMBER20 = 0xFFE65100
+    private const val ARGB_AMBER10 = 0xFF4E2000
+    private const val ARGB_PURPLE40 = 0xFF5C33A3
+    private const val ARGB_PURPLE80 = 0xFFB39DDB
+    private const val ARGB_PURPLE20 = 0xFF1A0F3C
+    private const val ARGB_NEUTRAL10 = 0xFF191C1C
+    private const val ARGB_NEUTRAL20 = 0xFF2D3131
+    private const val ARGB_NEUTRAL90 = 0xFFE0E3E3
+    private const val ARGB_NEUTRAL95 = 0xFFEFF1F1
+    private const val ARGB_NEUTRAL99 = 0xFFFAFAFA
+    private const val ARGB_NEUTRAL_VARIANT30 = 0xFF3F4848
+    private const val ARGB_NEUTRAL_VARIANT50 = 0xFF6F7979
+    private const val ARGB_NEUTRAL_VARIANT80 = 0xFFBEC8C8
+    private const val ARGB_NEUTRAL_VARIANT90 = 0xFFDAE4E4
+    private const val ARGB_ERROR40 = 0xFFE57373
+    private const val ARGB_ERROR80 = 0xFFEF9A9A
+    private const val ARGB_ERROR10 = 0xFFB71C1C
+    private const val ARGB_SURFACE_DARK = 0xFF191C1C
+    private const val ARGB_BACKGROUND_LIGHT = 0xFFFAFAFA
+    private const val ARGB_BACKGROUND_DARK = 0xFF101414
+
     // Brand
-    val Teal40 = Color(0xFF00897B) // Primary (light)
-    val Teal80 = Color(0xFF4DB6AC) // Primary container (light) / Primary (dark)
-    val Teal20 = Color(0xFF004D40) // On primary container
-    val Teal10 = Color(0xFF00251A)
+    val Teal40 = Color(ARGB_TEAL40) // Primary (light)
+    val Teal80 = Color(ARGB_TEAL80) // Primary container (light) / Primary (dark)
+    val Teal20 = Color(ARGB_TEAL20) // On primary container
+    val Teal10 = Color(ARGB_TEAL10)
 
-    val Amber40 = Color(0xFFFFB300) // Secondary (light)
-    val Amber80 = Color(0xFFFFD54F) // Secondary container (light) / Secondary (dark)
-    val Amber20 = Color(0xFFE65100)
-    val Amber10 = Color(0xFF4E2000)
+    val Amber40 = Color(ARGB_AMBER40) // Secondary (light)
+    val Amber80 = Color(ARGB_AMBER80) // Secondary container (light) / Secondary (dark)
+    val Amber20 = Color(ARGB_AMBER20)
+    val Amber10 = Color(ARGB_AMBER10)
 
-    val Purple40 = Color(0xFF5C33A3) // Tertiary
-    val Purple80 = Color(0xFFB39DDB)
-    val Purple20 = Color(0xFF1A0F3C)
+    val Purple40 = Color(ARGB_PURPLE40) // Tertiary
+    val Purple80 = Color(ARGB_PURPLE80)
+    val Purple20 = Color(ARGB_PURPLE20)
 
     // Neutral
-    val Neutral10 = Color(0xFF191C1C)
-    val Neutral20 = Color(0xFF2D3131)
-    val Neutral90 = Color(0xFFE0E3E3)
-    val Neutral95 = Color(0xFFEFF1F1)
-    val Neutral99 = Color(0xFFFAFAFA)
+    val Neutral10 = Color(ARGB_NEUTRAL10)
+    val Neutral20 = Color(ARGB_NEUTRAL20)
+    val Neutral90 = Color(ARGB_NEUTRAL90)
+    val Neutral95 = Color(ARGB_NEUTRAL95)
+    val Neutral99 = Color(ARGB_NEUTRAL99)
 
-    val NeutralVariant30 = Color(0xFF3F4848)
-    val NeutralVariant50 = Color(0xFF6F7979)
-    val NeutralVariant80 = Color(0xFFBEC8C8)
-    val NeutralVariant90 = Color(0xFFDAE4E4)
+    val NeutralVariant30 = Color(ARGB_NEUTRAL_VARIANT30)
+    val NeutralVariant50 = Color(ARGB_NEUTRAL_VARIANT50)
+    val NeutralVariant80 = Color(ARGB_NEUTRAL_VARIANT80)
+    val NeutralVariant90 = Color(ARGB_NEUTRAL_VARIANT90)
 
     // Semantic
-    val Error40 = Color(0xFFE57373) // Soft red
-    val Error80 = Color(0xFFEF9A9A)
-    val Error10 = Color(0xFFB71C1C)
+    val Error40 = Color(ARGB_ERROR40) // Soft red
+    val Error80 = Color(ARGB_ERROR80)
+    val Error10 = Color(ARGB_ERROR10)
     val OnError = Color.White
 
     // Surface
     val SurfaceLight = Color.White
-    val SurfaceDark = Color(0xFF191C1C)
-    val BackgroundLight = Color(0xFFFAFAFA)
-    val BackgroundDark = Color(0xFF101414)
+    val SurfaceDark = Color(ARGB_SURFACE_DARK)
+    val BackgroundLight = Color(ARGB_BACKGROUND_LIGHT)
+    val BackgroundDark = Color(ARGB_BACKGROUND_DARK)
 }
 
 // ── MARK: Light Color Scheme ───────────────────────────────────────────
@@ -133,13 +162,19 @@ private val DarkColorScheme =
 
 // ── MARK: Shapes ──────────────────────────────────────────────────────
 
+private const val CORNER_EXTRA_SMALL_DP = 6
+private const val CORNER_SMALL_DP = 10
+private const val CORNER_MEDIUM_DP = 16
+private const val CORNER_LARGE_DP = 24
+private const val CORNER_EXTRA_LARGE_DP = 32
+
 val BilboShapes =
     Shapes(
-        extraSmall = RoundedCornerShape(6.dp),
-        small = RoundedCornerShape(10.dp),
-        medium = RoundedCornerShape(16.dp),
-        large = RoundedCornerShape(24.dp),
-        extraLarge = RoundedCornerShape(32.dp),
+        extraSmall = RoundedCornerShape(CORNER_EXTRA_SMALL_DP.dp),
+        small = RoundedCornerShape(CORNER_SMALL_DP.dp),
+        medium = RoundedCornerShape(CORNER_MEDIUM_DP.dp),
+        large = RoundedCornerShape(CORNER_LARGE_DP.dp),
+        extraLarge = RoundedCornerShape(CORNER_EXTRA_LARGE_DP.dp),
     )
 
 // ── MARK: Theme composable ─────────────────────────────────────────────

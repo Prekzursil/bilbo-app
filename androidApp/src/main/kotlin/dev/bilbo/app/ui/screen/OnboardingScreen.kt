@@ -20,9 +20,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.bilbo.app.ui.theme.BilboTheme
+
+private const val SCREEN_PADDING_DP = 24
+private const val LOGO_SIZE_DP = 80
+private const val SPACE_SMALL_DP = 8
+private const val SPACE_MEDIUM_DP = 12
+private const val SPACE_LARGE_DP = 24
+private const val SPACE_XLARGE_DP = 48
 
 @Composable
 fun OnboardingScreen(onNavigateToDashboard: () -> Unit) {
@@ -32,7 +37,7 @@ fun OnboardingScreen(onNavigateToDashboard: () -> Unit) {
                 Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
-                    .padding(24.dp),
+                    .padding(SCREEN_PADDING_DP.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
@@ -40,28 +45,28 @@ fun OnboardingScreen(onNavigateToDashboard: () -> Unit) {
                 imageVector = Icons.Filled.Bolt,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(80.dp),
+                modifier = Modifier.size(LOGO_SIZE_DP.dp),
             )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(SPACE_LARGE_DP.dp))
             Text(
                 text = "Bilbo",
                 style = MaterialTheme.typography.displaySmall,
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(SPACE_SMALL_DP.dp))
             Text(
                 text = "Your digital wellness companion.\nBuild mindful habits, one screen at a time.",
                 style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(SPACE_XLARGE_DP.dp))
             Button(
                 onClick = onNavigateToDashboard,
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 Text("Get Started")
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(SPACE_MEDIUM_DP.dp))
             OutlinedButton(
                 onClick = onNavigateToDashboard,
                 modifier = Modifier.fillMaxWidth(),
@@ -69,13 +74,5 @@ fun OnboardingScreen(onNavigateToDashboard: () -> Unit) {
                 Text("Sign In")
             }
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun OnboardingScreenPreview() {
-    BilboTheme {
-        OnboardingScreen(onNavigateToDashboard = {})
     }
 }

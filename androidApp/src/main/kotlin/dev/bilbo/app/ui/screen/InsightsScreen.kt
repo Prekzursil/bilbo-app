@@ -15,8 +15,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import dev.bilbo.app.ui.theme.BilboTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -43,13 +41,5 @@ fun InsightsScreen(onNavigateBack: () -> Unit) {
         ) {
             Text("AI insights coming soon")
         }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun InsightsScreenPreview() {
-    BilboTheme {
-        InsightsScreen(onNavigateBack = {})
     }
 }
