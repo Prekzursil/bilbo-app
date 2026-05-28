@@ -11,22 +11,22 @@ import dev.bilbo.domain.social.Circle
 import dev.bilbo.domain.social.CircleMember
 import dev.bilbo.domain.social.CircleRole
 import dev.bilbo.domain.social.SharingLevel
-import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
 import dev.bilbo.shared.domain.model.AppUsageSession
 import dev.bilbo.shared.domain.model.AppUsageSummary
 import dev.bilbo.shared.domain.model.DailyInsight
 import dev.bilbo.shared.domain.model.GoalType
 import dev.bilbo.shared.domain.model.MoodScore
 import dev.bilbo.shared.domain.model.WellnessGoal
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
-import kotlinx.serialization.json.Json
+import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
 
 class DomainModelsTest {
     // ── AnalogSuggestion ─────────────────────────────────────────────────
@@ -167,7 +167,12 @@ class DomainModelsTest {
     // ── IntentDeclaration ─────────────────────────────────────────────────
 
     @Test fun intentDeclarationDefaults() {
-        val i = IntentDeclaration(timestamp = Instant.fromEpochSeconds(100), declaredApp = "com.app", declaredDurationMinutes = 30)
+        val i =
+            IntentDeclaration(
+                timestamp = Instant.fromEpochSeconds(100),
+                declaredApp = "com.app",
+                declaredDurationMinutes = 30,
+            )
         assertEquals(0L, i.id)
         assertNull(i.actualDurationMinutes)
         assertFalse(i.wasEnforced)

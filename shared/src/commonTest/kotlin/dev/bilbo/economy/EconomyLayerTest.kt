@@ -4,6 +4,12 @@ import dev.bilbo.domain.AppCategory
 import dev.bilbo.domain.DopamineBudget
 import dev.bilbo.domain.EnforcementMode
 import dev.bilbo.domain.FPEconomy
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
@@ -11,12 +17,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.Clock
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.LocalDateTime
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toInstant
-import kotlinx.datetime.toLocalDateTime
 
 // =============================================================================
 //  FocusPointsEngine Tests
@@ -480,7 +480,12 @@ class AppClassifierFactoryTest {
             )
         val overrides =
             listOf(
-                AppClassifier.AppClassification("com.a", "A Override", AppCategory.EMPTY_CALORIES, EnforcementMode.HARD_LOCK),
+                AppClassifier.AppClassification(
+                    "com.a",
+                    "A Override",
+                    AppCategory.EMPTY_CALORIES,
+                    EnforcementMode.HARD_LOCK,
+                ),
             )
         val classifier = AppClassifier.fromDefaults(defaults, overrides)
         val result = classifier.classify("com.a")

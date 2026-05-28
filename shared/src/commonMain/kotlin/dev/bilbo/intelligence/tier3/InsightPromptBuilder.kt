@@ -159,5 +159,9 @@ class InsightPromptBuilder {
             "Sunday",
         )
 
-    private fun String.extractDayOfWeek(): String? = dayNames.firstOrNull { this.contains(it, ignoreCase = true) }?.uppercase()
+    private fun String.extractDayOfWeek(): String? =
+        dayNames
+            .firstOrNull {
+                this.contains(it, ignoreCase = true)
+            }?.uppercase()
 }

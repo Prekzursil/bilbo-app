@@ -1,9 +1,9 @@
 package dev.bilbo.social
 
-import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.Instant
 import kotlinx.datetime.plus
+import kotlin.time.Clock
 
 /**
  * Manages accountability buddy pairs.
@@ -284,10 +284,8 @@ class BuddyManager {
 
     private val codeChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
-    private fun generateInviteCode(): String =
-        (1..INVITE_CODE_LENGTH).map { codeChars.random() }.joinToString("")
+    private fun generateInviteCode(): String = (1..INVITE_CODE_LENGTH).map { codeChars.random() }.joinToString("")
 }
 
-private operator fun BuddyManager.SharingLevel.compareTo(
-    other: BuddyManager.SharingLevel,
-): Int = this.ordinal.compareTo(other.ordinal)
+private operator fun BuddyManager.SharingLevel.compareTo(other: BuddyManager.SharingLevel): Int =
+    this.ordinal.compareTo(other.ordinal)

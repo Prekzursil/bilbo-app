@@ -119,7 +119,13 @@ class StrictZeroSupplementTest {
         assertEquals(5, Result.Success(5).getOrNull())
         assertNull((Result.Loading as Result<Int>).getOrNull())
         assertEquals(5, Result.Success(5).getOrThrow())
-        assertFailsWith<IllegalStateException> { (Result.Error(IllegalStateException("e")) as Result<Int>).getOrThrow() }
+        assertFailsWith<IllegalStateException> {
+            (
+                Result.Error(
+                    IllegalStateException("e"),
+                ) as Result<Int>
+            ).getOrThrow()
+        }
         assertFailsWith<IllegalStateException> { (Result.Loading as Result<Int>).getOrThrow() }
     }
 

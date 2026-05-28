@@ -79,7 +79,8 @@ class InsightRepository(
     /**
      * Returns cached heuristic insights for [weekStart], or an empty list if none are stored.
      */
-    suspend fun getHeuristicInsights(weekStart: LocalDate): List<HeuristicInsight> = heuristicCache[weekStart.toString()] ?: emptyList()
+    suspend fun getHeuristicInsights(weekStart: LocalDate): List<HeuristicInsight> =
+        heuristicCache[weekStart.toString()] ?: emptyList()
 
     /**
      * Updates the correlation data cache for the given [weekStart].
@@ -95,7 +96,8 @@ class InsightRepository(
     /**
      * Returns cached correlation data for [weekStart], or an empty map.
      */
-    suspend fun getCorrelationCache(weekStart: LocalDate): Map<String, Float> = correlationCache[weekStart.toString()] ?: emptyMap()
+    suspend fun getCorrelationCache(weekStart: LocalDate): Map<String, Float> =
+        correlationCache[weekStart.toString()] ?: emptyMap()
 
     // ── Weekly insights (Phase 8) ─────────────────────────────────────────────
 
@@ -112,7 +114,8 @@ class InsightRepository(
     /**
      * Returns the most recent [WeeklyInsight], or null if none has been stored yet.
      */
-    suspend fun getLatestWeeklyInsight(): WeeklyInsight? = weeklyInsightCache.values.maxByOrNull { it.weekStart.toString() }
+    suspend fun getLatestWeeklyInsight(): WeeklyInsight? =
+        weeklyInsightCache.values.maxByOrNull { it.weekStart.toString() }
 
     /**
      * Returns the [WeeklyInsight] for [weekStart], or null if not yet generated.
@@ -122,5 +125,8 @@ class InsightRepository(
     /**
      * Returns all stored weekly insights, sorted by weekStart descending (newest first).
      */
-    suspend fun getAllWeeklyInsights(): List<WeeklyInsight> = weeklyInsightCache.values.sortedByDescending { it.weekStart.toString() }
+    suspend fun getAllWeeklyInsights(): List<WeeklyInsight> =
+        weeklyInsightCache.values.sortedByDescending {
+            it.weekStart.toString()
+        }
 }

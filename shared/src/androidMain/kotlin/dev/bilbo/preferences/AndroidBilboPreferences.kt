@@ -15,7 +15,10 @@ class AndroidBilboPreferences(
     // ── Enforcement ──────────────────────────────────────────────────────
 
     override var defaultEnforcementMode: DefaultEnforcementMode
-        get() = DefaultEnforcementMode.valueOf(prefs.getString("enforcement_mode", DefaultEnforcementMode.SOFT_LOCK.name)!!)
+        get() =
+            DefaultEnforcementMode.valueOf(
+                prefs.getString("enforcement_mode", DefaultEnforcementMode.SOFT_LOCK.name)!!,
+            )
         set(value) {
             prefs.edit().putString("enforcement_mode", value.name).apply()
         }

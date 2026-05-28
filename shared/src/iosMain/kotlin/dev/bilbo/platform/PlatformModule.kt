@@ -1,9 +1,9 @@
 package dev.bilbo.platform
 
 import app.cash.sqldelight.db.SqlDriver
+import dev.bilbo.data.BilboDatabase
 import dev.bilbo.data.DatabaseDriverFactory
 import dev.bilbo.data.IosDatabaseDriver
-import dev.bilbo.data.BilboDatabase
 
 /**
  * iOS-specific dependency wiring for the shared module.
@@ -21,7 +21,6 @@ import dev.bilbo.data.BilboDatabase
  * platform bindings are needed in future.
  */
 class PlatformModule {
-
     /**
      * Factory that produces a [NativeSqliteDriver]-backed [SqlDriver].
      * The database file lands in the app's Documents directory on the

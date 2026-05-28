@@ -6,10 +6,10 @@
 
 package dev.bilbo.preferences
 
-import platform.Foundation.NSUserDefaults
-import kotlinx.serialization.encodeToString
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
+import platform.Foundation.NSUserDefaults
 
 // MARK: - App Group suite name (must match entitlements)
 private const val APP_GROUP = "group.dev.bilbo.app"
@@ -17,29 +17,28 @@ private const val APP_GROUP = "group.dev.bilbo.app"
 // MARK: - Keys
 
 private object Keys {
-    const val ENFORCEMENT_MODE          = "enforcement_mode"
-    const val COOLDOWN_MINUTES          = "cooldown_minutes"
-    const val BYPASS_LIST               = "bypass_list"
-    const val FP_ENABLED                = "fp_enabled"
-    const val DAILY_BASELINE_FP         = "daily_baseline_fp"
-    const val ANTI_GAMING_ENABLED       = "anti_gaming_enabled"
-    const val CHECK_IN_ENABLED          = "check_in_enabled"
-    const val COOLING_OFF_ENABLED       = "cooling_off_enabled"
-    const val CLOUD_INSIGHTS_ENABLED    = "cloud_insights_enabled"
-    const val VIEW_ANONYMIZATION        = "view_anonymization"
-    const val SHARING_LEVEL             = "sharing_level"
-    const val USER_INTERESTS            = "user_interests"
-    const val NOTIFICATION_PREFS        = "notification_prefs"
-    const val ONBOARDING_COMPLETED      = "onboarding_completed"
-    const val SEED_DATA_LOADED          = "seed_data_loaded"
-    const val USER_ID                   = "user_id"
-    const val DEVICE_TOKEN              = "device_token"
+    const val ENFORCEMENT_MODE = "enforcement_mode"
+    const val COOLDOWN_MINUTES = "cooldown_minutes"
+    const val BYPASS_LIST = "bypass_list"
+    const val FP_ENABLED = "fp_enabled"
+    const val DAILY_BASELINE_FP = "daily_baseline_fp"
+    const val ANTI_GAMING_ENABLED = "anti_gaming_enabled"
+    const val CHECK_IN_ENABLED = "check_in_enabled"
+    const val COOLING_OFF_ENABLED = "cooling_off_enabled"
+    const val CLOUD_INSIGHTS_ENABLED = "cloud_insights_enabled"
+    const val VIEW_ANONYMIZATION = "view_anonymization"
+    const val SHARING_LEVEL = "sharing_level"
+    const val USER_INTERESTS = "user_interests"
+    const val NOTIFICATION_PREFS = "notification_prefs"
+    const val ONBOARDING_COMPLETED = "onboarding_completed"
+    const val SEED_DATA_LOADED = "seed_data_loaded"
+    const val USER_ID = "user_id"
+    const val DEVICE_TOKEN = "device_token"
 }
 
 // MARK: - Implementation
 
 class IosBilboPreferences : BilboPreferences {
-
     private val defaults: NSUserDefaults =
         NSUserDefaults(suiteName = APP_GROUP) ?: NSUserDefaults.standardUserDefaults
 
@@ -47,24 +46,42 @@ class IosBilboPreferences : BilboPreferences {
 
     // ── Helpers ──────────────────────────────────────────────────────────
 
-    private fun getString(key: String, default: String? = null): String? =
-        defaults.stringForKey(key) ?: default
+    private fun getString(
+        key: String,
+        default: String? = null,
+    ): String? = defaults.stringForKey(key) ?: default
 
-    private fun setString(key: String, value: String?) {
+    private fun setString(
+        key: String,
+        value: String?,
+    ) {
         if (value != null) defaults.setObject(value, key) else defaults.removeObjectForKey(key)
     }
 
-    private fun getBool(key: String, default: Boolean): Boolean =
-        if (defaults.objectForKey(key) != null) defaults.boolForKey(key) else default
+    private fun getBool(
+        key: String,
+        default: Boolean,
+    ): Boolean = if (defaults.objectForKey(key) != null) defaults.boolForKey(key) else default
 
-    private fun setBool(key: String, value: Boolean) = defaults.setBool(value, key)
+    private fun setBool(
+        key: String,
+        value: Boolean,
+    ) = defaults.setBool(value, key)
 
-    private fun getInt(key: String, default: Int): Int =
-        (defaults.objectForKey(key)?.let { defaults.integerForKey(key) }?.toInt()) ?: default
+    private fun getInt(
+        key: String,
+        default: Int,
+    ): Int = (defaults.objectForKey(key)?.let { defaults.integerForKey(key) }?.toInt()) ?: default
 
-    private fun setInt(key: String, value: Int) = defaults.setInteger(value.toLong(), key)
+    private fun setInt(
+        key: String,
+        value: Int,
+    ) = defaults.setInteger(value.toLong(), key)
 
-    private inline fun <reified T> getJson(key: String, default: T): T {
+    private inline fun <reified T> getJson(
+        key: String,
+        default: T,
+    ): T {
         val raw = getString(key) ?: return default
         return try {
             json.decodeFromString(raw)
@@ -73,13 +90,18 @@ class IosBilboPreferences : BilboPreferences {
         }
     }
 
-    private inline fun <reified T> setJson(key: String, value: T) =
-        setString(key, json.encodeToString(value))
+    private inline fun <reified T> setJson(
+        key: String,
+        value: T,
+    ) = setString(key, json.encodeToString(value))
 
     // ── Enforcement ──────────────────────────────────────────────────────
 
     override var defaultEnforcementMode: DefaultEnforcementMode
-        get() = DefaultEnforcementMode.valueOf(getString(Keys.ENFORCEMENT_MODE) ?: DefaultEnforcementMode.SOFT_LOCK.name)
+        get() =
+            DefaultEnforcementMode.valueOf(
+                getString(Keys.ENFORCEMENT_MODE) ?: DefaultEnforcementMode.SOFT_LOCK.name,
+            )
         set(value) = setString(Keys.ENFORCEMENT_MODE, value.name)
 
     override var cooldownMinutes: Int
@@ -164,13 +186,23 @@ class IosBilboPreferences : BilboPreferences {
 
     override fun clear() {
         listOf(
-            Keys.ENFORCEMENT_MODE, Keys.COOLDOWN_MINUTES, Keys.BYPASS_LIST,
-            Keys.FP_ENABLED, Keys.DAILY_BASELINE_FP, Keys.ANTI_GAMING_ENABLED,
-            Keys.CHECK_IN_ENABLED, Keys.COOLING_OFF_ENABLED,
-            Keys.CLOUD_INSIGHTS_ENABLED, Keys.VIEW_ANONYMIZATION,
-            Keys.SHARING_LEVEL, Keys.USER_INTERESTS, Keys.NOTIFICATION_PREFS,
-            Keys.ONBOARDING_COMPLETED, Keys.SEED_DATA_LOADED,
-            Keys.USER_ID, Keys.DEVICE_TOKEN
+            Keys.ENFORCEMENT_MODE,
+            Keys.COOLDOWN_MINUTES,
+            Keys.BYPASS_LIST,
+            Keys.FP_ENABLED,
+            Keys.DAILY_BASELINE_FP,
+            Keys.ANTI_GAMING_ENABLED,
+            Keys.CHECK_IN_ENABLED,
+            Keys.COOLING_OFF_ENABLED,
+            Keys.CLOUD_INSIGHTS_ENABLED,
+            Keys.VIEW_ANONYMIZATION,
+            Keys.SHARING_LEVEL,
+            Keys.USER_INTERESTS,
+            Keys.NOTIFICATION_PREFS,
+            Keys.ONBOARDING_COMPLETED,
+            Keys.SEED_DATA_LOADED,
+            Keys.USER_ID,
+            Keys.DEVICE_TOKEN,
         ).forEach { defaults.removeObjectForKey(it) }
     }
 }

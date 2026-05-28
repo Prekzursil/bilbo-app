@@ -122,7 +122,10 @@ class HeuristicEngine(
 
         // Spike days
         summary.spikeDays.forEach { day ->
-            val dayLabel = day.date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+            val dayLabel =
+                day.date.dayOfWeek.name
+                    .lowercase()
+                    .replaceFirstChar { it.uppercase() }
             val abovePct =
                 ((day.totalMinutes - summary.overallAverage) / summary.overallAverage * PERCENT).toInt()
             insights +=

@@ -15,12 +15,12 @@ import dev.bilbo.intelligence.tier2.HeuristicEngine
 import dev.bilbo.intelligence.tier2.TrendDetector
 import dev.bilbo.intelligence.tier3.CloudInsightClient
 import dev.bilbo.intelligence.tier3.InsightPromptBuilder
-import kotlin.time.Clock
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 /**
  * Top-level orchestrator for all three intelligence tiers.

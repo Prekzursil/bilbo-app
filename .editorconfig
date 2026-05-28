@@ -1,0 +1,15 @@
+root = true
+
+[*.{kt,kts}]
+# Align ktlint's line-wrapping with detekt's MaxLineLength (120) so the two
+# Strict-Zero gates agree instead of fighting each other.
+max_line_length = 120
+indent_size = 4
+indent_style = space
+insert_final_newline = true
+ij_kotlin_allow_trailing_comma = true
+ij_kotlin_allow_trailing_comma_on_call_site = true
+# Never collapse explicit imports back into wildcards.
+ij_kotlin_packages_to_use_import_on_demand = unset
+ij_kotlin_name_count_to_use_star_import = 2147483647
+ij_kotlin_name_count_to_use_star_import_for_members = 2147483647

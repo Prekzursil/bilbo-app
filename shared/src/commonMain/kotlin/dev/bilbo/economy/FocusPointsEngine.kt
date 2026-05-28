@@ -93,16 +93,14 @@ class FocusPointsEngine {
         applyBonus(budget, FPEconomy.BONUS_BREATHING_EXERCISE)
 
     /** Awards the analog activity accepted bonus. */
-    fun awardAnalogBonus(budget: DopamineBudget): DopamineBudget =
-        applyBonus(budget, FPEconomy.BONUS_ANALOG_ACCEPTED)
+    fun awardAnalogBonus(budget: DopamineBudget): DopamineBudget = applyBonus(budget, FPEconomy.BONUS_ANALOG_ACCEPTED)
 
     /** Awards the accurate intent bonus. */
     fun awardAccurateIntentBonus(budget: DopamineBudget): DopamineBudget =
         applyBonus(budget, FPEconomy.BONUS_ACCURATE_INTENT)
 
     /** Awards the 7-day streak bonus. */
-    fun awardStreakBonus(budget: DopamineBudget): DopamineBudget =
-        applyBonus(budget, FPEconomy.STREAK_BONUS_7_DAY)
+    fun awardStreakBonus(budget: DopamineBudget): DopamineBudget = applyBonus(budget, FPEconomy.STREAK_BONUS_7_DAY)
 
     // -------------------------------------------------------------------------
     // Preset penalty helpers

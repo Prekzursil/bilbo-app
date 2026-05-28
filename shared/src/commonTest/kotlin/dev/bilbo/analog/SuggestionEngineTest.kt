@@ -7,12 +7,6 @@ import dev.bilbo.domain.DopamineBudget
 import dev.bilbo.domain.FPEconomy
 import dev.bilbo.domain.SuggestionCategory
 import dev.bilbo.domain.TimeOfDay
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertNotNull
-import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
@@ -22,6 +16,12 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 
 // =============================================================================
 //  Fake repositories
@@ -49,7 +49,11 @@ private class FakeSuggestionRepo : SuggestionRepository {
     override suspend fun getByCategoryAndTimeOfDay(
         category: SuggestionCategory,
         timeOfDay: TimeOfDay,
-    ): List<AnalogSuggestion> = suggestions.filter { it.category == category && (it.timeOfDay == null || it.timeOfDay == timeOfDay) }
+    ): List<AnalogSuggestion> =
+        suggestions.filter {
+            it.category == category &&
+                (it.timeOfDay == null || it.timeOfDay == timeOfDay)
+        }
 
     override suspend fun getCustom(): List<AnalogSuggestion> = suggestions.filter { it.isCustom }
 
@@ -146,7 +150,8 @@ class SuggestionEngineGetSuggestionsTest {
 
     @Test fun getSuggestionsEmpty() =
         runTest {
-            val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
+            val engine =
+                SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
             val result = engine.getSuggestions()
             assertTrue(result.isEmpty())
         }
@@ -187,10 +192,17 @@ class SuggestionEngineGetSuggestionsTest {
     @Test fun getSuggestionsIncludesNullTimeOfDay() =
         runTest {
             repo.suggestions.add(
-                AnalogSuggestion(id = 1, text = "Anytime", category = SuggestionCategory.EXERCISE, tags = emptyList(), timeOfDay = null),
+                AnalogSuggestion(
+                    id = 1,
+                    text = "Anytime",
+                    category = SuggestionCategory.EXERCISE,
+                    tags = emptyList(),
+                    timeOfDay = null,
+                ),
             )
 
-            val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.EVENING })
+            val engine =
+                SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.EVENING })
             val result = engine.getSuggestions()
             assertEquals(1, result.size)
         }
@@ -200,11 +212,17 @@ class SuggestionEngineGetSuggestionsTest {
             // Add 3 exercise suggestions but user interested only in CREATIVE
             repeat(3) { i ->
                 repo.suggestions.add(
-                    AnalogSuggestion(id = i.toLong() + 1, text = "Ex $i", category = SuggestionCategory.EXERCISE, tags = emptyList()),
+                    AnalogSuggestion(
+                        id = i.toLong() + 1,
+                        text = "Ex $i",
+                        category = SuggestionCategory.EXERCISE,
+                        tags = emptyList(),
+                    ),
                 )
             }
 
-            val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.CREATIVE) }, { TimeOfDay.MORNING })
+            val engine =
+                SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.CREATIVE) }, { TimeOfDay.MORNING })
             // interest filter yields 0, which < count(3), falls back to time-filtered
             val result = engine.getSuggestions(3)
             assertEquals(3, result.size)
@@ -233,7 +251,8 @@ class SuggestionEngineGetSuggestionsTest {
                 ),
             )
 
-            val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
+            val engine =
+                SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
             val result = engine.getSuggestions(2)
             assertEquals("B", result[0].text) // least shown first
             assertEquals("A", result[1].text)
@@ -243,11 +262,17 @@ class SuggestionEngineGetSuggestionsTest {
         runTest {
             repeat(10) { i ->
                 repo.suggestions.add(
-                    AnalogSuggestion(id = i.toLong() + 1, text = "S$i", category = SuggestionCategory.EXERCISE, tags = emptyList()),
+                    AnalogSuggestion(
+                        id = i.toLong() + 1,
+                        text = "S$i",
+                        category = SuggestionCategory.EXERCISE,
+                        tags = emptyList(),
+                    ),
                 )
             }
 
-            val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
+            val engine =
+                SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
             val result = engine.getSuggestions(3)
             assertEquals(3, result.size)
         }
@@ -258,7 +283,9 @@ class SuggestionEngineAcceptTest {
         runTest {
             val repo = FakeSuggestionRepo()
             val budgetRepo = FakeBudgetRepo()
-            repo.suggestions.add(AnalogSuggestion(id = 1, text = "Walk", category = SuggestionCategory.EXERCISE, tags = emptyList()))
+            repo.suggestions.add(
+                AnalogSuggestion(id = 1, text = "Walk", category = SuggestionCategory.EXERCISE, tags = emptyList()),
+            )
 
             val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
             engine.acceptSuggestion(1)
@@ -271,7 +298,9 @@ class SuggestionEngineAcceptTest {
         runTest {
             val repo = FakeSuggestionRepo()
             val budgetRepo = FakeBudgetRepo()
-            repo.suggestions.add(AnalogSuggestion(id = 1, text = "Walk", category = SuggestionCategory.EXERCISE, tags = emptyList()))
+            repo.suggestions.add(
+                AnalogSuggestion(id = 1, text = "Walk", category = SuggestionCategory.EXERCISE, tags = emptyList()),
+            )
 
             val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
             engine.showAnother(1)
@@ -286,7 +315,8 @@ class SuggestionEngineCustomTest {
             val budgetRepo = FakeBudgetRepo()
 
             val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
-            val suggestion = AnalogSuggestion(text = "My idea", category = SuggestionCategory.CREATIVE, tags = listOf("fun"))
+            val suggestion =
+                AnalogSuggestion(text = "My idea", category = SuggestionCategory.CREATIVE, tags = listOf("fun"))
             val id = engine.addCustomSuggestion(suggestion)
             assertTrue(id > 0)
             assertTrue(repo.suggestions.last().isCustom)
@@ -309,7 +339,13 @@ class SuggestionEngineCustomTest {
             val repo = FakeSuggestionRepo()
             val budgetRepo = FakeBudgetRepo()
             repo.suggestions.add(
-                AnalogSuggestion(id = 1, text = "Custom", category = SuggestionCategory.CREATIVE, tags = emptyList(), isCustom = true),
+                AnalogSuggestion(
+                    id = 1,
+                    text = "Custom",
+                    category = SuggestionCategory.CREATIVE,
+                    tags = emptyList(),
+                    isCustom = true,
+                ),
             )
 
             val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
@@ -322,7 +358,13 @@ class SuggestionEngineCustomTest {
             val repo = FakeSuggestionRepo()
             val budgetRepo = FakeBudgetRepo()
             repo.suggestions.add(
-                AnalogSuggestion(id = 1, text = "Built-in", category = SuggestionCategory.EXERCISE, tags = emptyList(), isCustom = false),
+                AnalogSuggestion(
+                    id = 1,
+                    text = "Built-in",
+                    category = SuggestionCategory.EXERCISE,
+                    tags = emptyList(),
+                    isCustom = false,
+                ),
             )
 
             val engine = SuggestionEngine(repo, budgetRepo, { emptySet() }, { TimeOfDay.MORNING })
@@ -347,7 +389,8 @@ class SuggestionEngineResolveTimeOfDayTest {
     // Test helper: create a fake clock at a specific hour (UTC)
     private fun clockAt(hour: Int): Clock =
         object : Clock {
-            override fun now(): Instant = LocalDateTime(2025, 6, 15, hour, 30).toInstant(TimeZone.currentSystemDefault())
+            override fun now(): Instant =
+                LocalDateTime(2025, 6, 15, hour, 30).toInstant(TimeZone.currentSystemDefault())
         }
 
     @Test fun resolveTimeOfDayDefaultClock() {
@@ -421,7 +464,8 @@ class SuggestionEngineAcceptanceRateTest {
                 ),
             )
 
-            val engine = SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
+            val engine =
+                SuggestionEngine(repo, budgetRepo, { setOf(SuggestionCategory.EXERCISE) }, { TimeOfDay.MORNING })
             val result = engine.getSuggestions(2)
             // Both have timesShown so A (0) is shown first, then B (10)
             assertEquals("A", result[0].text)

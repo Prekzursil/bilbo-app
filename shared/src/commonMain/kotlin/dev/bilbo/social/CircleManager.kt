@@ -1,7 +1,7 @@
 package dev.bilbo.social
 
-import kotlin.time.Clock
 import kotlinx.datetime.Instant
+import kotlin.time.Clock
 
 /**
  * Manages focus circles — small accountability groups (2–12 members).
@@ -223,7 +223,10 @@ class CircleManager {
      * Returns active memberships for a circle.
      */
     fun getActiveMemberships(circleId: String): List<CircleMembership> =
-        memberships.filter { it.circleId == circleId && it.isActive }
+        memberships.filter {
+            it.circleId == circleId &&
+                it.isActive
+        }
 
     /**
      * Returns all circles a user is an active member of.
@@ -243,7 +246,10 @@ class CircleManager {
      * Returns all public circles (for discovery).
      */
     fun getPublicCircles(): List<Circle> =
-        circles.values.filter { it.isActive && it.visibility == CircleVisibility.PUBLIC }
+        circles.values.filter {
+            it.isActive &&
+                it.visibility == CircleVisibility.PUBLIC
+        }
 
     /**
      * Returns the member count for [circleId].
@@ -317,4 +323,7 @@ private fun generateId(): String = "circle_${++circleIdCounter}_${Clock.System.n
 private const val CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
 private fun generateInviteCode(): String =
-    (1..CircleManager.INVITE_CODE_LENGTH).map { CODE_CHARS.random() }.joinToString("")
+    (1..CircleManager.INVITE_CODE_LENGTH)
+        .map {
+            CODE_CHARS.random()
+        }.joinToString("")

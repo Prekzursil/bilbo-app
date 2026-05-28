@@ -1,7 +1,6 @@
 package dev.bilbo.coverage
 
 import dev.bilbo.preferences.NotificationPreferences
-import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
 import dev.bilbo.shared.domain.model.AppUsageSession
 import dev.bilbo.shared.domain.model.AppUsageSummary
 import dev.bilbo.shared.domain.model.DailyInsight
@@ -14,10 +13,11 @@ import dev.bilbo.shared.util.getOrThrow
 import dev.bilbo.shared.util.map
 import dev.bilbo.util.BilboError
 import dev.bilbo.util.DefaultErrorHandler
-import dev.bilbo.util.ErrorHandler
 import dev.bilbo.util.NetworkException
 import dev.bilbo.util.OfflineException
 import dev.bilbo.util.toUserMessage
+import kotlinx.datetime.Instant
+import kotlinx.serialization.json.Json
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFailsWith
@@ -27,9 +27,7 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
-import kotlin.test.fail
-import kotlinx.datetime.Instant
-import kotlinx.serialization.json.Json
+import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
 
 // =============================================================================
 //  NotificationPreferences serialization & coverage

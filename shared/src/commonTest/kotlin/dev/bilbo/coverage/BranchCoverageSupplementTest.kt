@@ -27,16 +27,6 @@ import dev.bilbo.util.NetworkException
 import dev.bilbo.util.OfflineException
 import dev.bilbo.util.safeCall
 import dev.bilbo.util.withRetry
-import kotlin.test.BeforeTest
-import kotlin.test.Test
-import kotlin.test.assertEquals
-import kotlin.test.assertFailsWith
-import kotlin.test.assertFalse
-import kotlin.test.assertNotEquals
-import kotlin.test.assertNotNull
-import kotlin.test.assertNull
-import kotlin.test.assertTrue
-import kotlin.time.Clock
 import kotlinx.coroutines.test.runTest
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.DayOfWeek
@@ -46,6 +36,15 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlin.time.Clock
 
 // =============================================================================
 // Helper factories (reused across tests)
@@ -636,7 +635,14 @@ class LeaderboardCalculatorExtractValueBranchTest {
     @Test
     fun extractValueAndLabel_fpBalance_zeroValue() {
         val stats = singleStat(fpBalance = 0)
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, stats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                stats,
+                "u1",
+                fixedClock,
+            )
         assertEquals(0.0, board.entries[0].value)
         assertEquals("0 FP", board.entries[0].valueLabel)
     }
@@ -644,7 +650,14 @@ class LeaderboardCalculatorExtractValueBranchTest {
     @Test
     fun extractValueAndLabel_nutritiveMinutes_zeroValue() {
         val stats = singleStat(nutritiveMinutes = 0)
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.NUTRITIVE_MINUTES, stats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.NUTRITIVE_MINUTES,
+                stats,
+                "u1",
+                fixedClock,
+            )
         assertEquals(0.0, board.entries[0].value)
         assertEquals("0 min", board.entries[0].valueLabel)
     }
@@ -652,7 +665,14 @@ class LeaderboardCalculatorExtractValueBranchTest {
     @Test
     fun extractValueAndLabel_fewestEmptyCalories_zeroValue() {
         val stats = singleStat(emptyCalorieMinutes = 0)
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FEWEST_EMPTY_CALORIES, stats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FEWEST_EMPTY_CALORIES,
+                stats,
+                "u1",
+                fixedClock,
+            )
         assertEquals(0.0, board.entries[0].value)
         assertEquals("0 min", board.entries[0].valueLabel)
     }
@@ -660,7 +680,14 @@ class LeaderboardCalculatorExtractValueBranchTest {
     @Test
     fun extractValueAndLabel_streakDays_zeroValue() {
         val stats = singleStat(streakDays = 0)
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.STREAK_DAYS, stats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.STREAK_DAYS,
+                stats,
+                "u1",
+                fixedClock,
+            )
         assertEquals(0.0, board.entries[0].value)
         assertEquals("0 days", board.entries[0].valueLabel)
     }
@@ -668,7 +695,14 @@ class LeaderboardCalculatorExtractValueBranchTest {
     @Test
     fun extractValueAndLabel_intentAccuracy_zeroValue() {
         val stats = singleStat(intentAccuracyPercent = 0f)
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.INTENT_ACCURACY, stats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.INTENT_ACCURACY,
+                stats,
+                "u1",
+                fixedClock,
+            )
         assertEquals(0.0, board.entries[0].value, 0.01)
         assertEquals("0%", board.entries[0].valueLabel)
     }
@@ -676,7 +710,14 @@ class LeaderboardCalculatorExtractValueBranchTest {
     @Test
     fun extractValueAndLabel_fpEarnedWeekly_zeroValue() {
         val stats = singleStat(fpEarnedWeekly = 0)
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_EARNED_WEEKLY, stats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_EARNED_WEEKLY,
+                stats,
+                "u1",
+                fixedClock,
+            )
         assertEquals(0.0, board.entries[0].value)
         assertEquals("0 FP", board.entries[0].valueLabel)
     }
@@ -696,7 +737,14 @@ class LeaderboardCalculatorTopNEdgeCaseTest {
             listOf(
                 LeaderboardCalculator.UserStats("u1", "A", 100, 0, 0, 0, 0f, 0),
             )
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, stats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                stats,
+                "u1",
+                fixedClock,
+            )
         val top = calculator.topN(board, 0)
         assertTrue(top.isEmpty())
     }
@@ -712,7 +760,14 @@ class LeaderboardCalculatorUserContextEdgeCaseTest {
     @Test
     fun userContextWithEmptyBoard_returnsEmpty() {
         // Coverage gap: empty board entries, user not found
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, emptyList(), "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                emptyList(),
+                "u1",
+                fixedClock,
+            )
         val context = calculator.userContext(board, "u1")
         assertTrue(context.isEmpty())
     }
@@ -724,7 +779,14 @@ class LeaderboardCalculatorUserContextEdgeCaseTest {
             listOf(
                 LeaderboardCalculator.UserStats("u1", "A", 100, 0, 0, 0, 0f, 0),
             )
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, stats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                stats,
+                "u1",
+                fixedClock,
+            )
         val context = calculator.userContext(board, "u1", 2)
         assertEquals(1, context.size)
         assertEquals("u1", context[0].userId)
@@ -1133,7 +1195,15 @@ class BuddyManagerBuildSnapshotBoundaryTest {
             manager.buildSnapshot(
                 "buddy1",
                 BuddyManager.SharingLevel.MINIMAL,
-                stats = BuddyManager.BuddyStats(fpBalance = 999, streakDays = 50, fpEarned = 500, fpSpent = 100, nutritiveMinutes = 200, emptyCalorieMinutes = 150),
+                stats =
+                    BuddyManager.BuddyStats(
+                        fpBalance = 999,
+                        streakDays = 50,
+                        fpEarned = 500,
+                        fpSpent = 100,
+                        nutritiveMinutes = 200,
+                        emptyCalorieMinutes = 150,
+                    ),
             )
         assertNull(snapshot.fpBalance)
         assertNull(snapshot.streakDays)
@@ -1150,7 +1220,15 @@ class BuddyManagerBuildSnapshotBoundaryTest {
             manager.buildSnapshot(
                 "buddy1",
                 BuddyManager.SharingLevel.BASIC,
-                stats = BuddyManager.BuddyStats(fpBalance = 100, streakDays = 10, fpEarned = 200, fpSpent = 50, nutritiveMinutes = 80, emptyCalorieMinutes = 40),
+                stats =
+                    BuddyManager.BuddyStats(
+                        fpBalance = 100,
+                        streakDays = 10,
+                        fpEarned = 200,
+                        fpSpent = 50,
+                        nutritiveMinutes = 80,
+                        emptyCalorieMinutes = 40,
+                    ),
             )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(10, snapshot.streakDays)

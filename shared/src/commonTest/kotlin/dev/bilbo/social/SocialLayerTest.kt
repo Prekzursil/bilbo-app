@@ -1,5 +1,12 @@
 package dev.bilbo.social
 
+import kotlinx.datetime.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -9,13 +16,6 @@ import kotlin.test.assertNotEquals
 import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertTrue
-import kotlinx.datetime.Clock
-import kotlinx.datetime.DateTimeUnit
-import kotlinx.datetime.Instant
-import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDateTime
 
 // =============================================================================
 //  BuddyManager Tests
@@ -532,7 +532,15 @@ class BuddyManagerBuildSnapshotTest {
             manager.buildSnapshot(
                 buddyUserId = "buddy1",
                 sharingLevel = BuddyManager.SharingLevel.MINIMAL,
-                stats = BuddyManager.BuddyStats(fpBalance = 100, streakDays = 5, fpEarned = 200, fpSpent = 50, nutritiveMinutes = 60, emptyCalorieMinutes = 30),
+                stats =
+                    BuddyManager.BuddyStats(
+                        fpBalance = 100,
+                        streakDays = 5,
+                        fpEarned = 200,
+                        fpSpent = 50,
+                        nutritiveMinutes = 60,
+                        emptyCalorieMinutes = 30,
+                    ),
             )
         assertEquals("buddy1", snapshot.buddyUserId)
         assertEquals(BuddyManager.SharingLevel.MINIMAL, snapshot.sharingLevel)
@@ -550,7 +558,15 @@ class BuddyManagerBuildSnapshotTest {
             manager.buildSnapshot(
                 buddyUserId = "buddy1",
                 sharingLevel = BuddyManager.SharingLevel.BASIC,
-                stats = BuddyManager.BuddyStats(fpBalance = 100, streakDays = 5, fpEarned = 200, fpSpent = 50, nutritiveMinutes = 60, emptyCalorieMinutes = 30),
+                stats =
+                    BuddyManager.BuddyStats(
+                        fpBalance = 100,
+                        streakDays = 5,
+                        fpEarned = 200,
+                        fpSpent = 50,
+                        nutritiveMinutes = 60,
+                        emptyCalorieMinutes = 30,
+                    ),
             )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(5, snapshot.streakDays)
@@ -566,7 +582,15 @@ class BuddyManagerBuildSnapshotTest {
             manager.buildSnapshot(
                 buddyUserId = "buddy1",
                 sharingLevel = BuddyManager.SharingLevel.STANDARD,
-                stats = BuddyManager.BuddyStats(fpBalance = 100, streakDays = 5, fpEarned = 200, fpSpent = 50, nutritiveMinutes = 60, emptyCalorieMinutes = 30),
+                stats =
+                    BuddyManager.BuddyStats(
+                        fpBalance = 100,
+                        streakDays = 5,
+                        fpEarned = 200,
+                        fpSpent = 50,
+                        nutritiveMinutes = 60,
+                        emptyCalorieMinutes = 30,
+                    ),
             )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(5, snapshot.streakDays)
@@ -582,7 +606,15 @@ class BuddyManagerBuildSnapshotTest {
             manager.buildSnapshot(
                 buddyUserId = "buddy1",
                 sharingLevel = BuddyManager.SharingLevel.DETAILED,
-                stats = BuddyManager.BuddyStats(fpBalance = 100, streakDays = 5, fpEarned = 200, fpSpent = 50, nutritiveMinutes = 60, emptyCalorieMinutes = 30),
+                stats =
+                    BuddyManager.BuddyStats(
+                        fpBalance = 100,
+                        streakDays = 5,
+                        fpEarned = 200,
+                        fpSpent = 50,
+                        nutritiveMinutes = 60,
+                        emptyCalorieMinutes = 30,
+                    ),
             )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(5, snapshot.streakDays)
@@ -2128,8 +2160,18 @@ class CircleManagerGetPublicCirclesTest {
 
     @Test
     fun getPublicCirclesReturnsOnlyPublic() {
-        manager.createCircle("Public", visibility = CircleManager.CircleVisibility.PUBLIC, creatorUserId = "u1", clock = fixedClock)
-        manager.createCircle("Private", visibility = CircleManager.CircleVisibility.PRIVATE, creatorUserId = "u2", clock = fixedClock)
+        manager.createCircle(
+            "Public",
+            visibility = CircleManager.CircleVisibility.PUBLIC,
+            creatorUserId = "u1",
+            clock = fixedClock,
+        )
+        manager.createCircle(
+            "Private",
+            visibility = CircleManager.CircleVisibility.PRIVATE,
+            creatorUserId = "u2",
+            clock = fixedClock,
+        )
         assertEquals(1, manager.getPublicCircles().size)
         assertEquals("Public", manager.getPublicCircles()[0].name)
     }
@@ -2415,7 +2457,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeFpBalanceDescending() {
-        val board = calculator.compute("circle1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "circle1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals("u2", board.entries[0].userId) // 500
         assertEquals("u1", board.entries[1].userId) // 300
         assertEquals("u3", board.entries[2].userId) // 100
@@ -2453,7 +2502,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeStreakDaysDescending() {
-        val board = calculator.compute("circle1", LeaderboardCalculator.LeaderboardCategory.STREAK_DAYS, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "circle1",
+                LeaderboardCalculator.LeaderboardCategory.STREAK_DAYS,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals("u2", board.entries[0].userId) // 15
         assertEquals("u1", board.entries[1].userId) // 10
         assertEquals("u3", board.entries[2].userId) // 5
@@ -2461,7 +2517,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeIntentAccuracyDescending() {
-        val board = calculator.compute("circle1", LeaderboardCalculator.LeaderboardCategory.INTENT_ACCURACY, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "circle1",
+                LeaderboardCalculator.LeaderboardCategory.INTENT_ACCURACY,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals("u2", board.entries[0].userId) // 0.92
         assertEquals("u1", board.entries[1].userId) // 0.85
         assertEquals("u3", board.entries[2].userId) // 0.78
@@ -2469,7 +2532,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeFpEarnedWeeklyDescending() {
-        val board = calculator.compute("circle1", LeaderboardCalculator.LeaderboardCategory.FP_EARNED_WEEKLY, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "circle1",
+                LeaderboardCalculator.LeaderboardCategory.FP_EARNED_WEEKLY,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals("u2", board.entries[0].userId) // 350
         assertEquals("u1", board.entries[1].userId) // 200
         assertEquals("u3", board.entries[2].userId) // 150
@@ -2477,7 +2547,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeSetsCorrectRanks() {
-        val board = calculator.compute("circle1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "circle1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals(1, board.entries[0].rank)
         assertEquals(2, board.entries[1].rank)
         assertEquals(3, board.entries[2].rank)
@@ -2485,7 +2562,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeMarksCurrentUser() {
-        val board = calculator.compute("circle1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "circle1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val currentUserEntry = board.entries.find { it.userId == "u1" }!!
         assertTrue(currentUserEntry.isCurrentUser)
         assertFalse(board.entries.find { it.userId == "u2" }!!.isCurrentUser)
@@ -2493,7 +2577,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeSetsCurrentUserRank() {
-        val board = calculator.compute("circle1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "circle1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals(2, board.currentUserRank) // u1 is ranked 2nd
     }
 
@@ -2512,25 +2603,53 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeSetsCircleId() {
-        val board = calculator.compute("myCircle", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "myCircle",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals("myCircle", board.circleId)
     }
 
     @Test
     fun computeSetsCategory() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.STREAK_DAYS, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.STREAK_DAYS,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals(LeaderboardCalculator.LeaderboardCategory.STREAK_DAYS, board.category)
     }
 
     @Test
     fun computeSetsComputedAt() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals(fixedClock.now(), board.computedAt)
     }
 
     @Test
     fun computeHandlesEmptyStats() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, emptyList(), "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                emptyList(),
+                "u1",
+                fixedClock,
+            )
         assertTrue(board.entries.isEmpty())
         assertNull(board.currentUserRank)
     }
@@ -2538,14 +2657,28 @@ class LeaderboardCalculatorComputeTest {
     @Test
     fun computeHandlesSingleMember() {
         val single = listOf(sampleStats[0])
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, single, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                single,
+                "u1",
+                fixedClock,
+            )
         assertEquals(1, board.entries.size)
         assertEquals(1, board.currentUserRank)
     }
 
     @Test
     fun computeFpBalanceValueLabel() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val entry = board.entries.find { it.userId == "u2" }!!
         assertEquals(500.0, entry.value)
         assertEquals("500 FP", entry.valueLabel)
@@ -2553,7 +2686,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeNutritiveminutesValueLabel() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.NUTRITIVE_MINUTES, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.NUTRITIVE_MINUTES,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val entry = board.entries.find { it.userId == "u3" }!!
         assertEquals(200.0, entry.value)
         assertEquals("200 min", entry.valueLabel)
@@ -2561,7 +2701,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeFewestEmptyCaloriesValueLabel() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FEWEST_EMPTY_CALORIES, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FEWEST_EMPTY_CALORIES,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val entry = board.entries.find { it.userId == "u2" }!!
         assertEquals(20.0, entry.value)
         assertEquals("20 min", entry.valueLabel)
@@ -2569,7 +2716,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeStreakDaysValueLabel() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.STREAK_DAYS, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.STREAK_DAYS,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val entry = board.entries.find { it.userId == "u2" }!!
         assertEquals(15.0, entry.value)
         assertEquals("15 days", entry.valueLabel)
@@ -2577,7 +2731,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeIntentAccuracyValueLabel() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.INTENT_ACCURACY, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.INTENT_ACCURACY,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val entry = board.entries.find { it.userId == "u2" }!!
         assertEquals(0.92.toDouble(), entry.value, 0.01)
         // 0.92 * 100 = 92
@@ -2586,7 +2747,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeFpEarnedWeeklyValueLabel() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_EARNED_WEEKLY, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_EARNED_WEEKLY,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val entry = board.entries.find { it.userId == "u2" }!!
         assertEquals(350.0, entry.value)
         assertEquals("350 FP", entry.valueLabel)
@@ -2594,7 +2762,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeDisplayName() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val entry = board.entries.find { it.userId == "u1" }!!
         assertEquals("Alice", entry.displayName)
     }
@@ -2819,14 +2994,28 @@ class LeaderboardCalculatorTopNTest {
 
     @Test
     fun topNReturnsDefaultThree() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val top = calculator.topN(board)
         assertEquals(3, top.size)
     }
 
     @Test
     fun topNReturnsTopEntries() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val top = calculator.topN(board, 3)
         assertEquals("u2", top[0].userId) // 500
         assertEquals("u4", top[1].userId) // 400
@@ -2835,21 +3024,42 @@ class LeaderboardCalculatorTopNTest {
 
     @Test
     fun topNReturnsAllWhenNExceedsSize() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val top = calculator.topN(board, 10)
         assertEquals(5, top.size)
     }
 
     @Test
     fun topNReturnsEmptyForEmptyBoard() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, emptyList(), "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                emptyList(),
+                "u1",
+                fixedClock,
+            )
         val top = calculator.topN(board, 3)
         assertTrue(top.isEmpty())
     }
 
     @Test
     fun topNReturnsOneWhenNIsOne() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val top = calculator.topN(board, 1)
         assertEquals(1, top.size)
         assertEquals("u2", top[0].userId) // highest FP
@@ -2919,7 +3129,14 @@ class LeaderboardCalculatorUserContextTest {
 
     @Test
     fun userContextReturnsWindowAroundUser() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u3", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u3",
+                fixedClock,
+            )
         // u3 is at index 2 (rank 3), window=2 means indices 0..4
         val context = calculator.userContext(board, "u3", 2)
         assertEquals(5, context.size) // all 5 fit within window
@@ -2927,14 +3144,28 @@ class LeaderboardCalculatorUserContextTest {
 
     @Test
     fun userContextReturnsEmptyForUnknownUser() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         val context = calculator.userContext(board, "unknown")
         assertTrue(context.isEmpty())
     }
 
     @Test
     fun userContextDefaultWindowSize() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u3", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u3",
+                fixedClock,
+            )
         val context = calculator.userContext(board, "u3") // default windowSize = 2
         // u3 at index 2, window from 0 to 4+1=5
         assertEquals(5, context.size)
@@ -2942,7 +3173,14 @@ class LeaderboardCalculatorUserContextTest {
 
     @Test
     fun userContextClampedAtStart() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         // u1 is at index 0, window=2: from max(0, 0-2)=0, to min(5, 0+2+1)=3
         val context = calculator.userContext(board, "u1", 2)
         assertEquals(3, context.size)
@@ -2951,7 +3189,14 @@ class LeaderboardCalculatorUserContextTest {
 
     @Test
     fun userContextClampedAtEnd() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u5", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u5",
+                fixedClock,
+            )
         // u5 is at index 4, window=2: from max(0, 4-2)=2, to min(5, 4+2+1)=5
         val context = calculator.userContext(board, "u5", 2)
         assertEquals(3, context.size)
@@ -2960,7 +3205,14 @@ class LeaderboardCalculatorUserContextTest {
 
     @Test
     fun userContextWindowSizeOne() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u3", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u3",
+                fixedClock,
+            )
         // u3 at index 2, window=1: from max(0,2-1)=1, to min(5,2+1+1)=4
         val context = calculator.userContext(board, "u3", 1)
         assertEquals(3, context.size)
@@ -2971,7 +3223,14 @@ class LeaderboardCalculatorUserContextTest {
 
     @Test
     fun userContextWindowSizeZero() {
-        val board = calculator.compute("c1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "u3", fixedClock)
+        val board =
+            calculator.compute(
+                "c1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "u3",
+                fixedClock,
+            )
         // u3 at index 2, window=0: from max(0,2)=2, to min(5,3)=3
         val context = calculator.userContext(board, "u3", 0)
         assertEquals(1, context.size)
@@ -3017,7 +3276,12 @@ class BuddyManagerIntegrationTest {
         assertEquals(BuddyManager.SharingLevel.DETAILED, updated.sharingLevel)
 
         // Build snapshot
-        val snapshot = manager.buildSnapshot("bob", updated.sharingLevel, BuddyManager.BuddyStats(100, 5, 200, 50, 60, 30))
+        val snapshot =
+            manager.buildSnapshot(
+                "bob",
+                updated.sharingLevel,
+                BuddyManager.BuddyStats(100, 5, 200, 50, 60, 30),
+            )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(60, snapshot.nutritiveMinutes)
 

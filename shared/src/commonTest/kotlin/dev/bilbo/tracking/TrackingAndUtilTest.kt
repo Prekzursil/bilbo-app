@@ -26,6 +26,10 @@ import dev.bilbo.util.OfflineException
 import dev.bilbo.util.safeCall
 import dev.bilbo.util.toUserMessage
 import dev.bilbo.util.withRetry
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.test.runTest
+import kotlinx.serialization.SerializationException
 import kotlin.test.BeforeTest
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -36,11 +40,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertNull
 import kotlin.test.assertSame
 import kotlin.test.assertTrue
-import kotlin.test.fail
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOf
-import kotlinx.coroutines.test.runTest
-import kotlinx.serialization.SerializationException
 
 // TrackingAndUtilTest.kt
 // Bilbo — Comprehensive Unit Tests
@@ -49,8 +48,6 @@ import kotlinx.serialization.SerializationException
 //         OfflineException, NetworkException, withRetry, safeCall, toUserMessage,
 //         Result, DefaultEnforcementMode, SharingLevelPref, NotificationPreferences,
 //         SeedDataLoader
-
-
 
 // =============================================================================
 // MARK: - BypassManager Tests (production class at dev.bilbo.tracking.BypassManager)
@@ -1989,7 +1986,11 @@ private class FakeAppProfileRepository : AppProfileRepository {
 
     override fun observeByPackageName(packageName: String): Flow<AppProfile?> = flowOf(stored[packageName])
 
-    override suspend fun getByCategory(category: AppCategory): List<AppProfile> = stored.values.filter { it.category == category }
+    override suspend fun getByCategory(category: AppCategory): List<AppProfile> =
+        stored.values.filter {
+            it.category ==
+                category
+        }
 
     override suspend fun getByEnforcementMode(enforcementMode: EnforcementMode): List<AppProfile> =
         stored.values.filter { it.enforcementMode == enforcementMode }
@@ -2041,7 +2042,11 @@ private class FakeSuggestionRepository : SuggestionRepository {
 
     override suspend fun getById(id: Long): AnalogSuggestion? = stored.find { it.id == id }
 
-    override suspend fun getByCategory(category: SuggestionCategory): List<AnalogSuggestion> = stored.filter { it.category == category }
+    override suspend fun getByCategory(category: SuggestionCategory): List<AnalogSuggestion> =
+        stored.filter {
+            it.category ==
+                category
+        }
 
     override suspend fun getByTimeOfDay(timeOfDay: TimeOfDay): List<AnalogSuggestion> =
         stored.filter { it.timeOfDay == timeOfDay || it.timeOfDay == null }
@@ -2049,7 +2054,11 @@ private class FakeSuggestionRepository : SuggestionRepository {
     override suspend fun getByCategoryAndTimeOfDay(
         category: SuggestionCategory,
         timeOfDay: TimeOfDay,
-    ): List<AnalogSuggestion> = stored.filter { it.category == category && (it.timeOfDay == timeOfDay || it.timeOfDay == null) }
+    ): List<AnalogSuggestion> =
+        stored.filter {
+            it.category == category &&
+                (it.timeOfDay == timeOfDay || it.timeOfDay == null)
+        }
 
     override suspend fun getCustom(): List<AnalogSuggestion> = stored.filter { it.isCustom }
 

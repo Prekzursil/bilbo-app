@@ -12,17 +12,15 @@ import dev.bilbo.data.BilboDatabase
  * which is the standard location on iOS for user-generated / persistent data.
  */
 class IosDatabaseDriver : DatabaseDriverFactory {
-
     /**
      * Create (or open) the "bilbo.db" SQLite database and return a configured driver.
      * The [BilboDatabase.Schema] callback handles CREATE TABLE / migration statements.
      */
-    override fun createDriver(): SqlDriver {
-        return NativeSqliteDriver(
+    override fun createDriver(): SqlDriver =
+        NativeSqliteDriver(
             schema = BilboDatabase.Schema,
-            name = DATABASE_NAME
+            name = DATABASE_NAME,
         )
-    }
 
     companion object {
         const val DATABASE_NAME = "bilbo.db"

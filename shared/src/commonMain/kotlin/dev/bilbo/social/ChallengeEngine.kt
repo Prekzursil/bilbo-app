@@ -1,11 +1,10 @@
 package dev.bilbo.social
 
-import kotlin.time.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.number
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 /**
  * Manages focus challenges within circles and between buddy pairs.
