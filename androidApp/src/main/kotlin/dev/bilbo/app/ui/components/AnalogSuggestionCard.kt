@@ -32,48 +32,37 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.bilbo.app.ui.theme.BilboTheme
+import dev.bilbo.app.ui.components.SuggestionVisuals.emoji
+import dev.bilbo.app.ui.components.SuggestionVisuals.label
 import dev.bilbo.domain.AnalogSuggestion
 import dev.bilbo.domain.SuggestionCategory
-import dev.bilbo.domain.TimeOfDay
+
+private const val ARGB_CARD_GREEN = 0xFF2D6A4F
+private const val ARGB_CARD_GREEN_LIGHT = 0xFF52B788
+private const val ARGB_CARD_ON_GREEN = 0xFFD8F3DC
+private const val ARGB_CARD_SUBTLE = 0xFFB7E4C7
+
+private const val FLIP_ANGLE = 90f
+private const val FLIP_DONE_ANGLE = 89f
+private const val FLIP_DURATION_MS = 220
+private const val CAMERA_DISTANCE = 12f
+private const val ALPHA_BADGE_BG = 0.3f
+
+private const val RADIUS_HERO_DP = 20
+private const val RADIUS_BUTTON_DP = 12
+private const val ELEVATION_DP = 4
+private const val PADDING_DP = 20
+private const val SPACE_LARGE_DP = 12
+private const val SPACE_MEDIUM_DP = 8
+private const val SPACE_SMALL_DP = 4
+private const val BADGE_SIZE_DP = 36
 
 // ── Nature-inspired green palette ─────────────────────────────────────────────
-private val CardGreen = Color(0xFF2D6A4F)
-private val CardGreenLight = Color(0xFF52B788)
-private val CardGreenSurface = Color(0xFF40916C)
-private val CardOnGreen = Color(0xFFD8F3DC)
-private val CardSubtle = Color(0xFFB7E4C7)
-
-// ── Category emoji map ────────────────────────────────────────────────────────
-private fun SuggestionCategory.emoji(): String =
-    when (this) {
-        SuggestionCategory.EXERCISE -> "💪"
-        SuggestionCategory.CREATIVE -> "🎨"
-        SuggestionCategory.SOCIAL -> "👥"
-        SuggestionCategory.MINDFULNESS -> "🧘"
-        SuggestionCategory.LEARNING -> "📖"
-        SuggestionCategory.NATURE -> "🌿"
-        SuggestionCategory.COOKING -> "🍳"
-        SuggestionCategory.MUSIC -> "🎵"
-        SuggestionCategory.GAMING_PHYSICAL -> "🎲"
-        SuggestionCategory.READING -> "📚"
-    }
-
-private fun SuggestionCategory.label(): String =
-    when (this) {
-        SuggestionCategory.EXERCISE -> "Exercise"
-        SuggestionCategory.CREATIVE -> "Creative"
-        SuggestionCategory.SOCIAL -> "Social"
-        SuggestionCategory.MINDFULNESS -> "Mindfulness"
-        SuggestionCategory.LEARNING -> "Learning"
-        SuggestionCategory.NATURE -> "Nature"
-        SuggestionCategory.COOKING -> "Cooking"
-        SuggestionCategory.MUSIC -> "Music"
-        SuggestionCategory.GAMING_PHYSICAL -> "Physical Games"
-        SuggestionCategory.READING -> "Reading"
-    }
+private val CardGreen = Color(ARGB_CARD_GREEN)
+private val CardGreenLight = Color(ARGB_CARD_GREEN_LIGHT)
+private val CardOnGreen = Color(ARGB_CARD_ON_GREEN)
+private val CardSubtle = Color(ARGB_CARD_SUBTLE)
 
 /**
  * A card that displays a single [AnalogSuggestion].
@@ -81,9 +70,10 @@ private fun SuggestionCategory.label(): String =
  * When the user taps "Show another", the card performs a 3-D flip animation
  * before [onShowAnother] is invoked, giving the caller time to swap the data.
  *
- * @param suggestion   The suggestion to display.
- * @param onAccept     Called when the user taps "I'll do this! (+5 FP)".
+ * @param suggestion    The suggestion to display.
+ * @param onAccept      Called when the user taps "I'll do this! (+5 FP)".
  * @param onShowAnother Called when the user taps "Show another".
+ * @param modifier      Layout modifier applied to the card.
  */
 @Composable
 fun AnalogSuggestionCard(
@@ -96,10 +86,10 @@ fun AnalogSuggestionCard(
     var flipping by remember { mutableStateOf(false) }
 
     val rotation by animateFloatAsState(
-        targetValue = if (flipping) 90f else 0f,
-        animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+        targetValue = if (flipping) FLIP_ANGLE else 0f,
+        animationSpec = tween(durationMillis = FLIP_DURATION_MS, easing = FastOutSlowInEasing),
         finishedListener = { angle ->
-            if (angle >= 89f) {
+            if (angle >= FLIP_DONE_ANGLE) {
                 // Half-way through: invoke callback, then animate back from -90° to 0°
                 flipping = false
                 onShowAnother()
@@ -114,51 +104,17 @@ fun AnalogSuggestionCard(
                 .fillMaxWidth()
                 .graphicsLayer {
                     rotationX = rotation
-                    cameraDistance = 12f * density
+                    cameraDistance = CAMERA_DISTANCE * density
                 },
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(RADIUS_HERO_DP.dp),
         colors = CardDefaults.cardColors(containerColor = CardGreen),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = ELEVATION_DP.dp),
     ) {
         Column(
-            modifier = Modifier.padding(20.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(PADDING_DP.dp),
+            verticalArrangement = Arrangement.spacedBy(SPACE_LARGE_DP.dp),
         ) {
-            // ── Category badge ────────────────────────────────────────────
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(36.dp)
-                            .background(CardGreenLight.copy(alpha = 0.3f), CircleShape),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Text(
-                        text = suggestion.category.emoji(),
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                }
-                Text(
-                    text = suggestion.category.label(),
-                    style =
-                        MaterialTheme.typography.labelMedium.copy(
-                            color = CardSubtle,
-                            fontWeight = FontWeight.Medium,
-                        ),
-                )
-                suggestion.timeOfDay?.let { tod ->
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(
-                        text = tod.name.lowercase().replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.labelSmall.copy(color = CardSubtle),
-                    )
-                }
-            }
-
-            // ── Suggestion text ───────────────────────────────────────────
+            CategoryBadge(suggestion)
             Text(
                 text = suggestion.text,
                 style =
@@ -167,58 +123,76 @@ fun AnalogSuggestionCard(
                         fontWeight = FontWeight.Medium,
                     ),
             )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // ── Action buttons ────────────────────────────────────────────
-            Button(
-                onClick = onAccept,
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(12.dp),
-                colors =
-                    ButtonDefaults.buttonColors(
-                        containerColor = CardGreenLight,
-                        contentColor = Color.White,
-                    ),
-            ) {
-                Text(
-                    text = "I'll do this! (+5 FP)",
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                )
-            }
-
-            TextButton(
-                onClick = { flipping = true },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = "Show another",
-                    style = MaterialTheme.typography.labelMedium.copy(color = CardSubtle),
-                )
-            }
+            Spacer(modifier = Modifier.height(SPACE_SMALL_DP.dp))
+            ActionButtons(onAccept = onAccept, onShowAnother = { flipping = true })
         }
     }
 }
 
-// ── Preview ───────────────────────────────────────────────────────────────────
-
-@Preview(showBackground = true)
 @Composable
-private fun AnalogSuggestionCardPreview() {
-    BilboTheme {
-        Box(modifier = Modifier.padding(16.dp)) {
-            AnalogSuggestionCard(
-                suggestion =
-                    AnalogSuggestion(
-                        id = 1,
-                        text = "Step outside for a 10-minute walk around the block.",
-                        category = SuggestionCategory.EXERCISE,
-                        tags = listOf("outdoors", "quick"),
-                        timeOfDay = TimeOfDay.MORNING,
-                    ),
-                onAccept = {},
-                onShowAnother = {},
+private fun CategoryBadge(suggestion: AnalogSuggestion) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(SPACE_MEDIUM_DP.dp),
+    ) {
+        Box(
+            modifier =
+                Modifier
+                    .size(BADGE_SIZE_DP.dp)
+                    .background(CardGreenLight.copy(alpha = ALPHA_BADGE_BG), CircleShape),
+            contentAlignment = Alignment.Center,
+        ) {
+            Text(
+                text = suggestion.category.emoji(),
+                style = MaterialTheme.typography.titleMedium,
             )
         }
+        Text(
+            text = suggestion.category.label(),
+            style =
+                MaterialTheme.typography.labelMedium.copy(
+                    color = CardSubtle,
+                    fontWeight = FontWeight.Medium,
+                ),
+        )
+        suggestion.timeOfDay?.let { tod ->
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = tod.name.lowercase().replaceFirstChar { it.uppercase() },
+                style = MaterialTheme.typography.labelSmall.copy(color = CardSubtle),
+            )
+        }
+    }
+}
+
+@Composable
+private fun ActionButtons(
+    onAccept: () -> Unit,
+    onShowAnother: () -> Unit,
+) {
+    Button(
+        onClick = onAccept,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(RADIUS_BUTTON_DP.dp),
+        colors =
+            ButtonDefaults.buttonColors(
+                containerColor = CardGreenLight,
+                contentColor = Color.White,
+            ),
+    ) {
+        Text(
+            text = "I'll do this! (+5 FP)",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+        )
+    }
+
+    TextButton(
+        onClick = onShowAnother,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(
+            text = "Show another",
+            style = MaterialTheme.typography.labelMedium.copy(color = CardSubtle),
+        )
     }
 }
