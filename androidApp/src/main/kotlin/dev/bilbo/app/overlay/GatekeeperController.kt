@@ -78,7 +78,9 @@ class GatekeeperController
             scope.launch {
                 val hasActiveDeclaration = checkActiveDeclaration(appInfo.packageName)
                 if (hasActiveDeclaration) {
-                    Timber.d("GatekeeperController: active declaration exists for ${appInfo.packageName} — skipping gatekeeper")
+                    Timber.d(
+                        "GatekeeperController: active declaration exists for ${appInfo.packageName} — skipping gatekeeper",
+                    )
                     return@launch
                 }
 

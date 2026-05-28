@@ -118,14 +118,22 @@ private class InMemoryUsageRepository : UsageRepository {
 
     override suspend fun getById(id: Long): UsageSession? = sessions.firstOrNull { it.id == id }
 
-    override suspend fun getByPackageName(packageName: String): List<UsageSession> = sessions.filter { it.packageName == packageName }
+    override suspend fun getByPackageName(packageName: String): List<UsageSession> =
+        sessions.filter {
+            it.packageName ==
+                packageName
+        }
 
     override suspend fun getByDateRange(
         from: Instant,
         to: Instant,
     ): List<UsageSession> = sessions.filter { it.startTime in from..to }
 
-    override suspend fun getByCategory(category: AppCategory): List<UsageSession> = sessions.filter { it.category == category }
+    override suspend fun getByCategory(category: AppCategory): List<UsageSession> =
+        sessions.filter {
+            it.category ==
+                category
+        }
 
     override suspend fun getByDateRangeAndCategory(
         from: Instant,
@@ -160,7 +168,11 @@ private class InMemoryUsageRepository : UsageRepository {
         mutate { it.removeAll { s -> s.startTime < before } }
     }
 
-    override suspend fun countByPackageName(packageName: String): Long = sessions.count { it.packageName == packageName }.toLong()
+    override suspend fun countByPackageName(packageName: String): Long =
+        sessions
+            .count {
+                it.packageName == packageName
+            }.toLong()
 
     override suspend fun sumDurationByCategory(
         from: Instant,
@@ -190,9 +202,14 @@ private class InMemoryAppProfileRepository : AppProfileRepository {
 
     override suspend fun getByPackageName(packageName: String): AppProfile? = profiles[packageName]
 
-    override fun observeByPackageName(packageName: String): Flow<AppProfile?> = state.asStateFlow().map { it[packageName] }
+    override fun observeByPackageName(packageName: String): Flow<AppProfile?> =
+        state.asStateFlow().map { it[packageName] }
 
-    override suspend fun getByCategory(category: AppCategory): List<AppProfile> = profiles.values.filter { it.category == category }
+    override suspend fun getByCategory(category: AppCategory): List<AppProfile> =
+        profiles.values.filter {
+            it.category ==
+                category
+        }
 
     override suspend fun getByEnforcementMode(enforcementMode: EnforcementMode): List<AppProfile> =
         profiles.values.filter { it.enforcementMode == enforcementMode }
@@ -259,7 +276,11 @@ private class InMemoryIntentRepository : IntentRepository {
 
     override suspend fun getById(id: Long): IntentDeclaration? = declarations.firstOrNull { it.id == id }
 
-    override suspend fun getByApp(packageName: String): List<IntentDeclaration> = declarations.filter { it.declaredApp == packageName }
+    override suspend fun getByApp(packageName: String): List<IntentDeclaration> =
+        declarations.filter {
+            it.declaredApp ==
+                packageName
+        }
 
     override suspend fun getByDateRange(
         from: Instant,
@@ -343,7 +364,11 @@ private class InMemoryEmotionRepository : EmotionRepository {
         to: Instant,
     ): List<EmotionalCheckIn> = checkIns.filter { it.timestamp in from..to }
 
-    override suspend fun getByIntentId(intentId: Long): EmotionalCheckIn? = checkIns.firstOrNull { it.linkedIntentId == intentId }
+    override suspend fun getByIntentId(intentId: Long): EmotionalCheckIn? =
+        checkIns.firstOrNull {
+            it.linkedIntentId ==
+                intentId
+        }
 
     override suspend fun insert(checkIn: EmotionalCheckIn): Long {
         val id = nextId++
@@ -384,7 +409,11 @@ private class InMemoryBudgetRepository : BudgetRepository {
         to: LocalDate,
     ): List<DopamineBudget> = budgets.values.filter { it.date in from..to }.sortedBy { it.date }
 
-    override suspend fun getRecent(limit: Long): List<DopamineBudget> = budgets.values.sortedByDescending { it.date }.take(limit.toInt())
+    override suspend fun getRecent(limit: Long): List<DopamineBudget> =
+        budgets.values
+            .sortedByDescending {
+                it.date
+            }.take(limit.toInt())
 
     override suspend fun insert(budget: DopamineBudget) {
         budgets[budget.date] = budget

@@ -157,7 +157,6 @@ class WeeklyInsightWorker
             // 2. Run Tier-2 heuristic analysis (always — used as fallback and for cloud payload)
             val heuristicInsights =
                 heuristicEngine.analyzeWeek(
-                    weekStart = weekStart,
                     sessions = sessions,
                     checkIns = checkIns,
                     intents = intents,

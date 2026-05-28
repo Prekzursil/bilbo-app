@@ -149,7 +149,6 @@ class DailyResetWorker
             val priorSessions = usageRepository.getByDateRange(priorFromInstant, fromInstant)
 
             heuristicEngine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(), // EmotionRepository injected separately if needed
                 intents = emptyList(),

@@ -13,3 +13,7 @@ ij_kotlin_allow_trailing_comma_on_call_site = true
 ij_kotlin_packages_to_use_import_on_demand = unset
 ij_kotlin_name_count_to_use_star_import = 2147483647
 ij_kotlin_name_count_to_use_star_import_for_members = 2147483647
+# @Composable functions are PascalCase by official Jetpack Compose convention —
+# exempt them from ktlint's function-naming rule (matches detekt's FunctionNaming
+# ignoreAnnotated: [Composable]).
+ktlint_function_naming_ignore_when_annotated_with = Composable, Preview

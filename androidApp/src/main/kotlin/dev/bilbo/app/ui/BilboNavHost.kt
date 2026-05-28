@@ -257,13 +257,25 @@ fun BilboNavHost(
             composable(BilboRoute.SETTINGS) {
                 RealSettingsScreen()
             }
-            composable(BilboRoute.SETTINGS_ENFORCEMENT) { SettingsSubPlaceholder("Enforcement") { navController.popBackStack() } }
-            composable(BilboRoute.SETTINGS_ECONOMY) { SettingsSubPlaceholder("Focus Economy") { navController.popBackStack() } }
-            composable(BilboRoute.SETTINGS_EMOTIONAL) { SettingsSubPlaceholder("Emotional Check-ins") { navController.popBackStack() } }
-            composable(BilboRoute.SETTINGS_AI) { SettingsSubPlaceholder("AI Insights") { navController.popBackStack() } }
+            composable(
+                BilboRoute.SETTINGS_ENFORCEMENT,
+            ) { SettingsSubPlaceholder("Enforcement") { navController.popBackStack() } }
+            composable(
+                BilboRoute.SETTINGS_ECONOMY,
+            ) { SettingsSubPlaceholder("Focus Economy") { navController.popBackStack() } }
+            composable(BilboRoute.SETTINGS_EMOTIONAL) {
+                SettingsSubPlaceholder("Emotional Check-ins") { navController.popBackStack() }
+            }
+            composable(
+                BilboRoute.SETTINGS_AI,
+            ) { SettingsSubPlaceholder("AI Insights") { navController.popBackStack() } }
             composable(BilboRoute.SETTINGS_SOCIAL) { SettingsSubPlaceholder("Social") { navController.popBackStack() } }
-            composable(BilboRoute.SETTINGS_NOTIFICATIONS) { SettingsSubPlaceholder("Notifications") { navController.popBackStack() } }
-            composable(BilboRoute.SETTINGS_DATA) { SettingsSubPlaceholder("Data & Privacy") { navController.popBackStack() } }
+            composable(BilboRoute.SETTINGS_NOTIFICATIONS) {
+                SettingsSubPlaceholder("Notifications") { navController.popBackStack() }
+            }
+            composable(
+                BilboRoute.SETTINGS_DATA,
+            ) { SettingsSubPlaceholder("Data & Privacy") { navController.popBackStack() } }
             composable(BilboRoute.DATA_ANONYMIZATION) {
                 DataAnonymizationScreen(onBack = { navController.popBackStack() })
             }

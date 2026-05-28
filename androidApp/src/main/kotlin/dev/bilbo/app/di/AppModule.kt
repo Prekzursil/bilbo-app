@@ -38,7 +38,8 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideBilboDatabase(driverFactory: DatabaseDriverFactory): BilboDatabase = BilboDatabase(driverFactory.createDriver())
+    fun provideBilboDatabase(driverFactory: DatabaseDriverFactory): BilboDatabase =
+        BilboDatabase(driverFactory.createDriver())
 
     @Provides
     @Singleton
@@ -49,7 +50,8 @@ object AppModule {
     fun provideInsightRepository(apiService: BilboApiService): InsightRepository = InsightRepository(apiService)
 
     @Provides
-    fun provideGetDailyInsightsUseCase(repository: InsightRepository): GetDailyInsightsUseCase = GetDailyInsightsUseCase(repository)
+    fun provideGetDailyInsightsUseCase(repository: InsightRepository): GetDailyInsightsUseCase =
+        GetDailyInsightsUseCase(repository)
 
     @Provides
     @Singleton

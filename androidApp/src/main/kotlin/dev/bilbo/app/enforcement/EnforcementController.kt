@@ -174,7 +174,8 @@ class EnforcementController
                             )
                         EnforcementMode.HARD_LOCK -> {
                             cooldownManager.lockApp(appPackage, HARD_LOCK_COOLDOWN_MINUTES)
-                            val remainingSecs = cooldownManager.getRemainingSeconds(appPackage) ?: (HARD_LOCK_COOLDOWN_MINUTES * 60L)
+                            val remainingSecs =
+                                cooldownManager.getRemainingSeconds(appPackage) ?: (HARD_LOCK_COOLDOWN_MINUTES * 60L)
                             val suggestion = getSuggestion()
                             showHardLockOnMainThread(appPackage, appLabel, remainingSecs, suggestion, fpBalance)
                         }
@@ -267,7 +268,9 @@ class EnforcementController
                 if (balance < NUDGE_EXTENSION_FP_COST) return
 
                 budgetRepository.incrementFpSpent(today, NUDGE_EXTENSION_FP_COST)
-                Timber.d("EnforcementController: nudge extension granted for $appLabel (−${NUDGE_EXTENSION_FP_COST} FP)")
+                Timber.d(
+                    "EnforcementController: nudge extension granted for $appLabel (−${NUDGE_EXTENSION_FP_COST} FP)",
+                )
             } catch (e: Exception) {
                 Timber.e(e, "EnforcementController: error handling nudge extension")
             }
@@ -278,7 +281,9 @@ class EnforcementController
                 val today = todayDate()
                 budgetRepository.incrementFpSpent(today, HARD_LOCK_OVERRIDE_FP_COST)
                 cooldownManager.unlockApp(appPackage)
-                Timber.d("EnforcementController: hard lock override for $appPackage (−${HARD_LOCK_OVERRIDE_FP_COST} FP)")
+                Timber.d(
+                    "EnforcementController: hard lock override for $appPackage (−${HARD_LOCK_OVERRIDE_FP_COST} FP)",
+                )
             } catch (e: Exception) {
                 Timber.e(e, "EnforcementController: error handling hard lock override")
             }

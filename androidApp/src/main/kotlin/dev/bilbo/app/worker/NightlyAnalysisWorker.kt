@@ -134,7 +134,6 @@ class NightlyAnalysisWorker
             // 2. Run heuristic analysis — pure local computation
             val insights =
                 heuristicEngine.analyzeWeek(
-                    weekStart = weekStart,
                     sessions = sessions,
                     checkIns = checkIns,
                     intents = intents,

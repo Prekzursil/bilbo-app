@@ -1,21 +1,65 @@
-// SettingsScreen.kt
-// Bilbo — Android Settings
-//
-// Complete settings screen matching all iOS SettingsView sections:
-//   Enforcement · Economy · Emotional · AI · Social
-//   Notifications · Data · About
-
 package dev.bilbo.app.ui.screen.settings
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.AcUnit
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.BarChart
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.EmojiEvents
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FileDownload
+import androidx.compose.material.icons.filled.FlashOn
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.NightlightRound
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.People
+import androidx.compose.material.icons.filled.PersonRemove
+import androidx.compose.material.icons.filled.Preview
+import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Remove
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Shield
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Slider
+import androidx.compose.material3.Switch
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -23,6 +67,13 @@ import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.bilbo.app.BuildConfig
+
+// SettingsScreen.kt
+// Bilbo — Android Settings
+//
+// Complete settings screen matching all iOS SettingsView sections:
+//   Enforcement · Economy · Emotional · AI · Social
+//   Notifications · Data · About
 
 // MARK: - Enforcement mode
 
@@ -345,13 +396,26 @@ private fun SocialSection(vm: SettingsViewModel) {
 @Composable
 private fun NotificationsSection(vm: SettingsViewModel) {
     SettingsGroup(title = "Notifications") {
-        SettingsSwitchRow(Icons.Filled.Notifications, "Nudge Notifications", vm.nudgeNotifications) { vm.nudgeNotifications = it }
+        SettingsSwitchRow(Icons.Filled.Notifications, "Nudge Notifications", vm.nudgeNotifications) {
+            vm.nudgeNotifications =
+                it
+        }
         SettingsDivider()
-        SettingsSwitchRow(Icons.Filled.BarChart, "Weekly Insight Ready", vm.insightNotifications) { vm.insightNotifications = it }
+        SettingsSwitchRow(Icons.Filled.BarChart, "Weekly Insight Ready", vm.insightNotifications) {
+            vm.insightNotifications =
+                it
+        }
         SettingsDivider()
-        SettingsSwitchRow(Icons.Filled.EmojiEvents, "Challenge Updates", vm.challengeNotifications) { vm.challengeNotifications = it }
+        SettingsSwitchRow(Icons.Filled.EmojiEvents, "Challenge Updates", vm.challengeNotifications) {
+            vm.challengeNotifications =
+                it
+        }
         SettingsDivider()
-        SettingsSwitchRow(Icons.Filled.NightlightRound, "Quiet Hours", vm.quietHoursEnabled) { vm.quietHoursEnabled = it }
+        SettingsSwitchRow(
+            Icons.Filled.NightlightRound,
+            "Quiet Hours",
+            vm.quietHoursEnabled,
+        ) { vm.quietHoursEnabled = it }
         if (vm.quietHoursEnabled) {
             SettingsDivider()
             Row(
@@ -362,11 +426,19 @@ private fun NotificationsSection(vm: SettingsViewModel) {
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column {
-                    Text("Start", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "Start",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     Text(vm.quietStart, style = MaterialTheme.typography.bodyLarge)
                 }
                 Column(horizontalAlignment = Alignment.End) {
-                    Text("End", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "End",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                     Text(vm.quietEnd, style = MaterialTheme.typography.bodyLarge)
                 }
             }
@@ -411,7 +483,11 @@ private fun AboutSection(onPrivacyClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text("Version", style = MaterialTheme.typography.bodyLarge)
-            Text(BuildConfig.VERSION_NAME, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                BuildConfig.VERSION_NAME,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
         SettingsDivider()
         SettingsArrowRow(icon = Icons.Filled.Description, label = "Open-Source Licenses")

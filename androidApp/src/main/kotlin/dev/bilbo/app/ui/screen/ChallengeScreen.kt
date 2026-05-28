@@ -1,14 +1,48 @@
 package dev.bilbo.app.ui.screen
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.outlined.AddCircle
+import androidx.compose.material.icons.outlined.EmojiEvents
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.RadioButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -146,7 +180,10 @@ fun ChallengeScreen(
                 is ChallengeScreenMode.Detail -> {
                     val challenge = state.selectedChallenge
                     if (challenge != null) {
-                        ChallengeDetailContent(challenge = challenge, onJoin = { onJoinChallenge(challenge.challengeId) })
+                        ChallengeDetailContent(
+                            challenge = challenge,
+                            onJoin = { onJoinChallenge(challenge.challengeId) },
+                        )
                     } else {
                         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { CircularProgressIndicator() }
                     }
@@ -180,7 +217,12 @@ private fun ChallengeListContent(
         }
 
         if (isLoading) {
-            item { Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
+            item {
+                Box(
+                    Modifier.fillMaxWidth().padding(32.dp),
+                    contentAlignment = Alignment.Center,
+                ) { CircularProgressIndicator() }
+            }
         } else if (challenges.isEmpty()) {
             item {
                 Column(
@@ -232,7 +274,10 @@ private fun ChallengeListCard(
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(challenge.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Surface(shape = RoundedCornerShape(6.dp), color = typeColor.copy(alpha = 0.12f)) {
                             Text(
                                 challenge.type.displayName(),
@@ -241,13 +286,21 @@ private fun ChallengeListCard(
                                 modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
                             )
                         }
-                        Text("·", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "·",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         Text(
                             if (challenge.isTeam) "Team" else "Solo",
                             style = MaterialTheme.typography.labelSmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
-                        Text("·", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "·",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         Text(
                             "${challenge.daysRemaining}d left",
                             style = MaterialTheme.typography.labelSmall,
@@ -303,7 +356,10 @@ private fun ChallengeDetailContent(
                 colors = CardDefaults.cardColors(containerColor = typeColor.copy(alpha = 0.10f)),
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
                         Surface(shape = RoundedCornerShape(8.dp), color = typeColor.copy(alpha = 0.2f)) {
                             Text(
                                 challenge.type.displayName(),
@@ -315,7 +371,14 @@ private fun ChallengeDetailContent(
                         }
                         Surface(
                             shape = RoundedCornerShape(8.dp),
-                            color = if (challenge.isTeam) Color(0xFF4CAF50).copy(alpha = 0.15f) else Color(0xFF2196F3).copy(alpha = 0.15f),
+                            color =
+                                if (challenge.isTeam) {
+                                    Color(
+                                        0xFF4CAF50,
+                                    ).copy(alpha = 0.15f)
+                                } else {
+                                    Color(0xFF2196F3).copy(alpha = 0.15f)
+                                },
                         ) {
                             Text(
                                 if (challenge.isTeam) "Cooperative" else "Competitive",
@@ -335,7 +398,11 @@ private fun ChallengeDetailContent(
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
-                            Text("Start", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                "Start",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                             Text(
                                 challenge.startDate.toString(),
                                 style = MaterialTheme.typography.bodySmall,
@@ -343,8 +410,16 @@ private fun ChallengeDetailContent(
                             )
                         }
                         Column {
-                            Text("End", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(challenge.endDate.toString(), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                "End",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                challenge.endDate.toString(),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                            )
                         }
                         Column {
                             Text(
@@ -410,7 +485,11 @@ private fun ChallengeDetailContent(
         if (!isCompetitive) {
             item {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Group Progress", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                    Text(
+                        "Group Progress",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                     LinearProgressIndicator(
                         progress = { challenge.groupProgressPercent / 100f },
                         modifier = Modifier.fillMaxWidth().height(14.dp).clip(RoundedCornerShape(7.dp)),
@@ -463,14 +542,24 @@ private fun ChallengeLeaderboardRow(entry: ChallengeLeaderboardEntry) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Text(rankEmoji, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.width(32.dp), textAlign = TextAlign.Center)
+            Text(
+                rankEmoji,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = Modifier.width(32.dp),
+                textAlign = TextAlign.Center,
+            )
             Text(
                 entry.displayName,
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = if (entry.isCurrentUser) FontWeight.Bold else FontWeight.Normal,
                 modifier = Modifier.weight(1f),
             )
-            Text(entry.progressLabel, style = MaterialTheme.typography.bodySmall, color = rankColor, fontWeight = FontWeight.SemiBold)
+            Text(
+                entry.progressLabel,
+                style = MaterialTheme.typography.bodySmall,
+                color = rankColor,
+                fontWeight = FontWeight.SemiBold,
+            )
         }
     }
 }
@@ -478,7 +567,9 @@ private fun ChallengeLeaderboardRow(entry: ChallengeLeaderboardEntry) {
 // ── Create challenge form ─────────────────────────────────────────────────────
 
 @Composable
-private fun CreateChallengeForm(onCreate: (String, ChallengeEngine.ChallengeType, Boolean, Int, LocalDate, LocalDate) -> Unit) {
+private fun CreateChallengeForm(
+    onCreate: (String, ChallengeEngine.ChallengeType, Boolean, Int, LocalDate, LocalDate) -> Unit,
+) {
     var title by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf(ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES) }
     var isTeam by remember { mutableStateOf(false) }
@@ -550,7 +641,11 @@ private fun CreateChallengeForm(onCreate: (String, ChallengeEngine.ChallengeType
                 Text("Duration", style = MaterialTheme.typography.labelMedium)
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     durationOptions.forEach { days ->
-                        FilterChip(selected = durationDays == days, onClick = { durationDays = days }, label = { Text("${days}d") })
+                        FilterChip(
+                            selected = durationDays == days,
+                            onClick = { durationDays = days },
+                            label = { Text("${days}d") },
+                        )
                     }
                 }
             }

@@ -93,7 +93,11 @@ class DashboardViewModelTest {
             to: Instant,
         ): List<UsageSession> = state.value.filter { it.startTime in from..to }
 
-        override suspend fun getByCategory(category: AppCategory): List<UsageSession> = state.value.filter { it.category == category }
+        override suspend fun getByCategory(category: AppCategory): List<UsageSession> =
+            state.value.filter {
+                it.category ==
+                    category
+            }
 
         override suspend fun getByDateRangeAndCategory(
             from: Instant,
@@ -118,12 +122,20 @@ class DashboardViewModelTest {
 
         override suspend fun deleteOlderThan(before: Instant) = Unit
 
-        override suspend fun countByPackageName(packageName: String): Long = state.value.count { it.packageName == packageName }.toLong()
+        override suspend fun countByPackageName(packageName: String): Long =
+            state.value
+                .count {
+                    it.packageName ==
+                        packageName
+                }.toLong()
 
         override suspend fun sumDurationByCategory(
             from: Instant,
             to: Instant,
-        ): Map<AppCategory, Long> = state.value.groupBy { it.category }.mapValues { (_, v) -> v.sumOf { it.durationSeconds } }
+        ): Map<AppCategory, Long> =
+            state.value.groupBy { it.category }.mapValues { (_, v) ->
+                v.sumOf { it.durationSeconds }
+            }
     }
 
     private class FakeAppProfileRepository(
@@ -137,16 +149,22 @@ class DashboardViewModelTest {
 
         override suspend fun getByPackageName(packageName: String): AppProfile? = state.value[packageName]
 
-        override fun observeByPackageName(packageName: String): Flow<AppProfile?> = state.asStateFlow().map { it[packageName] }
+        override fun observeByPackageName(packageName: String): Flow<AppProfile?> =
+            state.asStateFlow().map { it[packageName] }
 
-        override suspend fun getByCategory(category: AppCategory): List<AppProfile> = state.value.values.filter { it.category == category }
+        override suspend fun getByCategory(category: AppCategory): List<AppProfile> =
+            state.value.values.filter {
+                it.category ==
+                    category
+            }
 
         override suspend fun getByEnforcementMode(enforcementMode: EnforcementMode): List<AppProfile> =
             state.value.values.filter { it.enforcementMode == enforcementMode }
 
         override suspend fun getBypassed(): List<AppProfile> = state.value.values.filter { it.isBypassed }
 
-        override suspend fun getCustomClassified(): List<AppProfile> = state.value.values.filter { it.isCustomClassification }
+        override suspend fun getCustomClassified(): List<AppProfile> =
+            state.value.values.filter { it.isCustomClassification }
 
         override suspend fun insert(profile: AppProfile) {
             state.value = state.value + (profile.packageName to profile)
