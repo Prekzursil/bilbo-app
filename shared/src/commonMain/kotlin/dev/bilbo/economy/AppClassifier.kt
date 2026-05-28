@@ -138,7 +138,8 @@ class AppClassifier(
     /**
      * Returns a list of package names with no classification (requires user input).
      */
-    fun getUnclassified(installedPackages: List<String>): List<String> = installedPackages.filter { classify(it) == null }
+    fun getUnclassified(installedPackages: List<String>): List<String> =
+        installedPackages.filter { classify(it) == null }
 
     // -------------------------------------------------------------------------
     // Factory / seed loading

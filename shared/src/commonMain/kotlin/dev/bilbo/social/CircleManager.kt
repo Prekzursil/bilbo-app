@@ -43,21 +43,9 @@ class CircleManager {
         val isActive: Boolean = true,
     )
 
-    data class CircleInvite(
-        val inviteId: String,
-        val circleId: String,
-        val invitedByUserId: String,
-        val invitedUserId: String?, // null if invite-code-only
-        val inviteCode: String,
-        val createdAt: Instant,
-        val expiresAt: Instant,
-        val isUsed: Boolean = false,
-    )
-
     // In-memory state
     private val circles = mutableMapOf<String, Circle>()
     private val memberships = mutableListOf<CircleMembership>()
-    private val invites = mutableListOf<CircleInvite>()
 
     // -------------------------------------------------------------------------
     // Circle creation
@@ -234,7 +222,8 @@ class CircleManager {
     /**
      * Returns active memberships for a circle.
      */
-    fun getActiveMemberships(circleId: String): List<CircleMembership> = memberships.filter { it.circleId == circleId && it.isActive }
+    fun getActiveMemberships(circleId: String): List<CircleMembership> =
+        memberships.filter { it.circleId == circleId && it.isActive }
 
     /**
      * Returns all circles a user is an active member of.
@@ -253,7 +242,8 @@ class CircleManager {
     /**
      * Returns all public circles (for discovery).
      */
-    fun getPublicCircles(): List<Circle> = circles.values.filter { it.isActive && it.visibility == CircleVisibility.PUBLIC }
+    fun getPublicCircles(): List<Circle> =
+        circles.values.filter { it.isActive && it.visibility == CircleVisibility.PUBLIC }
 
     /**
      * Returns the member count for [circleId].
@@ -316,12 +306,15 @@ class CircleManager {
         val m = getActiveMembership(circleId, userId)
         require(m?.role == CircleRole.ADMIN) { "Only circle admins can perform this action." }
     }
-
-    private var idCounter = 0L
-
-    private fun generateId(): String = "circle_${++idCounter}_${Clock.System.now().epochSeconds}"
-
-    private val codeChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
-
-    private fun generateInviteCode(): String = (1..INVITE_CODE_LENGTH).map { codeChars.random() }.joinToString("")
 }
+
+// File-level id/code generation helpers (kept out of the class to keep its
+// public surface focused on circle operations).
+private var circleIdCounter = 0L
+
+private fun generateId(): String = "circle_${++circleIdCounter}_${Clock.System.now().epochSeconds}"
+
+private const val CODE_CHARS = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
+
+private fun generateInviteCode(): String =
+    (1..CircleManager.INVITE_CODE_LENGTH).map { CODE_CHARS.random() }.joinToString("")

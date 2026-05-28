@@ -11,6 +11,10 @@ import kotlinx.datetime.Instant
  * the user's own stats are uploaded to compare).
  */
 class LeaderboardCalculator {
+    private companion object {
+        const val PERCENT = 100
+    }
+
     // -------------------------------------------------------------------------
     // Domain models
     // -------------------------------------------------------------------------
@@ -68,11 +72,9 @@ class LeaderboardCalculator {
     // -------------------------------------------------------------------------
 
     /**
-     * Computes a leaderboard for [circleId] in the given [category].
-     *
-     * @param memberStats Stats for all members in the circle.
-     * @param currentUserId The local user's ID (used to flag [LeaderboardEntry.isCurrentUser]).
-     * @param clock Used to timestamp the result.
+     * Computes a leaderboard for [circleId] in the given [category] from
+     * [memberStats]. [currentUserId] flags the local user's entry and [clock]
+     * timestamps the result.
      */
     fun compute(
         circleId: String,
@@ -210,7 +212,8 @@ class LeaderboardCalculator {
             LeaderboardCategory.STREAK_DAYS ->
                 stats.streakDays.toDouble() to "${stats.streakDays} days"
             LeaderboardCategory.INTENT_ACCURACY ->
-                stats.intentAccuracyPercent.toDouble() to "${(stats.intentAccuracyPercent * 100).toInt()}%"
+                stats.intentAccuracyPercent.toDouble() to
+                    "${(stats.intentAccuracyPercent * PERCENT).toInt()}%"
             LeaderboardCategory.FP_EARNED_WEEKLY ->
                 stats.fpEarnedWeekly.toDouble() to "${stats.fpEarnedWeekly} FP"
         }

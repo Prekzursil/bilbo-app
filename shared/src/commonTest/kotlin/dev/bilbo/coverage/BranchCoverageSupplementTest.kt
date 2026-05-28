@@ -839,70 +839,8 @@ class LeaderboardCalculatorSummarizeStandingBranchTest {
 }
 
 // =============================================================================
-// 3. CircleManager — missed branches (6 + CircleInvite 8 lines)
+// 3. CircleManager — missed branches
 // =============================================================================
-
-class CircleManagerCircleInviteDataTest {
-    @Test
-    fun circleInviteDataClassFields() {
-        // Coverage gap: CircleInvite data class -- equality, copy, and field access
-        val invite =
-            CircleManager.CircleInvite(
-                inviteId = "inv1",
-                circleId = "circle1",
-                invitedByUserId = "admin",
-                invitedUserId = null,
-                inviteCode = "ABCD1234",
-                createdAt = Instant.parse("2025-06-01T12:00:00Z"),
-                expiresAt = Instant.parse("2025-06-04T12:00:00Z"),
-                isUsed = false,
-            )
-        assertEquals("inv1", invite.inviteId)
-        assertEquals("circle1", invite.circleId)
-        assertEquals("admin", invite.invitedByUserId)
-        assertNull(invite.invitedUserId)
-        assertEquals("ABCD1234", invite.inviteCode)
-        assertFalse(invite.isUsed)
-
-        // Copy and equality
-        val copy = invite.copy(isUsed = true)
-        assertTrue(copy.isUsed)
-        assertNotEquals(invite, copy)
-
-        // With invited user
-        val claimed = invite.copy(invitedUserId = "user2", isUsed = true)
-        assertEquals("user2", claimed.invitedUserId)
-        assertTrue(claimed.isUsed)
-    }
-
-    @Test
-    fun circleInviteEquality() {
-        val a =
-            CircleManager.CircleInvite(
-                "i1",
-                "c1",
-                "u1",
-                null,
-                "CODE",
-                Instant.parse("2025-01-01T00:00:00Z"),
-                Instant.parse("2025-01-04T00:00:00Z"),
-                false,
-            )
-        val b =
-            CircleManager.CircleInvite(
-                "i1",
-                "c1",
-                "u1",
-                null,
-                "CODE",
-                Instant.parse("2025-01-01T00:00:00Z"),
-                Instant.parse("2025-01-04T00:00:00Z"),
-                false,
-            )
-        assertEquals(a, b)
-        assertEquals(a.hashCode(), b.hashCode())
-    }
-}
 
 class CircleManagerAuthorizationBranchTest {
     private val fixedClock =
@@ -1148,7 +1086,7 @@ class BuddyManagerBuildSnapshotBoundaryTest {
     fun buildSnapshot_allSharingLevels_zeroValues() {
         // Coverage gap: boundary values (zero) for each sharing level
         BuddyManager.SharingLevel.entries.forEach { level ->
-            val snapshot = manager.buildSnapshot("buddy1", level, 0, 0, 0, 0, 0, 0)
+            val snapshot = manager.buildSnapshot("buddy1", level, BuddyManager.BuddyStats(0, 0, 0, 0, 0, 0))
             assertEquals("buddy1", snapshot.buddyUserId)
             assertEquals(level, snapshot.sharingLevel)
             when (level) {
@@ -1195,12 +1133,7 @@ class BuddyManagerBuildSnapshotBoundaryTest {
             manager.buildSnapshot(
                 "buddy1",
                 BuddyManager.SharingLevel.MINIMAL,
-                fpBalance = 999,
-                streakDays = 50,
-                fpEarned = 500,
-                fpSpent = 100,
-                nutritiveMinutes = 200,
-                emptyCalorieMinutes = 150,
+                stats = BuddyManager.BuddyStats(fpBalance = 999, streakDays = 50, fpEarned = 500, fpSpent = 100, nutritiveMinutes = 200, emptyCalorieMinutes = 150),
             )
         assertNull(snapshot.fpBalance)
         assertNull(snapshot.streakDays)
@@ -1217,12 +1150,7 @@ class BuddyManagerBuildSnapshotBoundaryTest {
             manager.buildSnapshot(
                 "buddy1",
                 BuddyManager.SharingLevel.BASIC,
-                fpBalance = 100,
-                streakDays = 10,
-                fpEarned = 200,
-                fpSpent = 50,
-                nutritiveMinutes = 80,
-                emptyCalorieMinutes = 40,
+                stats = BuddyManager.BuddyStats(fpBalance = 100, streakDays = 10, fpEarned = 200, fpSpent = 50, nutritiveMinutes = 80, emptyCalorieMinutes = 40),
             )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(10, snapshot.streakDays)
@@ -1289,8 +1217,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "user1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
                 clock = fixedClock,
             )
@@ -1315,8 +1242,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
                 scope = ChallengeEngine.ChallengeScope.BUDDY_PAIR,
                 scopeId = "pair1",
                 createdByUserId = "user1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 50,
                 clock = fixedClock,
             )
@@ -1340,8 +1266,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "user1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 500,
                 isTeamChallenge = true,
                 clock = fixedClock,
@@ -1366,8 +1291,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "user1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 10,
                 clock = fixedClock,
             )
@@ -1387,8 +1311,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "user1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
                 clock = fixedClock,
             )
@@ -1408,8 +1331,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "user1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
                 clock = fixedClock,
             )

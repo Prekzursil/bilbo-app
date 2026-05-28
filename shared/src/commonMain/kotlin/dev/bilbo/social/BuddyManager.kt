@@ -16,6 +16,9 @@ import kotlinx.datetime.plus
 class BuddyManager {
     companion object {
         const val MAX_BUDDY_PAIRS = 3
+        private const val INVITE_EXPIRY_HOURS = 48
+        private const val SECONDS_PER_HOUR = 3600
+        private const val INVITE_CODE_LENGTH = 6
     }
 
     enum class SharingLevel {
@@ -71,6 +74,16 @@ class BuddyManager {
         val emptyCalorieMinutes: Int?,
     )
 
+    /** Raw, unfiltered buddy metrics passed to [buildSnapshot]. */
+    data class BuddyStats(
+        val fpBalance: Int,
+        val streakDays: Int,
+        val fpEarned: Int,
+        val fpSpent: Int,
+        val nutritiveMinutes: Int,
+        val emptyCalorieMinutes: Int,
+    )
+
     // In-memory state (backed by repository in production)
     private val pairs = mutableListOf<BuddyPair>()
     private val pendingInvites = mutableListOf<BuddyInvite>()
@@ -103,7 +116,7 @@ class BuddyManager {
                 inviteCode = generateInviteCode(),
                 sharingLevel = sharingLevel,
                 createdAt = now,
-                expiresAt = now.plus(48 * 3600, DateTimeUnit.SECOND),
+                expiresAt = now.plus(INVITE_EXPIRY_HOURS * SECONDS_PER_HOUR, DateTimeUnit.SECOND),
                 status = InviteStatus.PENDING,
             )
         pendingInvites += invite
@@ -237,28 +250,29 @@ class BuddyManager {
     }
 
     /**
-     * Builds a [BuddySnapshot] from raw data, filtered by [sharingLevel].
+     * Builds a [BuddySnapshot] from raw [stats], filtered by [sharingLevel].
      */
     fun buildSnapshot(
         buddyUserId: String,
         sharingLevel: SharingLevel,
-        fpBalance: Int,
-        streakDays: Int,
-        fpEarned: Int,
-        fpSpent: Int,
-        nutritiveMinutes: Int,
-        emptyCalorieMinutes: Int,
+        stats: BuddyStats,
     ): BuddySnapshot =
         BuddySnapshot(
             buddyUserId = buddyUserId,
             sharingLevel = sharingLevel,
-            fpBalance = if (sharingLevel >= SharingLevel.BASIC) fpBalance else null,
-            streakDays = if (sharingLevel >= SharingLevel.BASIC) streakDays else null,
-            fpEarned = if (sharingLevel >= SharingLevel.STANDARD) fpEarned else null,
-            fpSpent = if (sharingLevel >= SharingLevel.STANDARD) fpSpent else null,
-            nutritiveMinutes = if (sharingLevel >= SharingLevel.DETAILED) nutritiveMinutes else null,
-            emptyCalorieMinutes = if (sharingLevel >= SharingLevel.DETAILED) emptyCalorieMinutes else null,
+            fpBalance = stats.fpBalance.atLeast(sharingLevel, SharingLevel.BASIC),
+            streakDays = stats.streakDays.atLeast(sharingLevel, SharingLevel.BASIC),
+            fpEarned = stats.fpEarned.atLeast(sharingLevel, SharingLevel.STANDARD),
+            fpSpent = stats.fpSpent.atLeast(sharingLevel, SharingLevel.STANDARD),
+            nutritiveMinutes = stats.nutritiveMinutes.atLeast(sharingLevel, SharingLevel.DETAILED),
+            emptyCalorieMinutes = stats.emptyCalorieMinutes.atLeast(sharingLevel, SharingLevel.DETAILED),
         )
+
+    /** Returns this value only when [actual] meets the [required] sharing level. */
+    private fun Int.atLeast(
+        actual: SharingLevel,
+        required: SharingLevel,
+    ): Int? = if (actual >= required) this else null
 
     // -------------------------------------------------------------------------
     // Helpers
@@ -270,7 +284,10 @@ class BuddyManager {
 
     private val codeChars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"
 
-    private fun generateInviteCode(): String = (1..6).map { codeChars.random() }.joinToString("")
+    private fun generateInviteCode(): String =
+        (1..INVITE_CODE_LENGTH).map { codeChars.random() }.joinToString("")
 }
 
-private operator fun BuddyManager.SharingLevel.compareTo(other: BuddyManager.SharingLevel): Int = this.ordinal.compareTo(other.ordinal)
+private operator fun BuddyManager.SharingLevel.compareTo(
+    other: BuddyManager.SharingLevel,
+): Int = this.ordinal.compareTo(other.ordinal)

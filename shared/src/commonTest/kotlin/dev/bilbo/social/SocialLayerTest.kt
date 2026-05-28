@@ -532,12 +532,7 @@ class BuddyManagerBuildSnapshotTest {
             manager.buildSnapshot(
                 buddyUserId = "buddy1",
                 sharingLevel = BuddyManager.SharingLevel.MINIMAL,
-                fpBalance = 100,
-                streakDays = 5,
-                fpEarned = 200,
-                fpSpent = 50,
-                nutritiveMinutes = 60,
-                emptyCalorieMinutes = 30,
+                stats = BuddyManager.BuddyStats(fpBalance = 100, streakDays = 5, fpEarned = 200, fpSpent = 50, nutritiveMinutes = 60, emptyCalorieMinutes = 30),
             )
         assertEquals("buddy1", snapshot.buddyUserId)
         assertEquals(BuddyManager.SharingLevel.MINIMAL, snapshot.sharingLevel)
@@ -555,12 +550,7 @@ class BuddyManagerBuildSnapshotTest {
             manager.buildSnapshot(
                 buddyUserId = "buddy1",
                 sharingLevel = BuddyManager.SharingLevel.BASIC,
-                fpBalance = 100,
-                streakDays = 5,
-                fpEarned = 200,
-                fpSpent = 50,
-                nutritiveMinutes = 60,
-                emptyCalorieMinutes = 30,
+                stats = BuddyManager.BuddyStats(fpBalance = 100, streakDays = 5, fpEarned = 200, fpSpent = 50, nutritiveMinutes = 60, emptyCalorieMinutes = 30),
             )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(5, snapshot.streakDays)
@@ -576,12 +566,7 @@ class BuddyManagerBuildSnapshotTest {
             manager.buildSnapshot(
                 buddyUserId = "buddy1",
                 sharingLevel = BuddyManager.SharingLevel.STANDARD,
-                fpBalance = 100,
-                streakDays = 5,
-                fpEarned = 200,
-                fpSpent = 50,
-                nutritiveMinutes = 60,
-                emptyCalorieMinutes = 30,
+                stats = BuddyManager.BuddyStats(fpBalance = 100, streakDays = 5, fpEarned = 200, fpSpent = 50, nutritiveMinutes = 60, emptyCalorieMinutes = 30),
             )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(5, snapshot.streakDays)
@@ -597,12 +582,7 @@ class BuddyManagerBuildSnapshotTest {
             manager.buildSnapshot(
                 buddyUserId = "buddy1",
                 sharingLevel = BuddyManager.SharingLevel.DETAILED,
-                fpBalance = 100,
-                streakDays = 5,
-                fpEarned = 200,
-                fpSpent = 50,
-                nutritiveMinutes = 60,
-                emptyCalorieMinutes = 30,
+                stats = BuddyManager.BuddyStats(fpBalance = 100, streakDays = 5, fpEarned = 200, fpSpent = 50, nutritiveMinutes = 60, emptyCalorieMinutes = 30),
             )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(5, snapshot.streakDays)
@@ -615,7 +595,7 @@ class BuddyManagerBuildSnapshotTest {
     @Test
     fun buildSnapshotAlwaysSetsBuddyUserIdAndSharingLevel() {
         BuddyManager.SharingLevel.entries.forEach { level ->
-            val snapshot = manager.buildSnapshot("buddy1", level, 0, 0, 0, 0, 0, 0)
+            val snapshot = manager.buildSnapshot("buddy1", level, BuddyManager.BuddyStats(0, 0, 0, 0, 0, 0))
             assertEquals("buddy1", snapshot.buddyUserId)
             assertEquals(level, snapshot.sharingLevel)
         }
@@ -685,8 +665,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "circle1",
                 createdByUserId = "user1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
                 clock = fixedClock,
             )
@@ -703,8 +682,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "circle1",
                 createdByUserId = "user1",
-                startDate = futureDate,
-                endDate = futureDate.plus(7, DateTimeUnit.DAY),
+                dateRange = futureDate..futureDate.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
                 clock = fixedClock,
             )
@@ -720,8 +698,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.BUDDY_PAIR,
                 scopeId = "pair1",
                 createdByUserId = "user1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
                 clock = fixedClock,
             )
@@ -738,8 +715,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "u1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
                 clock = fixedClock,
             )
@@ -756,8 +732,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "u1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
                 clock = fixedClock,
             )
@@ -773,8 +748,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "u1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
                 clock = fixedClock,
             )
@@ -790,8 +764,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "u1",
-                startDate = today.plus(7, DateTimeUnit.DAY),
-                endDate = today,
+                dateRange = today.plus(7, DateTimeUnit.DAY)..today,
                 targetValue = 5,
                 clock = fixedClock,
             )
@@ -807,8 +780,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "u1",
-                startDate = today,
-                endDate = today,
+                dateRange = today..today,
                 targetValue = 5,
                 clock = fixedClock,
             )
@@ -824,8 +796,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "u1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 0,
                 clock = fixedClock,
             )
@@ -841,8 +812,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "u1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = -10,
                 clock = fixedClock,
             )
@@ -859,8 +829,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.BUDDY_PAIR,
                 scopeId = "pair99",
                 createdByUserId = "creator1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 500,
                 isTeamChallenge = true,
                 clock = fixedClock,
@@ -887,8 +856,7 @@ class ChallengeEngineCreateChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "u1",
-                startDate = today,
-                endDate = today.plus(1, DateTimeUnit.DAY),
+                dateRange = today..today.plus(1, DateTimeUnit.DAY),
                 targetValue = 5,
                 clock = fixedClock,
             )
@@ -917,8 +885,7 @@ class ChallengeEngineJoinChallengeTest {
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
             scopeId = "c1",
             createdByUserId = creator,
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
+            dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = 100,
             clock = fixedClock,
         )
@@ -953,8 +920,7 @@ class ChallengeEngineJoinChallengeTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "creator",
-                startDate = futureDate,
-                endDate = futureDate.plus(7, DateTimeUnit.DAY),
+                dateRange = futureDate..futureDate.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
                 clock = fixedClock,
             )
@@ -1014,8 +980,7 @@ class ChallengeEngineRecordProgressTest {
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
             scopeId = "c1",
             createdByUserId = creator,
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
+            dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = target,
             isTeamChallenge = isTeam,
             clock = fixedClock,
@@ -1124,8 +1089,7 @@ class ChallengeEngineFinalizeChallengeTest {
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
             scopeId = "c1",
             createdByUserId = "creator",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
+            dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = target,
             isTeamChallenge = isTeam,
             clock = fixedClock,
@@ -1262,8 +1226,7 @@ class ChallengeEngineCancelChallengeTest {
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
             scopeId = "c1",
             createdByUserId = creator,
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
+            dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = 5,
             clock = fixedClock,
         )
@@ -1330,8 +1293,7 @@ class ChallengeEngineQueryTest {
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
             scopeId = scopeId,
             createdByUserId = creator,
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
+            dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = 5,
             clock = fixedClock,
         )
@@ -1407,8 +1369,7 @@ class ChallengeEngineLeaderboardTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "user1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
                 clock = fixedClock,
             )
@@ -1434,8 +1395,7 @@ class ChallengeEngineLeaderboardTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "c1",
                 createdByUserId = "user1",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
                 clock = fixedClock,
             )
@@ -1482,8 +1442,7 @@ class ChallengeEngineProgressPercentTest {
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
             scopeId = "c1",
             createdByUserId = "creator",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
+            dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = target,
             clock = fixedClock,
         )
@@ -3058,7 +3017,7 @@ class BuddyManagerIntegrationTest {
         assertEquals(BuddyManager.SharingLevel.DETAILED, updated.sharingLevel)
 
         // Build snapshot
-        val snapshot = manager.buildSnapshot("bob", updated.sharingLevel, 100, 5, 200, 50, 60, 30)
+        val snapshot = manager.buildSnapshot("bob", updated.sharingLevel, BuddyManager.BuddyStats(100, 5, 200, 50, 60, 30))
         assertEquals(100, snapshot.fpBalance)
         assertEquals(60, snapshot.nutritiveMinutes)
 
@@ -3116,8 +3075,7 @@ class ChallengeEngineIntegrationTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "circle1",
                 createdByUserId = "alice",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
                 clock = fixedClock,
             )
@@ -3161,8 +3119,7 @@ class ChallengeEngineIntegrationTest {
                 scope = ChallengeEngine.ChallengeScope.CIRCLE,
                 scopeId = "circle1",
                 createdByUserId = "alice",
-                startDate = today,
-                endDate = today.plus(7, DateTimeUnit.DAY),
+                dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 200,
                 isTeamChallenge = true,
                 clock = fixedClock,

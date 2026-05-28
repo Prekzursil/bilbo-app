@@ -16,6 +16,10 @@ import kotlinx.datetime.toLocalDateTime
  *  - Determining winners / completions.
  */
 class ChallengeEngine {
+    private companion object {
+        const val PERCENT = 100
+    }
+
     // -------------------------------------------------------------------------
     // Domain models
     // -------------------------------------------------------------------------
@@ -95,12 +99,13 @@ class ChallengeEngine {
         scope: ChallengeScope,
         scopeId: String,
         createdByUserId: String,
-        startDate: LocalDate,
-        endDate: LocalDate,
+        dateRange: ClosedRange<LocalDate>,
         targetValue: Int,
         isTeamChallenge: Boolean = false,
         clock: Clock = Clock.System,
     ): Challenge {
+        val startDate = dateRange.start
+        val endDate = dateRange.endInclusive
         require(title.isNotBlank()) { "Challenge title must not be blank." }
         require(endDate >= startDate) { "End date must be on or after start date." }
         require(targetValue > 0) { "Target value must be positive." }
@@ -171,12 +176,9 @@ class ChallengeEngine {
     }
 
     /**
-     * Updates a participant's progress for a challenge.
+     * Updates a participant's progress for a challenge by [progressDelta].
      * Marks the participant as completed if [ChallengeParticipant.currentProgress] ≥ target.
      * For team challenges, also checks whether the group has collectively reached the goal.
-     *
-     * @param progressDelta The amount to add to the current progress (e.g. minutes, FP, count).
-     * @return The updated [ChallengeParticipant].
      */
     fun recordProgress(
         challengeId: String,
@@ -339,9 +341,9 @@ class ChallengeEngine {
     ): Int {
         val challenge = getChallenge(challengeId)
         val participant = getParticipant(challengeId, userId) ?: return 0
-        return ((participant.currentProgress.toFloat() / challenge.targetValue) * 100)
+        return ((participant.currentProgress.toFloat() / challenge.targetValue) * PERCENT)
             .toInt()
-            .coerceIn(0, 100)
+            .coerceIn(0, PERCENT)
     }
 
     // -------------------------------------------------------------------------

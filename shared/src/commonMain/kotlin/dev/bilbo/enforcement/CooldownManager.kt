@@ -21,6 +21,10 @@ import kotlin.time.Duration.Companion.minutes
 class CooldownManager(
     private val persistence: CooldownPersistence = NoOpCooldownPersistence,
 ) {
+    private companion object {
+        const val SECONDS_PER_MINUTE = 60
+    }
+
     /**
      * Internal record holding when a cooldown expires.
      * [expiryEpochSeconds] is a Unix timestamp in seconds.
@@ -75,7 +79,7 @@ class CooldownManager(
         val entry = cooldowns[packageName] ?: return null
         val nowSecs = Clock.System.now().epochSeconds
         val remainingSeconds = (entry.expiryEpochSeconds - nowSecs).coerceAtLeast(0L)
-        return (remainingSeconds / 60).toInt()
+        return (remainingSeconds / SECONDS_PER_MINUTE).toInt()
     }
 
     /**
