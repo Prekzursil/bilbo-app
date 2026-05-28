@@ -46,6 +46,7 @@ class DailyResetWorker
     ) : CoroutineWorker(appContext, workerParams) {
         companion object {
             const val WORK_NAME = "bilbo_daily_reset"
+            private const val SUNDAY_ORDINAL = 6 // Mon=0 … Sun=6 (kotlinx-datetime)
 
             /**
              * Enqueues (or re-queues) the daily reset worker.
@@ -128,7 +129,7 @@ class DailyResetWorker
 
             // 4. Tier-2 nightly analysis — run on Sundays (day-of-week == 7 in kotlinx-datetime).
             val dayOfWeek = today.dayOfWeek.ordinal // Mon=0 … Sun=6
-            if (dayOfWeek == 6) {
+            if (dayOfWeek == SUNDAY_ORDINAL) {
                 triggerWeeklyAnalysis(today)
             }
         }

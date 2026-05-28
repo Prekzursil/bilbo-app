@@ -1,7 +1,5 @@
 package dev.bilbo.app.emotional
 
-import android.content.Context
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.bilbo.app.overlay.OverlayManager
 import dev.bilbo.app.ui.overlay.AIInterventionCard
 import dev.bilbo.app.ui.overlay.CoolingOffScreen
@@ -15,7 +13,6 @@ import dev.bilbo.domain.AppCategory
 import dev.bilbo.domain.Emotion
 import dev.bilbo.domain.EmotionalCheckIn
 import dev.bilbo.domain.FPEconomy
-import dev.bilbo.economy.FocusPointsEngine
 import dev.bilbo.tracking.AppInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -57,16 +54,19 @@ import kotlin.time.Clock
 class EmotionalFlowController
     @Inject
     constructor(
-        @ApplicationContext private val context: Context,
         private val overlayManager: OverlayManager,
         private val emotionRepository: EmotionRepository,
         private val appProfileRepository: AppProfileRepository,
         private val budgetRepository: BudgetRepository,
         private val intentRepository: IntentRepository,
-        private val focusPointsEngine: FocusPointsEngine,
         private val settings: EmotionalFlowSettings,
     ) {
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
+
+        private companion object {
+            const val MIN_PATTERN_SAMPLES = 3
+            const val DEFAULT_SESSION_MINUTES = 20
+        }
 
         /**
          * Emits app-open events so callers can react when the flow completes and
@@ -102,7 +102,8 @@ class EmotionalFlowController
          * Called by [EnforcementController] when enforcement fires.
          * Optionally shows [PostSessionMoodScreen] over the enforcement overlay.
          *
-         * @param checkInId The emotional check-in linked to this session, or null.
+         * @param checkInId  The emotional check-in linked to this session, or null.
+         * @param onComplete Invoked once the optional mood prompt is dismissed.
          */
         fun triggerPostSessionMood(
             checkInId: Long?,
@@ -146,8 +147,8 @@ class EmotionalFlowController
                         onEmotionSelected = { emotion ->
                             onDismiss()
                             scope.launch {
-                                val checkInId = persistCheckIn(emotion, declarationId)
-                                handleEmotionSelected(info, emotion, checkInId, onAppOpen)
+                                persistCheckIn(emotion, declarationId)
+                                handleEmotionSelected(info, emotion, onAppOpen)
                             }
                         },
                         onSkip = {
@@ -164,7 +165,6 @@ class EmotionalFlowController
         private suspend fun handleEmotionSelected(
             appInfo: AppInfo,
             emotion: Emotion,
-            checkInId: Long,
             onAppOpen: () -> Unit,
         ) {
             val isNegativeEmotion = isNegativeEmotion(emotion)
@@ -198,7 +198,7 @@ class EmotionalFlowController
                     AIInterventionCard(
                         emotion = emotion,
                         appName = info.appLabel,
-                        avgDurationMins = pattern?.avgDurationMins ?: 20,
+                        avgDurationMins = pattern?.avgDurationMins ?: DEFAULT_SESSION_MINUTES,
                         postMood = pattern?.typicalPostMood,
                         onBreathe = {
                             onDismiss()
@@ -304,14 +304,15 @@ class EmotionalFlowController
                             ci.linkedIntentId in appIntentIds
                     }
 
-                if (matchingCheckIns.size < 3) return null
+                if (matchingCheckIns.size < MIN_PATTERN_SAMPLES) return null
 
                 // Average duration for this emotion + app combo
                 val durations =
                     matchingCheckIns.mapNotNull { ci ->
                         appIntents.firstOrNull { it.id == ci.linkedIntentId }?.declaredDurationMinutes
                     }
-                val avgDuration = if (durations.isEmpty()) 20 else durations.average().toInt()
+                val avgDuration =
+                    if (durations.isEmpty()) DEFAULT_SESSION_MINUTES else durations.average().toInt()
 
                 // Most common post-session mood
                 val postMoods = matchingCheckIns.mapNotNull { it.postSessionMood }

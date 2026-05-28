@@ -49,6 +49,7 @@ class NightlyAnalysisWorker
     ) : CoroutineWorker(appContext, workerParams) {
         companion object {
             const val WORK_NAME = "bilbo_nightly_analysis"
+            private const val NIGHTLY_RUN_HOUR = 3
 
             /**
              * Schedules the nightly worker to run at approximately 3 AM every day.
@@ -84,7 +85,7 @@ class NightlyAnalysisWorker
                 val now = Calendar.getInstance()
                 val target =
                     Calendar.getInstance().apply {
-                        set(Calendar.HOUR_OF_DAY, 3)
+                        set(Calendar.HOUR_OF_DAY, NIGHTLY_RUN_HOUR)
                         set(Calendar.MINUTE, 0)
                         set(Calendar.SECOND, 0)
                         set(Calendar.MILLISECOND, 0)

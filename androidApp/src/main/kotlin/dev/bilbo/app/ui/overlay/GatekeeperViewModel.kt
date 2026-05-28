@@ -36,6 +36,11 @@ class GatekeeperViewModel
         private val intentRepository: IntentRepository,
         private val appProfileRepository: AppProfileRepository,
     ) : ViewModel() {
+        private companion object {
+            const val MAX_INTENTION_LENGTH = 100
+            const val SECONDS_PER_MINUTE = 60L
+        }
+
         // ── UI state ──────────────────────────────────────────────────────────────
 
         data class UiState(
@@ -75,7 +80,7 @@ class GatekeeperViewModel
 
         /** Update the typed intention text. */
         fun onIntentionChanged(text: String) {
-            if (text.length > 100) return
+            if (text.length > MAX_INTENTION_LENGTH) return
             _uiState.update { it.copy(intention = text) }
         }
 
@@ -139,7 +144,7 @@ class GatekeeperViewModel
                             .firstOrNull { declaration ->
                                 val endEpoch =
                                     declaration.timestamp.epochSeconds +
-                                        (declaration.declaredDurationMinutes * 60L)
+                                        (declaration.declaredDurationMinutes * SECONDS_PER_MINUTE)
                                 now.epochSeconds < endEpoch
                             }
                     onResult(active)

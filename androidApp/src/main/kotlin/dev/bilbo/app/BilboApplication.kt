@@ -9,6 +9,11 @@ import timber.log.Timber
 
 @HiltAndroidApp
 class BilboApplication : Application() {
+    private companion object {
+        const val TRACES_SAMPLE_RATE_DEBUG = 1.0
+        const val TRACES_SAMPLE_RATE_RELEASE = 0.2
+    }
+
     override fun onCreate() {
         super.onCreate()
 
@@ -27,7 +32,8 @@ class BilboApplication : Application() {
         SentryAndroid.init(this) { options ->
             options.dsn = BuildConfig.SENTRY_DSN
             options.isDebug = BuildConfig.DEBUG
-            options.tracesSampleRate = if (BuildConfig.DEBUG) 1.0 else 0.2
+            options.tracesSampleRate =
+                if (BuildConfig.DEBUG) TRACES_SAMPLE_RATE_DEBUG else TRACES_SAMPLE_RATE_RELEASE
             options.environment = if (BuildConfig.DEBUG) "development" else "production"
         }
     }

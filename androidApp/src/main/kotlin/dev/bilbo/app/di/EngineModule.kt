@@ -122,6 +122,21 @@ object EngineModule {
 
     // ── Intelligence — Orchestrator ──────────────────────────────────────────
 
+    /** Bundles the tiered intelligence engines so the decision-engine provider stays small. */
+    class IntelligenceEngines(
+        val ruleEngine: RuleEngine,
+        val heuristicEngine: HeuristicEngine,
+        val promptBuilder: InsightPromptBuilder,
+    )
+
+    @Provides
+    @Singleton
+    fun provideIntelligenceEngines(
+        ruleEngine: RuleEngine,
+        heuristicEngine: HeuristicEngine,
+        promptBuilder: InsightPromptBuilder,
+    ): IntelligenceEngines = IntelligenceEngines(ruleEngine, heuristicEngine, promptBuilder)
+
     @Provides
     @Singleton
     fun provideDecisionEngine(
@@ -129,9 +144,7 @@ object EngineModule {
         budgetRepository: BudgetRepository,
         cooldownManager: CooldownManager,
         cloudInsightClient: CloudInsightClient,
-        ruleEngine: RuleEngine,
-        heuristicEngine: HeuristicEngine,
-        promptBuilder: InsightPromptBuilder,
+        engines: IntelligenceEngines,
     ): DecisionEngine {
         val appProfileProvider: (String) -> dev.bilbo.domain.AppProfile? = { packageName ->
             runBlocking { appProfileRepository.getByPackageName(packageName) }
@@ -170,9 +183,9 @@ object EngineModule {
             cooldownChecker = cooldownChecker,
             cloudInsightClient = cloudInsightClient,
             anonymousUserId = UUID.randomUUID().toString(),
-            ruleEngine = ruleEngine,
-            heuristicEngine = heuristicEngine,
-            promptBuilder = promptBuilder,
+            ruleEngine = engines.ruleEngine,
+            heuristicEngine = engines.heuristicEngine,
+            promptBuilder = engines.promptBuilder,
         )
     }
 

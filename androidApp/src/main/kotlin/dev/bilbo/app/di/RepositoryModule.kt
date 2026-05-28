@@ -267,6 +267,10 @@ private class InMemoryAppProfileRepository : AppProfileRepository {
 // ── IntentRepository ─────────────────────────────────────────────────────────
 
 private class InMemoryIntentRepository : IntentRepository {
+    private companion object {
+        const val ACCURACY_TOLERANCE = 0.20
+    }
+
     private val declarations = mutableListOf<IntentDeclaration>()
     private var nextId = 1L
 
@@ -337,7 +341,7 @@ private class InMemoryIntentRepository : IntentRepository {
                 val declared = intent.declaredDurationMinutes
                 if (declared == 0) return@count false
                 val delta = kotlin.math.abs(actual - declared).toDouble() / declared
-                delta <= 0.20
+                delta <= ACCURACY_TOLERANCE
             }.toLong()
     }
 

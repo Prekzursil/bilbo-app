@@ -70,8 +70,8 @@ class DashboardViewModel
 
             val formattedTotal: String
                 get() {
-                    val h = totalMinutes / 60
-                    val m = totalMinutes % 60
+                    val h = totalMinutes / MINUTES_PER_HOUR
+                    val m = totalMinutes % MINUTES_PER_HOUR
                     return if (h > 0) "${h}h ${m}m" else "${m}m"
                 }
         }
@@ -173,5 +173,6 @@ class DashboardViewModel
         companion object {
             /** Default daily screen-time goal; will be user-configurable in a later release. */
             const val DEFAULT_DAILY_GOAL_MINUTES = 150
+            const val MINUTES_PER_HOUR = 60
         }
     }

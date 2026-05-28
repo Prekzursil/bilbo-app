@@ -13,15 +13,6 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
-// MARK: - Route constants
-
-object OnboardingRoute {
-    const val WELCOME = "onboarding/welcome"
-    const val PERMISSIONS = "onboarding/permissions"
-    const val APP_CLASSIFICATION = "onboarding/app_classification"
-    const val FIRST_INTENT = "onboarding/first_intent"
-}
-
 // MARK: - Nav host
 
 @Composable
@@ -76,4 +67,13 @@ fun OnboardingNavHost(
             )
         }
     }
+}
+
+// MARK: - Route constants
+
+object OnboardingRoute {
+    const val WELCOME = "onboarding/welcome"
+    const val PERMISSIONS = "onboarding/permissions"
+    const val APP_CLASSIFICATION = "onboarding/app_classification"
+    const val FIRST_INTENT = "onboarding/first_intent"
 }

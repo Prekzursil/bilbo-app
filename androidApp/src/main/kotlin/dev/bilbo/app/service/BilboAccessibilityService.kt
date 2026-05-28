@@ -23,6 +23,10 @@ import timber.log.Timber
  * Settings → Accessibility → Downloaded apps.
  */
 class BilboAccessibilityService : AccessibilityService() {
+    private companion object {
+        const val NOTIFICATION_TIMEOUT_MS = 100L
+    }
+
     private var currentPackageName: String? = null
 
     override fun onServiceConnected() {
@@ -31,7 +35,7 @@ class BilboAccessibilityService : AccessibilityService() {
             serviceInfo.apply {
                 eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
                 feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
-                notificationTimeout = 100
+                notificationTimeout = NOTIFICATION_TIMEOUT_MS
             }
         Timber.d("BilboAccessibilityService connected")
     }

@@ -42,6 +42,7 @@ class GatekeeperController
             const val ACTION_START_TIMER = "dev.bilbo.app.action.START_TIMER"
             const val EXTRA_DECLARATION_ID = "extra_declaration_id"
             const val EXTRA_DURATION_MINUTES = "extra_duration_minutes"
+            private const val SECONDS_PER_MINUTE = 60L
         }
 
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -79,7 +80,7 @@ class GatekeeperController
                 val hasActiveDeclaration = checkActiveDeclaration(appInfo.packageName)
                 if (hasActiveDeclaration) {
                     Timber.d(
-                        "GatekeeperController: active declaration exists for ${appInfo.packageName} — skipping gatekeeper",
+                        "GatekeeperController: active declaration for ${appInfo.packageName} — skipping",
                     )
                     return@launch
                 }
@@ -157,7 +158,7 @@ class GatekeeperController
                 declarations.any { declaration ->
                     val endEpoch =
                         declaration.timestamp.epochSeconds +
-                            (declaration.declaredDurationMinutes * 60L)
+                            (declaration.declaredDurationMinutes * SECONDS_PER_MINUTE)
                     now.epochSeconds < endEpoch
                 }
             } catch (expected: Exception) {

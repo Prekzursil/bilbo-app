@@ -22,6 +22,10 @@ class WorkManagerScheduler
     constructor(
         private val workManager: WorkManager,
     ) {
+        private companion object {
+            const val BACKOFF_DELAY_MINUTES = 30L
+        }
+
         fun scheduleSyncWork() {
             val constraints =
                 Constraints
@@ -39,7 +43,7 @@ class WorkManagerScheduler
                 ).setConstraints(constraints)
                     .setBackoffCriteria(
                         BackoffPolicy.EXPONENTIAL,
-                        30L,
+                        BACKOFF_DELAY_MINUTES,
                         TimeUnit.MINUTES,
                     ).build()
 

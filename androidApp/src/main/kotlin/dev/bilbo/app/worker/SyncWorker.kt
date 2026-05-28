@@ -26,6 +26,7 @@ class SyncWorker
     ) : CoroutineWorker(context, workerParams) {
         companion object {
             const val WORK_NAME = "bilbo_sync_worker"
+            private const val MAX_RETRY_ATTEMPTS = 3
         }
 
         override suspend fun doWork(): Result {
@@ -46,7 +47,7 @@ class SyncWorker
                 Result.success()
             } catch (expected: Exception) {
                 Timber.e(expected, "SyncWorker: sync failed")
-                if (runAttemptCount < 3) Result.retry() else Result.failure()
+                if (runAttemptCount < MAX_RETRY_ATTEMPTS) Result.retry() else Result.failure()
             }
         }
     }

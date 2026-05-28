@@ -59,9 +59,9 @@ class EnforcementController
     ) {
         companion object {
             private const val HARD_LOCK_COOLDOWN_MINUTES = 30
-            private const val NUDGE_EXTENSION_MINUTES = 5
             private const val NUDGE_EXTENSION_FP_COST = 5
             private const val HARD_LOCK_OVERRIDE_FP_COST = 10
+            private const val SECONDS_PER_MINUTE = 60L
         }
 
         private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -175,9 +175,12 @@ class EnforcementController
                         EnforcementMode.HARD_LOCK -> {
                             cooldownManager.lockApp(appPackage, HARD_LOCK_COOLDOWN_MINUTES)
                             val remainingSecs =
-                                cooldownManager.getRemainingSeconds(appPackage) ?: (HARD_LOCK_COOLDOWN_MINUTES * 60L)
+                                cooldownManager.getRemainingSeconds(appPackage)
+                                    ?: (HARD_LOCK_COOLDOWN_MINUTES * SECONDS_PER_MINUTE)
                             val suggestion = getSuggestion()
-                            showHardLockOnMainThread(appPackage, appLabel, remainingSecs, suggestion, fpBalance)
+                            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                                showHardLockOverlay(appPackage, appLabel, remainingSecs, suggestion, fpBalance)
+                            }
                         }
                     }
                 } catch (expected: Exception) {
@@ -207,23 +210,11 @@ class EnforcementController
                             onDismiss()
                         },
                         onExtend5Min = {
-                            scope.launch { handleNudgeExtension(appPackage, appLabel) }
+                            scope.launch { handleNudgeExtension(appLabel) }
                             onDismiss()
                         },
                     )
                 }
-            }
-        }
-
-        private fun showHardLockOnMainThread(
-            appPackage: String,
-            appLabel: String,
-            remainingSecs: Long,
-            suggestion: String,
-            fpBalance: Int,
-        ) {
-            android.os.Handler(android.os.Looper.getMainLooper()).post {
-                showHardLockOverlay(appPackage, appLabel, remainingSecs, suggestion, fpBalance)
             }
         }
 
@@ -257,12 +248,9 @@ class EnforcementController
 
         // ── FP Economy actions ────────────────────────────────────────────────────
 
-        private suspend fun handleNudgeExtension(
-            appPackage: String,
-            appLabel: String,
-        ) {
+        private suspend fun handleNudgeExtension(appLabel: String) {
             try {
-                val today = todayDate()
+                val today = todayDate
                 val budget = budgetRepository.getByDate(today) ?: return
                 val balance = focusPointsEngine.getBalance(budget)
                 if (balance < NUDGE_EXTENSION_FP_COST) return
@@ -278,7 +266,7 @@ class EnforcementController
 
         private suspend fun handleHardLockOverride(appPackage: String) {
             try {
-                val today = todayDate()
+                val today = todayDate
                 budgetRepository.incrementFpSpent(today, HARD_LOCK_OVERRIDE_FP_COST)
                 cooldownManager.unlockApp(appPackage)
                 Timber.d(
@@ -289,11 +277,12 @@ class EnforcementController
             }
         }
 
-        private fun todayDate(): kotlinx.datetime.LocalDate =
-            Clock.System
-                .now()
-                .toLocalDateTime(TimeZone.currentSystemDefault())
-                .date
+        private val todayDate: kotlinx.datetime.LocalDate
+            get() =
+                Clock.System
+                    .now()
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
 
         // ── Navigation ────────────────────────────────────────────────────────────
 
@@ -331,7 +320,7 @@ class EnforcementController
                 val declaration = intentRepository.getById(declarationId) ?: return 0
                 val nowSecs = Clock.System.now().epochSeconds
                 val startSecs = declaration.timestamp.epochSeconds
-                ((nowSecs - startSecs) / 60).toInt()
+                ((nowSecs - startSecs) / SECONDS_PER_MINUTE).toInt()
             } catch (ignored: Exception) {
                 0
             }
