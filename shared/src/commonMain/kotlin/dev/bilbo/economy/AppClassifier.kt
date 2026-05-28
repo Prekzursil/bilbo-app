@@ -1,6 +1,8 @@
 package dev.bilbo.economy
 
-import dev.bilbo.domain.*
+import dev.bilbo.domain.AppCategory
+import dev.bilbo.domain.AppProfile
+import dev.bilbo.domain.EnforcementMode
 
 /**
  * Manages app categorization.

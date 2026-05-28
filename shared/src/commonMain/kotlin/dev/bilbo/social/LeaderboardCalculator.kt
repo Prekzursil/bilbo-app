@@ -1,8 +1,7 @@
 package dev.bilbo.social
 
-import dev.bilbo.domain.*
-import kotlinx.datetime.*
 import kotlin.time.Clock
+import kotlinx.datetime.Instant
 
 /**
  * Computes circle-scoped leaderboards across multiple ranking categories.

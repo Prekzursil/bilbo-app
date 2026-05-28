@@ -76,18 +76,8 @@ kotlin {
     }
 }
 
-// Force Bouncy Castle to a non-vulnerable version on every configuration
-// (transitive pulls via supabase-kt / Ktor / others). WU-B12.dependabot.
-configurations.all {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "org.bouncycastle" &&
-            (requested.name == "bcprov-jdk18on" || requested.name == "bcpkix-jdk18on")
-        ) {
-            useVersion(libs.versions.bouncycastle.get())
-            because("WU-B12.dependabot — pin to >= 1.84 to mitigate 3 CVEs")
-        }
-    }
-}
+// Bouncy Castle CVE pin is centralised in the root build's allprojects {} block
+// (WU-B12.dependabot) — applied to every configuration of every module.
 
 android {
     namespace = "dev.bilbo.shared"
@@ -209,19 +199,7 @@ kover {
                 )
             }
         }
-        verify {
-            rule {
-                minBound(
-                    100,
-                    kotlinx.kover.gradle.plugin.dsl.CoverageUnit.LINE,
-                    kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE,
-                )
-                minBound(
-                    100,
-                    kotlinx.kover.gradle.plugin.dsl.CoverageUnit.BRANCH,
-                    kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE,
-                )
-            }
-        }
+        // 100% line+branch verify rule is centralised in the root build's
+        // allprojects { } block (Strict-Zero Kover gate).
     }
 }

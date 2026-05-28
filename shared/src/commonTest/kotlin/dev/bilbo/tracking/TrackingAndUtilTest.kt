@@ -1,11 +1,3 @@
-// TrackingAndUtilTest.kt
-// Bilbo — Comprehensive Unit Tests
-//
-// Covers: BypassManager, AppInfo, AppMonitor, BilboError, DefaultErrorHandler,
-//         OfflineException, NetworkException, withRetry, safeCall, toUserMessage,
-//         Result, DefaultEnforcementMode, SharingLevelPref, NotificationPreferences,
-//         SeedDataLoader
-
 package dev.bilbo.tracking
 
 import dev.bilbo.data.AppProfileRepository
@@ -34,11 +26,31 @@ import dev.bilbo.util.OfflineException
 import dev.bilbo.util.safeCall
 import dev.bilbo.util.toUserMessage
 import dev.bilbo.util.withRetry
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertSame
+import kotlin.test.assertTrue
+import kotlin.test.fail
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
-import kotlin.test.*
+
+// TrackingAndUtilTest.kt
+// Bilbo — Comprehensive Unit Tests
+//
+// Covers: BypassManager, AppInfo, AppMonitor, BilboError, DefaultErrorHandler,
+//         OfflineException, NetworkException, withRetry, safeCall, toUserMessage,
+//         Result, DefaultEnforcementMode, SharingLevelPref, NotificationPreferences,
+//         SeedDataLoader
+
+
 
 // =============================================================================
 // MARK: - BypassManager Tests (production class at dev.bilbo.tracking.BypassManager)

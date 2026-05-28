@@ -1,7 +1,7 @@
 package dev.bilbo.social
 
-import kotlinx.datetime.*
 import kotlin.time.Clock
+import kotlinx.datetime.Instant
 
 /**
  * Manages focus circles — small accountability groups (2–12 members).

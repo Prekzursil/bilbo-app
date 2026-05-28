@@ -1,6 +1,12 @@
 package dev.bilbo.intelligence.tier3
 
-import dev.bilbo.domain.*
+import dev.bilbo.domain.AppCategory
+import dev.bilbo.domain.DopamineBudget
+import dev.bilbo.domain.EmotionalCheckIn
+import dev.bilbo.domain.FPEconomy
+import dev.bilbo.domain.InsightType
+import dev.bilbo.domain.UsageSession
+import dev.bilbo.domain.WeeklyInsight
 import kotlinx.datetime.LocalDate
 
 /**

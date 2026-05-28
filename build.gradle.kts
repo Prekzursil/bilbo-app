@@ -46,4 +46,52 @@ allprojects {
             exclude { entry -> entry.file.path.contains("/generated/") }
         }
     }
+
+    // Force Bouncy Castle to a non-vulnerable version on every configuration of
+    // every module. Transitive pulls (via supabase-kt / Ktor / others) would
+    // otherwise resolve to versions < 1.84 that contain 3 CVEs (covert timing
+    // channel HIGH, LDAP injection MEDIUM, broken crypto algorithm MEDIUM).
+    // Centralised here (instead of duplicated per-module) — WU-B12.dependabot.
+    val bouncyCastleVersion =
+        rootProject.extensions
+            .getByType<org.gradle.api.artifacts.VersionCatalogsExtension>()
+            .named("libs")
+            .findVersion("bouncycastle")
+            .get()
+            .requiredVersion
+    configurations.all {
+        resolutionStrategy.eachDependency {
+            if (requested.group == "org.bouncycastle" &&
+                (requested.name == "bcprov-jdk18on" || requested.name == "bcpkix-jdk18on")
+            ) {
+                useVersion(bouncyCastleVersion)
+                because("WU-B12.dependabot — pin to >= 1.84 to mitigate 3 CVEs")
+            }
+        }
+    }
+
+    // Strict-Zero Kover gate: every module that applies Kover must hit 100%
+    // line AND branch coverage. Centralised here so the identical verify rule is
+    // not duplicated across module build files (the per-module `kover { reports {
+    // filters { ... } } }` blocks keep only their module-specific exclusions).
+    pluginManager.withPlugin("org.jetbrains.kotlinx.kover") {
+        configure<kotlinx.kover.gradle.plugin.dsl.KoverProjectExtension> {
+            reports {
+                verify {
+                    rule {
+                        minBound(
+                            100,
+                            kotlinx.kover.gradle.plugin.dsl.CoverageUnit.LINE,
+                            kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE,
+                        )
+                        minBound(
+                            100,
+                            kotlinx.kover.gradle.plugin.dsl.CoverageUnit.BRANCH,
+                            kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE,
+                        )
+                    }
+                }
+            }
+        }
+    }
 }

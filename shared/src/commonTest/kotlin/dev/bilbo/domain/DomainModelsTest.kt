@@ -1,11 +1,32 @@
 package dev.bilbo.domain
 
-import dev.bilbo.domain.social.*
-import dev.bilbo.shared.domain.model.*
-import kotlinx.datetime.*
-import kotlinx.serialization.json.Json
-import kotlin.test.*
+import dev.bilbo.domain.social.BuddyPair
+import dev.bilbo.domain.social.Challenge
+import dev.bilbo.domain.social.ChallengeGoal
+import dev.bilbo.domain.social.ChallengeMode
+import dev.bilbo.domain.social.ChallengeParticipantProgress
+import dev.bilbo.domain.social.ChallengeStatus
+import dev.bilbo.domain.social.ChallengeType
+import dev.bilbo.domain.social.Circle
+import dev.bilbo.domain.social.CircleMember
+import dev.bilbo.domain.social.CircleRole
+import dev.bilbo.domain.social.SharingLevel
 import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
+import dev.bilbo.shared.domain.model.AppUsageSession
+import dev.bilbo.shared.domain.model.AppUsageSummary
+import dev.bilbo.shared.domain.model.DailyInsight
+import dev.bilbo.shared.domain.model.GoalType
+import dev.bilbo.shared.domain.model.MoodScore
+import dev.bilbo.shared.domain.model.WellnessGoal
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.serialization.json.Json
 
 class DomainModelsTest {
     // ── AnalogSuggestion ─────────────────────────────────────────────────

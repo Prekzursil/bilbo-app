@@ -1,6 +1,15 @@
 package dev.bilbo.coverage
 
-import dev.bilbo.domain.*
+import dev.bilbo.domain.AppCategory
+import dev.bilbo.domain.DopamineBudget
+import dev.bilbo.domain.Emotion
+import dev.bilbo.domain.EmotionalCheckIn
+import dev.bilbo.domain.EnforcementMode
+import dev.bilbo.domain.HeuristicInsight
+import dev.bilbo.domain.InsightType
+import dev.bilbo.domain.IntentDeclaration
+import dev.bilbo.domain.UsageSession
+import dev.bilbo.domain.WeeklyInsight
 import dev.bilbo.economy.AppClassifier
 import dev.bilbo.enforcement.CooldownManager
 import dev.bilbo.enforcement.CooldownPersistence
@@ -12,11 +21,31 @@ import dev.bilbo.social.BuddyManager
 import dev.bilbo.social.ChallengeEngine
 import dev.bilbo.social.CircleManager
 import dev.bilbo.social.LeaderboardCalculator
-import dev.bilbo.util.*
-import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.*
-import kotlin.test.*
+import dev.bilbo.util.BilboError
+import dev.bilbo.util.DefaultErrorHandler
+import dev.bilbo.util.NetworkException
+import dev.bilbo.util.OfflineException
+import dev.bilbo.util.safeCall
+import dev.bilbo.util.withRetry
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotEquals
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Clock
+import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
 
 // =============================================================================
 // Helper factories (reused across tests)

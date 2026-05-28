@@ -2,12 +2,26 @@ package dev.bilbo.analog
 
 import dev.bilbo.data.BudgetRepository
 import dev.bilbo.data.SuggestionRepository
-import dev.bilbo.domain.*
+import dev.bilbo.domain.AnalogSuggestion
+import dev.bilbo.domain.DopamineBudget
+import dev.bilbo.domain.FPEconomy
+import dev.bilbo.domain.SuggestionCategory
+import dev.bilbo.domain.TimeOfDay
+import kotlin.test.BeforeTest
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertNotNull
+import kotlin.test.assertTrue
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.test.runTest
-import kotlinx.datetime.*
-import kotlin.test.*
+import kotlinx.datetime.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
 
 // =============================================================================
 //  Fake repositories

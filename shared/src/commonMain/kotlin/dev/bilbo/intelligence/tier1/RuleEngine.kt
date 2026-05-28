@@ -1,6 +1,9 @@
 package dev.bilbo.intelligence.tier1
 
-import dev.bilbo.domain.*
+import dev.bilbo.domain.AppCategory
+import dev.bilbo.domain.AppProfile
+import dev.bilbo.domain.DopamineBudget
+import dev.bilbo.domain.EnforcementMode
 
 sealed class LaunchDecision {
     data object Allow : LaunchDecision()

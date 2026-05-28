@@ -1,6 +1,9 @@
 package dev.bilbo.intelligence.tier2
 
-import dev.bilbo.domain.*
+import dev.bilbo.domain.AppCategory
+import dev.bilbo.domain.Emotion
+import dev.bilbo.domain.EmotionalCheckIn
+import dev.bilbo.domain.UsageSession
 import kotlin.math.sqrt
 
 /**

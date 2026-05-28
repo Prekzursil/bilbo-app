@@ -1,7 +1,9 @@
 package dev.bilbo.intelligence.tier2
 
-import dev.bilbo.domain.*
-import kotlinx.datetime.*
+import dev.bilbo.domain.AppCategory
+import dev.bilbo.domain.FPEconomy
+import dev.bilbo.domain.UsageSession
+import kotlinx.datetime.TimeZone
 
 /**
  * Anti-gaming heuristics for the FP economy.

@@ -1,7 +1,11 @@
 package dev.bilbo.intelligence.tier2
 
-import dev.bilbo.domain.*
-import kotlinx.datetime.*
+import dev.bilbo.domain.AppCategory
+import dev.bilbo.domain.UsageSession
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 
 /**
  * Detects weekly and daily usage trends. Flags days with usage more than 40% above the

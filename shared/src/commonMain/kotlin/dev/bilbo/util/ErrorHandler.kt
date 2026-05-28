@@ -84,6 +84,16 @@ fun interface ErrorListener {
 // MARK: - Default implementation
 
 class DefaultErrorHandler : ErrorHandler {
+    private companion object {
+        const val HTTP_UNAUTHORIZED = 401
+        const val HTTP_FORBIDDEN = 403
+        const val HTTP_NOT_FOUND = 404
+        const val HTTP_CLIENT_ERROR_START = 400
+        const val HTTP_CLIENT_ERROR_END = 499
+        const val HTTP_SERVER_ERROR_START = 500
+        const val HTTP_SERVER_ERROR_END = 599
+    }
+
     private val listeners = mutableListOf<ErrorListener>()
 
     override fun map(throwable: Throwable): BilboError =
@@ -101,14 +111,14 @@ class DefaultErrorHandler : ErrorHandler {
 
     private fun mapNetworkException(throwable: NetworkException): BilboError =
         when (throwable.statusCode) {
-            401, 403 -> BilboError.Unauthorized()
-            404 -> BilboError.NotFound()
-            in 400..499 ->
+            HTTP_UNAUTHORIZED, HTTP_FORBIDDEN -> BilboError.Unauthorized()
+            HTTP_NOT_FOUND -> BilboError.NotFound()
+            in HTTP_CLIENT_ERROR_START..HTTP_CLIENT_ERROR_END ->
                 BilboError.ClientError(
                     statusCode = throwable.statusCode,
                     message = throwable.message ?: "Request failed (${throwable.statusCode}).",
                 )
-            in 500..599 -> BilboError.ServerError(throwable.statusCode)
+            in HTTP_SERVER_ERROR_START..HTTP_SERVER_ERROR_END -> BilboError.ServerError(throwable.statusCode)
             else -> BilboError.Unknown(cause = throwable)
         }
 
@@ -153,12 +163,8 @@ expect fun isNetworkAvailable(): Boolean
 /**
  * Retry a suspend block up to [maxAttempts] times with exponential back-off.
  * Only retries on [BilboError.Offline] or [BilboError.ServerError].
- *
- * @param maxAttempts  Maximum total attempts (default 3).
- * @param initialDelay Initial delay in ms before first retry (default 500 ms).
- * @param factor       Multiplier applied to delay on each retry (default 2.0).
- * @param errorHandler Used to map exceptions to [BilboError].
- * @param block        The suspending operation to execute.
+ * [initialDelay] (ms) is multiplied by [factor] on each retry; [errorHandler]
+ * maps exceptions to [BilboError] and [block] is the suspending operation.
  */
 suspend fun <T> withRetry(
     maxAttempts: Int = 3,
@@ -171,8 +177,8 @@ suspend fun <T> withRetry(
     repeat(maxAttempts - 1) { attempt ->
         try {
             return block()
-        } catch (e: Exception) {
-            val mapped = errorHandler.map(e)
+        } catch (expected: Exception) {
+            val mapped = errorHandler.map(expected)
             val shouldRetry = mapped is BilboError.Offline || mapped is BilboError.ServerError
             if (!shouldRetry || attempt == maxAttempts - 2) throw mapped
         }
@@ -195,8 +201,8 @@ suspend fun <T> safeCall(
 ): Result<T> =
     try {
         Result.success(block())
-    } catch (e: Exception) {
-        Result.failure(errorHandler.map(e))
+    } catch (expected: Exception) {
+        Result.failure(errorHandler.map(expected))
     }
 
 /** Returns a user-friendly display message for any [Throwable]. */

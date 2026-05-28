@@ -130,40 +130,14 @@ kover {
                 )
             }
         }
-        verify {
-            rule {
-                minBound(
-                    100,
-                    kotlinx.kover.gradle.plugin.dsl.CoverageUnit.LINE,
-                    kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE,
-                )
-                minBound(
-                    100,
-                    kotlinx.kover.gradle.plugin.dsl.CoverageUnit.BRANCH,
-                    kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE,
-                )
-            }
-        }
+        // 100% line+branch verify rule is centralised in the root build's
+        // allprojects { } block (Strict-Zero Kover gate).
     }
 }
 
-// Force Bouncy Castle to a non-vulnerable version on every configuration.
-// Transitive pulls (via supabase-kt / Ktor / others) would otherwise resolve
-// to versions < 1.84 that contain CVEs:
-//   - Covert timing channel (HIGH)
-//   - LDAP injection (MEDIUM)
-//   - Broken cryptographic algorithm (MEDIUM)
-// All three are fixed in 1.84. WU-B12.dependabot.
-configurations.all {
-    resolutionStrategy.eachDependency {
-        if (requested.group == "org.bouncycastle" &&
-            (requested.name == "bcprov-jdk18on" || requested.name == "bcpkix-jdk18on")
-        ) {
-            useVersion(libs.versions.bouncycastle.get())
-            because("WU-B12.dependabot — pin to >= 1.84 to mitigate 3 CVEs")
-        }
-    }
-}
+// Bouncy Castle CVE pin is centralised in the root build's allprojects {} block
+// (WU-B12.dependabot) — applied to every configuration of every module. The
+// explicit Dependabot constraint pin remains below so the version is tracked.
 
 dependencies {
     implementation(project(":shared"))

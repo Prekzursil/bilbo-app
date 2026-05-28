@@ -1,6 +1,16 @@
 package dev.bilbo.intelligence
 
-import dev.bilbo.domain.*
+import dev.bilbo.domain.AppCategory
+import dev.bilbo.domain.AppProfile
+import dev.bilbo.domain.DopamineBudget
+import dev.bilbo.domain.Emotion
+import dev.bilbo.domain.EmotionalCheckIn
+import dev.bilbo.domain.EnforcementMode
+import dev.bilbo.domain.HeuristicInsight
+import dev.bilbo.domain.InsightType
+import dev.bilbo.domain.IntentDeclaration
+import dev.bilbo.domain.UsageSession
+import dev.bilbo.domain.WeeklyInsight
 import dev.bilbo.intelligence.tier1.EnforcementAction
 import dev.bilbo.intelligence.tier1.LaunchDecision
 import dev.bilbo.intelligence.tier1.RuleEngine
@@ -9,8 +19,20 @@ import dev.bilbo.intelligence.tier2.GamingDetector
 import dev.bilbo.intelligence.tier2.HeuristicEngine
 import dev.bilbo.intelligence.tier2.TrendDetector
 import dev.bilbo.intelligence.tier3.InsightPromptBuilder
-import kotlinx.datetime.*
-import kotlin.test.*
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFailsWith
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.DayOfWeek
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.plus
 
 // =============================================================================
 // Helper factories

@@ -1,6 +1,12 @@
 package dev.bilbo.intelligence
 
-import dev.bilbo.domain.*
+import dev.bilbo.domain.AppCategory
+import dev.bilbo.domain.AppProfile
+import dev.bilbo.domain.DopamineBudget
+import dev.bilbo.domain.EmotionalCheckIn
+import dev.bilbo.domain.IntentDeclaration
+import dev.bilbo.domain.UsageSession
+import dev.bilbo.domain.WeeklyInsight
 import dev.bilbo.intelligence.tier1.EnforcementAction
 import dev.bilbo.intelligence.tier1.LaunchDecision
 import dev.bilbo.intelligence.tier1.RuleEngine
@@ -10,8 +16,12 @@ import dev.bilbo.intelligence.tier2.HeuristicEngine
 import dev.bilbo.intelligence.tier2.TrendDetector
 import dev.bilbo.intelligence.tier3.CloudInsightClient
 import dev.bilbo.intelligence.tier3.InsightPromptBuilder
-import kotlinx.datetime.*
 import kotlin.time.Clock
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.minus
+import kotlinx.datetime.toLocalDateTime
 
 /**
  * Top-level orchestrator for all three intelligence tiers.

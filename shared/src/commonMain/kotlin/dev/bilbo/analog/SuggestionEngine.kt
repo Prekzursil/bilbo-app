@@ -106,6 +106,13 @@ class SuggestionEngine(
     // ── Helpers ────────────────────────────────────────────────────────────────
 
     companion object {
+        private const val MORNING_START_HOUR = 5
+        private const val MORNING_END_HOUR = 11
+        private const val AFTERNOON_START_HOUR = 12
+        private const val AFTERNOON_END_HOUR = 16
+        private const val EVENING_START_HOUR = 17
+        private const val EVENING_END_HOUR = 20
+
         /**
          * Resolves the current [TimeOfDay] from the device clock.
          *
@@ -121,9 +128,9 @@ class SuggestionEngine(
                     .toLocalDateTime(TimeZone.currentSystemDefault())
                     .hour
             return when (hour) {
-                in 5..11 -> TimeOfDay.MORNING
-                in 12..16 -> TimeOfDay.AFTERNOON
-                in 17..20 -> TimeOfDay.EVENING
+                in MORNING_START_HOUR..MORNING_END_HOUR -> TimeOfDay.MORNING
+                in AFTERNOON_START_HOUR..AFTERNOON_END_HOUR -> TimeOfDay.AFTERNOON
+                in EVENING_START_HOUR..EVENING_END_HOUR -> TimeOfDay.EVENING
                 else -> TimeOfDay.NIGHT
             }
         }

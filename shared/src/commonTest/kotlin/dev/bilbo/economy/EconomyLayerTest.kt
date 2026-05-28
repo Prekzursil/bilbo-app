@@ -1,9 +1,22 @@
 package dev.bilbo.economy
 
-import dev.bilbo.domain.*
-import kotlinx.datetime.*
-import kotlin.test.*
+import dev.bilbo.domain.AppCategory
+import dev.bilbo.domain.DopamineBudget
+import dev.bilbo.domain.EnforcementMode
+import dev.bilbo.domain.FPEconomy
+import kotlin.test.Test
+import kotlin.test.assertEquals
+import kotlin.test.assertFalse
+import kotlin.test.assertNotNull
+import kotlin.test.assertNull
+import kotlin.test.assertTrue
 import kotlin.time.Clock
+import kotlinx.datetime.Instant
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import kotlinx.datetime.toLocalDateTime
 
 // =============================================================================
 //  FocusPointsEngine Tests
