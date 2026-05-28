@@ -64,40 +64,76 @@ import androidx.compose.ui.unit.sp
 import dev.bilbo.domain.HeuristicInsight
 import dev.bilbo.domain.InsightType
 import dev.bilbo.domain.WeeklyInsight
-import kotlinx.datetime.LocalDate
 
-// ── Sample / preview data helpers ────────────────────────────────────────────
+// ── Dimensions & layout constants ─────────────────────────────────────────────
 
-private val PreviewInsight =
-    WeeklyInsight(
-        weekStart = LocalDate(2026, 4, 7),
-        tier2Insights =
-            listOf(
-                dev.bilbo.domain.HeuristicInsight(
-                    type = InsightType.ACHIEVEMENT,
-                    message = "You stayed under your daily average for 5 days in a row this week.",
-                    confidence = 0.92f,
-                ),
-                dev.bilbo.domain.HeuristicInsight(
-                    type = InsightType.CORRELATION,
-                    message = "When you feel Stressed, there's a strong correlation with using scrolling apps more.",
-                    confidence = 0.78f,
-                ),
-                dev.bilbo.domain.HeuristicInsight(
-                    type = InsightType.TREND,
-                    message = "Mondays tend to be your highest-usage day. Consider scheduling a focus block.",
-                    confidence = 0.65f,
-                ),
-            ),
-        tier3Narrative = null,
-        totalScreenTimeMinutes = 312,
-        nutritiveMinutes = 87,
-        emptyCalorieMinutes = 148,
-        fpEarned = 105,
-        fpSpent = 60,
-        intentAccuracyPercent = 0.78f,
-        streakDays = 5,
-    )
+private const val MINUTES_PER_HOUR = 60
+private const val PERCENT_SCALE = 100
+private const val TOP_INSIGHTS_COUNT = 3
+private const val MIN_STREAK_FOR_MENTION = 3
+private const val DAYS_IN_WEEK = 7
+private const val STREAK_HISTORY_WEEKS = 4
+private const val STREAK_HISTORY_DOTS = 28
+private const val SKELETON_CARD_COUNT = 4
+
+private const val CONF_HIGH = 0.8f
+private const val CONF_MEDIUM = 0.6f
+private const val ALPHA_BADGE = 0.15f
+private const val ALPHA_ICON_BG = 0.12f
+private const val ALPHA_GRADIENT = 0.25f
+private const val ALPHA_DOT_OUTLINE = 0.3f
+private const val ALPHA_DOT_HALO = 0.05f
+
+private const val RADIUS_HERO_DP = 20
+private const val RADIUS_LARGE_DP = 16
+private const val RADIUS_CARD_DP = 14
+private const val RADIUS_MEDIUM_DP = 12
+private const val RADIUS_SMALL_DP = 6
+private const val ELEVATION_HERO_DP = 4
+private const val ELEVATION_CARD_DP = 2
+
+private const val SPACE_SMALL_DP = 4
+private const val SPACE_SMALL_PLUS_DP = 6
+private const val SPACE_MEDIUM_DP = 8
+private const val SPACE_MEDIUM_PLUS_DP = 10
+private const val SPACE_LARGE_DP = 12
+private const val SPACE_XL_DP = 14
+private const val SPACE_XXL_DP = 16
+private const val SPACE_HERO_DP = 20
+private const val SPACE_SECTION_DP = 24
+
+private const val ICON_SIZE_SMALL_DP = 18
+private const val ICON_SIZE_DP = 20
+private const val ICON_SIZE_LARGE_DP = 24
+private const val AVATAR_SIZE_DP = 40
+private const val STAT_CARD_WIDTH_DP = 110
+private const val CHART_HEIGHT_DP = 120
+private const val DOT_SIZE_DP = 12
+private const val SKELETON_HERO_HEIGHT_DP = 140
+private const val SKELETON_ROW_HEIGHT_DP = 80
+
+private const val FONT_BADGE_SP = 12
+private const val FONT_STREAK_EMOJI_SP = 20
+private const val LINE_HEIGHT_SP = 26
+
+private const val STROKE_LINE_DP = 3
+private const val DOT_RADIUS_DP = 5
+
+private const val ARGB_GREEN = 0xFF4CAF50
+private const val ARGB_RED = 0xFFF44336
+private const val ARGB_ORANGE = 0xFFFF9800
+private const val ARGB_BLUE = 0xFF2196F3
+
+// Placeholder daily-minutes series (Mon→Sun) shown until real data is wired in.
+private const val SAMPLE_MON = 45
+private const val SAMPLE_TUE = 62
+private const val SAMPLE_WED = 38
+private const val SAMPLE_THU = 71
+private const val SAMPLE_FRI = 28
+private const val SAMPLE_SAT = 35
+private const val SAMPLE_SUN = 33
+private val SAMPLE_DAILY_MINUTES =
+    listOf(SAMPLE_MON, SAMPLE_TUE, SAMPLE_WED, SAMPLE_THU, SAMPLE_FRI, SAMPLE_SAT, SAMPLE_SUN)
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -116,7 +152,7 @@ private val PreviewInsight =
 @Composable
 fun WeeklyInsightScreen(
     insight: WeeklyInsight?,
-    dailyMinutes: List<Int> = listOf(45, 62, 38, 71, 28, 35, 33),
+    dailyMinutes: List<Int> = SAMPLE_DAILY_MINUTES,
     isCloudInsight: Boolean = false,
     isRefreshing: Boolean = false,
     canRefresh: Boolean = true,
@@ -209,7 +245,7 @@ private fun WeeklyInsightContent(
         val topInsights =
             insight.tier2Insights
                 .sortedByDescending { it.confidence }
-                .take(3)
+                .take(TOP_INSIGHTS_COUNT)
 
         if (topInsights.isNotEmpty()) {
             item {
@@ -236,7 +272,7 @@ private fun WeeklyInsightContent(
             }
         }
 
-        item { Spacer(Modifier.height(24.dp)) }
+        item { Spacer(Modifier.height(SPACE_SECTION_DP.dp)) }
     }
 }
 
@@ -252,7 +288,7 @@ private fun NarrativeHeroCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(RADIUS_HERO_DP.dp),
         colors =
             CardDefaults.cardColors(
                 containerColor =
@@ -262,90 +298,99 @@ private fun NarrativeHeroCard(
                         MaterialTheme.colorScheme.surfaceVariant
                     },
             ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = ELEVATION_HERO_DP.dp),
     ) {
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(20.dp),
+                    .padding(SPACE_HERO_DP.dp),
         ) {
             if (isCloudInsight) {
-                // AI badge
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                ) {
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f),
-                    ) {
-                        Row(
-                            modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        ) {
-                            Text(text = "✨", fontSize = 12.sp)
-                            Text(
-                                text = "AI Insight",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                        }
-                    }
-                }
-                Spacer(Modifier.height(12.dp))
-                Text(
-                    text = narrative,
-                    style =
-                        MaterialTheme.typography.bodyLarge.copy(
-                            fontStyle = FontStyle.Italic,
-                            lineHeight = 26.sp,
-                        ),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
-                )
+                CloudNarrativeContent(narrative)
             } else {
-                Icon(
-                    imageVector = Icons.Outlined.Lightbulb,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp),
-                )
-                Spacer(Modifier.height(10.dp))
+                HeuristicNarrativeContent(narrative)
+            }
+        }
+    }
+}
+
+@Composable
+private fun CloudNarrativeContent(narrative: String) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(SPACE_SMALL_PLUS_DP.dp),
+    ) {
+        Surface(
+            shape = RoundedCornerShape(RADIUS_MEDIUM_DP.dp),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = ALPHA_BADGE),
+        ) {
+            Row(
+                modifier = Modifier.padding(horizontal = SPACE_MEDIUM_DP.dp, vertical = SPACE_SMALL_DP.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(SPACE_SMALL_DP.dp),
+            ) {
+                Text(text = "✨", fontSize = FONT_BADGE_SP.sp)
                 Text(
-                    text = narrative,
-                    style = MaterialTheme.typography.bodyLarge.copy(lineHeight = 26.sp),
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    text = "AI Insight",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
         }
     }
+    Spacer(Modifier.height(SPACE_LARGE_DP.dp))
+    Text(
+        text = narrative,
+        style =
+            MaterialTheme.typography.bodyLarge.copy(
+                fontStyle = FontStyle.Italic,
+                lineHeight = LINE_HEIGHT_SP.sp,
+            ),
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
+    )
+}
+
+@Composable
+private fun HeuristicNarrativeContent(narrative: String) {
+    Icon(
+        imageVector = Icons.Outlined.Lightbulb,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.size(ICON_SIZE_LARGE_DP.dp),
+    )
+    Spacer(Modifier.height(SPACE_MEDIUM_PLUS_DP.dp))
+    Text(
+        text = narrative,
+        style = MaterialTheme.typography.bodyLarge.copy(lineHeight = LINE_HEIGHT_SP.sp),
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
 }
 
 // ── Stats row ─────────────────────────────────────────────────────────────────
 
 @Composable
 private fun StatsRow(insight: WeeklyInsight) {
-    val hours = insight.totalScreenTimeMinutes / 60
-    val mins = insight.totalScreenTimeMinutes % 60
+    val hours = insight.totalScreenTimeMinutes / MINUTES_PER_HOUR
+    val mins = insight.totalScreenTimeMinutes % MINUTES_PER_HOUR
     val timeLabel = if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
 
     val nutritivePct =
         if (insight.totalScreenTimeMinutes > 0) {
-            (insight.nutritiveMinutes * 100 / insight.totalScreenTimeMinutes)
+            (insight.nutritiveMinutes * PERCENT_SCALE / insight.totalScreenTimeMinutes)
         } else {
             0
         }
     val emptyPct =
         if (insight.totalScreenTimeMinutes > 0) {
-            (insight.emptyCalorieMinutes * 100 / insight.totalScreenTimeMinutes)
+            (insight.emptyCalorieMinutes * PERCENT_SCALE / insight.totalScreenTimeMinutes)
         } else {
             0
         }
 
     LazyRow(
-        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(SPACE_LARGE_DP.dp),
     ) {
         item {
             StatCard(
@@ -360,7 +405,7 @@ private fun StatsRow(insight: WeeklyInsight) {
                 label = "Nutritive",
                 value = "$nutritivePct%",
                 icon = Icons.Outlined.LocalFlorist,
-                tint = Color(0xFF4CAF50),
+                tint = Color(ARGB_GREEN),
             )
         }
         item {
@@ -368,7 +413,7 @@ private fun StatsRow(insight: WeeklyInsight) {
                 label = "Empty Cal.",
                 value = "$emptyPct%",
                 icon = Icons.Outlined.PhoneAndroid,
-                tint = Color(0xFFF44336),
+                tint = Color(ARGB_RED),
             )
         }
         item {
@@ -376,7 +421,7 @@ private fun StatsRow(insight: WeeklyInsight) {
                 label = "FP Balance",
                 value = "+${insight.fpEarned - insight.fpSpent}",
                 icon = Icons.Outlined.Star,
-                tint = Color(0xFFFF9800),
+                tint = Color(ARGB_ORANGE),
             )
         }
     }
@@ -390,22 +435,22 @@ private fun StatCard(
     tint: Color,
 ) {
     Card(
-        modifier = Modifier.width(110.dp),
-        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.width(STAT_CARD_WIDTH_DP.dp),
+        shape = RoundedCornerShape(RADIUS_LARGE_DP.dp),
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
             ),
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            modifier = Modifier.padding(SPACE_XL_DP.dp),
+            verticalArrangement = Arrangement.spacedBy(SPACE_SMALL_PLUS_DP.dp),
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = tint,
-                modifier = Modifier.size(20.dp),
+                modifier = Modifier.size(ICON_SIZE_DP.dp),
             )
             Text(
                 text = value,
@@ -427,9 +472,9 @@ private fun StatCard(
 private fun TrendChartCard(dailyMinutes: List<Int>) {
     val days = listOf("M", "T", "W", "T", "F", "S", "S")
     val values =
-        dailyMinutes.take(7).let { list ->
+        dailyMinutes.take(DAYS_IN_WEEK).let { list ->
             // Pad to 7 if needed
-            list + List(maxOf(0, 7 - list.size)) { 0 }
+            list + List(maxOf(0, DAYS_IN_WEEK - list.size)) { 0 }
         }
     val maxVal = values.max().coerceAtLeast(1).toFloat()
     val primary = MaterialTheme.colorScheme.primary
@@ -437,83 +482,21 @@ private fun TrendChartCard(dailyMinutes: List<Int>) {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(RADIUS_LARGE_DP.dp),
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
             ),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(SPACE_XXL_DP.dp)) {
             Text(
                 text = "7-Day Screen Time",
                 style = MaterialTheme.typography.titleSmall,
                 fontWeight = FontWeight.SemiBold,
             )
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(SPACE_LARGE_DP.dp))
 
-            // Canvas line chart
-            Canvas(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(120.dp),
-            ) {
-                val width = size.width
-                val height = size.height
-                val stepX = width / (values.size - 1).coerceAtLeast(1).toFloat()
-                val padding = 8.dp.toPx()
-
-                val points =
-                    values.mapIndexed { i, v ->
-                        Offset(
-                            x = i * stepX,
-                            y = height - padding - (v / maxVal) * (height - padding * 2),
-                        )
-                    }
-
-                // Gradient fill under the line
-                val gradientPath =
-                    Path().apply {
-                        if (points.isNotEmpty()) {
-                            moveTo(points.first().x, height)
-                            points.forEach { lineTo(it.x, it.y) }
-                            lineTo(points.last().x, height)
-                            close()
-                        }
-                    }
-                drawPath(
-                    path = gradientPath,
-                    brush =
-                        Brush.verticalGradient(
-                            colors = listOf(primary.copy(alpha = 0.25f), Color.Transparent),
-                            startY = 0f,
-                            endY = height,
-                        ),
-                )
-
-                // Line
-                val linePath =
-                    Path().apply {
-                        points.forEachIndexed { i, pt ->
-                            if (i == 0) moveTo(pt.x, pt.y) else lineTo(pt.x, pt.y)
-                        }
-                    }
-                drawPath(
-                    path = linePath,
-                    color = primary,
-                    style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round),
-                )
-
-                // Dots
-                points.forEach { pt ->
-                    drawCircle(color = primary, radius = 5.dp.toPx(), center = pt)
-                    drawCircle(
-                        color = onSurface.copy(alpha = 0.05f),
-                        radius = 5.dp.toPx(),
-                        center = pt,
-                    )
-                }
-            }
+            TrendLineChart(values = values, maxVal = maxVal, primary = primary, onSurface = onSurface)
 
             // Day labels
             Row(
@@ -534,73 +517,153 @@ private fun TrendChartCard(dailyMinutes: List<Int>) {
     }
 }
 
+@Composable
+private fun TrendLineChart(
+    values: List<Int>,
+    maxVal: Float,
+    primary: Color,
+    onSurface: Color,
+) {
+    Canvas(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(CHART_HEIGHT_DP.dp),
+    ) {
+        val height = size.height
+        val stepX = size.width / (values.size - 1).coerceAtLeast(1).toFloat()
+        val padding = SPACE_MEDIUM_DP.dp.toPx()
+
+        val points =
+            values.mapIndexed { i, v ->
+                Offset(
+                    x = i * stepX,
+                    y = height - padding - (v / maxVal) * (height - padding * 2),
+                )
+            }
+
+        // Gradient fill under the line
+        val gradientPath =
+            Path().apply {
+                if (points.isNotEmpty()) {
+                    moveTo(points.first().x, height)
+                    points.forEach { lineTo(it.x, it.y) }
+                    lineTo(points.last().x, height)
+                    close()
+                }
+            }
+        drawPath(
+            path = gradientPath,
+            brush =
+                Brush.verticalGradient(
+                    colors = listOf(primary.copy(alpha = ALPHA_GRADIENT), Color.Transparent),
+                    startY = 0f,
+                    endY = height,
+                ),
+        )
+
+        // Line
+        val linePath =
+            Path().apply {
+                points.forEachIndexed { i, pt ->
+                    if (i == 0) moveTo(pt.x, pt.y) else lineTo(pt.x, pt.y)
+                }
+            }
+        drawPath(
+            path = linePath,
+            color = primary,
+            style = Stroke(width = STROKE_LINE_DP.dp.toPx(), cap = StrokeCap.Round),
+        )
+
+        // Dots
+        points.forEach { pt ->
+            drawCircle(color = primary, radius = DOT_RADIUS_DP.dp.toPx(), center = pt)
+            drawCircle(
+                color = onSurface.copy(alpha = ALPHA_DOT_HALO),
+                radius = DOT_RADIUS_DP.dp.toPx(),
+                center = pt,
+            )
+        }
+    }
+}
+
 // ── Insight card ─────────────────────────────────────────────────────────────
+
+private fun iconAndTintFor(type: InsightType): Pair<ImageVector, Color> =
+    when (type) {
+        InsightType.CORRELATION -> Pair(Icons.Outlined.TrendingUp, Color(ARGB_BLUE))
+        InsightType.TREND -> Pair(Icons.Outlined.ShowChart, Color(ARGB_ORANGE))
+        InsightType.ANOMALY -> Pair(Icons.Outlined.Warning, Color(ARGB_RED))
+        InsightType.ACHIEVEMENT -> Pair(Icons.Outlined.EmojiEvents, Color(ARGB_GREEN))
+    }
+
+private fun confidenceLabelFor(confidence: Float): String =
+    when {
+        confidence >= CONF_HIGH -> "High"
+        confidence >= CONF_MEDIUM -> "Medium"
+        else -> "Low"
+    }
+
+@Composable
+private fun InsightIconAvatar(
+    icon: ImageVector,
+    tint: Color,
+) {
+    Surface(
+        shape = CircleShape,
+        color = tint.copy(alpha = ALPHA_ICON_BG),
+        modifier = Modifier.size(AVATAR_SIZE_DP.dp),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = tint,
+                modifier = Modifier.size(ICON_SIZE_DP.dp),
+            )
+        }
+    }
+}
 
 @Composable
 private fun InsightCard(insight: HeuristicInsight) {
-    val (icon, tint) =
-        when (insight.type) {
-            InsightType.CORRELATION -> Pair(Icons.Outlined.TrendingUp, Color(0xFF2196F3))
-            InsightType.TREND -> Pair(Icons.Outlined.ShowChart, Color(0xFFFF9800))
-            InsightType.ANOMALY -> Pair(Icons.Outlined.Warning, Color(0xFFF44336))
-            InsightType.ACHIEVEMENT -> Pair(Icons.Outlined.EmojiEvents, Color(0xFF4CAF50))
-        }
-
-    val confidencePct = (insight.confidence * 100).toInt()
-    val confidenceLabel =
-        when {
-            insight.confidence >= 0.8f -> "High"
-            insight.confidence >= 0.6f -> "Medium"
-            else -> "Low"
-        }
+    val (icon, tint) = iconAndTintFor(insight.type)
+    val confidenceLabel = confidenceLabelFor(insight.confidence)
     val confidenceColor =
         when {
-            insight.confidence >= 0.8f -> Color(0xFF4CAF50)
-            insight.confidence >= 0.6f -> Color(0xFFFF9800)
+            insight.confidence >= CONF_HIGH -> Color(ARGB_GREEN)
+            insight.confidence >= CONF_MEDIUM -> Color(ARGB_ORANGE)
             else -> MaterialTheme.colorScheme.onSurfaceVariant
         }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
+        shape = RoundedCornerShape(RADIUS_CARD_DP.dp),
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surface,
             ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = ELEVATION_CARD_DP.dp),
     ) {
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(14.dp),
+                    .padding(SPACE_XL_DP.dp),
             verticalAlignment = Alignment.Top,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(SPACE_LARGE_DP.dp),
         ) {
-            Surface(
-                shape = CircleShape,
-                color = tint.copy(alpha = 0.12f),
-                modifier = Modifier.size(40.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        tint = tint,
-                        modifier = Modifier.size(20.dp),
-                    )
-                }
-            }
+            InsightIconAvatar(icon = icon, tint = tint)
 
-            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(SPACE_SMALL_PLUS_DP.dp)) {
                 Text(
                     text = insight.message,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                 )
                 Surface(
-                    shape = RoundedCornerShape(6.dp),
-                    color = confidenceColor.copy(alpha = 0.12f),
+                    shape = RoundedCornerShape(RADIUS_SMALL_DP.dp),
+                    color = confidenceColor.copy(alpha = ALPHA_ICON_BG),
                     modifier = Modifier.wrapContentSize(),
                 ) {
                     Text(
@@ -620,26 +683,26 @@ private fun InsightCard(insight: HeuristicInsight) {
 @Composable
 private fun StreakCard(streakDays: Int) {
     // Show last 4 weeks (28 days) as dots, with the current streak highlighted
-    val totalDots = 28
+    val totalDots = STREAK_HISTORY_DOTS
     val activeDots = streakDays.coerceIn(0, totalDots)
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(RADIUS_LARGE_DP.dp),
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
             ),
     ) {
         Column(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            modifier = Modifier.padding(SPACE_XXL_DP.dp),
+            verticalArrangement = Arrangement.spacedBy(SPACE_LARGE_DP.dp),
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(SPACE_MEDIUM_DP.dp),
             ) {
-                Text(text = "🔥", fontSize = 20.sp)
+                Text(text = "🔥", fontSize = FONT_STREAK_EMOJI_SP.sp)
                 Text(
                     text = "$streakDays-day streak",
                     style = MaterialTheme.typography.titleMedium,
@@ -651,19 +714,19 @@ private fun StreakCard(streakDays: Int) {
             val primary = MaterialTheme.colorScheme.primary
             val outline = MaterialTheme.colorScheme.outline
 
-            Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                (0 until 4).forEach { week ->
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        (0 until 7).forEach { day ->
-                            val dotIndex = week * 7 + day
+            Column(verticalArrangement = Arrangement.spacedBy(SPACE_SMALL_PLUS_DP.dp)) {
+                repeat(STREAK_HISTORY_WEEKS) { week ->
+                    Row(horizontalArrangement = Arrangement.spacedBy(SPACE_SMALL_PLUS_DP.dp)) {
+                        repeat(DAYS_IN_WEEK) { day ->
+                            val dotIndex = week * DAYS_IN_WEEK + day
                             val isActive = dotIndex >= (totalDots - activeDots)
                             Box(
                                 modifier =
                                     Modifier
-                                        .size(12.dp)
+                                        .size(DOT_SIZE_DP.dp)
                                         .clip(CircleShape)
                                         .background(
-                                            if (isActive) primary else outline.copy(alpha = 0.3f),
+                                            if (isActive) primary else outline.copy(alpha = ALPHA_DOT_OUTLINE),
                                         ),
                             )
                         }
@@ -685,20 +748,20 @@ private fun StreakCard(streakDays: Int) {
 @Composable
 private fun RateLimitBanner() {
     Surface(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(RADIUS_MEDIUM_DP.dp),
         color = MaterialTheme.colorScheme.secondaryContainer,
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier.padding(SPACE_LARGE_DP.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            horizontalArrangement = Arrangement.spacedBy(SPACE_MEDIUM_PLUS_DP.dp),
         ) {
             Icon(
                 imageVector = Icons.Outlined.Info,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.size(18.dp),
+                modifier = Modifier.size(ICON_SIZE_SMALL_DP.dp),
             )
             Text(
                 text = "AI insights refresh once per week. Check back next Sunday.",
@@ -717,16 +780,16 @@ private fun WeeklyInsightSkeleton() {
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(16.dp),
+                .padding(SPACE_XXL_DP.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
-        repeat(4) {
+        repeat(SKELETON_CARD_COUNT) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth()
-                        .height(if (it == 0) 140.dp else 80.dp)
-                        .clip(RoundedCornerShape(16.dp))
+                        .height(if (it == 0) SKELETON_HERO_HEIGHT_DP.dp else SKELETON_ROW_HEIGHT_DP.dp)
+                        .clip(RoundedCornerShape(RADIUS_LARGE_DP.dp))
                         .background(MaterialTheme.colorScheme.surfaceVariant),
             )
         }
@@ -736,11 +799,11 @@ private fun WeeklyInsightSkeleton() {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 private fun buildFallbackNarrative(insight: WeeklyInsight): String {
-    val hours = insight.totalScreenTimeMinutes / 60
-    val mins = insight.totalScreenTimeMinutes % 60
+    val hours = insight.totalScreenTimeMinutes / MINUTES_PER_HOUR
+    val mins = insight.totalScreenTimeMinutes % MINUTES_PER_HOUR
     val timeStr = if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
     return "This week you spent $timeStr on your phone. " +
-        if (insight.streakDays >= 3) {
+        if (insight.streakDays >= MIN_STREAK_FOR_MENTION) {
             "You kept a ${insight.streakDays}-day streak — great work!"
         } else {
             "Keep building your streak — every day counts."
