@@ -26,19 +26,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.bilbo.app.ui.components.FPBalanceWidget
-import dev.bilbo.app.ui.theme.BilboTheme
 
-// ── Colours reused from the gatekeeper palette ────────────────────────────────
-private val GkPrimary = Color(0xFF48B8A0)
-private val FpGreen = Color(0xFF4CAF50)
-private val FpYellow = Color(0xFFFFC107)
-private val FpRed = Color(0xFFE53935)
-private val GkOnSurface = Color(0xFFE0EEF5)
-private val GkSurface = Color(0xFF243344)
-private val GkSubtle = Color(0xFF8AAFC4)
+private const val LOW_BALANCE_THRESHOLD = 10
+private const val WIDGET_SIZE_DP = 72
+private const val CONTAINER_RADIUS_DP = 14
+private const val BANNER_RADIUS_DP = 8
+private const val PADDING_H_DP = 16
+private const val PADDING_V_DP = 14
+private const val SPACE_MEDIUM_PLUS_DP = 10
+private const val SPACE_LARGE_DP = 16
+private const val SPACE_SMALL_DP = 8
+private const val SPACE_XS_DP = 2
+private const val BORDER_WIDTH_DP = 1
+private const val BANNER_PADDING_H_DP = 12
+private const val ICON_SIZE_DP = 16
+private const val ALPHA_BORDER = 0.5f
+private const val ALPHA_FILL = 0.1f
 
 /**
  * Focus Points section shown inside [GatekeeperScreen] for Empty Calorie apps.
@@ -54,6 +59,7 @@ private val GkSubtle = Color(0xFF8AAFC4)
  * @param fpEarned           FP earned today (used by the ring indicator).
  * @param estimatedCostFp    Estimated FP cost = selected session duration in minutes × 1 FP/min.
  * @param isEmptyCalorieApp  Pass `false` for Nutritive/Neutral apps (section is hidden).
+ * @param modifier           Layout modifier applied to the section container.
  */
 @Composable
 fun GatekeeperFPSection(
@@ -72,36 +78,33 @@ fun GatekeeperFPSection(
             modifier =
                 modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(GkSurface)
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
+                    .clip(RoundedCornerShape(CONTAINER_RADIUS_DP.dp))
+                    .background(OverlayPalette.Surface)
+                    .padding(horizontal = PADDING_H_DP.dp, vertical = PADDING_V_DP.dp),
+            verticalArrangement = Arrangement.spacedBy(SPACE_MEDIUM_PLUS_DP.dp),
         ) {
             // ── Balance + ring ────────────────────────────────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(SPACE_LARGE_DP.dp),
             ) {
                 FPBalanceWidget(
                     currentBalance = currentBalance,
                     fpEarned = fpEarned,
-                    size = 72.dp,
+                    size = WIDGET_SIZE_DP.dp,
                 )
 
                 Column {
                     Text(
                         text = "Your Focus Points",
-                        style =
-                            MaterialTheme.typography.labelMedium.copy(
-                                color = GkSubtle,
-                            ),
+                        style = MaterialTheme.typography.labelMedium.copy(color = OverlayPalette.Subtle),
                     )
-                    Spacer(modifier = Modifier.height(2.dp))
+                    Spacer(modifier = Modifier.height(SPACE_XS_DP.dp))
                     Text(
                         text = "This will cost ~$estimatedCostFp FP",
                         style =
                             MaterialTheme.typography.bodyMedium.copy(
-                                color = GkOnSurface,
+                                color = OverlayPalette.OnSurface,
                                 fontWeight = FontWeight.Medium,
                             ),
                     )
@@ -113,12 +116,12 @@ fun GatekeeperFPSection(
                 currentBalance <= 0 ->
                     FpStatusBanner(
                         message = "No Focus Points remaining. Earn more first.",
-                        color = FpRed,
+                        color = OverlayPalette.FpRed,
                     )
-                currentBalance < 10 ->
+                currentBalance < LOW_BALANCE_THRESHOLD ->
                     FpStatusBanner(
                         message = "Low balance. $currentBalance FP remaining.",
-                        color = FpYellow,
+                        color = OverlayPalette.FpYellow,
                     )
                 else -> {} // All good — no banner needed
             }
@@ -137,69 +140,25 @@ private fun FpStatusBanner(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(8.dp))
+                .clip(RoundedCornerShape(BANNER_RADIUS_DP.dp))
                 .border(
-                    width = 1.dp,
-                    color = color.copy(alpha = 0.5f),
-                    shape = RoundedCornerShape(8.dp),
-                ).background(color.copy(alpha = 0.1f))
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+                    width = BORDER_WIDTH_DP.dp,
+                    color = color.copy(alpha = ALPHA_BORDER),
+                    shape = RoundedCornerShape(BANNER_RADIUS_DP.dp),
+                ).background(color.copy(alpha = ALPHA_FILL))
+                .padding(horizontal = BANNER_PADDING_H_DP.dp, vertical = SPACE_SMALL_DP.dp),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(SPACE_SMALL_DP.dp),
     ) {
         Icon(
             imageVector = Icons.Filled.Warning,
             contentDescription = null,
             tint = color,
-            modifier = Modifier.size(16.dp),
+            modifier = Modifier.size(ICON_SIZE_DP.dp),
         )
         Text(
             text = message,
             style = MaterialTheme.typography.bodySmall.copy(color = color),
-        )
-    }
-}
-
-// ── Previews ──────────────────────────────────────────────────────────────────
-
-@Preview(showBackground = true, backgroundColor = 0xFF1A2C3D)
-@Composable
-private fun FPSectionEmptyPreview() {
-    BilboTheme {
-        GatekeeperFPSection(
-            currentBalance = 0,
-            fpEarned = 5,
-            estimatedCostFp = 15,
-            isEmptyCalorieApp = true,
-            modifier = Modifier.padding(16.dp),
-        )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF1A2C3D)
-@Composable
-private fun FPSectionLowPreview() {
-    BilboTheme {
-        GatekeeperFPSection(
-            currentBalance = 7,
-            fpEarned = 12,
-            estimatedCostFp = 10,
-            isEmptyCalorieApp = true,
-            modifier = Modifier.padding(16.dp),
-        )
-    }
-}
-
-@Preview(showBackground = true, backgroundColor = 0xFF1A2C3D)
-@Composable
-private fun FPSectionOkPreview() {
-    BilboTheme {
-        GatekeeperFPSection(
-            currentBalance = 42,
-            fpEarned = 30,
-            estimatedCostFp = 15,
-            isEmptyCalorieApp = true,
-            modifier = Modifier.padding(16.dp),
         )
     }
 }

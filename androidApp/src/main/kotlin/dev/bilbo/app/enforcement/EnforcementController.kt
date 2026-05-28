@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dev.bilbo.app.overlay.OverlayManager
 import dev.bilbo.app.service.TimerService
 import dev.bilbo.app.ui.overlay.HardLockOverlayScreen
+import dev.bilbo.app.ui.overlay.HardLockUiState
 import dev.bilbo.app.ui.overlay.NudgeOverlayScreen
 import dev.bilbo.data.AppProfileRepository
 import dev.bilbo.data.BudgetRepository
@@ -229,11 +230,14 @@ class EnforcementController
                 appInfo = AppInfo(packageName = appPackage, appLabel = appLabel, category = null),
             ) { _, onDismiss ->
                 HardLockOverlayScreen(
-                    appName = appLabel,
-                    cooldownMinutes = HARD_LOCK_COOLDOWN_MINUTES,
-                    remainingSeconds = remainingSecs,
-                    suggestion = suggestion,
-                    fpBalance = fpBalance,
+                    state =
+                        HardLockUiState(
+                            appName = appLabel,
+                            cooldownMinutes = HARD_LOCK_COOLDOWN_MINUTES,
+                            remainingSeconds = remainingSecs,
+                            suggestion = suggestion,
+                            fpBalance = fpBalance,
+                        ),
                     onGoHome = {
                         navigateHome()
                         onDismiss()

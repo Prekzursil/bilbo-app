@@ -39,14 +39,43 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // ── Nudge palette: warm amber tones ──────────────────────────────────────────
-private val NudgeBackground = Color(0x80000000) // translucent scrim
-private val NudgeCard = Color(0xFF2C1F0E) // deep warm brown
-private val NudgeAmber = Color(0xFFF5A623) // primary amber
-private val NudgeAmberSoft = Color(0xFFFFD280) // lighter amber text
-private val NudgeSurface = Color(0xFF3D2B14) // slightly lighter card surface
-private val NudgeOnSurface = Color(0xFFF5ECD7) // warm off-white
-private val NudgeSubtle = Color(0xFFAA8C6A) // muted warm text
-private val NudgeGreen = Color(0xFF6BCB77) // "Got it" positive action
+private const val ARGB_BACKGROUND = 0x80000000
+private const val ARGB_CARD = 0xFF2C1F0E
+private const val ARGB_AMBER = 0xFFF5A623
+private const val ARGB_AMBER_SOFT = 0xFFFFD280
+private const val ARGB_ON_SURFACE = 0xFFF5ECD7
+private const val ARGB_SUBTLE = 0xFFAA8C6A
+private const val ARGB_GREEN = 0xFF6BCB77
+
+private val NudgeBackground = Color(ARGB_BACKGROUND) // translucent scrim
+private val NudgeCard = Color(ARGB_CARD) // deep warm brown
+private val NudgeAmber = Color(ARGB_AMBER) // primary amber
+private val NudgeAmberSoft = Color(ARGB_AMBER_SOFT) // lighter amber text
+private val NudgeOnSurface = Color(ARGB_ON_SURFACE) // warm off-white
+private val NudgeSubtle = Color(ARGB_SUBTLE) // muted warm text
+private val NudgeGreen = Color(ARGB_GREEN) // "Got it" positive action
+
+private const val EXTEND_COST_FP = 5
+private const val FADE_IN_MS = 300
+private const val SLIDE_IN_MS = 380
+private const val EMOJI_SP = 40
+private const val TITLE_LINE_HEIGHT_SP = 26
+private const val OUTER_PAD_H_DP = 16
+private const val OUTER_PAD_V_DP = 24
+private const val CARD_CORNER_DP = 20
+private const val CARD_ELEVATION_DP = 16
+private const val CARD_PAD_H_DP = 24
+private const val CARD_PAD_V_DP = 28
+private const val BUTTON_HEIGHT_DP = 52
+private const val EXTEND_BUTTON_HEIGHT_DP = 48
+private const val BUTTON_CORNER_DP = 14
+private const val BORDER_THIN_DP = 1
+private const val ALPHA_EXTEND_BORDER = 0.5f
+private const val SPACE_TITLE_DP = 14
+private const val SPACE_USAGE_DP = 10
+private const val SPACE_ACTIONS_DP = 28
+private const val SPACE_BETWEEN_DP = 10
+private const val SPACE_BOTTOM_DP = 4
 
 /**
  * Translucent top-card nudge overlay that appears when a declared session timer expires
@@ -72,7 +101,7 @@ fun NudgeOverlayScreen(
     var visible by remember { mutableStateOf(false) }
     LaunchedEffect(Unit) { visible = true }
 
-    val canExtend = fpBalance >= 5
+    val canExtend = fpBalance >= EXTEND_COST_FP
 
     Box(
         modifier =
@@ -84,10 +113,10 @@ fun NudgeOverlayScreen(
         AnimatedVisibility(
             visible = visible,
             enter =
-                fadeIn(tween(300)) +
+                fadeIn(tween(FADE_IN_MS)) +
                     slideInVertically(
                         initialOffsetY = { -it },
-                        animationSpec = tween(380, easing = EaseOutCubic),
+                        animationSpec = tween(SLIDE_IN_MS, easing = EaseOutCubic),
                     ),
         ) {
             Card(
@@ -95,52 +124,22 @@ fun NudgeOverlayScreen(
                     Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
-                        .padding(horizontal = 16.dp, vertical = 24.dp),
-                shape = RoundedCornerShape(20.dp),
+                        .padding(horizontal = OUTER_PAD_H_DP.dp, vertical = OUTER_PAD_V_DP.dp),
+                shape = RoundedCornerShape(CARD_CORNER_DP.dp),
                 colors = CardDefaults.cardColors(containerColor = NudgeCard),
-                elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION_DP.dp),
             ) {
                 Column(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 28.dp),
+                            .padding(horizontal = CARD_PAD_H_DP.dp, vertical = CARD_PAD_V_DP.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    // ── Emoji header ─────────────────────────────────────────
-                    Text(
-                        text = "⏰",
-                        fontSize = 40.sp,
-                    )
-
-                    Spacer(Modifier.height(14.dp))
-
-                    // ── Title ────────────────────────────────────────────────
-                    Text(
-                        text =
-                            buildAnnotatedString {
-                                append("Time's up! Your ")
-                                withStyle(SpanStyle(color = NudgeAmber, fontWeight = FontWeight.Bold)) {
-                                    append("$declaredMinutes min")
-                                }
-                                append(" on ")
-                                withStyle(SpanStyle(color = NudgeAmberSoft, fontWeight = FontWeight.SemiBold)) {
-                                    append(appName)
-                                }
-                                append(" is over.")
-                            },
-                        style =
-                            androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
-                                color = NudgeOnSurface,
-                                lineHeight = 26.sp,
-                            ),
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth(),
-                    )
-
-                    Spacer(Modifier.height(10.dp))
-
-                    // ── Actual usage ─────────────────────────────────────────
+                    Text(text = "⏰", fontSize = EMOJI_SP.sp)
+                    Spacer(Modifier.height(SPACE_TITLE_DP.dp))
+                    NudgeTitle(appName = appName, declaredMinutes = declaredMinutes)
+                    Spacer(Modifier.height(SPACE_USAGE_DP.dp))
                     Text(
                         text = "You've been here for $actualMinutes minute${if (actualMinutes != 1) "s" else ""}.",
                         style =
@@ -149,73 +148,105 @@ fun NudgeOverlayScreen(
                             ),
                         textAlign = TextAlign.Center,
                     )
-
-                    Spacer(Modifier.height(28.dp))
-
-                    // ── Got it button ────────────────────────────────────────
-                    Button(
-                        onClick = onGotIt,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(52.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = NudgeGreen),
-                    ) {
-                        Text(
-                            text = "Got it",
-                            style =
-                                androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color.White,
-                                ),
-                        )
-                    }
-
-                    // ── Extension button (conditional) ────────────────────────
-                    if (canExtend) {
-                        Spacer(Modifier.height(10.dp))
-                        OutlinedButton(
-                            onClick = onExtend5Min,
-                            modifier =
-                                Modifier
-                                    .fillMaxWidth()
-                                    .height(48.dp),
-                            shape = RoundedCornerShape(14.dp),
-                            colors =
-                                ButtonDefaults.outlinedButtonColors(
-                                    contentColor = NudgeAmber,
-                                ),
-                            border =
-                                androidx.compose.foundation.BorderStroke(
-                                    width = 1.dp,
-                                    color = NudgeAmber.copy(alpha = 0.5f),
-                                ),
-                        ) {
-                            Text(
-                                text = "5 more minutes  (−5 FP)",
-                                style =
-                                    androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = FontWeight.Medium,
-                                        color = NudgeAmber,
-                                    ),
-                            )
-                        }
-                    } else {
-                        Spacer(Modifier.height(10.dp))
-                        Text(
-                            text = "Balance: $fpBalance FP · Not enough to extend",
-                            style =
-                                androidx.compose.material3.MaterialTheme.typography.labelSmall.copy(
-                                    color = NudgeSubtle,
-                                ),
-                            textAlign = TextAlign.Center,
-                        )
-                    }
-
-                    Spacer(Modifier.height(4.dp))
+                    Spacer(Modifier.height(SPACE_ACTIONS_DP.dp))
+                    GotItButton(onGotIt = onGotIt)
+                    Spacer(Modifier.height(SPACE_BETWEEN_DP.dp))
+                    ExtensionAction(canExtend = canExtend, fpBalance = fpBalance, onExtend5Min = onExtend5Min)
+                    Spacer(Modifier.height(SPACE_BOTTOM_DP.dp))
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun NudgeTitle(
+    appName: String,
+    declaredMinutes: Int,
+) {
+    Text(
+        text =
+            buildAnnotatedString {
+                append("Time's up! Your ")
+                withStyle(SpanStyle(color = NudgeAmber, fontWeight = FontWeight.Bold)) {
+                    append("$declaredMinutes min")
+                }
+                append(" on ")
+                withStyle(SpanStyle(color = NudgeAmberSoft, fontWeight = FontWeight.SemiBold)) {
+                    append(appName)
+                }
+                append(" is over.")
+            },
+        style =
+            androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
+                color = NudgeOnSurface,
+                lineHeight = TITLE_LINE_HEIGHT_SP.sp,
+            ),
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun GotItButton(onGotIt: () -> Unit) {
+    Button(
+        onClick = onGotIt,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(BUTTON_HEIGHT_DP.dp),
+        shape = RoundedCornerShape(BUTTON_CORNER_DP.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = NudgeGreen),
+    ) {
+        Text(
+            text = "Got it",
+            style =
+                androidx.compose.material3.MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color.White,
+                ),
+        )
+    }
+}
+
+@Composable
+private fun ExtensionAction(
+    canExtend: Boolean,
+    fpBalance: Int,
+    onExtend5Min: () -> Unit,
+) {
+    if (canExtend) {
+        OutlinedButton(
+            onClick = onExtend5Min,
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(EXTEND_BUTTON_HEIGHT_DP.dp),
+            shape = RoundedCornerShape(BUTTON_CORNER_DP.dp),
+            colors = ButtonDefaults.outlinedButtonColors(contentColor = NudgeAmber),
+            border =
+                androidx.compose.foundation.BorderStroke(
+                    width = BORDER_THIN_DP.dp,
+                    color = NudgeAmber.copy(alpha = ALPHA_EXTEND_BORDER),
+                ),
+        ) {
+            Text(
+                text = "$EXTEND_COST_FP more minutes  (−$EXTEND_COST_FP FP)",
+                style =
+                    androidx.compose.material3.MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Medium,
+                        color = NudgeAmber,
+                    ),
+            )
+        }
+    } else {
+        Text(
+            text = "Balance: $fpBalance FP · Not enough to extend",
+            style =
+                androidx.compose.material3.MaterialTheme.typography.labelSmall.copy(
+                    color = NudgeSubtle,
+                ),
+            textAlign = TextAlign.Center,
+        )
     }
 }

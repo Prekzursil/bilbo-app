@@ -48,57 +48,102 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 // ── Hard lock palette: deep blue / purple calming ─────────────────────────────
-private val LockBackground = Color(0xFF060B18) // near-black deep space
-private val LockGradientTop = Color(0xFF0D1B3E) // deep navy
-private val LockGradientBot = Color(0xFF1A0D33) // deep purple
-private val LockPurple = Color(0xFF7B61FF) // soft purple accent
-private val LockPurpleDim = Color(0xFF4A3B99) // dimmer purple
-private val LockOnSurface = Color(0xFFDDE3F5) // cool lavender-white
-private val LockSubtle = Color(0xFF8892B0) // muted blue-grey
-private val LockSurface = Color(0xFF131B34) // card surface
-private val LockRed = Color(0xFFFF6B6B) // override warning
-private val LockGreen = Color(0xFF64D9A8) // home button
+private const val ARGB_GRADIENT_TOP = 0xFF0D1B3E
+private const val ARGB_GRADIENT_BOT = 0xFF1A0D33
+private const val ARGB_PURPLE = 0xFF7B61FF
+private const val ARGB_PURPLE_DIM = 0xFF4A3B99
+private const val ARGB_ON_SURFACE = 0xFFDDE3F5
+private const val ARGB_SUBTLE = 0xFF8892B0
+private const val ARGB_SURFACE = 0xFF131B34
+private const val ARGB_RED = 0xFFFF6B6B
+private const val ARGB_GREEN = 0xFF64D9A8
+private const val ARGB_GO_HOME_LABEL = 0xFF001A0D
+
+private val LockGradientTop = Color(ARGB_GRADIENT_TOP) // deep navy
+private val LockGradientBot = Color(ARGB_GRADIENT_BOT) // deep purple
+private val LockPurple = Color(ARGB_PURPLE) // soft purple accent
+private val LockPurpleDim = Color(ARGB_PURPLE_DIM) // dimmer purple
+private val LockOnSurface = Color(ARGB_ON_SURFACE) // cool lavender-white
+private val LockSubtle = Color(ARGB_SUBTLE) // muted blue-grey
+private val LockSurface = Color(ARGB_SURFACE) // card surface
+private val LockRed = Color(ARGB_RED) // override warning
+private val LockGreen = Color(ARGB_GREEN) // home button
+
+// ── Override economics ────────────────────────────────────────────────────────
+private const val OVERRIDE_COST_FP = 10
+
+// ── Layout / animation tuning ─────────────────────────────────────────────────
+private const val PULSE_MIN = 0.95f
+private const val PULSE_MAX = 1.05f
+private const val PULSE_PERIOD_MS = 2_000
+private const val SCREEN_PADDING_DP = 28
+private const val ICON_SIZE_DP = 80
+private const val ICON_FONT_SP = 36
+private const val ALPHA_ICON_FILL = 0.15f
+private const val ALPHA_ICON_BORDER = 0.4f
+private const val ALPHA_CARD_BORDER = 0.2f
+private const val ALPHA_COUNTDOWN_FILL = 0.25f
+private const val ALPHA_COUNTDOWN_BORDER = 0.3f
+private const val ALPHA_OVERRIDE_LABEL = 0.8f
+private const val BORDER_THIN_DP = 1
+private const val HEADER_LINE_HEIGHT_SP = 32
+private const val CARD_CORNER_DP = 16
+private const val CARD_PADDING_DP = 18
+private const val LABEL_LETTER_SPACING_SP = 0.8
+private const val COUNTDOWN_CORNER_DP = 20
+private const val COUNTDOWN_PAD_H_DP = 32
+private const val COUNTDOWN_PAD_V_DP = 16
+private const val COUNTDOWN_LETTER_SPACING_SP = 4
+private const val COUNTDOWN_FONT_SP = 52
+private const val BUTTON_HEIGHT_DP = 56
+private const val SPACE_XS_DP = 6
+private const val SPACE_SM_DP = 8
+private const val SPACE_MD_DP = 12
+private const val SPACE_LG_DP = 24
+private const val SPACE_XL_DP = 32
+private const val SPACE_XXL_DP = 40
+
+// ── Time conversion ───────────────────────────────────────────────────────────
+private const val SECONDS_PER_HOUR = 3_600
+private const val SECONDS_PER_MINUTE = 60
+
+/**
+ * Immutable view-state for the [HardLockOverlayScreen], grouped to keep the
+ * composable's parameter list small and self-documenting.
+ *
+ * @property appName          Human-readable app name.
+ * @property cooldownMinutes  Total cooldown duration in minutes.
+ * @property remainingSeconds Remaining cooldown in seconds — drives the countdown display.
+ * @property suggestion       Analog alternative suggestion text.
+ * @property fpBalance        Current Focus Points balance.
+ */
+data class HardLockUiState(
+    val appName: String,
+    val cooldownMinutes: Int,
+    val remainingSeconds: Long,
+    val suggestion: String,
+    val fpBalance: Int,
+)
 
 /**
  * Full-screen, opaque Hard Lock overlay shown when [EnforcementMode.HARD_LOCK] fires.
  *
  * The user can:
  * - Go home (safe action)
- * - Override (costs 10 FP, requires confirmation, disabled if insufficient balance)
+ * - Override (costs [OVERRIDE_COST_FP] FP, requires confirmation, disabled if insufficient balance)
  *
- * @param appName            Human-readable app name.
- * @param cooldownMinutes    Total cooldown duration in minutes.
- * @param remainingSeconds   Remaining cooldown in seconds — drives the countdown display.
- * @param suggestion         Analog alternative suggestion text.
- * @param fpBalance          Current Focus Points balance.
- * @param onGoHome           User taps "Go Home".
- * @param onOverride         User confirms the override (10 FP deducted by caller).
+ * @param state     Immutable view-state (app name, cooldown, balance, suggestion).
+ * @param onGoHome  User taps "Go Home".
+ * @param onOverride User confirms the override (FP deducted by caller).
  */
 @Composable
 fun HardLockOverlayScreen(
-    appName: String,
-    cooldownMinutes: Int,
-    remainingSeconds: Long,
-    suggestion: String,
-    fpBalance: Int,
+    state: HardLockUiState,
     onGoHome: () -> Unit,
     onOverride: () -> Unit,
 ) {
     var showOverrideDialog by remember { mutableStateOf(false) }
-    val canOverride = fpBalance >= 10
-
-    // Pulsing glow on the lock icon
-    val infiniteTransition = rememberInfiniteTransition(label = "LockPulse")
-    val pulse by infiniteTransition.animateFloat(
-        initialValue = 0.95f,
-        targetValue = 1.05f,
-        animationSpec =
-            infiniteRepeatable(
-                animation = tween(2000, easing = LinearEasing),
-                repeatMode = RepeatMode.Reverse,
-            ),
-        label = "PulseScale",
-    )
+    val canOverride = state.fpBalance >= OVERRIDE_COST_FP
 
     Box(
         modifier =
@@ -113,198 +158,246 @@ fun HardLockOverlayScreen(
             modifier =
                 Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 28.dp),
+                    .padding(horizontal = SCREEN_PADDING_DP.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            // ── Lock icon ─────────────────────────────────────────────────────
-            Box(
-                modifier =
-                    Modifier
-                        .scale(pulse)
-                        .size(80.dp)
-                        .clip(CircleShape)
-                        .background(LockPurple.copy(alpha = 0.15f))
-                        .border(1.dp, LockPurple.copy(alpha = 0.4f), CircleShape),
-                contentAlignment = Alignment.Center,
-            ) {
-                Text(text = "🔒", fontSize = 36.sp)
-            }
+            PulsingLockIcon()
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(SPACE_LG_DP.dp))
 
-            // ── Header ────────────────────────────────────────────────────────
-            Text(
-                text =
-                    buildAnnotatedString {
-                        append("Time's up. ")
-                        withStyle(SpanStyle(color = LockPurple, fontWeight = FontWeight.Bold)) {
-                            append(appName)
-                        }
-                        append(" is locked for $cooldownMinutes minutes.")
-                    },
-                style =
-                    MaterialTheme.typography.headlineSmall.copy(
-                        color = LockOnSurface,
-                        fontWeight = FontWeight.SemiBold,
-                        lineHeight = 32.sp,
-                    ),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-            )
+            LockHeader(appName = state.appName, cooldownMinutes = state.cooldownMinutes)
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(SPACE_XL_DP.dp))
 
-            // ── Cooldown countdown ────────────────────────────────────────────
-            CooldownCounterDisplay(remainingSeconds = remainingSeconds)
+            CooldownCounterDisplay(remainingSeconds = state.remainingSeconds)
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(SPACE_XL_DP.dp))
 
-            // ── Analog suggestion card ────────────────────────────────────────
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
-                colors = CardDefaults.cardColors(containerColor = LockSurface),
-                border =
-                    androidx.compose.foundation.BorderStroke(
-                        1.dp,
-                        LockPurple.copy(alpha = 0.2f),
-                    ),
-            ) {
-                Column(
-                    modifier = Modifier.padding(18.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    Text(
-                        text = "While you wait, try:",
-                        style =
-                            MaterialTheme.typography.labelMedium.copy(
-                                color = LockSubtle,
-                                letterSpacing = 0.8.sp,
-                            ),
-                    )
-                    Spacer(Modifier.height(6.dp))
-                    Text(
-                        text = suggestion,
-                        style =
-                            MaterialTheme.typography.bodyLarge.copy(
-                                color = LockOnSurface,
-                                fontWeight = FontWeight.Medium,
-                            ),
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
+            SuggestionCard(suggestion = state.suggestion)
 
-            Spacer(Modifier.height(40.dp))
+            Spacer(Modifier.height(SPACE_XXL_DP.dp))
 
-            // ── Go Home (primary) ─────────────────────────────────────────────
-            Button(
-                onClick = onGoHome,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = LockGreen),
-            ) {
-                Text(
-                    text = "Go Home",
-                    style =
-                        MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = Color(0xFF001A0D),
-                        ),
-                )
-            }
+            GoHomeButton(onGoHome = onGoHome)
 
-            Spacer(Modifier.height(12.dp))
+            Spacer(Modifier.height(SPACE_MD_DP.dp))
 
-            // ── Override (secondary, destructive) ─────────────────────────────
-            TextButton(
-                onClick = { showOverrideDialog = true },
-                modifier = Modifier.fillMaxWidth(),
-            ) {
-                Text(
-                    text = if (canOverride) "Override (costs 10 FP)" else "Override (not enough FP)",
-                    style =
-                        MaterialTheme.typography.bodyMedium.copy(
-                            color = if (canOverride) LockRed.copy(alpha = 0.8f) else LockSubtle,
-                        ),
-                )
-            }
+            OverrideButton(canOverride = canOverride, onClick = { showOverrideDialog = true })
 
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(SPACE_SM_DP.dp))
 
             Text(
-                text = "Balance: $fpBalance FP",
+                text = "Balance: ${state.fpBalance} FP",
                 style = MaterialTheme.typography.labelSmall.copy(color = LockSubtle),
             )
         }
     }
 
-    // ── Override confirmation dialog ──────────────────────────────────────────
     if (showOverrideDialog) {
-        AlertDialog(
-            onDismissRequest = { showOverrideDialog = false },
-            containerColor = LockSurface,
-            title = {
-                Text(
-                    text = "Override Lock?",
-                    style =
-                        MaterialTheme.typography.titleLarge.copy(
-                            color = LockOnSurface,
-                            fontWeight = FontWeight.Bold,
-                        ),
-                )
+        OverrideDialog(
+            canOverride = canOverride,
+            fpBalance = state.fpBalance,
+            onConfirm = {
+                showOverrideDialog = false
+                onOverride()
             },
-            text = {
-                if (canOverride) {
-                    Text(
-                        text = "Override costs 10 Focus Points.\n\nCurrent balance: $fpBalance FP.\n\nContinue?",
-                        style = MaterialTheme.typography.bodyMedium.copy(color = LockSubtle),
-                    )
-                } else {
-                    Text(
-                        text = "Not enough Focus Points to override.\n\nYou need 10 FP but only have $fpBalance FP.",
-                        style = MaterialTheme.typography.bodyMedium.copy(color = LockSubtle),
-                    )
-                }
-            },
-            confirmButton = {
-                if (canOverride) {
-                    TextButton(
-                        onClick = {
-                            showOverrideDialog = false
-                            onOverride()
-                        },
-                    ) {
-                        Text(
-                            text = "Yes, override",
-                            style = MaterialTheme.typography.labelLarge.copy(color = LockRed),
-                        )
-                    }
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showOverrideDialog = false }) {
-                    Text(
-                        text = "Cancel",
-                        style = MaterialTheme.typography.labelLarge.copy(color = LockPurple),
-                    )
-                }
-            },
+            onDismiss = { showOverrideDialog = false },
         )
     }
+}
+
+@Composable
+private fun PulsingLockIcon() {
+    val infiniteTransition = rememberInfiniteTransition(label = "LockPulse")
+    val pulse by infiniteTransition.animateFloat(
+        initialValue = PULSE_MIN,
+        targetValue = PULSE_MAX,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(PULSE_PERIOD_MS, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
+        label = "PulseScale",
+    )
+    Box(
+        modifier =
+            Modifier
+                .scale(pulse)
+                .size(ICON_SIZE_DP.dp)
+                .clip(CircleShape)
+                .background(LockPurple.copy(alpha = ALPHA_ICON_FILL))
+                .border(BORDER_THIN_DP.dp, LockPurple.copy(alpha = ALPHA_ICON_BORDER), CircleShape),
+        contentAlignment = Alignment.Center,
+    ) {
+        Text(text = "🔒", fontSize = ICON_FONT_SP.sp)
+    }
+}
+
+@Composable
+private fun LockHeader(
+    appName: String,
+    cooldownMinutes: Int,
+) {
+    Text(
+        text =
+            buildAnnotatedString {
+                append("Time's up. ")
+                withStyle(SpanStyle(color = LockPurple, fontWeight = FontWeight.Bold)) {
+                    append(appName)
+                }
+                append(" is locked for $cooldownMinutes minutes.")
+            },
+        style =
+            MaterialTheme.typography.headlineSmall.copy(
+                color = LockOnSurface,
+                fontWeight = FontWeight.SemiBold,
+                lineHeight = HEADER_LINE_HEIGHT_SP.sp,
+            ),
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth(),
+    )
+}
+
+@Composable
+private fun SuggestionCard(suggestion: String) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(CARD_CORNER_DP.dp),
+        colors = CardDefaults.cardColors(containerColor = LockSurface),
+        border =
+            androidx.compose.foundation.BorderStroke(
+                BORDER_THIN_DP.dp,
+                LockPurple.copy(alpha = ALPHA_CARD_BORDER),
+            ),
+    ) {
+        Column(
+            modifier = Modifier.padding(CARD_PADDING_DP.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            Text(
+                text = "While you wait, try:",
+                style =
+                    MaterialTheme.typography.labelMedium.copy(
+                        color = LockSubtle,
+                        letterSpacing = LABEL_LETTER_SPACING_SP.sp,
+                    ),
+            )
+            Spacer(Modifier.height(SPACE_XS_DP.dp))
+            Text(
+                text = suggestion,
+                style =
+                    MaterialTheme.typography.bodyLarge.copy(
+                        color = LockOnSurface,
+                        fontWeight = FontWeight.Medium,
+                    ),
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Composable
+private fun GoHomeButton(onGoHome: () -> Unit) {
+    Button(
+        onClick = onGoHome,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(BUTTON_HEIGHT_DP.dp),
+        shape = RoundedCornerShape(CARD_CORNER_DP.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = LockGreen),
+    ) {
+        Text(
+            text = "Go Home",
+            style =
+                MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                    color = Color(ARGB_GO_HOME_LABEL),
+                ),
+        )
+    }
+}
+
+@Composable
+private fun OverrideButton(
+    canOverride: Boolean,
+    onClick: () -> Unit,
+) {
+    TextButton(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Text(
+            text = if (canOverride) "Override (costs $OVERRIDE_COST_FP FP)" else "Override (not enough FP)",
+            style =
+                MaterialTheme.typography.bodyMedium.copy(
+                    color = if (canOverride) LockRed.copy(alpha = ALPHA_OVERRIDE_LABEL) else LockSubtle,
+                ),
+        )
+    }
+}
+
+@Composable
+private fun OverrideDialog(
+    canOverride: Boolean,
+    fpBalance: Int,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        containerColor = LockSurface,
+        title = {
+            Text(
+                text = "Override Lock?",
+                style =
+                    MaterialTheme.typography.titleLarge.copy(
+                        color = LockOnSurface,
+                        fontWeight = FontWeight.Bold,
+                    ),
+            )
+        },
+        text = {
+            val body =
+                if (canOverride) {
+                    "Override costs $OVERRIDE_COST_FP Focus Points.\n\nCurrent balance: $fpBalance FP.\n\nContinue?"
+                } else {
+                    "Not enough Focus Points to override.\n\n" +
+                        "You need $OVERRIDE_COST_FP FP but only have $fpBalance FP."
+                }
+            Text(
+                text = body,
+                style = MaterialTheme.typography.bodyMedium.copy(color = LockSubtle),
+            )
+        },
+        confirmButton = {
+            if (canOverride) {
+                TextButton(onClick = onConfirm) {
+                    Text(
+                        text = "Yes, override",
+                        style = MaterialTheme.typography.labelLarge.copy(color = LockRed),
+                    )
+                }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(
+                    text = "Cancel",
+                    style = MaterialTheme.typography.labelLarge.copy(color = LockPurple),
+                )
+            }
+        },
+    )
 }
 
 // ── Countdown display component ───────────────────────────────────────────────
 
 @Composable
 private fun CooldownCounterDisplay(remainingSeconds: Long) {
-    val hours = remainingSeconds / 3600
-    val minutes = (remainingSeconds % 3600) / 60
-    val seconds = remainingSeconds % 60
+    val hours = remainingSeconds / SECONDS_PER_HOUR
+    val minutes = (remainingSeconds % SECONDS_PER_HOUR) / SECONDS_PER_MINUTE
+    val seconds = remainingSeconds % SECONDS_PER_MINUTE
 
     val timeStr =
         if (hours > 0) {
@@ -317,10 +410,14 @@ private fun CooldownCounterDisplay(remainingSeconds: Long) {
         modifier =
             Modifier
                 .wrapContentSize()
-                .clip(RoundedCornerShape(20.dp))
-                .background(LockPurpleDim.copy(alpha = 0.25f))
-                .border(1.dp, LockPurple.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
-                .padding(horizontal = 32.dp, vertical = 16.dp),
+                .clip(RoundedCornerShape(COUNTDOWN_CORNER_DP.dp))
+                .background(LockPurpleDim.copy(alpha = ALPHA_COUNTDOWN_FILL))
+                .border(
+                    BORDER_THIN_DP.dp,
+                    LockPurple.copy(alpha = ALPHA_COUNTDOWN_BORDER),
+                    RoundedCornerShape(COUNTDOWN_CORNER_DP.dp),
+                )
+                .padding(horizontal = COUNTDOWN_PAD_H_DP.dp, vertical = COUNTDOWN_PAD_V_DP.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
@@ -329,8 +426,8 @@ private fun CooldownCounterDisplay(remainingSeconds: Long) {
                 MaterialTheme.typography.displayMedium.copy(
                     color = LockOnSurface,
                     fontWeight = FontWeight.Light,
-                    letterSpacing = 4.sp,
-                    fontSize = 52.sp,
+                    letterSpacing = COUNTDOWN_LETTER_SPACING_SP.sp,
+                    fontSize = COUNTDOWN_FONT_SP.sp,
                 ),
         )
     }

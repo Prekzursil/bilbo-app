@@ -119,7 +119,6 @@ class EmotionalFlowController
                     appInfo = AppInfo(packageName = "post_session_mood", appLabel = "", category = null),
                 ) { _, onDismiss ->
                     PostSessionMoodScreen(
-                        checkInId = checkInId,
                         onMoodSelected = { emotion ->
                             scope.launch { persistPostMood(checkInId, emotion) }
                             onDismiss()

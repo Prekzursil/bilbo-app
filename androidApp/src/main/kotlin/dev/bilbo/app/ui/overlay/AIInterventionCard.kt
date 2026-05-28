@@ -41,15 +41,46 @@ import androidx.compose.ui.unit.sp
 import dev.bilbo.domain.Emotion
 
 // ── Intervention palette: warm, supportive, non-judgmental ────────────────────
-private val AiBackground = Color(0x80000000) // scrim
-private val AiCard = Color(0xFF1E1528) // deep warm violet-grey
-private val AiPurple = Color(0xFFB08DFF) // soft lilac accent
-private val AiPurpleDim = Color(0xFF7C5CBF) // dim purple
-private val AiOnSurface = Color(0xFFEDE8F8) // lavender-white
-private val AiSubtle = Color(0xFF998AB8) // muted lavender
-private val AiSurface = Color(0xFF2A1E3C) // slightly lighter card
-private val AiGreen = Color(0xFF6BCB77) // breathe button
-private val AiNeutral = Color(0xFF5A5A6A) // continue button outline
+private const val ARGB_BACKGROUND = 0x80000000
+private const val ARGB_CARD = 0xFF1E1528
+private const val ARGB_PURPLE = 0xFFB08DFF
+private const val ARGB_PURPLE_DIM = 0xFF7C5CBF
+private const val ARGB_ON_SURFACE = 0xFFEDE8F8
+private const val ARGB_SUBTLE = 0xFF998AB8
+private const val ARGB_GREEN = 0xFF6BCB77
+private const val ARGB_NEUTRAL = 0xFF5A5A6A
+private const val ARGB_BREATHE_LABEL = 0xFF001A0D
+
+private val AiBackground = Color(ARGB_BACKGROUND) // scrim
+private val AiCard = Color(ARGB_CARD) // deep warm violet-grey
+private val AiPurple = Color(ARGB_PURPLE) // soft lilac accent
+private val AiPurpleDim = Color(ARGB_PURPLE_DIM) // dim purple
+private val AiOnSurface = Color(ARGB_ON_SURFACE) // lavender-white
+private val AiSubtle = Color(ARGB_SUBTLE) // muted lavender
+private val AiGreen = Color(ARGB_GREEN) // breathe button
+private val AiNeutral = Color(ARGB_NEUTRAL) // continue button outline
+
+private const val FADE_IN_MS = 280
+private const val SLIDE_IN_MS = 360
+private const val SLIDE_IN_DIVISOR = 3
+private const val ICON_SP = 36
+private const val CARD_PAD_OUTER_DP = 20
+private const val CARD_CORNER_DP = 24
+private const val CARD_ELEVATION_DP = 12
+private const val CARD_PAD_DP = 28
+private const val DIVIDER_THICKNESS_DP = 1
+private const val ALPHA_DIVIDER = 0.3f
+private const val SUGGESTION_LINE_HEIGHT_SP = 24
+private const val PATTERN_LINE_HEIGHT_SP = 22
+private const val BREATHE_BUTTON_HEIGHT_DP = 54
+private const val CONTINUE_BUTTON_HEIGHT_DP = 48
+private const val BUTTON_CORNER_DP = 14
+private const val BORDER_THIN_DP = 1
+private const val ALPHA_CONTINUE_BORDER = 0.5f
+private const val SPACE_ICON_DP = 16
+private const val SPACE_SECTION_DP = 20
+private const val SPACE_SUGGESTION_DP = 24
+private const val SPACE_BETWEEN_DP = 10
 
 /**
  * Full-overlay card shown after a negative emotion check-in on an Empty Calorie app.
@@ -86,10 +117,10 @@ fun AIInterventionCard(
         AnimatedVisibility(
             visible = visible,
             enter =
-                fadeIn(tween(280)) +
+                fadeIn(tween(FADE_IN_MS)) +
                     slideInVertically(
-                        initialOffsetY = { it / 3 },
-                        animationSpec = tween(360),
+                        initialOffsetY = { it / SLIDE_IN_DIVISOR },
+                        animationSpec = tween(SLIDE_IN_MS),
                     ),
         ) {
             Card(
@@ -97,102 +128,114 @@ fun AIInterventionCard(
                     Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
-                        .padding(horizontal = 20.dp),
-                shape = RoundedCornerShape(24.dp),
+                        .padding(horizontal = CARD_PAD_OUTER_DP.dp),
+                shape = RoundedCornerShape(CARD_CORNER_DP.dp),
                 colors = CardDefaults.cardColors(containerColor = AiCard),
-                elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
+                elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION_DP.dp),
             ) {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(28.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    // ── Brain/insight icon ────────────────────────────────────
-                    Text(text = "✨", fontSize = 36.sp)
-
-                    Spacer(Modifier.height(16.dp))
-
-                    // ── Pattern observation ───────────────────────────────────
-                    PatternObservationText(
-                        emotion = emotion,
-                        appName = appName,
-                        avgDurationMins = avgDurationMins,
-                        postMood = postMood,
-                    )
-
-                    Spacer(Modifier.height(20.dp))
-
-                    HorizontalDivider(
-                        color = AiPurpleDim.copy(alpha = 0.3f),
-                        thickness = 1.dp,
-                    )
-
-                    Spacer(Modifier.height(20.dp))
-
-                    // ── Breathe suggestion ────────────────────────────────────
-                    Text(
-                        text = "Would you like to try 2 minutes\nof breathing instead?",
-                        style =
-                            MaterialTheme.typography.bodyLarge.copy(
-                                color = AiOnSurface,
-                                fontWeight = FontWeight.Medium,
-                                lineHeight = 24.sp,
-                            ),
-                        textAlign = TextAlign.Center,
-                    )
-
-                    Spacer(Modifier.height(24.dp))
-
-                    // ── Breathe CTA ───────────────────────────────────────────
-                    Button(
-                        onClick = onBreathe,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(54.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = AiGreen),
-                    ) {
-                        Text(
-                            text = "Yes, let me breathe 🌬️",
-                            style =
-                                MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color(0xFF001A0D),
-                                ),
-                        )
-                    }
-
-                    Spacer(Modifier.height(10.dp))
-
-                    // ── Continue anyway ───────────────────────────────────────
-                    OutlinedButton(
-                        onClick = onContinue,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(48.dp),
-                        shape = RoundedCornerShape(14.dp),
-                        colors =
-                            ButtonDefaults.outlinedButtonColors(
-                                contentColor = AiSubtle,
-                            ),
-                        border =
-                            androidx.compose.foundation.BorderStroke(
-                                1.dp,
-                                AiNeutral.copy(alpha = 0.5f),
-                            ),
-                    ) {
-                        Text(
-                            text = "Continue to $appName",
-                            style = MaterialTheme.typography.bodyMedium.copy(color = AiSubtle),
-                        )
-                    }
-                }
+                InterventionCardContent(
+                    emotion = emotion,
+                    appName = appName,
+                    avgDurationMins = avgDurationMins,
+                    postMood = postMood,
+                    onBreathe = onBreathe,
+                    onContinue = onContinue,
+                )
             }
         }
+    }
+}
+
+@Composable
+private fun InterventionCardContent(
+    emotion: Emotion,
+    appName: String,
+    avgDurationMins: Int,
+    postMood: Emotion?,
+    onBreathe: () -> Unit,
+    onContinue: () -> Unit,
+) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(CARD_PAD_DP.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Text(text = "✨", fontSize = ICON_SP.sp)
+        Spacer(Modifier.height(SPACE_ICON_DP.dp))
+        PatternObservationText(
+            emotion = emotion,
+            appName = appName,
+            avgDurationMins = avgDurationMins,
+            postMood = postMood,
+        )
+        Spacer(Modifier.height(SPACE_SECTION_DP.dp))
+        HorizontalDivider(
+            color = AiPurpleDim.copy(alpha = ALPHA_DIVIDER),
+            thickness = DIVIDER_THICKNESS_DP.dp,
+        )
+        Spacer(Modifier.height(SPACE_SECTION_DP.dp))
+        Text(
+            text = "Would you like to try 2 minutes\nof breathing instead?",
+            style =
+                MaterialTheme.typography.bodyLarge.copy(
+                    color = AiOnSurface,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = SUGGESTION_LINE_HEIGHT_SP.sp,
+                ),
+            textAlign = TextAlign.Center,
+        )
+        Spacer(Modifier.height(SPACE_SUGGESTION_DP.dp))
+        InterventionActions(appName = appName, onBreathe = onBreathe, onContinue = onContinue)
+    }
+}
+
+@Composable
+private fun InterventionActions(
+    appName: String,
+    onBreathe: () -> Unit,
+    onContinue: () -> Unit,
+) {
+    Button(
+        onClick = onBreathe,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(BREATHE_BUTTON_HEIGHT_DP.dp),
+        shape = RoundedCornerShape(BUTTON_CORNER_DP.dp),
+        colors = ButtonDefaults.buttonColors(containerColor = AiGreen),
+    ) {
+        Text(
+            text = "Yes, let me breathe 🌬️",
+            style =
+                MaterialTheme.typography.titleMedium.copy(
+                    fontWeight = FontWeight.SemiBold,
+                    color = Color(ARGB_BREATHE_LABEL),
+                ),
+        )
+    }
+
+    Spacer(Modifier.height(SPACE_BETWEEN_DP.dp))
+
+    OutlinedButton(
+        onClick = onContinue,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(CONTINUE_BUTTON_HEIGHT_DP.dp),
+        shape = RoundedCornerShape(BUTTON_CORNER_DP.dp),
+        colors = ButtonDefaults.outlinedButtonColors(contentColor = AiSubtle),
+        border =
+            androidx.compose.foundation.BorderStroke(
+                BORDER_THIN_DP.dp,
+                AiNeutral.copy(alpha = ALPHA_CONTINUE_BORDER),
+            ),
+    ) {
+        Text(
+            text = "Continue to $appName",
+            style = MaterialTheme.typography.bodyMedium.copy(color = AiSubtle),
+        )
     }
 }
 
@@ -236,7 +279,7 @@ private fun PatternObservationText(
         style =
             MaterialTheme.typography.bodyMedium.copy(
                 color = AiSubtle,
-                lineHeight = 22.sp,
+                lineHeight = PATTERN_LINE_HEIGHT_SP.sp,
             ),
         textAlign = TextAlign.Center,
     )

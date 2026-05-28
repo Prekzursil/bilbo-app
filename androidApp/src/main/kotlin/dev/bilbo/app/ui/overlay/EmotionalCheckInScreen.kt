@@ -42,13 +42,43 @@ import androidx.compose.ui.unit.sp
 import dev.bilbo.domain.Emotion
 
 // ── Check-in palette: soft neutral warm tones ─────────────────────────────────
-private val CiBackground = Color(0xFF0F1520) // dark navy background
-private val CiCard = Color(0xFF1B2535) // card surface
-private val CiSelected = Color(0xFF48B8A0) // teal highlight
-private val CiSelectedBg = Color(0x2048B8A0) // teal tint background
-private val CiOnSurface = Color(0xFFE0EEF5) // near-white text
-private val CiSubtle = Color(0xFF8AAFC4) // muted blue
-private val CiSurface = Color(0xFF243344) // slightly lighter surface
+private const val ARGB_BACKGROUND = 0xFF0F1520
+private const val ARGB_BACKGROUND_BOT = 0xFF0D1B2A
+private const val ARGB_CARD = 0xFF1B2535
+private const val ARGB_SELECTED = 0xFF48B8A0
+private const val ARGB_SELECTED_BG = 0x2048B8A0
+private const val ARGB_ON_SURFACE = 0xFFE0EEF5
+private const val ARGB_SUBTLE = 0xFF8AAFC4
+private const val ARGB_SURFACE = 0xFF243344
+
+private val CiBackground = Color(ARGB_BACKGROUND) // dark navy background
+private val CiBackgroundBot = Color(ARGB_BACKGROUND_BOT) // gradient bottom
+private val CiCard = Color(ARGB_CARD) // card surface
+private val CiSelected = Color(ARGB_SELECTED) // teal highlight
+private val CiSelectedBg = Color(ARGB_SELECTED_BG) // teal tint background
+private val CiOnSurface = Color(ARGB_ON_SURFACE) // near-white text
+private val CiSubtle = Color(ARGB_SUBTLE) // muted blue
+private val CiSurface = Color(ARGB_SURFACE) // slightly lighter surface
+
+private const val GRID_COLUMNS = 2
+private const val GRID_SPACING_DP = 12
+private const val HEADER_EMOJI_SP = 40
+private const val HEADER_LINE_HEIGHT_SP = 34
+private const val SCREEN_PADDING_DP = 24
+private const val CARD_CORNER_DP = 16
+private const val CARD_PAD_V_DP = 20
+private const val EMOJI_SP = 30
+private const val LABEL_GAP_DP = 6
+private const val BORDER_SELECTED_DP = 2
+private const val BORDER_DP = 1
+private const val ELEVATION_SELECTED_DP = 4
+private const val ELEVATION_DP = 0
+private const val BORDER_ANIM_MS = 200
+private const val SPACE_TOP_DP = 48
+private const val SPACE_HEADER_DP = 16
+private const val SPACE_SUB_DP = 8
+private const val SPACE_GRID_DP = 32
+private const val SPACE_SKIP_DP = 28
 
 /**
  * Emotion selection grid inserted between the gatekeeper and app launch.
@@ -72,7 +102,7 @@ fun EmotionalCheckInScreen(
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        listOf(CiBackground, Color(0xFF0D1B2A)),
+                        listOf(CiBackground, CiBackgroundBot),
                     ),
                 ),
         contentAlignment = Alignment.Center,
@@ -81,46 +111,17 @@ fun EmotionalCheckInScreen(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = SCREEN_PADDING_DP.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(Modifier.height(48.dp))
-
-            // ── Header ────────────────────────────────────────────────────────
-            Text(
-                text = "🧠",
-                fontSize = 40.sp,
-            )
-
-            Spacer(Modifier.height(16.dp))
-
-            Text(
-                text = "How are you feeling\nright now?",
-                style =
-                    MaterialTheme.typography.headlineSmall.copy(
-                        color = CiOnSurface,
-                        fontWeight = FontWeight.SemiBold,
-                        lineHeight = 34.sp,
-                    ),
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(Modifier.height(8.dp))
-
-            Text(
-                text = "Be honest — it helps Bilbo support you better.",
-                style = MaterialTheme.typography.bodyMedium.copy(color = CiSubtle),
-                textAlign = TextAlign.Center,
-            )
-
-            Spacer(Modifier.height(32.dp))
-
-            // ── Emotion grid ──────────────────────────────────────────────────
+            Spacer(Modifier.height(SPACE_TOP_DP.dp))
+            CheckInHeader()
+            Spacer(Modifier.height(SPACE_GRID_DP.dp))
             LazyVerticalGrid(
-                columns = GridCells.Fixed(2),
+                columns = GridCells.Fixed(GRID_COLUMNS),
                 contentPadding = PaddingValues(0.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalArrangement = Arrangement.spacedBy(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(GRID_SPACING_DP.dp),
+                verticalArrangement = Arrangement.spacedBy(GRID_SPACING_DP.dp),
                 modifier = Modifier.fillMaxWidth(),
             ) {
                 items(EMOTION_ITEMS) { item ->
@@ -135,9 +136,8 @@ fun EmotionalCheckInScreen(
                 }
             }
 
-            Spacer(Modifier.height(28.dp))
+            Spacer(Modifier.height(SPACE_SKIP_DP.dp))
 
-            // ── Skip ──────────────────────────────────────────────────────────
             TextButton(onClick = onSkip) {
                 Text(
                     text = "Skip",
@@ -149,12 +149,58 @@ fun EmotionalCheckInScreen(
                 )
             }
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(SPACE_TOP_DP.dp))
         }
     }
 }
 
+@Composable
+private fun CheckInHeader() {
+    Text(text = "🧠", fontSize = HEADER_EMOJI_SP.sp)
+
+    Spacer(Modifier.height(SPACE_HEADER_DP.dp))
+
+    Text(
+        text = "How are you feeling\nright now?",
+        style =
+            MaterialTheme.typography.headlineSmall.copy(
+                color = CiOnSurface,
+                fontWeight = FontWeight.SemiBold,
+                lineHeight = HEADER_LINE_HEIGHT_SP.sp,
+            ),
+        textAlign = TextAlign.Center,
+    )
+
+    Spacer(Modifier.height(SPACE_SUB_DP.dp))
+
+    Text(
+        text = "Be honest — it helps Bilbo support you better.",
+        style = MaterialTheme.typography.bodyMedium.copy(color = CiSubtle),
+        textAlign = TextAlign.Center,
+    )
+}
+
 // ── Emotion card ──────────────────────────────────────────────────────────────
+
+@Composable
+private fun emotionCardBackground(isSelected: Boolean): Color {
+    val bgColor by animateColorAsState(
+        targetValue = if (isSelected) CiSelectedBg else CiCard,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+        label = "EmotionCardBg",
+    )
+    return bgColor
+}
+
+@Composable
+private fun emotionCardBorder(isSelected: Boolean): Color {
+    val borderColor by animateColorAsState(
+        targetValue = if (isSelected) CiSelected else CiSurface,
+        animationSpec = tween(BORDER_ANIM_MS),
+        label = "EmotionCardBorder",
+    )
+    return borderColor
+}
 
 @Composable
 private fun EmotionCard(
@@ -162,54 +208,44 @@ private fun EmotionCard(
     isSelected: Boolean,
     onClick: () -> Unit,
 ) {
-    val bgColor by animateColorAsState(
-        targetValue = if (isSelected) CiSelectedBg else CiCard,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-        label = "EmotionCardBg",
-    )
-    val borderColor by animateColorAsState(
-        targetValue = if (isSelected) CiSelected else CiSurface,
-        animationSpec = tween(200),
-        label = "EmotionCardBorder",
-    )
+    val bgColor = emotionCardBackground(isSelected)
+    val borderColor = emotionCardBorder(isSelected)
+    val borderWidth = if (isSelected) BORDER_SELECTED_DP.dp else BORDER_DP.dp
+    val elevation = if (isSelected) ELEVATION_SELECTED_DP.dp else ELEVATION_DP.dp
+    val labelColor = if (isSelected) CiSelected else CiOnSurface
+    val labelWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
 
     Card(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(CARD_CORNER_DP.dp))
                 .clickable { onClick() }
                 .border(
-                    width = if (isSelected) 2.dp else 1.dp,
+                    width = borderWidth,
                     color = borderColor,
-                    shape = RoundedCornerShape(16.dp),
+                    shape = RoundedCornerShape(CARD_CORNER_DP.dp),
                 ),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(CARD_CORNER_DP.dp),
         colors = CardDefaults.cardColors(containerColor = bgColor),
-        elevation =
-            CardDefaults.cardElevation(
-                defaultElevation = if (isSelected) 4.dp else 0.dp,
-            ),
+        elevation = CardDefaults.cardElevation(defaultElevation = elevation),
     ) {
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 20.dp),
+                    .padding(vertical = CARD_PAD_V_DP.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-            Text(
-                text = item.emoji,
-                fontSize = 30.sp,
-            )
-            Spacer(Modifier.height(6.dp))
+            Text(text = item.emoji, fontSize = EMOJI_SP.sp)
+            Spacer(Modifier.height(LABEL_GAP_DP.dp))
             Text(
                 text = item.label,
                 style =
                     MaterialTheme.typography.bodyMedium.copy(
-                        color = if (isSelected) CiSelected else CiOnSurface,
-                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                        color = labelColor,
+                        fontWeight = labelWeight,
                     ),
             )
         }
