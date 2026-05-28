@@ -41,6 +41,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -64,45 +65,9 @@ import dev.bilbo.app.ui.screen.WeeklyInsightScreen
 import dev.bilbo.app.ui.screen.onboarding.OnboardingNavHost
 import dev.bilbo.app.ui.screen.settings.SettingsScreen as RealSettingsScreen
 
-// MARK: - Top-level route constants
+// MARK: - Transition tuning
 
-object BilboRoute {
-    // Top-level tabs
-    const val DASHBOARD = "dashboard"
-    const val FOCUS = "focus"
-    const val INSIGHTS = "insights"
-    const val SOCIAL = "social"
-    const val SETTINGS = "settings"
-
-    // Dashboard sub-routes
-    const val BUDGET = "budget"
-
-    // Insights sub-routes
-    const val WEEKLY_INSIGHT = "insights/weekly/{weekStart}"
-    const val ANALOG_SUGGESTIONS = "analog/suggestions"
-    const val INTERESTS_ONBOARDING = "interests/setup"
-
-    // Social sub-routes
-    const val SOCIAL_HUB = "social/hub"
-    const val BUDDY_PAIRS = "social/buddies"
-    const val CIRCLES = "social/circles"
-    const val CHALLENGES = "social/challenges"
-    const val LEADERBOARD = "social/leaderboard"
-    const val DIGEST = "social/digest"
-
-    // Settings sub-routes
-    const val SETTINGS_ENFORCEMENT = "settings/enforcement"
-    const val SETTINGS_ECONOMY = "settings/economy"
-    const val SETTINGS_EMOTIONAL = "settings/emotional"
-    const val SETTINGS_AI = "settings/ai"
-    const val SETTINGS_SOCIAL = "settings/social"
-    const val SETTINGS_NOTIFICATIONS = "settings/notifications"
-    const val SETTINGS_DATA = "settings/data"
-    const val DATA_ANONYMIZATION = "settings/data/anonymization"
-
-    // Onboarding (full-screen, no bottom bar)
-    const val ONBOARDING = "onboarding"
-}
+private const val SLIDE_DIVISOR = 4
 
 // MARK: - Bottom navigation items
 
@@ -157,129 +122,135 @@ fun BilboNavHost(
             navController = navController,
             startDestination = if (onboardingCompleted) BilboRoute.DASHBOARD else BilboRoute.ONBOARDING,
             modifier = Modifier.padding(innerPadding),
-            enterTransition = { fadeIn() + slideInHorizontally { it / 4 } },
-            exitTransition = { fadeOut() + slideOutHorizontally { -it / 4 } },
-            popEnterTransition = { fadeIn() + slideInHorizontally { -it / 4 } },
-            popExitTransition = { fadeOut() + slideOutHorizontally { it / 4 } },
+            enterTransition = { fadeIn() + slideInHorizontally { it / SLIDE_DIVISOR } },
+            exitTransition = { fadeOut() + slideOutHorizontally { -it / SLIDE_DIVISOR } },
+            popEnterTransition = { fadeIn() + slideInHorizontally { -it / SLIDE_DIVISOR } },
+            popExitTransition = { fadeOut() + slideOutHorizontally { it / SLIDE_DIVISOR } },
         ) {
-            // ── Onboarding ───────────────────────────────────────────────
-            composable(BilboRoute.ONBOARDING) {
-                OnboardingNavHost(
-                    onOnboardingComplete = {
-                        onOnboardingFinished()
-                        navController.navigate(BilboRoute.DASHBOARD) {
-                            popUpTo(BilboRoute.ONBOARDING) { inclusive = true }
-                        }
-                    },
-                )
-            }
-
-            // ── Dashboard ────────────────────────────────────────────────
-            composable(BilboRoute.DASHBOARD) {
-                DashboardScreen(
-                    onNavigateToInsights = { navController.navigate(BilboRoute.INSIGHTS) },
-                    onNavigateToSettings = { navController.navigate(BilboRoute.SETTINGS) },
-                )
-            }
-
-            composable(BilboRoute.BUDGET) {
-                BudgetDashboardScreen(
-                    uiState = BudgetDashboardUiState(),
-                    onRefresh = {},
-                    onBack = { navController.popBackStack() },
-                )
-            }
-
-            // ── Focus ────────────────────────────────────────────────────
-            composable(BilboRoute.FOCUS) {
-                FocusPlaceholder()
-            }
-
-            // ── Insights ─────────────────────────────────────────────────
-            composable(BilboRoute.INSIGHTS) {
-                InsightsScreen(onNavigateBack = { navController.popBackStack() })
-            }
-
-            composable(
-                route = BilboRoute.WEEKLY_INSIGHT,
-                arguments = listOf(navArgument("weekStart") { type = NavType.StringType }),
-            ) {
-                WeeklyInsightScreen(
-                    insight = null,
-                    onBack = { navController.popBackStack() },
-                )
-            }
-
-            composable(BilboRoute.ANALOG_SUGGESTIONS) {
-                AnalogSuggestionsScreen(
-                    uiState = AnalogSuggestionsUiState(),
-                    onAccept = {},
-                    onShowAnother = {},
-                    onAddCustom = {},
-                    onDeleteCustom = {},
-                    onBack = { navController.popBackStack() },
-                )
-            }
-
-            composable(BilboRoute.INTERESTS_ONBOARDING) {
-                // Full interests onboarding flow is exposed via the onboarding module;
-                // tapping "Edit interests" from Settings routes back to Dashboard.
-                InterestsReconfigurePlaceholder(onDone = { navController.popBackStack() })
-            }
-
-            // ── Social ───────────────────────────────────────────────────
-            composable(BilboRoute.SOCIAL) {
-                SocialHubScreen(
-                    onBuddyPairTap = { _ -> navController.navigate(BilboRoute.BUDDY_PAIRS) },
-                    onCircleTap = { _ -> navController.navigate(BilboRoute.CIRCLES) },
-                    onChallengeTap = { _ -> navController.navigate(BilboRoute.CHALLENGES) },
-                    onBack = { navController.popBackStack() },
-                )
-            }
-            composable(BilboRoute.BUDDY_PAIRS) {
-                dev.bilbo.app.ui.screen
-                    .BuddyPairScreen(onBack = { navController.popBackStack() })
-            }
-            composable(BilboRoute.CIRCLES) {
-                CircleScreen(onBack = { navController.popBackStack() })
-            }
-            composable(BilboRoute.CHALLENGES) {
-                ChallengeScreen(onBack = { navController.popBackStack() })
-            }
-            composable(BilboRoute.LEADERBOARD) {
-                LeaderboardScreen(onBack = { navController.popBackStack() })
-            }
-            composable(BilboRoute.DIGEST) {
-                DigestScreen(onDismiss = { navController.popBackStack() })
-            }
-
-            // ── Settings ─────────────────────────────────────────────────
-            composable(BilboRoute.SETTINGS) {
-                RealSettingsScreen()
-            }
-            composable(
-                BilboRoute.SETTINGS_ENFORCEMENT,
-            ) { SettingsSubPlaceholder("Enforcement") { navController.popBackStack() } }
-            composable(
-                BilboRoute.SETTINGS_ECONOMY,
-            ) { SettingsSubPlaceholder("Focus Economy") { navController.popBackStack() } }
-            composable(BilboRoute.SETTINGS_EMOTIONAL) {
-                SettingsSubPlaceholder("Emotional Check-ins") { navController.popBackStack() }
-            }
-            composable(
-                BilboRoute.SETTINGS_AI,
-            ) { SettingsSubPlaceholder("AI Insights") { navController.popBackStack() } }
-            composable(BilboRoute.SETTINGS_SOCIAL) { SettingsSubPlaceholder("Social") { navController.popBackStack() } }
-            composable(BilboRoute.SETTINGS_NOTIFICATIONS) {
-                SettingsSubPlaceholder("Notifications") { navController.popBackStack() }
-            }
-            composable(
-                BilboRoute.SETTINGS_DATA,
-            ) { SettingsSubPlaceholder("Data & Privacy") { navController.popBackStack() } }
-            composable(BilboRoute.DATA_ANONYMIZATION) {
-                DataAnonymizationScreen(onBack = { navController.popBackStack() })
-            }
+            onboardingGraph(navController, onOnboardingFinished)
+            dashboardGraph(navController)
+            insightsGraph(navController)
+            socialGraph(navController)
+            settingsGraph(navController)
         }
+    }
+}
+
+private fun NavGraphBuilder.onboardingGraph(
+    navController: NavHostController,
+    onOnboardingFinished: () -> Unit,
+) {
+    composable(BilboRoute.ONBOARDING) {
+        OnboardingNavHost(
+            onOnboardingComplete = {
+                onOnboardingFinished()
+                navController.navigate(BilboRoute.DASHBOARD) {
+                    popUpTo(BilboRoute.ONBOARDING) { inclusive = true }
+                }
+            },
+        )
+    }
+}
+
+private fun NavGraphBuilder.dashboardGraph(navController: NavHostController) {
+    composable(BilboRoute.DASHBOARD) {
+        DashboardScreen(
+            onNavigateToInsights = { navController.navigate(BilboRoute.INSIGHTS) },
+            onNavigateToSettings = { navController.navigate(BilboRoute.SETTINGS) },
+        )
+    }
+    composable(BilboRoute.BUDGET) {
+        BudgetDashboardScreen(
+            uiState = BudgetDashboardUiState(),
+            onRefresh = {},
+            onBack = { navController.popBackStack() },
+        )
+    }
+    composable(BilboRoute.FOCUS) {
+        FocusPlaceholder()
+    }
+}
+
+private fun NavGraphBuilder.insightsGraph(navController: NavHostController) {
+    composable(BilboRoute.INSIGHTS) {
+        InsightsScreen(onNavigateBack = { navController.popBackStack() })
+    }
+    composable(
+        route = BilboRoute.WEEKLY_INSIGHT,
+        arguments = listOf(navArgument("weekStart") { type = NavType.StringType }),
+    ) {
+        WeeklyInsightScreen(
+            insight = null,
+            onBack = { navController.popBackStack() },
+        )
+    }
+    composable(BilboRoute.ANALOG_SUGGESTIONS) {
+        AnalogSuggestionsScreen(
+            uiState = AnalogSuggestionsUiState(),
+            onAccept = {},
+            onShowAnother = {},
+            onAddCustom = {},
+            onDeleteCustom = {},
+            onBack = { navController.popBackStack() },
+        )
+    }
+    composable(BilboRoute.INTERESTS_ONBOARDING) {
+        InterestsReconfigurePlaceholder()
+    }
+}
+
+private fun NavGraphBuilder.socialGraph(navController: NavHostController) {
+    composable(BilboRoute.SOCIAL) {
+        SocialHubScreen(
+            onBuddyPairTap = { _ -> navController.navigate(BilboRoute.BUDDY_PAIRS) },
+            onCircleTap = { _ -> navController.navigate(BilboRoute.CIRCLES) },
+            onChallengeTap = { _ -> navController.navigate(BilboRoute.CHALLENGES) },
+            onBack = { navController.popBackStack() },
+        )
+    }
+    composable(BilboRoute.BUDDY_PAIRS) {
+        dev.bilbo.app.ui.screen
+            .BuddyPairScreen(onBack = { navController.popBackStack() })
+    }
+    composable(BilboRoute.CIRCLES) {
+        CircleScreen(onBack = { navController.popBackStack() })
+    }
+    composable(BilboRoute.CHALLENGES) {
+        ChallengeScreen(onBack = { navController.popBackStack() })
+    }
+    composable(BilboRoute.LEADERBOARD) {
+        LeaderboardScreen(onBack = { navController.popBackStack() })
+    }
+    composable(BilboRoute.DIGEST) {
+        DigestScreen(onDismiss = { navController.popBackStack() })
+    }
+}
+
+private fun NavGraphBuilder.settingsGraph(navController: NavHostController) {
+    composable(BilboRoute.SETTINGS) {
+        RealSettingsScreen()
+    }
+    composable(
+        BilboRoute.SETTINGS_ENFORCEMENT,
+    ) { SettingsSubPlaceholder("Enforcement") { navController.popBackStack() } }
+    composable(
+        BilboRoute.SETTINGS_ECONOMY,
+    ) { SettingsSubPlaceholder("Focus Economy") { navController.popBackStack() } }
+    composable(BilboRoute.SETTINGS_EMOTIONAL) {
+        SettingsSubPlaceholder("Emotional Check-ins") { navController.popBackStack() }
+    }
+    composable(
+        BilboRoute.SETTINGS_AI,
+    ) { SettingsSubPlaceholder("AI Insights") { navController.popBackStack() } }
+    composable(BilboRoute.SETTINGS_SOCIAL) { SettingsSubPlaceholder("Social") { navController.popBackStack() } }
+    composable(BilboRoute.SETTINGS_NOTIFICATIONS) {
+        SettingsSubPlaceholder("Notifications") { navController.popBackStack() }
+    }
+    composable(
+        BilboRoute.SETTINGS_DATA,
+    ) { SettingsSubPlaceholder("Data & Privacy") { navController.popBackStack() } }
+    composable(BilboRoute.DATA_ANONYMIZATION) {
+        DataAnonymizationScreen(onBack = { navController.popBackStack() })
     }
 }
 
@@ -335,7 +306,7 @@ private fun FocusPlaceholder() {
 }
 
 @Composable
-private fun InterestsReconfigurePlaceholder(onDone: () -> Unit) {
+private fun InterestsReconfigurePlaceholder() {
     Box(
         modifier = Modifier.fillMaxSize(),
         contentAlignment = Alignment.Center,

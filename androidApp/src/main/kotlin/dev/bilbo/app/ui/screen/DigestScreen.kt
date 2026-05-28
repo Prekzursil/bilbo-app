@@ -37,17 +37,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-// ── UI models ─────────────────────────────────────────────────────────────────
-
-data class CommunityDigestData(
-    val weekLabel: String = "Apr 7–13", // e.g. "Apr 7–13"
-    val totalActiveUsers: Int = 0,
-    val collectiveHoursSaved: Int = 0,
-    val topAnalogSuggestion: String = "",
-    val topCircleAchievement: String = "",
-    val anonymousTips: kotlin.collections.List<String> = emptyList(), // max 3
-    val isLoading: Boolean = false,
-)
+// ── Layout constants ──────────────────────────────────────────────────────────
+private const val THOUSAND = 1_000
+private const val MILLION = 1_000_000
 
 /**
  * Weekly community digest card.
@@ -99,71 +91,61 @@ fun DigestScreen(
                 CircularProgressIndicator()
             }
         } else {
-            LazyColumn(
-                modifier =
-                    Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
-                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                // Hero banner
-                item { DigestHeroBanner(weekLabel = data.weekLabel) }
-
-                // Stats row
-                item { DigestStatsRow(activeUsers = data.totalActiveUsers, hoursSaved = data.collectiveHoursSaved) }
-
-                // Top analog suggestion
-                if (data.topAnalogSuggestion.isNotBlank()) {
-                    item {
-                        DigestHighlightCard(
-                            icon = "🌿",
-                            label = "Top Analog Pick",
-                            text = data.topAnalogSuggestion,
-                        )
-                    }
-                }
-
-                // Top circle achievement
-                if (data.topCircleAchievement.isNotBlank()) {
-                    item {
-                        DigestHighlightCard(
-                            icon = "🏆",
-                            label = "Circle Achievement",
-                            text = data.topCircleAchievement,
-                        )
-                    }
-                }
-
-                // Anonymous tips
-                if (data.anonymousTips.isNotEmpty()) {
-                    item {
-                        Text(
-                            "From the Community",
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.SemiBold,
-                        )
-                    }
-                    items(data.anonymousTips) { tip ->
-                        AnonymousTipCard(tip = tip)
-                    }
-                }
-
-                // Footer
-                item {
-                    Text(
-                        "This digest is compiled anonymously every Sunday. Individual data is never shared.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
-                    )
-                }
-
-                item { Spacer(Modifier.height(16.dp)) }
-            }
+            DigestList(data = data, modifier = Modifier.fillMaxSize().padding(paddingValues))
         }
     }
+}
+
+@Composable
+private fun DigestList(
+    data: CommunityDigestData,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        item { DigestHeroBanner(weekLabel = data.weekLabel) }
+        item { DigestStatsRow(activeUsers = data.totalActiveUsers, hoursSaved = data.collectiveHoursSaved) }
+
+        if (data.topAnalogSuggestion.isNotBlank()) {
+            item {
+                DigestHighlightCard(icon = "🌿", label = "Top Analog Pick", text = data.topAnalogSuggestion)
+            }
+        }
+        if (data.topCircleAchievement.isNotBlank()) {
+            item {
+                DigestHighlightCard(icon = "🏆", label = "Circle Achievement", text = data.topCircleAchievement)
+            }
+        }
+        if (data.anonymousTips.isNotEmpty()) {
+            item {
+                Text(
+                    "From the Community",
+                    style = MaterialTheme.typography.titleSmall,
+                    fontWeight = FontWeight.SemiBold,
+                )
+            }
+            items(data.anonymousTips) { tip ->
+                AnonymousTipCard(tip = tip)
+            }
+        }
+
+        item { DigestFooter() }
+        item { Spacer(Modifier.height(16.dp)) }
+    }
+}
+
+@Composable
+private fun DigestFooter() {
+    Text(
+        "This digest is compiled anonymously every Sunday. Individual data is never shared.",
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        textAlign = TextAlign.Center,
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
+    )
 }
 
 // ── Sub-components ────────────────────────────────────────────────────────────
@@ -331,11 +313,21 @@ private fun AnonymousTipCard(tip: String) {
     }
 }
 
-// ── Helpers ───────────────────────────────────────────────────────────────────
+// ── Helpers / models ──────────────────────────────────────────────────────────
 
 private fun formatCompact(n: Int): String =
     when {
-        n >= 1_000_000 -> "${n / 1_000_000}M"
-        n >= 1_000 -> "${n / 1_000}K"
+        n >= MILLION -> "${n / MILLION}M"
+        n >= THOUSAND -> "${n / THOUSAND}K"
         else -> n.toString()
     }
+
+data class CommunityDigestData(
+    val weekLabel: String = "Apr 7–13", // e.g. "Apr 7–13"
+    val totalActiveUsers: Int = 0,
+    val collectiveHoursSaved: Int = 0,
+    val topAnalogSuggestion: String = "",
+    val topCircleAchievement: String = "",
+    val anonymousTips: kotlin.collections.List<String> = emptyList(), // max 3
+    val isLoading: Boolean = false,
+)
