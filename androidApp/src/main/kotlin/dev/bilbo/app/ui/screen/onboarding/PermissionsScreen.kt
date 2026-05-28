@@ -12,6 +12,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,7 +49,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 
@@ -57,6 +57,19 @@ import androidx.core.content.ContextCompat
 //
 // Lists required permissions with explanations, grant buttons,
 // and green checkmarks when granted.
+
+// MARK: - Constants
+
+private const val SDK_TIRAMISU = 33
+private const val SDK_Q = 29
+private const val SCREEN_PAD_H_DP = 24
+private const val SCREEN_PAD_TOP_DP = 48
+private const val SCREEN_PAD_BOTTOM_DP = 32
+private const val SECTION_GAP_DP = 32
+private const val ROW_GAP_DP = 16
+private const val SMALL_GAP_DP = 8
+private const val BUTTON_HEIGHT_DP = 56
+private const val BUTTON_CORNER_DP = 16
 
 // MARK: - Permission items
 
@@ -96,40 +109,23 @@ fun PermissionsScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .padding(top = 48.dp, bottom = 32.dp),
+                .padding(horizontal = SCREEN_PAD_H_DP.dp)
+                .padding(top = SCREEN_PAD_TOP_DP.dp, bottom = SCREEN_PAD_BOTTOM_DP.dp),
     ) {
-        // Back
-        IconButton(onClick = onBack) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Permissions",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-        )
-        Text(
-            text = "Bilbo needs these to protect your focus.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Spacer(modifier = Modifier.height(32.dp))
+        PermissionsHeader(onBack = onBack)
 
         Column(
             modifier =
                 Modifier
                     .weight(1f)
                     .verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
+            verticalArrangement = Arrangement.spacedBy(ROW_GAP_DP.dp),
         ) {
             permissions.forEach { item ->
                 PermissionCard(
                     item = item,
                     onGrant = {
-                        if (item.id == "notifications" && Build.VERSION.SDK_INT >= 33) {
+                        if (item.id == "notifications" && Build.VERSION.SDK_INT >= SDK_TIRAMISU) {
                             notifLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
                         } else {
                             item.onGrant(context)
@@ -140,30 +136,59 @@ fun PermissionsScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(SECTION_GAP_DP.dp))
 
-        Button(
+        PermissionsFooter(allGranted = allGranted, onContinue = onContinue)
+    }
+}
+
+@Composable
+private fun ColumnScope.PermissionsFooter(
+    allGranted: Boolean,
+    onContinue: () -> Unit,
+) {
+    Button(
+        onClick = onContinue,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(BUTTON_HEIGHT_DP.dp),
+        shape = RoundedCornerShape(BUTTON_CORNER_DP.dp),
+        enabled = allGranted,
+    ) {
+        Text("Continue", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+    }
+
+    if (!allGranted) {
+        Spacer(modifier = Modifier.height(SMALL_GAP_DP.dp))
+        TextButton(
             onClick = onContinue,
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-            enabled = allGranted,
+            modifier = Modifier.align(Alignment.CenterHorizontally),
         ) {
-            Text("Continue", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-        }
-
-        if (!allGranted) {
-            Spacer(modifier = Modifier.height(8.dp))
-            TextButton(
-                onClick = onContinue,
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-            ) {
-                Text("Skip for now", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            Text("Skip for now", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
+}
+
+@Composable
+private fun PermissionsHeader(onBack: () -> Unit) {
+    IconButton(onClick = onBack) {
+        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+    }
+
+    Spacer(modifier = Modifier.height(ROW_GAP_DP.dp))
+
+    Text(
+        text = "Permissions",
+        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+    )
+    Text(
+        text = "Bilbo needs these to protect your focus.",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+
+    Spacer(modifier = Modifier.height(SECTION_GAP_DP.dp))
 }
 
 @Composable
@@ -290,7 +315,7 @@ private fun hasUsageAccess(context: Context): Boolean =
     try {
         val ops = context.getSystemService(Context.APP_OPS_SERVICE) as AppOpsManager
         val mode =
-            if (Build.VERSION.SDK_INT >= 29) {
+            if (Build.VERSION.SDK_INT >= SDK_Q) {
                 ops.unsafeCheckOpNoThrow(
                     AppOpsManager.OPSTR_GET_USAGE_STATS,
                     android.os.Process.myUid(),
@@ -308,9 +333,3 @@ private fun hasUsageAccess(context: Context): Boolean =
     } catch (ignored: Exception) {
         false
     }
-
-@Preview(showBackground = true)
-@Composable
-private fun PermissionsScreenPreview() {
-    PermissionsScreen(onContinue = {}, onBack = {})
-}

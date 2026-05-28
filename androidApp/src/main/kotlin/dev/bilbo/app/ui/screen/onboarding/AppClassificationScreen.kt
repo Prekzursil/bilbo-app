@@ -33,7 +33,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 // AppClassificationScreen.kt
@@ -89,6 +88,16 @@ data class ClassifiableApp(
 
 // MARK: - Screen
 
+private const val MAX_CLASSIFIABLE_APPS = 10
+private const val SCREEN_PAD_H_DP = 24
+private const val SCREEN_PAD_TOP_DP = 48
+private const val SCREEN_PAD_BOTTOM_DP = 32
+private const val SECTION_GAP_DP = 24
+private const val ROW_GAP_DP = 16
+private const val LIST_GAP_DP = 12
+private const val BUTTON_HEIGHT_DP = 56
+private const val BUTTON_CORNER_DP = 16
+
 @Composable
 fun AppClassificationScreen(
     onNext: () -> Unit,
@@ -107,35 +116,14 @@ fun AppClassificationScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .padding(top = 48.dp, bottom = 32.dp),
+                .padding(horizontal = SCREEN_PAD_H_DP.dp)
+                .padding(top = SCREEN_PAD_TOP_DP.dp, bottom = SCREEN_PAD_BOTTOM_DP.dp),
     ) {
-        IconButton(onClick = onBack) {
-            Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Classify Your Apps",
-            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
-        )
-        Text(
-            text = "How should we categorize your most-used apps?",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Legend
-        ClassificationLegend()
-
-        Spacer(modifier = Modifier.height(16.dp))
+        AppClassificationHeader(onBack = onBack)
 
         LazyColumn(
             modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(12.dp),
+            verticalArrangement = Arrangement.spacedBy(LIST_GAP_DP.dp),
         ) {
             items(apps, key = { it.packageName }) { app ->
                 AppClassificationRow(
@@ -148,15 +136,15 @@ fun AppClassificationScreen(
             }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(SECTION_GAP_DP.dp))
 
         Button(
             onClick = onNext,
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
+                    .height(BUTTON_HEIGHT_DP.dp),
+            shape = RoundedCornerShape(BUTTON_CORNER_DP.dp),
         ) {
             Text(
                 "Looks Good!",
@@ -164,6 +152,31 @@ fun AppClassificationScreen(
             )
         }
     }
+}
+
+@Composable
+private fun AppClassificationHeader(onBack: () -> Unit) {
+    IconButton(onClick = onBack) {
+        Icon(Icons.Filled.ArrowBack, contentDescription = "Back")
+    }
+
+    Spacer(modifier = Modifier.height(ROW_GAP_DP.dp))
+
+    Text(
+        text = "Classify Your Apps",
+        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
+    )
+    Text(
+        text = "How should we categorize your most-used apps?",
+        style = MaterialTheme.typography.bodyMedium,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+    )
+
+    Spacer(modifier = Modifier.height(SECTION_GAP_DP.dp))
+
+    ClassificationLegend()
+
+    Spacer(modifier = Modifier.height(ROW_GAP_DP.dp))
 }
 
 @Composable
@@ -255,7 +268,7 @@ private fun loadTopApps(context: Context): List<ClassifiableApp> {
         pm
             .getInstalledApplications(PackageManager.GET_META_DATA)
             .filter { (it.flags and ApplicationInfo.FLAG_SYSTEM) == 0 }
-            .take(10)
+            .take(MAX_CLASSIFIABLE_APPS)
 
     return installed.map { info ->
         val name =
@@ -276,10 +289,4 @@ private fun loadTopApps(context: Context): List<ClassifiableApp> {
             classification = defaultClass,
         )
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun AppClassificationScreenPreview() {
-    AppClassificationScreen(onNext = {}, onBack = {})
 }

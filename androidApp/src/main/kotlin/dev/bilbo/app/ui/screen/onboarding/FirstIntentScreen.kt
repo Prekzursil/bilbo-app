@@ -48,7 +48,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 
 // FirstIntentScreen.kt
@@ -56,6 +55,32 @@ import androidx.compose.ui.unit.dp
 //
 // Guided walkthrough of the Intent Gatekeeper with coaching text.
 // Simulates the gatekeeper experience step by step.
+
+// MARK: - Layout / palette constants
+
+private const val ARGB_GATEKEEPER_BG = 0xFF0F2240
+private const val ARGB_AMBER = 0xFFFFB300
+private const val ALPHA_BORDER = 0.3f
+private const val PULSE_MIN = 0.4f
+private const val PULSE_MAX = 1f
+private const val PULSE_PERIOD_MS = 900
+private const val SLIDE_DIVISOR = 2
+private const val SCREEN_PAD_H_DP = 24
+private const val SCREEN_PAD_TOP_DP = 48
+private const val SCREEN_PAD_BOTTOM_DP = 32
+private const val PROGRESS_GAP_DP = 6
+private const val PROGRESS_HEIGHT_DP = 4
+private const val CARD_CORNER_DP = 24
+private const val INTRO_CARD_HEIGHT_DP = 220
+private const val INTRO_ICON_DP = 64
+private const val CARD_PAD_DP = 24
+private const val BUTTON_HEIGHT_DP = 56
+private const val BUTTON_CORNER_DP = 16
+private const val SPACE_TITLE_DP = 32
+private const val SPACE_CARD_DP = 40
+private const val SPACE_SM_DP = 8
+private const val SPACE_MD_DP = 12
+private const val SPACE_LG_DP = 16
 
 // MARK: - Demo steps
 
@@ -98,97 +123,110 @@ fun FirstIntentScreen(
         modifier =
             Modifier
                 .fillMaxSize()
-                .padding(horizontal = 24.dp)
-                .padding(top = 48.dp, bottom = 32.dp),
+                .padding(horizontal = SCREEN_PAD_H_DP.dp)
+                .padding(top = SCREEN_PAD_TOP_DP.dp, bottom = SCREEN_PAD_BOTTOM_DP.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        // Progress indicator
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(6.dp),
-        ) {
-            steps.forEachIndexed { i, _ ->
-                Box(
-                    modifier =
-                        Modifier
-                            .height(4.dp)
-                            .weight(1f)
-                            .clip(CircleShape)
-                            .background(
-                                if (i <= stepIndex) {
-                                    MaterialTheme.colorScheme.primary
-                                } else {
-                                    MaterialTheme.colorScheme.surfaceVariant
-                                },
-                            ),
-                )
-            }
-        }
+        DemoProgressBar(stepCount = steps.size, currentIndex = stepIndex)
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(SPACE_TITLE_DP.dp))
 
         Text(
             text = "Let's try it out!",
             style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.ExtraBold),
         )
 
-        Spacer(modifier = Modifier.height(40.dp))
+        Spacer(modifier = Modifier.height(SPACE_CARD_DP.dp))
 
-        // Demo card
         AnimatedContent(
             targetState = currentStep,
             transitionSpec = {
-                slideInHorizontally(initialOffsetX = { it / 2 }) + fadeIn() togetherWith
-                    slideOutHorizontally(targetOffsetX = { -it / 2 }) + fadeOut()
+                slideInHorizontally(initialOffsetX = { it / SLIDE_DIVISOR }) + fadeIn() togetherWith
+                    slideOutHorizontally(targetOffsetX = { -it / SLIDE_DIVISOR }) + fadeOut()
             },
             label = "demo_step",
         ) { step ->
             DemoStepCard(step = step)
         }
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(SPACE_TITLE_DP.dp))
 
-        // Coaching text
-        AnimatedContent(
-            targetState = currentStep.coaching,
-            label = "coaching",
-        ) { text ->
+        AnimatedContent(targetState = currentStep.coaching, label = "coaching") { text ->
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(horizontal = 8.dp),
+                modifier = Modifier.padding(horizontal = SPACE_SM_DP.dp),
             )
         }
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Button(
-            onClick = {
-                if (currentStep == DemoStep.COMPLETE) {
-                    onCompleteSetup()
-                } else {
-                    currentStep = steps[stepIndex + 1]
-                }
+        DemoNavButtons(
+            buttonLabel = currentStep.buttonLabel,
+            showBack = stepIndex == 0,
+            onNext = {
+                if (currentStep == DemoStep.COMPLETE) onCompleteSetup() else currentStep = steps[stepIndex + 1]
             },
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-            shape = RoundedCornerShape(16.dp),
-        ) {
-            Text(
-                text = currentStep.buttonLabel,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-            )
-        }
+            onBack = onBack,
+        )
+    }
+}
 
-        if (stepIndex == 0) {
-            Spacer(modifier = Modifier.height(8.dp))
-            TextButton(onClick = onBack) {
-                Text("← Back", color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+@Composable
+private fun DemoNavButtons(
+    buttonLabel: String,
+    showBack: Boolean,
+    onNext: () -> Unit,
+    onBack: () -> Unit,
+) {
+    Button(
+        onClick = onNext,
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .height(BUTTON_HEIGHT_DP.dp),
+        shape = RoundedCornerShape(BUTTON_CORNER_DP.dp),
+    ) {
+        Text(
+            text = buttonLabel,
+            style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+        )
+    }
+
+    if (showBack) {
+        Spacer(modifier = Modifier.height(SPACE_SM_DP.dp))
+        TextButton(onClick = onBack) {
+            Text("← Back", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        }
+    }
+}
+
+@Composable
+private fun DemoProgressBar(
+    stepCount: Int,
+    currentIndex: Int,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(PROGRESS_GAP_DP.dp),
+    ) {
+        repeat(stepCount) { i ->
+            Box(
+                modifier =
+                    Modifier
+                        .height(PROGRESS_HEIGHT_DP.dp)
+                        .weight(1f)
+                        .clip(CircleShape)
+                        .background(
+                            if (i <= currentIndex) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.surfaceVariant
+                            },
+                        ),
+            )
         }
     }
 }
@@ -210,8 +248,8 @@ private fun IntroCard() {
         modifier =
             Modifier
                 .fillMaxWidth()
-                .height(220.dp),
-        shape = RoundedCornerShape(24.dp),
+                .height(INTRO_CARD_HEIGHT_DP.dp),
+        shape = RoundedCornerShape(CARD_CORNER_DP.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
     ) {
         Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -219,10 +257,10 @@ private fun IntroCard() {
                 Icon(
                     Icons.Filled.TouchApp,
                     contentDescription = null,
-                    modifier = Modifier.size(64.dp),
+                    modifier = Modifier.size(INTRO_ICON_DP.dp),
                     tint = MaterialTheme.colorScheme.primary,
                 )
-                Spacer(modifier = Modifier.height(12.dp))
+                Spacer(modifier = Modifier.height(SPACE_MD_DP.dp))
                 Text(
                     "Tap an app icon…",
                     style = MaterialTheme.typography.titleMedium,
@@ -239,11 +277,11 @@ private fun GatekeeperCard() {
         modifier =
             Modifier
                 .fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF0F2240)),
+        shape = RoundedCornerShape(CARD_CORNER_DP.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(ARGB_GATEKEEPER_BG)),
     ) {
         Column(
-            modifier = Modifier.padding(24.dp),
+            modifier = Modifier.padding(CARD_PAD_DP.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
@@ -252,7 +290,7 @@ private fun GatekeeperCard() {
                 color = Color.White,
                 textAlign = TextAlign.Center,
             )
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(SPACE_LG_DP.dp))
             OutlinedTextField(
                 value = "Check messages",
                 onValueChange = {},
@@ -260,8 +298,8 @@ private fun GatekeeperCard() {
                 modifier = Modifier.fillMaxWidth(),
                 colors =
                     OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color(0xFFFFB300),
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
+                        focusedBorderColor = Color(ARGB_AMBER),
+                        unfocusedBorderColor = Color.White.copy(alpha = ALPHA_BORDER),
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,
                     ),
@@ -302,9 +340,9 @@ private fun IntentEnteredCard() {
 private fun TimerCard() {
     val infiniteTransition = rememberInfiniteTransition(label = "pulse")
     val alpha by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 0.4f,
-        animationSpec = infiniteRepeatable(tween(900), RepeatMode.Reverse),
+        initialValue = PULSE_MAX,
+        targetValue = PULSE_MIN,
+        animationSpec = infiniteRepeatable(tween(PULSE_PERIOD_MS), RepeatMode.Reverse),
         label = "pulse_alpha",
     )
     Card(
@@ -355,10 +393,4 @@ private fun CompleteCard() {
             )
         }
     }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun FirstIntentScreenPreview() {
-    FirstIntentScreen(onCompleteSetup = {}, onBack = {})
 }

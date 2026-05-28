@@ -33,18 +33,30 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import dev.bilbo.app.ui.theme.BilboTheme
 import dev.bilbo.domain.SuggestionCategory
 
 // ── Chip palette ───────────────────────────────────────────────────────────────
-private val ChipSelected = Color(0xFF2D6A4F)
-private val ChipSelectedOn = Color(0xFFD8F3DC)
-private val ChipUnselected = Color(0xFF52B788).copy(alpha = 0.15f)
+private const val ARGB_CHIP_SELECTED = 0xFF2D6A4F
+private const val ARGB_CHIP_SELECTED_ON = 0xFFD8F3DC
+private const val ARGB_CHIP_UNSELECTED = 0xFF52B788
+private const val ALPHA_CHIP_UNSELECTED = 0.15f
+
+private val ChipSelected = Color(ARGB_CHIP_SELECTED)
+private val ChipSelectedOn = Color(ARGB_CHIP_SELECTED_ON)
+private val ChipUnselected = Color(ARGB_CHIP_UNSELECTED).copy(alpha = ALPHA_CHIP_UNSELECTED)
 
 // ── Minimum selection count ────────────────────────────────────────────────────
 private const val MIN_SELECTIONS = 2
+private const val CHIP_GAP_DP = 10
+private const val CHIP_CORNER_DP = 12
+private const val BUTTON_CORNER_DP = 14
+private const val SCREEN_PAD_H_DP = 24
+private const val BOTTOM_PAD_V_DP = 20
+private const val SPACE_TOP_DP = 40
+private const val SPACE_TITLE_DP = 8
+private const val SPACE_GRID_DP = 32
+private const val SPACE_BOTTOM_DP = 24
 
 // ── Interest definitions ──────────────────────────────────────────────────────
 
@@ -90,41 +102,10 @@ fun InterestsOnboardingScreen(
 
     Scaffold(
         bottomBar = {
-            Box(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 24.dp, vertical = 20.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                val selectionCount = selected.size
-                val canContinue = selectionCount >= MIN_SELECTIONS
-
-                Button(
-                    onClick = { onContinue(selected) },
-                    enabled = canContinue,
-                    modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors =
-                        ButtonDefaults.buttonColors(
-                            containerColor = ChipSelected,
-                            contentColor = ChipSelectedOn,
-                        ),
-                ) {
-                    Text(
-                        text =
-                            if (canContinue) {
-                                "Continue ($selectionCount selected)"
-                            } else {
-                                "Select at least $MIN_SELECTIONS interests"
-                            },
-                        style =
-                            MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.SemiBold,
-                            ),
-                    )
-                }
-            }
+            InterestsContinueBar(
+                selectionCount = selected.size,
+                onContinue = { onContinue(selected) },
+            )
         },
     ) { innerPadding ->
         Column(
@@ -133,110 +114,127 @@ fun InterestsOnboardingScreen(
                     .fillMaxSize()
                     .padding(innerPadding)
                     .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp),
+                    .padding(horizontal = SCREEN_PAD_H_DP.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Spacer(modifier = Modifier.height(40.dp))
-
-            // ── Heading ───────────────────────────────────────────────
-            Text(
-                text = "What do you enjoy offline?",
-                style =
-                    MaterialTheme.typography.headlineMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        textAlign = TextAlign.Center,
-                    ),
-            )
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            Text(
-                text = "We'll suggest activities that match your interests when you feel like reaching for your phone.",
-                style =
-                    MaterialTheme.typography.bodyMedium.copy(
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    ),
-            )
-
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // ── Interest chip grid ────────────────────────────────────
+            Spacer(modifier = Modifier.height(SPACE_TOP_DP.dp))
+            InterestsHeading()
+            Spacer(modifier = Modifier.height(SPACE_GRID_DP.dp))
             FlowRow(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
-                verticalArrangement = Arrangement.spacedBy(10.dp),
+                horizontalArrangement = Arrangement.spacedBy(CHIP_GAP_DP.dp, Alignment.CenterHorizontally),
+                verticalArrangement = Arrangement.spacedBy(CHIP_GAP_DP.dp),
             ) {
                 allInterests.forEach { entry ->
-                    val isSelected = entry.category in selected
-
-                    val containerColor by animateColorAsState(
-                        targetValue = if (isSelected) ChipSelected else ChipUnselected,
-                        animationSpec = spring(),
-                        label = "ChipContainer_${entry.label}",
-                    )
-                    val labelColor by animateColorAsState(
-                        targetValue =
-                            if (isSelected) {
-                                ChipSelectedOn
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            },
-                        animationSpec = spring(),
-                        label = "ChipLabel_${entry.label}",
-                    )
-
-                    FilterChip(
-                        selected = isSelected,
-                        onClick = {
+                    InterestChip(
+                        entry = entry,
+                        isSelected = entry.category in selected,
+                        onToggle = {
                             selected =
-                                if (isSelected) {
+                                if (entry.category in selected) {
                                     selected - entry.category
                                 } else {
                                     selected + entry.category
                                 }
                         },
-                        label = {
-                            Text(
-                                text = "${entry.emoji} ${entry.label}",
-                                style =
-                                    MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                                        color = labelColor,
-                                    ),
-                            )
-                        },
-                        shape = RoundedCornerShape(12.dp),
-                        colors =
-                            FilterChipDefaults.filterChipColors(
-                                containerColor = ChipUnselected,
-                                selectedContainerColor = ChipSelected,
-                                labelColor = MaterialTheme.colorScheme.onSurface,
-                                selectedLabelColor = ChipSelectedOn,
-                            ),
                     )
                 }
             }
-
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(SPACE_BOTTOM_DP.dp))
         }
     }
 }
 
-// ── Preview ───────────────────────────────────────────────────────────────────
-
-@Preview(showBackground = true)
 @Composable
-private fun InterestsOnboardingScreenPreview() {
-    BilboTheme {
-        InterestsOnboardingScreen(
-            initialSelections =
-                setOf(
-                    SuggestionCategory.READING,
-                    SuggestionCategory.EXERCISE,
-                    SuggestionCategory.NATURE,
+private fun InterestsContinueBar(
+    selectionCount: Int,
+    onContinue: () -> Unit,
+) {
+    Box(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = SCREEN_PAD_H_DP.dp, vertical = BOTTOM_PAD_V_DP.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        val canContinue = selectionCount >= MIN_SELECTIONS
+        Button(
+            onClick = onContinue,
+            enabled = canContinue,
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(BUTTON_CORNER_DP.dp),
+            colors =
+                ButtonDefaults.buttonColors(
+                    containerColor = ChipSelected,
+                    contentColor = ChipSelectedOn,
                 ),
-            onContinue = {},
-        )
+        ) {
+            Text(
+                text =
+                    if (canContinue) {
+                        "Continue ($selectionCount selected)"
+                    } else {
+                        "Select at least $MIN_SELECTIONS interests"
+                    },
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
+            )
+        }
     }
+}
+
+@Composable
+private fun InterestsHeading() {
+    Text(
+        text = "What do you enjoy offline?",
+        style =
+            MaterialTheme.typography.headlineMedium.copy(
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center,
+            ),
+    )
+    Spacer(modifier = Modifier.height(SPACE_TITLE_DP.dp))
+    Text(
+        text = "We'll suggest activities that match your interests when you feel like reaching for your phone.",
+        style =
+            MaterialTheme.typography.bodyMedium.copy(
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            ),
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun InterestChip(
+    entry: InterestEntry,
+    isSelected: Boolean,
+    onToggle: () -> Unit,
+) {
+    val labelColor by animateColorAsState(
+        targetValue = if (isSelected) ChipSelectedOn else MaterialTheme.colorScheme.onSurface,
+        animationSpec = spring(),
+        label = "ChipLabel_${entry.label}",
+    )
+    FilterChip(
+        selected = isSelected,
+        onClick = onToggle,
+        label = {
+            Text(
+                text = "${entry.emoji} ${entry.label}",
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                        color = labelColor,
+                    ),
+            )
+        },
+        shape = RoundedCornerShape(CHIP_CORNER_DP.dp),
+        colors =
+            FilterChipDefaults.filterChipColors(
+                containerColor = ChipUnselected,
+                selectedContainerColor = ChipSelected,
+                labelColor = MaterialTheme.colorScheme.onSurface,
+                selectedLabelColor = ChipSelectedOn,
+            ),
+    )
 }
