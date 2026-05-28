@@ -1,0 +1,18 @@
+{
+  "threshold": 0,
+  "reporters": ["console"],
+  "absolute": true,
+  "gitignore": true,
+  "format": ["kotlin"],
+  "ignore": [
+    "**/build/**",
+    "**/.gradle/**",
+    "**/generated/**",
+    "**/iosApp/**",
+    "**/supabase/**",
+    "**/*Test.kt",
+    "**/src/commonTest/**",
+    "**/src/test/**",
+    "**/src/androidTest/**"
+  ]
+}

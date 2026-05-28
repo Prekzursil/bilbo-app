@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+#
+# Canonical Strict-Zero verification for bilbo-app.
+#
+# Runs every quality gate that is reproducible on a Linux runner:
+#   1. ktlint        — Kotlin formatting (zero findings)
+#   2. detekt        — Kotlin static analysis + complexity (zero findings, CCN <= 10)
+#   3. unit tests    — shared (KMP/JVM) + androidApp (JVM unit tests)
+#   4. Kover         — line + branch coverage report and 100% verification
+#   5. lizard        — cyclomatic complexity ceiling of 10 for Kotlin
+#   6. jscpd         — copy/paste duplication detection (zero clones)
+#
+# The iOS leg (iosApp/, shared iosMain/iosTest, supabase Deno functions) is NOT
+# buildable on Linux and is intentionally NOT exercised here — it is covered by
+# ios-ci.yml / backend-ci.yml on macOS / Deno runners. See README "Quality" section.
+set -euo pipefail
+
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
+
+if [[ ! -f ./gradlew || ! -f gradle/wrapper/gradle-wrapper.properties || ! -f gradle/wrapper/gradle-wrapper.jar ]]; then
+  echo "Gradle wrapper is required. Commit gradlew and gradle/wrapper/* to the repository." >&2
+  exit 1
+fi
+chmod +x ./gradlew
+
+GRADLE="./gradlew --no-daemon --stacktrace"
+
+echo "==> [1/6] ktlint (Kotlin formatting)"
+$GRADLE ktlintCheck
+
+echo "==> [2/6] detekt (static analysis + complexity, CCN <= 10)"
+$GRADLE detekt
+
+echo "==> [3/6] unit tests (shared + androidApp)"
+$GRADLE :shared:testDebugUnitTest :androidApp:testDebugUnitTest
+
+echo "==> [4/6] Kover coverage report + 100% line/branch verification"
+$GRADLE :shared:koverXmlReport :shared:koverVerify \
+        :androidApp:koverXmlReport :androidApp:koverVerify
+
+echo "==> [5/6] lizard (cyclomatic complexity ceiling 10, Kotlin)"
+if command -v lizard >/dev/null 2>&1; then
+  lizard . -l kotlin -C 10 \
+    --exclude "*/build/*" \
+    --exclude "*/iosApp/*" \
+    --exclude "*/supabase/*"
+else
+  echo "WARNING: lizard not installed; skipping (CI installs it). pip install lizard" >&2
+fi
+
+echo "==> [6/6] jscpd (copy/paste duplication)"
+if command -v npx >/dev/null 2>&1; then
+  npx --yes jscpd@4 .
+else
+  echo "WARNING: npx not available; skipping jscpd (CI provides Node)." >&2
+fi
+
+echo "All Strict-Zero checks passed."

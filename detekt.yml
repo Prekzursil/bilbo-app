@@ -60,7 +60,7 @@ complexity:
   active: true
   CognitiveComplexMethod:
     active: true
-    threshold: 15
+    threshold: 10
   ComplexCondition:
     active: true
     threshold: 5
@@ -71,7 +71,7 @@ complexity:
     includePrivateDeclarations: false
   CyclomaticComplexMethod:
     active: true
-    threshold: 15
+    threshold: 10
     ignoreSingleWhenExpression: false
     ignoreSimpleWhenEntries: false
     ignoreNestingFunctions: false
@@ -220,7 +220,6 @@ exceptions:
     active: false
   ThrowingExceptionsWithoutMessageOrCause:
     active: true
-    allowedExceptionNameRegex: '^$'
     exceptions:
       - 'ArrayIndexOutOfBoundsException'
       - 'Exception'
@@ -267,9 +266,6 @@ naming:
     parameterPattern: '[a-z][A-Za-z0-9]*'
     privateParameterPattern: '[a-z][A-Za-z0-9]*'
     excludeClassPattern: '$^'
-  EnumEntryNaming:
-    active: true
-    enumEntryPattern: '[A-Z][_a-zA-Z0-9]*'
   ForbiddenClassName:
     active: false
   FunctionMaxLength:
@@ -502,7 +498,7 @@ style:
     active: false
   ForbiddenComment:
     active: true
-    values:
+    comments:
       - reason: 'Forbidden STOPSHIP comment — remove before release'
         value: 'STOPSHIP'
     allowedPatterns: ''
@@ -676,8 +672,6 @@ style:
   UseRequireNotNull:
     active: true
   UseSumOfInsteadOfFlatMapSize:
-    active: false
-  UseWithIndex:
     active: false
   VarCouldBeVal:
     active: true
