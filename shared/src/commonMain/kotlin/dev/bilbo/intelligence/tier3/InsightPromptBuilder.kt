@@ -16,6 +16,10 @@ import kotlinx.datetime.LocalDate
  * No PII is included — only aggregated usage statistics and heuristic insight types.
  */
 class InsightPromptBuilder {
+    private companion object {
+        const val TOP_N = 3
+    }
+
     data class WeeklySummaryPayload(
         val weekStart: String, // ISO date, e.g. "2025-03-10"
         val totalScreenTimeMinutes: Int,
@@ -58,7 +62,7 @@ class InsightPromptBuilder {
                 .groupBy { it.preSessionEmotion }
                 .entries
                 .sortedByDescending { it.value.size }
-                .take(3)
+                .take(TOP_N)
                 .map { it.key.name }
 
         val nutritiveByApp =
@@ -67,7 +71,7 @@ class InsightPromptBuilder {
                 .groupBy { it.appLabel }
                 .entries
                 .sortedByDescending { it.value.sumOf { s -> s.durationSeconds } }
-                .take(3)
+                .take(TOP_N)
                 .map { it.key }
 
         val emptyByApp =
@@ -76,7 +80,7 @@ class InsightPromptBuilder {
                 .groupBy { it.appLabel }
                 .entries
                 .sortedByDescending { it.value.sumOf { s -> s.durationSeconds } }
-                .take(3)
+                .take(TOP_N)
                 .map { it.key }
 
         val spikeDays =

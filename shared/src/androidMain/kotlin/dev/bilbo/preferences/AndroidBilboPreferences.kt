@@ -8,6 +8,11 @@ import kotlinx.serialization.json.Json
 class AndroidBilboPreferences(
     context: Context,
 ) : BilboPreferences {
+    private companion object {
+        const val DEFAULT_COOLDOWN_MINUTES = 15
+        const val DEFAULT_BASELINE_FP = 60
+    }
+
     private val prefs: SharedPreferences =
         context.applicationContext.getSharedPreferences("bilbo_prefs", Context.MODE_PRIVATE)
     private val json = Json { ignoreUnknownKeys = true }
@@ -24,7 +29,7 @@ class AndroidBilboPreferences(
         }
 
     override var cooldownMinutes: Int
-        get() = prefs.getInt("cooldown_minutes", 15)
+        get() = prefs.getInt("cooldown_minutes", DEFAULT_COOLDOWN_MINUTES)
         set(value) {
             prefs.edit().putInt("cooldown_minutes", value).apply()
         }
@@ -44,7 +49,7 @@ class AndroidBilboPreferences(
         }
 
     override var dailyBaselineFP: Int
-        get() = prefs.getInt("daily_baseline_fp", 60)
+        get() = prefs.getInt("daily_baseline_fp", DEFAULT_BASELINE_FP)
         set(value) {
             prefs.edit().putInt("daily_baseline_fp", value).apply()
         }

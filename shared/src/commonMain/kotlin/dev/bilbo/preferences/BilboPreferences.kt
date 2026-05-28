@@ -41,45 +41,50 @@ data class NotificationPreferences(
 
 // MARK: - BilboPreferences interface
 
-/**
- * Cross-platform preferences interface.
- * Implemented per-platform via expect/actual.
- */
-interface BilboPreferences {
-    // ── Enforcement ──────────────────────────────────────────────────────
+/** Enforcement-related preference toggles and values. */
+interface EnforcementPreferences {
     var defaultEnforcementMode: DefaultEnforcementMode
     var cooldownMinutes: Int
     var bypassList: List<String> // Bundle IDs / package names exempt from enforcement
+}
 
-    // ── Economy ──────────────────────────────────────────────────────────
+/** Focus-economy preference toggles and values. */
+interface EconomyPreferences {
     var fpEnabled: Boolean
     var dailyBaselineFP: Int
     var antiGamingEnabled: Boolean
+}
 
-    // ── Emotional ────────────────────────────────────────────────────────
+/** Emotional / AI / social experience preference toggles. */
+interface ExperiencePreferences {
     var checkInEnabled: Boolean
     var coolingOffEnabled: Boolean
-
-    // ── AI ───────────────────────────────────────────────────────────────
     var cloudInsightsEnabled: Boolean
     var viewAnonymization: Boolean
-
-    // ── Social ───────────────────────────────────────────────────────────
     var sharingLevel: SharingLevelPref
     var userInterests: List<String> // Tags used for analog suggestions
-
-    // ── Notifications ────────────────────────────────────────────────────
     var notificationPreferences: NotificationPreferences
+}
 
-    // ── Onboarding ───────────────────────────────────────────────────────
+/** Onboarding / account preference state. */
+interface AccountPreferences {
     var onboardingCompleted: Boolean
     var seedDataLoaded: Boolean
-
-    // ── User ─────────────────────────────────────────────────────────────
     var userId: String?
     var deviceToken: String?
+}
 
-    // ── Helpers ──────────────────────────────────────────────────────────
+/**
+ * Cross-platform preferences interface, composed of focused facets so no single
+ * interface exceeds the Strict-Zero complexity ceiling.
+ * Implemented per-platform via expect/actual.
+ */
+interface BilboPreferences :
+    EnforcementPreferences,
+    EconomyPreferences,
+    ExperiencePreferences,
+    AccountPreferences {
+    /** Resets all preferences to their defaults. */
     fun clear()
 }
 

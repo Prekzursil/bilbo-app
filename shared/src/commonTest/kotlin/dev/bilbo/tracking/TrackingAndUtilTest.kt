@@ -1334,7 +1334,7 @@ class SafeCallTest {
     @Test
     fun safeCallMapsRuntimeExceptionToUnknown() =
         runTest {
-            val result = safeCall { throw RuntimeException("oops") }
+            val result = safeCall { throw IllegalStateException("oops") }
             val error = result.exceptionOrNull()
             assertTrue(error is BilboError.Unknown)
         }
@@ -2139,7 +2139,7 @@ private val SUGGESTIONS_JSON =
 ]
     """.trimIndent()
 
-private val EMPTY_JSON = "[]"
+private const val EMPTY_JSON = "[]"
 
 class SeedDataLoaderTest {
     private lateinit var appProfileRepo: FakeAppProfileRepository

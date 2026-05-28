@@ -5,29 +5,21 @@ import dev.bilbo.domain.SuggestionCategory
 import dev.bilbo.domain.TimeOfDay
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Repository for persisting and querying [AnalogSuggestion] records.
- */
-interface SuggestionRepository {
+/** Read-only queries over [AnalogSuggestion] records. */
+interface SuggestionQueries {
     /**
      * Observe all suggestions ordered by category then text.
      * Emits whenever the underlying data changes.
      */
     fun observeAll(): Flow<List<AnalogSuggestion>>
 
-    /**
-     * Return all stored suggestions.
-     */
+    /** Return all stored suggestions. */
     suspend fun getAll(): List<AnalogSuggestion>
 
-    /**
-     * Return a single suggestion by its primary key, or null if not found.
-     */
+    /** Return a single suggestion by its primary key, or null if not found. */
     suspend fun getById(id: Long): AnalogSuggestion?
 
-    /**
-     * Return all suggestions in [category], ordered by acceptance count descending.
-     */
+    /** Return all suggestions in [category], ordered by acceptance count descending. */
     suspend fun getByCategory(category: SuggestionCategory): List<AnalogSuggestion>
 
     /**
@@ -36,24 +28,21 @@ interface SuggestionRepository {
      */
     suspend fun getByTimeOfDay(timeOfDay: TimeOfDay): List<AnalogSuggestion>
 
-    /**
-     * Return suggestions filtered by both [category] and [timeOfDay].
-     */
+    /** Return suggestions filtered by both [category] and [timeOfDay]. */
     suspend fun getByCategoryAndTimeOfDay(
         category: SuggestionCategory,
         timeOfDay: TimeOfDay,
     ): List<AnalogSuggestion>
 
-    /**
-     * Return user-created suggestions.
-     */
+    /** Return user-created suggestions. */
     suspend fun getCustom(): List<AnalogSuggestion>
 
-    /**
-     * Return the [limit] most-accepted suggestions across all categories.
-     */
+    /** Return the [limit] most-accepted suggestions across all categories. */
     suspend fun getTopAccepted(limit: Long): List<AnalogSuggestion>
+}
 
+/** Mutating operations over [AnalogSuggestion] records. */
+interface SuggestionMutations {
     /**
      * Persist a new suggestion.
      * Returns the auto-generated row id.
@@ -66,18 +55,20 @@ interface SuggestionRepository {
      */
     suspend fun update(suggestion: AnalogSuggestion)
 
-    /**
-     * Atomically increment the [AnalogSuggestion.timesShown] counter for [id].
-     */
+    /** Atomically increment the [AnalogSuggestion.timesShown] counter for [id]. */
     suspend fun recordShown(id: Long)
 
-    /**
-     * Atomically increment the [AnalogSuggestion.timesAccepted] counter for [id].
-     */
+    /** Atomically increment the [AnalogSuggestion.timesAccepted] counter for [id]. */
     suspend fun recordAccepted(id: Long)
 
-    /**
-     * Remove the suggestion with [id].
-     */
+    /** Remove the suggestion with [id]. */
     suspend fun deleteById(id: Long)
 }
+
+/**
+ * Repository for persisting and querying [AnalogSuggestion] records.
+ * Composed of [SuggestionQueries] (reads) and [SuggestionMutations] (writes).
+ */
+interface SuggestionRepository :
+    SuggestionQueries,
+    SuggestionMutations

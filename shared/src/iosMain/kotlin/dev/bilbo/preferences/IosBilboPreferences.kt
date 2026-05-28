@@ -14,6 +14,10 @@ import platform.Foundation.NSUserDefaults
 // MARK: - App Group suite name (must match entitlements)
 private const val APP_GROUP = "group.dev.bilbo.app"
 
+// MARK: - Preference defaults
+private const val DEFAULT_COOLDOWN_MINUTES = 15
+private const val DEFAULT_BASELINE_FP = 60
+
 // MARK: - Keys
 
 private object Keys {
@@ -105,7 +109,7 @@ class IosBilboPreferences : BilboPreferences {
         set(value) = setString(Keys.ENFORCEMENT_MODE, value.name)
 
     override var cooldownMinutes: Int
-        get() = getInt(Keys.COOLDOWN_MINUTES, 15)
+        get() = getInt(Keys.COOLDOWN_MINUTES, DEFAULT_COOLDOWN_MINUTES)
         set(value) = setInt(Keys.COOLDOWN_MINUTES, value)
 
     override var bypassList: List<String>
@@ -119,7 +123,7 @@ class IosBilboPreferences : BilboPreferences {
         set(value) = setBool(Keys.FP_ENABLED, value)
 
     override var dailyBaselineFP: Int
-        get() = getInt(Keys.DAILY_BASELINE_FP, 60)
+        get() = getInt(Keys.DAILY_BASELINE_FP, DEFAULT_BASELINE_FP)
         set(value) = setInt(Keys.DAILY_BASELINE_FP, value)
 
     override var antiGamingEnabled: Boolean

@@ -1034,7 +1034,7 @@ class CooldownManagerIsLockedExpiryBoundaryTest {
                 override fun save(
                     packageName: String,
                     expiryEpochSeconds: Long,
-                ) {}
+                ) { /* test fake: no-op */ }
 
                 override fun clear(packageName: String) {
                     cleared.add(packageName)
@@ -1292,8 +1292,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
             engine.createChallenge(
                 title = "Reduce Challenge",
                 type = ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "user1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
@@ -1317,8 +1316,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
             engine.createChallenge(
                 title = "Earn Minutes",
                 type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-                scope = ChallengeEngine.ChallengeScope.BUDDY_PAIR,
-                scopeId = "pair1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.BUDDY_PAIR, "pair1"),
                 createdByUserId = "user1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 50,
@@ -1341,8 +1339,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
             engine.createChallenge(
                 title = "Team Goal",
                 type = ChallengeEngine.ChallengeType.GROUP_FP_POOL,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "user1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 500,
@@ -1366,8 +1363,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
             engine.createChallenge(
                 title = "Analog Week",
                 type = ChallengeEngine.ChallengeType.ANALOG_COMPLETIONS,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "user1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 10,
@@ -1386,8 +1382,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
             engine.createChallenge(
                 title = "Streak Challenge",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "user1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
@@ -1406,8 +1401,7 @@ class ChallengeEngineFinalizeTypeBranchTest {
             engine.createChallenge(
                 title = "FP Goal",
                 type = ChallengeEngine.ChallengeType.REACH_FP_BALANCE,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "user1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,

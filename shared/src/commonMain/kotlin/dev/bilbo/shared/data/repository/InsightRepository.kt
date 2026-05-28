@@ -21,7 +21,7 @@ import kotlinx.datetime.LocalDate
 class InsightRepository(
     private val apiService: BilboApiService,
 ) {
-    // ── In-memory caches (production would use SQLDelight / DataStore) ─────────
+    // In-memory caches (production would use SQLDelight / DataStore)
 
     /** Cache of weekly insights keyed by weekStart date string. */
     private val weeklyInsightCache = mutableMapOf<String, WeeklyInsight>()
@@ -32,7 +32,7 @@ class InsightRepository(
     /** Cache of correlation data keyed by weekStart date string. */
     private val correlationCache = mutableMapOf<String, Map<String, Float>>()
 
-    // ── Daily insights (existing) ─────────────────────────────────────────────
+    // Daily insights (existing)
 
     /**
      * Returns a [Flow] that emits [Result] states for daily insights.
@@ -45,8 +45,8 @@ class InsightRepository(
             try {
                 val insights = apiService.getDailyInsights(limit)
                 emit(Result.Success(insights))
-            } catch (e: Exception) {
-                emit(Result.Error(e))
+            } catch (expected: Exception) {
+                emit(Result.Error(expected))
             }
         }
 
@@ -57,11 +57,11 @@ class InsightRepository(
         try {
             val insight = apiService.generateAiInsight(date)
             Result.Success(insight)
-        } catch (e: Exception) {
-            Result.Error(e)
+        } catch (expected: Exception) {
+            Result.Error(expected)
         }
 
-    // ── Heuristic insights (Phase 8) ──────────────────────────────────────────
+    // Heuristic insights (Phase 8)
 
     /**
      * Stores the list of [HeuristicInsight] entries produced by [HeuristicEngine.analyzeWeek]
@@ -99,7 +99,7 @@ class InsightRepository(
     suspend fun getCorrelationCache(weekStart: LocalDate): Map<String, Float> =
         correlationCache[weekStart.toString()] ?: emptyMap()
 
-    // ── Weekly insights (Phase 8) ─────────────────────────────────────────────
+    // Weekly insights (Phase 8)
 
     /**
      * Persists a [WeeklyInsight] (containing both Tier-2 heuristics and optional

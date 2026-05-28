@@ -5,6 +5,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.flow.onEach
 
 /**
@@ -13,11 +14,8 @@ import kotlinx.coroutines.flow.onEach
  * iOS cannot directly consume Kotlin suspend functions or Flow, so this
  * helper provides a callback-based API bridge. On iOS, pass in
  * a [CoroutineScope] derived from a ViewModel or lifecycle object.
- *
- * @param scope   The [CoroutineScope] in which to collect.
- * @param onEach  Called for each emitted item.
- * @param onError Called when the flow terminates with an exception.
- * @param onComplete Called when the flow completes normally.
+ * [onEach] is invoked per item, [onError] on terminal failure, and
+ * [onComplete] when the flow finishes.
  */
 fun <T> Flow<T>.collectAsCallback(
     scope: CoroutineScope,
@@ -28,6 +26,7 @@ fun <T> Flow<T>.collectAsCallback(
     this
         .onEach { onEach(it) }
         .catch { onError(it) }
+        .onCompletion { cause -> if (cause == null) onComplete() }
         .launchIn(scope)
 }
 

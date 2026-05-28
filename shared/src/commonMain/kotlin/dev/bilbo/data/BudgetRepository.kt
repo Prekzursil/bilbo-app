@@ -4,57 +4,48 @@ import dev.bilbo.domain.DopamineBudget
 import kotlinx.coroutines.flow.Flow
 import kotlinx.datetime.LocalDate
 
-/**
- * Repository for persisting and querying daily [DopamineBudget] records.
- */
-interface BudgetRepository {
+/** Read-only queries over daily [DopamineBudget] records. */
+interface BudgetQueries {
     /**
      * Observe all budget records, newest date first.
      * Emits whenever the underlying data changes.
      */
     fun observeAll(): Flow<List<DopamineBudget>>
 
-    /**
-     * Return all stored budget records.
-     */
+    /** Return all stored budget records. */
     suspend fun getAll(): List<DopamineBudget>
 
-    /**
-     * Return the budget for [date], or null if no record exists yet.
-     */
+    /** Return the budget for [date], or null if no record exists yet. */
     suspend fun getByDate(date: LocalDate): DopamineBudget?
 
-    /**
-     * Observe the budget for a specific [date] in real-time.
-     */
+    /** Observe the budget for a specific [date] in real-time. */
     fun observeByDate(date: LocalDate): Flow<DopamineBudget?>
 
-    /**
-     * Return budgets for dates within [[from], [to]] inclusive, ordered ascending.
-     */
+    /** Return budgets for dates within [[from], [to]] inclusive, ordered ascending. */
     suspend fun getByDateRange(
         from: LocalDate,
         to: LocalDate,
     ): List<DopamineBudget>
 
-    /**
-     * Return the [limit] most recent budget records.
-     */
+    /** Return the [limit] most recent budget records. */
     suspend fun getRecent(limit: Long): List<DopamineBudget>
 
-    /**
-     * Persist a new budget record for a date that does not yet exist.
-     */
+    /** Return the sum of [DopamineBudget.fpEarned] over all dates in [[from], [to]]. */
+    suspend fun sumFpEarned(
+        from: LocalDate,
+        to: LocalDate,
+    ): Long
+}
+
+/** Mutating operations over daily [DopamineBudget] records. */
+interface BudgetMutations {
+    /** Persist a new budget record for a date that does not yet exist. */
     suspend fun insert(budget: DopamineBudget)
 
-    /**
-     * Replace all fields of an existing budget record identified by its date.
-     */
+    /** Replace all fields of an existing budget record identified by its date. */
     suspend fun update(budget: DopamineBudget)
 
-    /**
-     * Insert or replace the budget for its date (upsert semantics).
-     */
+    /** Insert or replace the budget for its date (upsert semantics). */
     suspend fun upsert(budget: DopamineBudget)
 
     /**
@@ -84,16 +75,14 @@ interface BudgetRepository {
         amount: Int,
     )
 
-    /**
-     * Remove the budget record for [date].
-     */
+    /** Remove the budget record for [date]. */
     suspend fun deleteByDate(date: LocalDate)
-
-    /**
-     * Return the sum of [DopamineBudget.fpEarned] over all dates in [[from], [to]].
-     */
-    suspend fun sumFpEarned(
-        from: LocalDate,
-        to: LocalDate,
-    ): Long
 }
+
+/**
+ * Repository for persisting and querying daily [DopamineBudget] records.
+ * Composed of [BudgetQueries] (reads) and [BudgetMutations] (writes).
+ */
+interface BudgetRepository :
+    BudgetQueries,
+    BudgetMutations

@@ -45,6 +45,12 @@ class ChallengeEngine {
 
     enum class ChallengeScope { CIRCLE, BUDDY_PAIR }
 
+    /** Identifies which group a challenge belongs to. */
+    data class ScopeRef(
+        val scope: ChallengeScope,
+        val scopeId: String, // circleId or pairId
+    )
+
     enum class ChallengeStatus { UPCOMING, ACTIVE, COMPLETED, CANCELLED }
 
     data class Challenge(
@@ -95,8 +101,7 @@ class ChallengeEngine {
         title: String,
         description: String = "",
         type: ChallengeType,
-        scope: ChallengeScope,
-        scopeId: String,
+        target: ScopeRef,
         createdByUserId: String,
         dateRange: ClosedRange<LocalDate>,
         targetValue: Int,
@@ -123,8 +128,8 @@ class ChallengeEngine {
                 title = title.trim(),
                 description = description.trim(),
                 type = type,
-                scope = scope,
-                scopeId = scopeId,
+                scope = target.scope,
+                scopeId = target.scopeId,
                 createdByUserId = createdByUserId,
                 startDate = startDate,
                 endDate = endDate,

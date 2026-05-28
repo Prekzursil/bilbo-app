@@ -5,52 +5,38 @@ import dev.bilbo.domain.AppProfile
 import dev.bilbo.domain.EnforcementMode
 import kotlinx.coroutines.flow.Flow
 
-/**
- * Repository for persisting and querying [AppProfile] records.
- * Package name is the natural primary key.
- */
-interface AppProfileRepository {
+/** Read-only queries over [AppProfile] records. */
+interface AppProfileQueries {
     /**
      * Observe all app profiles, ordered by app label ascending.
      * Emits whenever the underlying data changes.
      */
     fun observeAll(): Flow<List<AppProfile>>
 
-    /**
-     * Return all stored app profiles.
-     */
+    /** Return all stored app profiles. */
     suspend fun getAll(): List<AppProfile>
 
-    /**
-     * Return the profile for [packageName], or null if not found.
-     */
+    /** Return the profile for [packageName], or null if not found. */
     suspend fun getByPackageName(packageName: String): AppProfile?
 
-    /**
-     * Observe a specific app profile by package name.
-     */
+    /** Observe a specific app profile by package name. */
     fun observeByPackageName(packageName: String): Flow<AppProfile?>
 
-    /**
-     * Return all profiles belonging to [category].
-     */
+    /** Return all profiles belonging to [category]. */
     suspend fun getByCategory(category: AppCategory): List<AppProfile>
 
-    /**
-     * Return all profiles configured with [enforcementMode].
-     */
+    /** Return all profiles configured with [enforcementMode]. */
     suspend fun getByEnforcementMode(enforcementMode: EnforcementMode): List<AppProfile>
 
-    /**
-     * Return all profiles where [AppProfile.isBypassed] is true.
-     */
+    /** Return all profiles where [AppProfile.isBypassed] is true. */
     suspend fun getBypassed(): List<AppProfile>
 
-    /**
-     * Return all profiles that were manually classified by the user.
-     */
+    /** Return all profiles that were manually classified by the user. */
     suspend fun getCustomClassified(): List<AppProfile>
+}
 
+/** Mutating operations over [AppProfile] records. */
+interface AppProfileMutations {
     /**
      * Persist a new profile. If a profile with the same package name exists,
      * an exception is thrown — use [upsert] for insert-or-replace semantics.
@@ -63,9 +49,7 @@ interface AppProfileRepository {
      */
     suspend fun update(profile: AppProfile)
 
-    /**
-     * Insert or replace the profile (upsert semantics).
-     */
+    /** Insert or replace the profile (upsert semantics). */
     suspend fun upsert(profile: AppProfile)
 
     /**
@@ -77,16 +61,21 @@ interface AppProfileRepository {
         category: AppCategory,
     )
 
-    /**
-     * Enable or disable the bypass flag for an app.
-     */
+    /** Enable or disable the bypass flag for an app. */
     suspend fun updateBypass(
         packageName: String,
         isBypassed: Boolean,
     )
 
-    /**
-     * Remove the profile for [packageName].
-     */
+    /** Remove the profile for [packageName]. */
     suspend fun deleteByPackageName(packageName: String)
 }
+
+/**
+ * Repository for persisting and querying [AppProfile] records. Package name is
+ * the natural primary key. Composed of [AppProfileQueries] (reads) and
+ * [AppProfileMutations] (writes).
+ */
+interface AppProfileRepository :
+    AppProfileQueries,
+    AppProfileMutations

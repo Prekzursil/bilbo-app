@@ -9,10 +9,6 @@ import dev.bilbo.domain.TimeOfDay
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
 
-// ── Preference key ─────────────────────────────────────────────────────────────
-
-private const val KEY_SEEDED = "bilbo_seed_data_loaded_v1"
-
 // ── JSON data-transfer objects ─────────────────────────────────────────────────
 
 @Serializable
@@ -153,20 +149,12 @@ class SeedDataLoader(
             else -> EnforcementMode.NUDGE
         }
 
-    private fun String.toSuggestionCategory(): SuggestionCategory =
-        when (uppercase()) {
-            "EXERCISE" -> SuggestionCategory.EXERCISE
-            "CREATIVE" -> SuggestionCategory.CREATIVE
-            "SOCIAL" -> SuggestionCategory.SOCIAL
-            "MINDFULNESS" -> SuggestionCategory.MINDFULNESS
-            "LEARNING" -> SuggestionCategory.LEARNING
-            "NATURE" -> SuggestionCategory.NATURE
-            "COOKING" -> SuggestionCategory.COOKING
-            "MUSIC" -> SuggestionCategory.MUSIC
-            "GAMING_PHYSICAL" -> SuggestionCategory.GAMING_PHYSICAL
-            "READING" -> SuggestionCategory.READING
-            else -> SuggestionCategory.READING // safe default
-        }
+    private fun String.toSuggestionCategory(): SuggestionCategory {
+        val name = uppercase()
+        // Direct enum lookup keeps this branch-free; READING is the safe default.
+        return SuggestionCategory.entries.firstOrNull { it.name == name }
+            ?: SuggestionCategory.READING
+    }
 
     private fun String.toTimeOfDay(): TimeOfDay =
         when (uppercase()) {

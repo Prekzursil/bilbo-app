@@ -153,23 +153,7 @@ class HeuristicEngine(
 
         // Week-over-week improvement
         summary.weekOverWeekChange?.let { change ->
-            if (change < WEEK_OVER_WEEK_DROP) {
-                val pct = (-change * PERCENT).toInt()
-                insights +=
-                    HeuristicInsight(
-                        type = InsightType.ACHIEVEMENT,
-                        message = "Great week! Your scrolling time dropped $pct% compared to last week.",
-                        confidence = INSIGHT_CONFIDENCE_HIGH,
-                    )
-            } else if (change > WEEK_OVER_WEEK_RISE) {
-                val pct = (change * PERCENT).toInt()
-                insights +=
-                    HeuristicInsight(
-                        type = InsightType.TREND,
-                        message = "Heads up: scrolling time was up $pct% vs. last week.",
-                        confidence = INSIGHT_CONFIDENCE_MEDIUM,
-                    )
-            }
+            weekOverWeekInsight(change)?.let { insights += it }
         }
 
         // Streak
@@ -186,6 +170,25 @@ class HeuristicEngine(
 
         return insights
     }
+
+    private fun weekOverWeekInsight(change: Double): HeuristicInsight? =
+        when {
+            change < WEEK_OVER_WEEK_DROP ->
+                HeuristicInsight(
+                    type = InsightType.ACHIEVEMENT,
+                    message =
+                        "Great week! Your scrolling time dropped " +
+                            "${(-change * PERCENT).toInt()}% compared to last week.",
+                    confidence = INSIGHT_CONFIDENCE_HIGH,
+                )
+            change > WEEK_OVER_WEEK_RISE ->
+                HeuristicInsight(
+                    type = InsightType.TREND,
+                    message = "Heads up: scrolling time was up ${(change * PERCENT).toInt()}% vs. last week.",
+                    confidence = INSIGHT_CONFIDENCE_MEDIUM,
+                )
+            else -> null
+        }
 
     // -------------------------------------------------------------------------
     // Intent Accuracy Tracking

@@ -84,9 +84,9 @@ enum class ChallengeStatus {
 /**
  * Quantified target for a Challenge.
  *
- * @param targetValue The numeric threshold to reach (e.g. 500 FP, 300 minutes, 5 exercises).
- * @param unit Human-readable unit label for display (e.g. "FP", "minutes", "exercises").
- * @param perParticipant If true and mode is COOPERATIVE, targetValue is per-person;
+ * @property targetValue The numeric threshold to reach (e.g. 500 FP, 300 minutes, 5 exercises).
+ * @property unit Human-readable unit label for display (e.g. "FP", "minutes", "exercises").
+ * @property perParticipant If true and mode is COOPERATIVE, targetValue is per-person;
  *        if false, targetValue is the aggregate group target.
  */
 data class ChallengeGoal(

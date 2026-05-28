@@ -694,8 +694,7 @@ class ChallengeEngineCreateChallengeTest {
             engine.createChallenge(
                 title = "Test Challenge",
                 type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "circle1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "circle1"),
                 createdByUserId = "user1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
@@ -711,8 +710,7 @@ class ChallengeEngineCreateChallengeTest {
             engine.createChallenge(
                 title = "Future Challenge",
                 type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "circle1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "circle1"),
                 createdByUserId = "user1",
                 dateRange = futureDate..futureDate.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
@@ -727,8 +725,7 @@ class ChallengeEngineCreateChallengeTest {
             engine.createChallenge(
                 title = "Test",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.BUDDY_PAIR,
-                scopeId = "pair1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.BUDDY_PAIR, "pair1"),
                 createdByUserId = "user1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
@@ -744,8 +741,7 @@ class ChallengeEngineCreateChallengeTest {
             engine.createChallenge(
                 title = "  Trimmed Title  ",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "u1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
@@ -761,8 +757,7 @@ class ChallengeEngineCreateChallengeTest {
                 title = "Test",
                 description = "  Some description  ",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "u1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
@@ -777,8 +772,7 @@ class ChallengeEngineCreateChallengeTest {
             engine.createChallenge(
                 title = "   ",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "u1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
@@ -793,8 +787,7 @@ class ChallengeEngineCreateChallengeTest {
             engine.createChallenge(
                 title = "Bad Dates",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "u1",
                 dateRange = today.plus(7, DateTimeUnit.DAY)..today,
                 targetValue = 5,
@@ -809,8 +802,7 @@ class ChallengeEngineCreateChallengeTest {
             engine.createChallenge(
                 title = "Same Day",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "u1",
                 dateRange = today..today,
                 targetValue = 5,
@@ -825,8 +817,7 @@ class ChallengeEngineCreateChallengeTest {
             engine.createChallenge(
                 title = "Zero Target",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "u1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 0,
@@ -841,8 +832,7 @@ class ChallengeEngineCreateChallengeTest {
             engine.createChallenge(
                 title = "Negative Target",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "u1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = -10,
@@ -858,8 +848,7 @@ class ChallengeEngineCreateChallengeTest {
                 title = "Focus Week",
                 description = "A week of focus",
                 type = ChallengeEngine.ChallengeType.REACH_FP_BALANCE,
-                scope = ChallengeEngine.ChallengeScope.BUDDY_PAIR,
-                scopeId = "pair99",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.BUDDY_PAIR, "pair99"),
                 createdByUserId = "creator1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 500,
@@ -885,8 +874,7 @@ class ChallengeEngineCreateChallengeTest {
             engine.createChallenge(
                 title = "Solo",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "u1",
                 dateRange = today..today.plus(1, DateTimeUnit.DAY),
                 targetValue = 5,
@@ -914,8 +902,7 @@ class ChallengeEngineJoinChallengeTest {
         engine.createChallenge(
             title = "Test",
             type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
+            target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
             createdByUserId = creator,
             dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = 100,
@@ -949,8 +936,7 @@ class ChallengeEngineJoinChallengeTest {
             engine.createChallenge(
                 title = "Future",
                 type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "creator",
                 dateRange = futureDate..futureDate.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
@@ -1009,8 +995,7 @@ class ChallengeEngineRecordProgressTest {
         engine.createChallenge(
             title = "Test",
             type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
+            target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
             createdByUserId = creator,
             dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = target,
@@ -1118,8 +1103,7 @@ class ChallengeEngineFinalizeChallengeTest {
         engine.createChallenge(
             title = "Test",
             type = type,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
+            target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
             createdByUserId = "creator",
             dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = target,
@@ -1255,8 +1239,7 @@ class ChallengeEngineCancelChallengeTest {
         engine.createChallenge(
             title = "Test",
             type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
+            target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
             createdByUserId = creator,
             dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = 5,
@@ -1322,8 +1305,7 @@ class ChallengeEngineQueryTest {
         engine.createChallenge(
             title = "Test",
             type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = scopeId,
+            target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, scopeId),
             createdByUserId = creator,
             dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = 5,
@@ -1398,8 +1380,7 @@ class ChallengeEngineLeaderboardTest {
             engine.createChallenge(
                 title = "Test",
                 type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "user1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
@@ -1424,8 +1405,7 @@ class ChallengeEngineLeaderboardTest {
             engine.createChallenge(
                 title = "Reduce",
                 type = ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "c1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
                 createdByUserId = "user1",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
@@ -1471,8 +1451,7 @@ class ChallengeEngineProgressPercentTest {
         engine.createChallenge(
             title = "Test",
             type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
+            target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "c1"),
             createdByUserId = "creator",
             dateRange = today..today.plus(7, DateTimeUnit.DAY),
             targetValue = target,
@@ -2908,8 +2887,8 @@ class LeaderboardCalculatorSummarizeStandingTest {
     fun summarizeStandingShowsBestCategory() {
         val boards = calculator.computeAll("c1", sampleStats, "u1", fixedClock)
         val summary = calculator.summarizeStanding(boards, "u1")
-        // u1 (Alice) is best in NUTRITIVE_MINUTES (rank 2 in most, but rank 1 in nutritive - she has 120, Carol has 200...)
-        // Actually let's just verify the summary is non-empty and well-formed
+        // u1 (Alice) ranks best in NUTRITIVE_MINUTES; just verify the summary
+        // is non-empty and well-formed.
         assertTrue(summary.isNotBlank())
     }
 
@@ -3336,8 +3315,7 @@ class ChallengeEngineIntegrationTest {
             engine.createChallenge(
                 title = "Weekly Focus",
                 type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "circle1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "circle1"),
                 createdByUserId = "alice",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 100,
@@ -3380,8 +3358,7 @@ class ChallengeEngineIntegrationTest {
             engine.createChallenge(
                 title = "Team Goal",
                 type = ChallengeEngine.ChallengeType.GROUP_FP_POOL,
-                scope = ChallengeEngine.ChallengeScope.CIRCLE,
-                scopeId = "circle1",
+                target = ChallengeEngine.ScopeRef(ChallengeEngine.ChallengeScope.CIRCLE, "circle1"),
                 createdByUserId = "alice",
                 dateRange = today..today.plus(7, DateTimeUnit.DAY),
                 targetValue = 200,
@@ -3434,7 +3411,7 @@ class CircleManagerIntegrationTest {
         assertEquals(CircleManager.CircleRole.MEMBER, bob.role)
 
         // Join directly
-        val carol = manager.joinCircle(circle.circleId, "carol", fixedClock)
+        manager.joinCircle(circle.circleId, "carol", fixedClock)
         assertEquals(3, manager.getMemberCount(circle.circleId))
 
         // Promote bob to admin

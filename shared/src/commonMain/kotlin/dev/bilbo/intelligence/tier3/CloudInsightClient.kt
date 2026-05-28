@@ -1,10 +1,13 @@
 package dev.bilbo.intelligence.tier3
 
-import io.ktor.client.*
-import io.ktor.client.call.*
-import io.ktor.client.request.*
-import io.ktor.client.statement.*
-import io.ktor.http.*
+import io.ktor.client.HttpClient
+import io.ktor.client.call.body
+import io.ktor.client.request.headers
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.ContentType
+import io.ktor.http.HttpHeaders
 import kotlinx.datetime.Instant
 import kotlinx.datetime.minus
 import kotlin.time.Clock
@@ -26,6 +29,8 @@ class CloudInsightClient(
     companion object {
         private const val EDGE_FUNCTION_PATH = "/functions/v1/weekly-insight"
         private const val RATE_LIMIT_DAYS = 7L
+        private const val HTTP_OK = 200
+        private const val HTTP_TOO_MANY_REQUESTS = 429
 
         // Returned when the call is rate-limited locally
         const val RATE_LIMITED_SENTINEL = "__RATE_LIMITED__"
@@ -87,21 +92,21 @@ class CloudInsightClient(
                 }
 
             when (response.status.value) {
-                200 -> {
+                HTTP_OK -> {
                     val body = response.body<String>()
                     val narrative = parseNarrativeFromResponse(body)
                     lastRequestInstant = clock.now()
                     InsightResult.Success(narrative)
                 }
-                429 -> InsightResult.RateLimited
+                HTTP_TOO_MANY_REQUESTS -> InsightResult.RateLimited
                 else ->
                     InsightResult.ServerError(
                         statusCode = response.status.value,
                         body = response.body(),
                     )
             }
-        } catch (e: Exception) {
-            InsightResult.NetworkError(e.message ?: "Unknown network error")
+        } catch (expected: Exception) {
+            InsightResult.NetworkError(expected.message ?: "Unknown network error")
         }
     }
 
@@ -142,25 +147,29 @@ class CloudInsightClient(
      * Expected format: { "narrative": "..." }
      */
     private fun parseNarrativeFromResponse(json: String): String {
-        // Simple extraction without a full JSON library dependency at this layer
-        val key = "\"narrative\""
-        val keyIndex = json.indexOf(key)
-        if (keyIndex == -1) return json.trim()
-
-        val colonIndex = json.indexOf(':', keyIndex + key.length)
-        if (colonIndex == -1) return json.trim()
-
-        val valueStart = json.indexOf('"', colonIndex + 1)
-        if (valueStart == -1) return json.trim()
-
-        val valueEnd = findClosingQuote(json, valueStart + 1)
-        if (valueEnd == -1) return json.trim()
-
+        val bounds = locateNarrativeValue(json) ?: return json.trim()
         return json
-            .substring(valueStart + 1, valueEnd)
+            .substring(bounds.first, bounds.second)
             .replace("\\n", "\n")
             .replace("\\\"", "\"")
             .replace("\\\\", "\\")
+    }
+
+    /**
+     * Locates the narrative string value within [json] using simple index
+     * scanning (no JSON library at this layer). Returns the (start, end) bounds
+     * of the raw value, or null if the expected `"narrative": "..."` shape is
+     * not present.
+     */
+    private fun locateNarrativeValue(json: String): Pair<Int, Int>? {
+        val key = "\"narrative\""
+        val keyIndex = json.indexOf(key)
+        if (keyIndex == -1) return null
+
+        val colonIndex = json.indexOf(':', keyIndex + key.length)
+        val valueStart = if (colonIndex == -1) -1 else json.indexOf('"', colonIndex + 1)
+        val valueEnd = if (valueStart == -1) -1 else findClosingQuote(json, valueStart + 1)
+        return if (valueEnd == -1) null else (valueStart + 1) to valueEnd
     }
 
     private fun findClosingQuote(

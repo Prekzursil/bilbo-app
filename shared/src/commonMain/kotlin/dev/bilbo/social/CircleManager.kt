@@ -270,7 +270,7 @@ class CircleManager {
         description: String? = null,
         visibility: CircleVisibility? = null,
     ): Circle {
-        requireAdmin(circleId, requestingUserId)
+        requireActiveAdmin(getActiveMembership(circleId, requestingUserId))
         val circle = circles[circleId] ?: throw IllegalArgumentException("Circle not found.")
         val updated =
             circle.copy(
@@ -289,7 +289,7 @@ class CircleManager {
         circleId: String,
         requestingUserId: String,
     ): String {
-        requireAdmin(circleId, requestingUserId)
+        requireActiveAdmin(getActiveMembership(circleId, requestingUserId))
         val circle = circles[circleId] ?: throw IllegalArgumentException("Circle not found.")
         val newCode = generateInviteCode()
         circles[circleId] = circle.copy(inviteCode = newCode)
@@ -304,18 +304,16 @@ class CircleManager {
         circleId: String,
         userId: String,
     ): CircleMembership? = memberships.find { it.circleId == circleId && it.userId == userId && it.isActive }
+}
 
-    private fun requireAdmin(
-        circleId: String,
-        userId: String,
-    ) {
-        val m = getActiveMembership(circleId, userId)
-        require(m?.role == CircleRole.ADMIN) { "Only circle admins can perform this action." }
+// File-level helpers (kept out of the class to keep its public surface focused
+// on circle operations).
+private fun requireActiveAdmin(membership: CircleManager.CircleMembership?) {
+    require(membership?.role == CircleManager.CircleRole.ADMIN) {
+        "Only circle admins can perform this action."
     }
 }
 
-// File-level id/code generation helpers (kept out of the class to keep its
-// public surface focused on circle operations).
 private var circleIdCounter = 0L
 
 private fun generateId(): String = "circle_${++circleIdCounter}_${Clock.System.now().epochSeconds}"

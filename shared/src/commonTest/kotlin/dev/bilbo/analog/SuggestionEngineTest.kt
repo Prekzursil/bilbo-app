@@ -103,21 +103,21 @@ private class FakeBudgetRepo : BudgetRepository {
 
     override suspend fun getRecent(limit: Long): List<DopamineBudget> = emptyList()
 
-    override suspend fun insert(budget: DopamineBudget) {}
+    override suspend fun insert(budget: DopamineBudget) { /* test fake: no-op */ }
 
-    override suspend fun update(budget: DopamineBudget) {}
+    override suspend fun update(budget: DopamineBudget) { /* test fake: no-op */ }
 
-    override suspend fun upsert(budget: DopamineBudget) {}
+    override suspend fun upsert(budget: DopamineBudget) { /* test fake: no-op */ }
 
     override suspend fun incrementFpEarned(
         date: LocalDate,
         amount: Int,
-    ) {}
+    ) { /* test fake: no-op */ }
 
     override suspend fun incrementFpSpent(
         date: LocalDate,
         amount: Int,
-    ) {}
+    ) { /* test fake: no-op */ }
 
     override suspend fun incrementFpBonus(
         date: LocalDate,
@@ -126,7 +126,7 @@ private class FakeBudgetRepo : BudgetRepository {
         bonusIncrements.add(date to amount)
     }
 
-    override suspend fun deleteByDate(date: LocalDate) {}
+    override suspend fun deleteByDate(date: LocalDate) { /* test fake: no-op */ }
 
     override suspend fun sumFpEarned(
         from: LocalDate,

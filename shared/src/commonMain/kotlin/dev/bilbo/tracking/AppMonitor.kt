@@ -3,9 +3,9 @@ package dev.bilbo.tracking
 /**
  * Represents a currently-active foreground application.
  *
- * @param packageName The Android package name (e.g. "com.instagram.android").
- * @param appLabel    The human-readable app name resolved via PackageManager.
- * @param category    Bilbo's classification of this app, or null if not yet
+ * @property packageName The Android package name (e.g. "com.instagram.android").
+ * @property appLabel    The human-readable app name resolved via PackageManager.
+ * @property category    Bilbo's classification of this app, or null if not yet
  *                    profiled.
  */
 data class AppInfo(

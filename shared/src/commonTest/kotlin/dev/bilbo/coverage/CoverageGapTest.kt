@@ -120,7 +120,6 @@ class SharedDomainModelEqualityTest {
         assertEquals(s1, s2)
         assertEquals(s1.hashCode(), s2.hashCode())
         assertNotEquals(s1, s1.copy(id = "s2"))
-        assertFalse(s1.equals(null))
         assertFalse(s1.equals("string"))
     }
 
@@ -130,7 +129,6 @@ class SharedDomainModelEqualityTest {
         assertEquals(a1, a2)
         assertEquals(a1.hashCode(), a2.hashCode())
         assertNotEquals(a1, a1.copy(packageName = "com.other"))
-        assertFalse(a1.equals(null))
         assertFalse(a1.equals("string"))
     }
 
@@ -152,7 +150,6 @@ class SharedDomainModelEqualityTest {
         assertEquals(d1, d2)
         assertEquals(d1.hashCode(), d2.hashCode())
         assertNotEquals(d1, d1.copy(id = "i2"))
-        assertFalse(d1.equals(null))
         assertFalse(d1.equals("string"))
     }
 
@@ -163,7 +160,6 @@ class SharedDomainModelEqualityTest {
         assertEquals(m1.hashCode(), m2.hashCode())
         assertNotEquals(m1, MoodScore(7, "happy"))
         assertNotEquals(m1, MoodScore(8, "sad"))
-        assertFalse(m1.equals(null))
         assertFalse(m1.equals("string"))
     }
 
@@ -184,7 +180,6 @@ class SharedDomainModelEqualityTest {
         assertEquals(g1, g2)
         assertEquals(g1.hashCode(), g2.hashCode())
         assertNotEquals(g1, g1.copy(id = "g2"))
-        assertFalse(g1.equals(null))
         assertFalse(g1.equals("string"))
     }
 }

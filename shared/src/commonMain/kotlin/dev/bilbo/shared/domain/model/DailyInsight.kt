@@ -7,8 +7,8 @@ import kotlinx.serialization.Serializable
  * An AI-generated or heuristic insight summarising the user's
  * digital wellness activity for a given day.
  *
- * @property tier Which AI tier produced this insight (1 = local heuristic,
- *   2 = on-device ML, 3 = Anthropic API via Edge Function).
+ * The `tier` field records which AI tier produced this insight (1 = local
+ * heuristic, 2 = on-device ML, 3 = Anthropic API via Edge Function).
  */
 @Serializable
 data class DailyInsight(
