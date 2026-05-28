@@ -43,6 +43,46 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.datetime.Instant
 
+// ── Layout / palette constants ────────────────────────────────────────────────
+private const val ARGB_GOLD = 0xFFFFD700
+private const val ARGB_SILVER = 0xFFC0C0C0
+private const val ARGB_BRONZE = 0xFFCD7F32
+private const val PODIUM_COUNT = 3
+private const val RANK_GOLD = 1
+private const val RANK_SILVER = 2
+private const val RANK_BRONZE = 3
+private const val NAME_MAX_CHARS = 12
+private const val PODIUM_HEIGHT_1_DP = 100
+private const val PODIUM_HEIGHT_2_DP = 72
+private const val PODIUM_HEIGHT_3_DP = 52
+private const val PODIUM_WIDTH_DP = 100
+private const val MEDAL_SP = 24
+private const val EDGE_PAD_DP = 16
+private const val SCREEN_BOTTOM_PAD_DP = 32
+private const val SECTION_GAP_DP = 8
+private const val ROW_GAP_DP = 12
+private const val PODIUM_GAP_DP = 6
+private const val EMPTY_GAP_DP = 12
+private const val EMPTY_PAD_DP = 40
+private const val EMPTY_ICON_DP = 48
+private const val ALPHA_DIVIDER = 0.2f
+private const val ALPHA_EMPTY_ICON = 0.35f
+private const val ALPHA_PODIUM_BAR = 0.2f
+private const val ROW_CORNER_DP = 12
+private const val ROW_TONAL_ELEVATION_DP = 1
+private const val ALPHA_CURRENT_USER_BG = 0.35f
+private const val ALPHA_AVATAR_BG = 0.15f
+private const val ROW_PAD_H_DP = 14
+private const val ROW_PAD_V_DP = 10
+private const val ROW_OUTER_PAD_V_DP = 4
+private const val RANK_WIDTH_DP = 32
+private const val RANK_EMOJI_SP = 18
+private const val AVATAR_DP = 36
+private const val PODIUM_BAR_CORNER_DP = 6
+private const val BANNER_CORNER_DP = 10
+private const val BANNER_PAD_DP = 10
+private const val BANNER_ICON_DP = 16
+
 // ── UI models ─────────────────────────────────────────────────────────────────
 
 data class LeaderboardUiState(
@@ -113,9 +153,9 @@ fun LeaderboardScreen(
                 ScrollableTabRow(
                     selectedTabIndex = LeaderboardCategory.entries.indexOf(state.currentCategory),
                     containerColor = MaterialTheme.colorScheme.surface,
-                    edgePadding = 16.dp,
+                    edgePadding = EDGE_PAD_DP.dp,
                 ) {
-                    LeaderboardCategory.entries.forEachIndexed { idx, category ->
+                    LeaderboardCategory.entries.forEach { category ->
                         Tab(
                             selected = state.currentCategory == category,
                             onClick = { onCategoryChange(category) },
@@ -131,95 +171,100 @@ fun LeaderboardScreen(
                 CircularProgressIndicator()
             }
         } else {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(paddingValues),
-                contentPadding = PaddingValues(bottom = 32.dp),
-            ) {
-                // Weekly reset indicator
-                state.nextResetAt?.let { resetAt ->
-                    item {
-                        WeeklyResetBanner(nextReset = resetAt)
-                    }
-                }
+            LeaderboardList(state = state, modifier = Modifier.fillMaxSize().padding(paddingValues))
+        }
+    }
+}
 
-                // Podium (top 3)
-                val top3 = state.entries.take(3)
-                if (top3.isNotEmpty()) {
-                    item {
-                        PodiumRow(top3 = top3, category = state.currentCategory)
-                        Spacer(Modifier.height(8.dp))
-                    }
-                }
+@Composable
+private fun LeaderboardList(
+    state: LeaderboardUiState,
+    modifier: Modifier = Modifier,
+) {
+    LazyColumn(
+        modifier = modifier,
+        contentPadding = PaddingValues(bottom = SCREEN_BOTTOM_PAD_DP.dp),
+    ) {
+        if (state.nextResetAt != null) {
+            item { WeeklyResetBanner() }
+        }
 
-                // Divider + "All" header
-                item {
-                    Divider(
-                        modifier = Modifier.padding(horizontal = 16.dp),
-                        color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
-                    )
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                    ) {
-                        Text(
-                            "All Rankings",
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        )
-                        state.currentUserRank?.let {
-                            Text(
-                                "You: #$it",
-                                style = MaterialTheme.typography.labelMedium,
-                                color = MaterialTheme.colorScheme.primary,
-                                fontWeight = FontWeight.SemiBold,
-                            )
-                        }
-                    }
-                }
-
-                // Full ranked list
-                if (state.entries.isEmpty()) {
-                    item {
-                        Column(
-                            Modifier.fillMaxWidth().padding(vertical = 40.dp),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                        ) {
-                            Icon(
-                                Icons.Outlined.BarChart,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
-                                modifier = Modifier.size(48.dp),
-                            )
-                            Text(
-                                "No data yet. Keep tracking your wellness!",
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                textAlign = TextAlign.Center,
-                            )
-                        }
-                    }
-                } else {
-                    items(state.entries) { entry ->
-                        LeaderboardRow(entry = entry)
-                    }
-                }
+        val top3 = state.entries.take(PODIUM_COUNT)
+        if (top3.isNotEmpty()) {
+            item {
+                PodiumRow(top3 = top3)
+                Spacer(Modifier.height(SECTION_GAP_DP.dp))
             }
         }
+
+        item { AllRankingsHeader(currentUserRank = state.currentUserRank) }
+
+        if (state.entries.isEmpty()) {
+            item { EmptyLeaderboardState() }
+        } else {
+            items(state.entries) { entry ->
+                LeaderboardRow(entry = entry)
+            }
+        }
+    }
+}
+
+@Composable
+private fun AllRankingsHeader(currentUserRank: Int?) {
+    Divider(
+        modifier = Modifier.padding(horizontal = EDGE_PAD_DP.dp),
+        color = MaterialTheme.colorScheme.outline.copy(alpha = ALPHA_DIVIDER),
+    )
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = EDGE_PAD_DP.dp, vertical = SECTION_GAP_DP.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            "All Rankings",
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+        if (currentUserRank != null) {
+            Text(
+                "You: #$currentUserRank",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.primary,
+                fontWeight = FontWeight.SemiBold,
+            )
+        }
+    }
+}
+
+@Composable
+private fun EmptyLeaderboardState() {
+    Column(
+        Modifier.fillMaxWidth().padding(vertical = EMPTY_PAD_DP.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.spacedBy(EMPTY_GAP_DP.dp),
+    ) {
+        Icon(
+            Icons.Outlined.BarChart,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = ALPHA_EMPTY_ICON),
+            modifier = Modifier.size(EMPTY_ICON_DP.dp),
+        )
+        Text(
+            "No data yet. Keep tracking your wellness!",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center,
+        )
     }
 }
 
 // ── Podium ────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun PodiumRow(
-    top3: kotlin.collections.List<LeaderboardEntryUiItem>,
-    category: LeaderboardCategory,
-) {
+private fun PodiumRow(top3: kotlin.collections.List<LeaderboardEntryUiItem>) {
     val reordered =
         buildList {
             top3.getOrNull(1)?.let { add(it) } // 2nd (left)
@@ -231,36 +276,33 @@ private fun PodiumRow(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .padding(horizontal = EDGE_PAD_DP.dp, vertical = EDGE_PAD_DP.dp),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
         reordered.forEach { entry ->
-            PodiumSlot(entry = entry, category = category)
+            PodiumSlot(entry = entry)
         }
     }
 }
 
 @Composable
-private fun PodiumSlot(
-    entry: LeaderboardEntryUiItem,
-    category: LeaderboardCategory,
-) {
+private fun PodiumSlot(entry: LeaderboardEntryUiItem) {
     val (podiumHeight, medalEmoji, medalColor) =
         when (entry.rank) {
-            1 -> Triple(100.dp, "🥇", Color(0xFFFFD700))
-            2 -> Triple(72.dp, "🥈", Color(0xFFC0C0C0))
-            3 -> Triple(52.dp, "🥉", Color(0xFFCD7F32))
-            else -> Triple(52.dp, "#${entry.rank}", MaterialTheme.colorScheme.onSurfaceVariant)
+            RANK_GOLD -> Triple(PODIUM_HEIGHT_1_DP.dp, "🥇", Color(ARGB_GOLD))
+            RANK_SILVER -> Triple(PODIUM_HEIGHT_2_DP.dp, "🥈", Color(ARGB_SILVER))
+            RANK_BRONZE -> Triple(PODIUM_HEIGHT_3_DP.dp, "🥉", Color(ARGB_BRONZE))
+            else -> Triple(PODIUM_HEIGHT_3_DP.dp, "#${entry.rank}", MaterialTheme.colorScheme.onSurfaceVariant)
         }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(6.dp),
-        modifier = Modifier.width(100.dp),
+        verticalArrangement = Arrangement.spacedBy(PODIUM_GAP_DP.dp),
+        modifier = Modifier.width(PODIUM_WIDTH_DP.dp),
     ) {
         Text(
-            text = entry.displayName.take(12),
+            text = entry.displayName.take(NAME_MAX_CHARS),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = if (entry.isCurrentUser) FontWeight.Bold else FontWeight.Normal,
             color = if (entry.isCurrentUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
@@ -273,12 +315,12 @@ private fun PodiumSlot(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.Center,
         )
-        Text(text = medalEmoji, fontSize = 24.sp)
+        Text(text = medalEmoji, fontSize = MEDAL_SP.sp)
 
         // Podium bar
         Surface(
-            shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp),
-            color = medalColor.copy(alpha = 0.2f),
+            shape = RoundedCornerShape(topStart = PODIUM_BAR_CORNER_DP.dp, topEnd = PODIUM_BAR_CORNER_DP.dp),
+            color = medalColor.copy(alpha = ALPHA_PODIUM_BAR),
             modifier =
                 Modifier
                     .fillMaxWidth()
@@ -307,8 +349,8 @@ private fun LeaderboardRow(entry: LeaderboardEntryUiItem) {
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-        shape = RoundedCornerShape(12.dp),
+                .padding(horizontal = EDGE_PAD_DP.dp, vertical = ROW_OUTER_PAD_V_DP.dp),
+        shape = RoundedCornerShape(ROW_CORNER_DP.dp),
         color = style.background,
         tonalElevation = style.tonalElevation,
     ) {
@@ -316,9 +358,9 @@ private fun LeaderboardRow(entry: LeaderboardEntryUiItem) {
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                    .padding(horizontal = ROW_PAD_H_DP.dp, vertical = ROW_PAD_V_DP.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(ROW_GAP_DP.dp),
         ) {
             LeaderboardRankBadge(rankEmoji = rankEmoji, rank = entry.rank)
             LeaderboardAvatar(displayName = entry.displayName, style = style)
@@ -361,11 +403,11 @@ private fun rememberLeaderboardRowStyle(isCurrentUser: Boolean): LeaderboardRowS
     val scheme = MaterialTheme.colorScheme
     return if (isCurrentUser) {
         LeaderboardRowStyle(
-            background = scheme.primaryContainer.copy(alpha = 0.35f),
+            background = scheme.primaryContainer.copy(alpha = ALPHA_CURRENT_USER_BG),
             text = scheme.primary,
             accent = scheme.primary,
             accentOrMuted = scheme.primary,
-            avatarBackground = scheme.primary.copy(alpha = 0.15f),
+            avatarBackground = scheme.primary.copy(alpha = ALPHA_AVATAR_BG),
             avatarText = scheme.primary,
             nameWeight = FontWeight.Bold,
             tonalElevation = 0.dp,
@@ -379,16 +421,16 @@ private fun rememberLeaderboardRowStyle(isCurrentUser: Boolean): LeaderboardRowS
             avatarBackground = scheme.secondaryContainer,
             avatarText = scheme.onSecondaryContainer,
             nameWeight = FontWeight.Normal,
-            tonalElevation = 1.dp,
+            tonalElevation = ROW_TONAL_ELEVATION_DP.dp,
         )
     }
 }
 
 private fun rankEmojiFor(rank: Int): String? =
     when (rank) {
-        1 -> "🥇"
-        2 -> "🥈"
-        3 -> "🥉"
+        RANK_GOLD -> "🥇"
+        RANK_SILVER -> "🥈"
+        RANK_BRONZE -> "🥉"
         else -> null
     }
 
@@ -398,11 +440,11 @@ private fun LeaderboardRankBadge(
     rank: Int,
 ) {
     Box(
-        modifier = Modifier.width(32.dp),
+        modifier = Modifier.width(RANK_WIDTH_DP.dp),
         contentAlignment = Alignment.Center,
     ) {
         if (rankEmoji != null) {
-            Text(rankEmoji, fontSize = 18.sp)
+            Text(rankEmoji, fontSize = RANK_EMOJI_SP.sp)
         } else {
             Text(
                 text = "#$rank",
@@ -423,7 +465,7 @@ private fun LeaderboardAvatar(
     Surface(
         shape = CircleShape,
         color = style.avatarBackground,
-        modifier = Modifier.size(36.dp),
+        modifier = Modifier.size(AVATAR_DP.dp),
     ) {
         Box(contentAlignment = Alignment.Center) {
             Text(
@@ -439,25 +481,25 @@ private fun LeaderboardAvatar(
 // ── Weekly reset banner ───────────────────────────────────────────────────────
 
 @Composable
-private fun WeeklyResetBanner(nextReset: Instant) {
+private fun WeeklyResetBanner() {
     Surface(
         modifier =
             Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(10.dp),
+                .padding(horizontal = EDGE_PAD_DP.dp, vertical = SECTION_GAP_DP.dp),
+        shape = RoundedCornerShape(BANNER_CORNER_DP.dp),
         color = MaterialTheme.colorScheme.secondaryContainer,
     ) {
         Row(
-            modifier = Modifier.padding(10.dp),
+            modifier = Modifier.padding(BANNER_PAD_DP.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(SECTION_GAP_DP.dp),
         ) {
             Icon(
                 imageVector = Icons.Outlined.Refresh,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(BANNER_ICON_DP.dp),
             )
             Text(
                 text = "Leaderboard resets weekly on Sunday",
