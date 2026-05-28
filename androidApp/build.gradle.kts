@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.kover)
 }
 
 kotlin {
@@ -71,7 +72,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             signingConfig = signingConfigs.getByName("debug") // replace with release signing in production
         }
@@ -96,6 +97,52 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+        }
+    }
+}
+
+// Kover coverage for the Android app module. The XML report feeds Codecov
+// (flag: android) and the Strict-Zero gate. Only framework-generated boilerplate
+// that cannot carry meaningful unit-test coverage is excluded — no business
+// logic is excluded. Composable UI / Activities require instrumentation
+// (androidTest, mac/device-only) and are tracked as the honest remaining gap.
+kover {
+    reports {
+        filters {
+            excludes {
+                // Hilt / Dagger generated DI graph.
+                annotatedBy(
+                    "dagger.hilt.android.HiltAndroidApp",
+                    "dagger.hilt.android.AndroidEntryPoint",
+                    "dagger.Module",
+                    "dagger.hilt.InstallIn",
+                )
+                classes(
+                    // KSP / build-generated.
+                    "*_Factory",
+                    "*_HiltModules*",
+                    "*_GeneratedInjector",
+                    "*Hilt_*",
+                    "dagger.hilt.*",
+                    "hilt_aggregated_deps.*",
+                    "dev.bilbo.app.BuildConfig",
+                    "dev.bilbo.app.*ComposableSingletons*",
+                )
+            }
+        }
+        verify {
+            rule {
+                minBound(
+                    100,
+                    kotlinx.kover.gradle.plugin.dsl.CoverageUnit.LINE,
+                    kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE,
+                )
+                minBound(
+                    100,
+                    kotlinx.kover.gradle.plugin.dsl.CoverageUnit.BRANCH,
+                    kotlinx.kover.gradle.plugin.dsl.AggregationType.COVERED_PERCENTAGE,
+                )
+            }
         }
     }
 }
