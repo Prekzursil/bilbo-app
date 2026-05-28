@@ -276,20 +276,8 @@ private fun PodiumSlot(
 
 @Composable
 private fun LeaderboardRow(entry: LeaderboardEntryUiItem) {
-    val (bgColor, textColor) =
-        if (entry.isCurrentUser) {
-            Pair(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f), MaterialTheme.colorScheme.primary)
-        } else {
-            Pair(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface)
-        }
-
-    val rankEmoji =
-        when (entry.rank) {
-            1 -> "🥇"
-            2 -> "🥈"
-            3 -> "🥉"
-            else -> null
-        }
+    val style = rememberLeaderboardRowStyle(entry.isCurrentUser)
+    val rankEmoji = rankEmojiFor(entry.rank)
 
     Surface(
         modifier =
@@ -297,8 +285,8 @@ private fun LeaderboardRow(entry: LeaderboardEntryUiItem) {
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 4.dp),
         shape = RoundedCornerShape(12.dp),
-        color = bgColor,
-        tonalElevation = if (entry.isCurrentUser) 0.dp else 1.dp,
+        color = style.background,
+        tonalElevation = style.tonalElevation,
     ) {
         Row(
             modifier =
@@ -308,51 +296,15 @@ private fun LeaderboardRow(entry: LeaderboardEntryUiItem) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            // Rank badge
-            Box(
-                modifier = Modifier.width(32.dp),
-                contentAlignment = Alignment.Center,
-            ) {
-                if (rankEmoji != null) {
-                    Text(rankEmoji, fontSize = 18.sp)
-                } else {
-                    Text(
-                        text = "#${entry.rank}",
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontWeight = FontWeight.SemiBold,
-                        textAlign = TextAlign.Center,
-                    )
-                }
-            }
-
-            // Avatar
-            Surface(
-                shape = CircleShape,
-                color =
-                    if (entry.isCurrentUser) {
-                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                    } else {
-                        MaterialTheme.colorScheme.secondaryContainer
-                    },
-                modifier = Modifier.size(36.dp),
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Text(
-                        text = entry.displayName.take(1).uppercase(),
-                        style = MaterialTheme.typography.bodyMedium,
-                        fontWeight = FontWeight.Bold,
-                        color = if (entry.isCurrentUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSecondaryContainer,
-                    )
-                }
-            }
+            LeaderboardRankBadge(rankEmoji = rankEmoji, rank = entry.rank)
+            LeaderboardAvatar(displayName = entry.displayName, style = style)
 
             // Name
             Text(
                 text = entry.displayName,
                 style = MaterialTheme.typography.bodyMedium,
-                fontWeight = if (entry.isCurrentUser) FontWeight.Bold else FontWeight.Normal,
-                color = textColor,
+                fontWeight = style.nameWeight,
+                color = style.text,
                 modifier = Modifier.weight(1f),
                 maxLines = 1,
             )
@@ -361,8 +313,100 @@ private fun LeaderboardRow(entry: LeaderboardEntryUiItem) {
             Text(
                 text = entry.valueLabel,
                 style = MaterialTheme.typography.bodySmall,
-                color = if (entry.isCurrentUser) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                fontWeight = if (entry.isCurrentUser) FontWeight.Bold else FontWeight.Normal,
+                color = style.accentOrMuted,
+                fontWeight = style.nameWeight,
+            )
+        }
+    }
+}
+
+/** Resolved per-row visual styling, computed once so the row Composable stays simple. */
+private data class LeaderboardRowStyle(
+    val background: Color,
+    val text: Color,
+    val accent: Color,
+    val accentOrMuted: Color,
+    val avatarBackground: Color,
+    val avatarText: Color,
+    val nameWeight: FontWeight,
+    val tonalElevation: androidx.compose.ui.unit.Dp,
+)
+
+@Composable
+private fun rememberLeaderboardRowStyle(isCurrentUser: Boolean): LeaderboardRowStyle {
+    val scheme = MaterialTheme.colorScheme
+    return if (isCurrentUser) {
+        LeaderboardRowStyle(
+            background = scheme.primaryContainer.copy(alpha = 0.35f),
+            text = scheme.primary,
+            accent = scheme.primary,
+            accentOrMuted = scheme.primary,
+            avatarBackground = scheme.primary.copy(alpha = 0.15f),
+            avatarText = scheme.primary,
+            nameWeight = FontWeight.Bold,
+            tonalElevation = 0.dp,
+        )
+    } else {
+        LeaderboardRowStyle(
+            background = scheme.surface,
+            text = scheme.onSurface,
+            accent = scheme.primary,
+            accentOrMuted = scheme.onSurfaceVariant,
+            avatarBackground = scheme.secondaryContainer,
+            avatarText = scheme.onSecondaryContainer,
+            nameWeight = FontWeight.Normal,
+            tonalElevation = 1.dp,
+        )
+    }
+}
+
+private fun rankEmojiFor(rank: Int): String? =
+    when (rank) {
+        1 -> "🥇"
+        2 -> "🥈"
+        3 -> "🥉"
+        else -> null
+    }
+
+@Composable
+private fun LeaderboardRankBadge(
+    rankEmoji: String?,
+    rank: Int,
+) {
+    Box(
+        modifier = Modifier.width(32.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        if (rankEmoji != null) {
+            Text(rankEmoji, fontSize = 18.sp)
+        } else {
+            Text(
+                text = "#$rank",
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.SemiBold,
+                textAlign = TextAlign.Center,
+            )
+        }
+    }
+}
+
+@Composable
+private fun LeaderboardAvatar(
+    displayName: String,
+    style: LeaderboardRowStyle,
+) {
+    Surface(
+        shape = CircleShape,
+        color = style.avatarBackground,
+        modifier = Modifier.size(36.dp),
+    ) {
+        Box(contentAlignment = Alignment.Center) {
+            Text(
+                text = displayName.take(1).uppercase(),
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = FontWeight.Bold,
+                color = style.avatarText,
             )
         }
     }

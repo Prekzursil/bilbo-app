@@ -90,23 +90,25 @@ class DefaultErrorHandler : ErrorHandler {
         when (throwable) {
             is BilboError -> throwable // Already mapped
             is OfflineException -> BilboError.Offline()
-            is NetworkException ->
-                when {
-                    throwable.statusCode == 401 || throwable.statusCode == 403 -> BilboError.Unauthorized()
-                    throwable.statusCode == 404 -> BilboError.NotFound()
-                    throwable.statusCode in 400..499 ->
-                        BilboError.ClientError(
-                            statusCode = throwable.statusCode,
-                            message = throwable.message ?: "Request failed (${throwable.statusCode}).",
-                        )
-                    throwable.statusCode in 500..599 -> BilboError.ServerError(throwable.statusCode)
-                    else -> BilboError.Unknown(cause = throwable)
-                }
+            is NetworkException -> mapNetworkException(throwable)
             is kotlinx.serialization.SerializationException ->
                 BilboError.DataError(
                     cause = throwable,
                     message = "Failed to read data. The app may need updating.",
                 )
+            else -> BilboError.Unknown(cause = throwable)
+        }
+
+    private fun mapNetworkException(throwable: NetworkException): BilboError =
+        when (throwable.statusCode) {
+            401, 403 -> BilboError.Unauthorized()
+            404 -> BilboError.NotFound()
+            in 400..499 ->
+                BilboError.ClientError(
+                    statusCode = throwable.statusCode,
+                    message = throwable.message ?: "Request failed (${throwable.statusCode}).",
+                )
+            in 500..599 -> BilboError.ServerError(throwable.statusCode)
             else -> BilboError.Unknown(cause = throwable)
         }
 
