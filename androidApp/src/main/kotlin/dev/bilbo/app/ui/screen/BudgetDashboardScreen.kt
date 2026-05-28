@@ -41,18 +41,52 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.bilbo.app.ui.components.FPBalanceWidget
-import dev.bilbo.app.ui.theme.BilboTheme
 import dev.bilbo.domain.FPEconomy
 
 // ── Palette helpers ────────────────────────────────────────────────────────────
-private val FpGreen = Color(0xFF4CAF50)
-private val FpRed = Color(0xFFE53935)
-private val FpNeutral = Color(0xFF9E9E9E)
-private val FpAmber = Color(0xFFFFC107)
+private const val ARGB_GREEN = 0xFF4CAF50
+private const val ARGB_RED = 0xFFE53935
+private const val ARGB_NEUTRAL = 0xFF9E9E9E
+private const val ARGB_AMBER = 0xFFFFC107
+
+private val FpGreen = Color(ARGB_GREEN)
+private val FpRed = Color(ARGB_RED)
+private val FpNeutral = Color(ARGB_NEUTRAL)
+private val FpAmber = Color(ARGB_AMBER)
+
+private const val WEEK_DAYS = 7
+private const val BAR_ANIM_MS = 700
+private const val FP_WIDGET_SIZE_DP = 160
+private const val WEEKLY_CHART_HEIGHT_DP = 120
+private const val SCREEN_PAD_H_DP = 16
+private const val SCREEN_PAD_V_DP = 8
+private const val SECTION_GAP_DP = 16
+private const val SMALL_GAP_DP = 8
+private const val SPLIT_BAR_HEIGHT_DP = 12
+private const val SPLIT_BAR_RADIUS_DP = 6
+private const val ALPHA_LINE = 0.4f
+private const val ALPHA_TODAY_GLOW = 0.25f
+private const val ALPHA_BAR_TRACK = 0.15f
+private const val CHART_PAD_DP = 16
+private const val CHART_LINE_DP = 2
+private const val DOT_RADIUS_DP = 4
+private const val DOT_TODAY_RADIUS_DP = 7
+private const val DOT_GLOW_RADIUS_DP = 12
+private const val TIME_BAR_MAX_MIN = 480f
+private const val TIME_LABEL_WIDTH_DP = 110
+private const val TIME_VALUE_WIDTH_DP = 36
+private const val TIME_BAR_HEIGHT_DP = 8
+private const val TIME_BAR_RADIUS_DP = 4
+private const val STREAK_ICON_DP = 32
+private const val STREAK_BONUS_THRESHOLD = 7
+private const val CARD_CORNER_DP = 16
+private const val CARD_ELEVATION_DP = 2
+private const val CARD_PAD_DP = 16
+private const val TITLE_BOTTOM_PAD_DP = 12
 
 // ── Data representation fed into the screen ────────────────────────────────────
 
@@ -70,7 +104,7 @@ data class BudgetDashboardUiState(
     val emptyCalorieMinutes: Int = 0,
     val streakDays: Int = 0,
     /** Daily balances for the last 7 days, index 0 = oldest, 6 = today. */
-    val weeklyBalances: List<Int> = List(7) { 0 },
+    val weeklyBalances: List<Int> = List(WEEK_DAYS) { 0 },
     val isRefreshing: Boolean = false,
 )
 
@@ -115,63 +149,60 @@ fun BudgetDashboardScreen(
                     .fillMaxSize()
                     .padding(padding),
         ) {
-            Column(
+            BudgetDashboardContent(uiState = uiState)
+        }
+    }
+}
+
+@Composable
+private fun BudgetDashboardContent(uiState: BudgetDashboardUiState) {
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = SCREEN_PAD_H_DP.dp, vertical = SCREEN_PAD_V_DP.dp),
+        verticalArrangement = Arrangement.spacedBy(SECTION_GAP_DP.dp),
+    ) {
+        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+            FPBalanceWidget(
+                currentBalance = uiState.currentBalance,
+                fpEarned = uiState.fpEarned,
+                size = FP_WIDGET_SIZE_DP.dp,
+            )
+        }
+
+        SectionCard(title = "Today's Activity") {
+            TodayActivitySection(
+                earned = uiState.fpEarned,
+                spent = uiState.fpSpent,
+                bonus = uiState.fpBonus,
+            )
+        }
+
+        SectionCard(title = "This Week") {
+            WeeklyChart(
+                balances = uiState.weeklyBalances,
                 modifier =
                     Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-            ) {
-                // ── 1. FP Balance widget ─────────────────────────────────────
-                Box(
-                    modifier = Modifier.fillMaxWidth(),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    FPBalanceWidget(
-                        currentBalance = uiState.currentBalance,
-                        fpEarned = uiState.fpEarned,
-                        size = 160.dp,
-                    )
-                }
-
-                // ── 2. Today's Activity ──────────────────────────────────────
-                SectionCard(title = "Today's Activity") {
-                    TodayActivitySection(
-                        earned = uiState.fpEarned,
-                        spent = uiState.fpSpent,
-                        bonus = uiState.fpBonus,
-                    )
-                }
-
-                // ── 3. This Week ─────────────────────────────────────────────
-                SectionCard(title = "This Week") {
-                    WeeklyChart(
-                        balances = uiState.weeklyBalances,
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .height(120.dp),
-                    )
-                }
-
-                // ── 4. Time Breakdown ────────────────────────────────────────
-                SectionCard(title = "Time Breakdown") {
-                    TimeBreakdownSection(
-                        nutritiveMinutes = uiState.nutritiveMinutes,
-                        neutralMinutes = uiState.neutralMinutes,
-                        emptyCalorieMinutes = uiState.emptyCalorieMinutes,
-                    )
-                }
-
-                // ── 5. Streak ────────────────────────────────────────────────
-                SectionCard(title = "Streak") {
-                    StreakSection(streakDays = uiState.streakDays)
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-            }
+                        .fillMaxWidth()
+                        .height(WEEKLY_CHART_HEIGHT_DP.dp),
+            )
         }
+
+        SectionCard(title = "Time Breakdown") {
+            TimeBreakdownSection(
+                nutritiveMinutes = uiState.nutritiveMinutes,
+                neutralMinutes = uiState.neutralMinutes,
+                emptyCalorieMinutes = uiState.emptyCalorieMinutes,
+            )
+        }
+
+        SectionCard(title = "Streak") {
+            StreakSection(streakDays = uiState.streakDays)
+        }
+
+        Spacer(modifier = Modifier.height(SECTION_GAP_DP.dp))
     }
 }
 
@@ -186,37 +217,37 @@ private fun TodayActivitySection(
     val total = (earned + spent).coerceAtLeast(1)
     val earnedFrac by animateFloatAsState(
         targetValue = earned.toFloat() / total,
-        animationSpec = tween(700),
+        animationSpec = tween(BAR_ANIM_MS),
         label = "EarnedFrac",
     )
     val spentFrac by animateFloatAsState(
         targetValue = spent.toFloat() / total,
-        animationSpec = tween(700),
+        animationSpec = tween(BAR_ANIM_MS),
         label = "SpentFrac",
     )
 
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(SMALL_GAP_DP.dp)) {
         // Horizontal split bar
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .height(12.dp)
-                    .clip(RoundedCornerShape(6.dp))
+                    .height(SPLIT_BAR_HEIGHT_DP.dp)
+                    .clip(RoundedCornerShape(SPLIT_BAR_RADIUS_DP.dp))
                     .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth(earnedFrac)
-                        .height(12.dp)
+                        .height(SPLIT_BAR_HEIGHT_DP.dp)
                         .background(FpGreen),
             )
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth(spentFrac)
-                        .height(12.dp)
+                        .height(SPLIT_BAR_HEIGHT_DP.dp)
                         .background(FpRed),
             )
         }
@@ -237,23 +268,19 @@ private fun WeeklyChart(
     modifier: Modifier = Modifier,
 ) {
     val dotColor = MaterialTheme.colorScheme.primary
-    val lineColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+    val lineColor = MaterialTheme.colorScheme.primary.copy(alpha = ALPHA_LINE)
     val todayColor = FpGreen
-    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-    val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     val data =
-        balances.takeLast(7).let { list ->
-            if (list.size < 7) List(7 - list.size) { 0 } + list else list
+        balances.takeLast(WEEK_DAYS).let { list ->
+            if (list.size < WEEK_DAYS) List(WEEK_DAYS - list.size) { 0 } + list else list
         }
     val maxVal = data.max().coerceAtLeast(1).toFloat()
 
     Canvas(modifier = modifier) {
-        val w = size.width
-        val h = size.height
-        val padding = 16.dp.toPx()
-        val chartH = h - padding * 2
-        val stepX = if (data.size > 1) (w - padding * 2) / (data.size - 1) else w
+        val padding = CHART_PAD_DP.dp.toPx()
+        val chartH = size.height - padding * 2
+        val stepX = if (data.size > 1) (size.width - padding * 2) / (data.size - 1) else size.width
 
         val points =
             data.mapIndexed { i, v ->
@@ -262,32 +289,44 @@ private fun WeeklyChart(
                 Offset(x, y)
             }
 
-        // Lines
-        for (i in 0 until points.size - 1) {
-            drawLine(
-                color = lineColor,
-                start = points[i],
-                end = points[i + 1],
-                strokeWidth = 2.dp.toPx(),
-                cap = StrokeCap.Round,
-            )
-        }
+        drawChartLines(points = points, lineColor = lineColor)
+        drawChartDots(points = points, dotColor = dotColor, todayColor = todayColor)
+    }
+}
 
-        // Dots
-        points.forEachIndexed { i, pt ->
-            val isToday = i == points.lastIndex
+private fun DrawScope.drawChartLines(
+    points: List<Offset>,
+    lineColor: Color,
+) {
+    for (i in 0 until points.size - 1) {
+        drawLine(
+            color = lineColor,
+            start = points[i],
+            end = points[i + 1],
+            strokeWidth = CHART_LINE_DP.dp.toPx(),
+            cap = StrokeCap.Round,
+        )
+    }
+}
+
+private fun DrawScope.drawChartDots(
+    points: List<Offset>,
+    dotColor: Color,
+    todayColor: Color,
+) {
+    points.forEachIndexed { i, pt ->
+        val isToday = i == points.lastIndex
+        drawCircle(
+            color = if (isToday) todayColor else dotColor,
+            radius = if (isToday) DOT_TODAY_RADIUS_DP.dp.toPx() else DOT_RADIUS_DP.dp.toPx(),
+            center = pt,
+        )
+        if (isToday) {
             drawCircle(
-                color = if (isToday) todayColor else dotColor,
-                radius = if (isToday) 7.dp.toPx() else 4.dp.toPx(),
+                color = todayColor.copy(alpha = ALPHA_TODAY_GLOW),
+                radius = DOT_GLOW_RADIUS_DP.dp.toPx(),
                 center = pt,
             )
-            if (isToday) {
-                drawCircle(
-                    color = todayColor.copy(alpha = 0.25f),
-                    radius = 12.dp.toPx(),
-                    center = pt,
-                )
-            }
         }
     }
 }
@@ -300,7 +339,7 @@ private fun TimeBreakdownSection(
     neutralMinutes: Int,
     emptyCalorieMinutes: Int,
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(SMALL_GAP_DP.dp)) {
         TimeBar(label = "Nutritive", minutes = nutritiveMinutes, color = FpGreen)
         TimeBar(label = "Neutral", minutes = neutralMinutes, color = FpNeutral)
         TimeBar(label = "Empty Calories", minutes = emptyCalorieMinutes, color = FpRed)
@@ -313,20 +352,19 @@ private fun TimeBar(
     minutes: Int,
     color: Color,
 ) {
-    val totalMin = 480f // 8 hours max for visual scale
     val fraction by animateFloatAsState(
-        targetValue = (minutes.toFloat() / totalMin).coerceIn(0f, 1f),
-        animationSpec = tween(700),
+        targetValue = (minutes.toFloat() / TIME_BAR_MAX_MIN).coerceIn(0f, 1f),
+        animationSpec = tween(BAR_ANIM_MS),
         label = "TimeBar_$label",
     )
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(SMALL_GAP_DP.dp),
     ) {
         Text(
             text = label,
-            modifier = Modifier.width(110.dp),
+            modifier = Modifier.width(TIME_LABEL_WIDTH_DP.dp),
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurface,
         )
@@ -334,15 +372,15 @@ private fun TimeBar(
             modifier =
                 Modifier
                     .weight(1f)
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .background(color.copy(alpha = 0.15f)),
+                    .height(TIME_BAR_HEIGHT_DP.dp)
+                    .clip(RoundedCornerShape(TIME_BAR_RADIUS_DP.dp))
+                    .background(color.copy(alpha = ALPHA_BAR_TRACK)),
         ) {
             Box(
                 modifier =
                     Modifier
                         .fillMaxWidth(fraction)
-                        .height(8.dp)
+                        .height(TIME_BAR_HEIGHT_DP.dp)
                         .background(color),
             )
         }
@@ -350,7 +388,7 @@ private fun TimeBar(
             text = "${minutes}m",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.width(36.dp),
+            modifier = Modifier.width(TIME_VALUE_WIDTH_DP.dp),
         )
     }
 }
@@ -361,20 +399,20 @@ private fun TimeBar(
 private fun StreakSection(streakDays: Int) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = Arrangement.spacedBy(SMALL_GAP_DP.dp),
     ) {
         Icon(
             imageVector = Icons.Filled.LocalFireDepartment,
             contentDescription = null,
             tint = FpAmber,
-            modifier = Modifier.size(32.dp),
+            modifier = Modifier.size(STREAK_ICON_DP.dp),
         )
         Column {
             Text(
                 text = "$streakDays day streak",
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
             )
-            if (streakDays >= 7) {
+            if (streakDays >= STREAK_BONUS_THRESHOLD) {
                 Text(
                     text = "7-day bonus: +${FPEconomy.STREAK_BONUS_7_DAY} FP",
                     style = MaterialTheme.typography.bodySmall,
@@ -394,44 +432,20 @@ private fun SectionCard(
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = RoundedCornerShape(CARD_CORNER_DP.dp),
         colors =
             CardDefaults.cardColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
             ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = CARD_ELEVATION_DP.dp),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(CARD_PAD_DP.dp)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.SemiBold),
-                modifier = Modifier.padding(bottom = 12.dp),
+                modifier = Modifier.padding(bottom = TITLE_BOTTOM_PAD_DP.dp),
             )
             content()
         }
-    }
-}
-
-// ── Preview ───────────────────────────────────────────────────────────────────
-
-@Preview(showBackground = true)
-@Composable
-private fun BudgetDashboardPreview() {
-    BilboTheme {
-        BudgetDashboardScreen(
-            uiState =
-                BudgetDashboardUiState(
-                    currentBalance = 38,
-                    fpEarned = 25,
-                    fpSpent = 10,
-                    fpBonus = 5,
-                    nutritiveMinutes = 40,
-                    neutralMinutes = 60,
-                    emptyCalorieMinutes = 30,
-                    streakDays = 9,
-                    weeklyBalances = listOf(20, 35, 28, 42, 15, 50, 38),
-                ),
-            onRefresh = {},
-        )
     }
 }
