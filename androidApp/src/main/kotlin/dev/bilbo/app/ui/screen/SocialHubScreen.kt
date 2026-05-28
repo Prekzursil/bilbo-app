@@ -63,6 +63,14 @@ import androidx.compose.ui.unit.dp
 import dev.bilbo.social.BuddyManager
 import dev.bilbo.social.ChallengeEngine
 
+// ── Sharing-level chip colours ────────────────────────────────────────────────
+private const val ARGB_BASIC = 0xFF2196F3
+private const val ARGB_DETAILED = 0xFF4CAF50
+
+private const val TAB_BUDDIES = 0
+private const val TAB_CIRCLES = 1
+private const val TAB_CHALLENGES = 2
+
 // ── UI state models ───────────────────────────────────────────────────────────
 
 data class BuddyUiState(
@@ -125,48 +133,15 @@ fun SocialHubScreen(
     onChallengeTap: (String) -> Unit = {},
     onBack: () -> Unit = {},
 ) {
-    var selectedTab by remember { mutableStateOf(0) }
-    val tabs =
-        listOf(
-            Triple("Buddies", Icons.Outlined.People, Icons.Filled.People),
-            Triple("Circles", Icons.Outlined.Group, Icons.Filled.Group),
-            Triple("Challenges", Icons.Outlined.EmojiEvents, Icons.Filled.EmojiEvents),
-        )
+    var selectedTab by remember { mutableStateOf(TAB_BUDDIES) }
 
     Scaffold(
         topBar = {
-            Column {
-                TopAppBar(
-                    title = { Text("Social", fontWeight = FontWeight.SemiBold) },
-                    navigationIcon = {
-                        IconButton(onClick = onBack) {
-                            Icon(Icons.Default.ArrowBack, contentDescription = "Back")
-                        }
-                    },
-                    colors =
-                        TopAppBarDefaults.topAppBarColors(
-                            containerColor = MaterialTheme.colorScheme.surface,
-                        ),
-                )
-                TabRow(
-                    selectedTabIndex = selectedTab,
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ) {
-                    tabs.forEachIndexed { idx, (label, outlinedIcon, filledIcon) ->
-                        Tab(
-                            selected = selectedTab == idx,
-                            onClick = { selectedTab = idx },
-                            icon = {
-                                Icon(
-                                    imageVector = if (selectedTab == idx) filledIcon else outlinedIcon,
-                                    contentDescription = label,
-                                )
-                            },
-                            text = { Text(label) },
-                        )
-                    }
-                }
-            }
+            SocialHubTopBar(
+                selectedTab = selectedTab,
+                onTabSelect = { selectedTab = it },
+                onBack = onBack,
+            )
         },
     ) { paddingValues ->
         Box(
@@ -176,26 +151,73 @@ fun SocialHubScreen(
                     .padding(paddingValues),
         ) {
             when (selectedTab) {
-                0 ->
+                TAB_BUDDIES ->
                     BuddiesTab(
                         state = buddyState,
                         onInvite = onInviteBuddy,
                         onEnterCode = onEnterBuddyCode,
                         onPairTap = onBuddyPairTap,
                     )
-                1 ->
+                TAB_CIRCLES ->
                     CirclesTab(
                         state = circleState,
                         onCreate = onCreateCircle,
                         onJoin = onJoinCircle,
                         onCircleTap = onCircleTap,
                     )
-                2 ->
+                TAB_CHALLENGES ->
                     ChallengesTab(
                         state = challengeState,
                         onCreate = onCreateChallenge,
                         onChallengeTap = onChallengeTap,
                     )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SocialHubTopBar(
+    selectedTab: Int,
+    onTabSelect: (Int) -> Unit,
+    onBack: () -> Unit,
+) {
+    val tabs =
+        listOf(
+            Triple("Buddies", Icons.Outlined.People, Icons.Filled.People),
+            Triple("Circles", Icons.Outlined.Group, Icons.Filled.Group),
+            Triple("Challenges", Icons.Outlined.EmojiEvents, Icons.Filled.EmojiEvents),
+        )
+    Column {
+        TopAppBar(
+            title = { Text("Social", fontWeight = FontWeight.SemiBold) },
+            navigationIcon = {
+                IconButton(onClick = onBack) {
+                    Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                }
+            },
+            colors =
+                TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                ),
+        )
+        TabRow(
+            selectedTabIndex = selectedTab,
+            containerColor = MaterialTheme.colorScheme.surface,
+        ) {
+            tabs.forEachIndexed { idx, (label, outlinedIcon, filledIcon) ->
+                Tab(
+                    selected = selectedTab == idx,
+                    onClick = { onTabSelect(idx) },
+                    icon = {
+                        Icon(
+                            imageVector = if (selectedTab == idx) filledIcon else outlinedIcon,
+                            contentDescription = label,
+                        )
+                    },
+                    text = { Text(label) },
+                )
             }
         }
     }
@@ -321,9 +343,9 @@ private fun SharingLevelChip(level: BuddyManager.SharingLevel) {
     val (label, color) =
         when (level) {
             BuddyManager.SharingLevel.MINIMAL -> "Minimal" to MaterialTheme.colorScheme.outline
-            BuddyManager.SharingLevel.BASIC -> "Basic" to Color(0xFF2196F3)
+            BuddyManager.SharingLevel.BASIC -> "Basic" to Color(ARGB_BASIC)
             BuddyManager.SharingLevel.STANDARD -> "Standard" to MaterialTheme.colorScheme.primary
-            BuddyManager.SharingLevel.DETAILED -> "Detailed" to Color(0xFF4CAF50)
+            BuddyManager.SharingLevel.DETAILED -> "Detailed" to Color(ARGB_DETAILED)
         }
     Surface(
         shape = RoundedCornerShape(8.dp),

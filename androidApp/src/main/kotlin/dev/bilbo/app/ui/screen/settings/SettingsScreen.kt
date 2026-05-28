@@ -63,7 +63,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.bilbo.app.BuildConfig
 
@@ -97,14 +96,17 @@ enum class SharingLevel(
 
 // MARK: - ViewModel
 
+private const val DEFAULT_COOLDOWN_MINUTES = 15f
+private const val DEFAULT_DAILY_BASELINE_FP = 60
+
 class SettingsViewModel : androidx.lifecycle.ViewModel() {
     // Enforcement
     var defaultMode by mutableStateOf(EnforcementMode.SOFT_LOCK)
-    var cooldownMinutes by mutableFloatStateOf(15f)
+    var cooldownMinutes by mutableFloatStateOf(DEFAULT_COOLDOWN_MINUTES)
 
     // Economy
     var fpEnabled by mutableStateOf(true)
-    var dailyBaselineFP by mutableIntStateOf(60)
+    var dailyBaselineFP by mutableIntStateOf(DEFAULT_DAILY_BASELINE_FP)
     var antiGamingEnabled by mutableStateOf(true)
 
     // Emotional
@@ -159,6 +161,29 @@ fun SettingsScreen(
 ) {
     val uriHandler = LocalUriHandler.current
 
+    SettingsDialogs(viewModel)
+
+    Column(
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
+    ) {
+        EnforcementSection(viewModel)
+        EconomySection(viewModel)
+        EmotionalSection(viewModel)
+        AiSection(viewModel)
+        SocialSection(viewModel)
+        NotificationsSection(viewModel)
+        DataSection(viewModel)
+        AboutSection(onPrivacyClick = { uriHandler.openUri("https://getbilbo.app/privacy") })
+    }
+}
+
+@Composable
+private fun SettingsDialogs(viewModel: SettingsViewModel) {
     if (viewModel.showDeleteDialog) {
         AlertDialog(
             onDismissRequest = { viewModel.showDeleteDialog = false },
@@ -218,24 +243,6 @@ fun SettingsScreen(
             onDismiss = { viewModel.showSharingPicker = false },
         )
     }
-
-    Column(
-        modifier =
-            Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp),
-    ) {
-        EnforcementSection(viewModel)
-        EconomySection(viewModel)
-        EmotionalSection(viewModel)
-        AiSection(viewModel)
-        SocialSection(viewModel)
-        NotificationsSection(viewModel)
-        DataSection(viewModel)
-        AboutSection(onPrivacyClick = { uriHandler.openUri("https://getbilbo.app/privacy") })
-    }
 }
 
 // MARK: - Section composables
@@ -276,6 +283,11 @@ private fun EnforcementSection(vm: SettingsViewModel) {
     }
 }
 
+private const val BASELINE_STEP_FP = 10
+private const val BASELINE_MIN_FP = 10
+private const val BASELINE_MAX_FP = 190
+private const val BASELINE_VALUE_WIDTH_DP = 56
+
 @Composable
 private fun EconomySection(vm: SettingsViewModel) {
     SettingsGroup(title = "Economy") {
@@ -285,49 +297,63 @@ private fun EconomySection(vm: SettingsViewModel) {
             checked = vm.fpEnabled,
             onCheckedChange = { vm.fpEnabled = it },
         )
-
         if (vm.fpEnabled) {
-            SettingsDivider()
+            EconomyDetailRows(vm)
+        }
+    }
+}
 
-            Row(
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Column {
-                    Text("Daily Baseline", style = MaterialTheme.typography.bodyLarge)
-                    Text(
-                        "FP awarded each day",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    IconButton(onClick = { if (vm.dailyBaselineFP >= 10) vm.dailyBaselineFP -= 10 }) {
-                        Icon(Icons.Filled.Remove, contentDescription = "Decrease")
-                    }
-                    Text(
-                        "${vm.dailyBaselineFP} FP",
-                        modifier = Modifier.width(56.dp),
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
-                    )
-                    IconButton(onClick = { if (vm.dailyBaselineFP <= 190) vm.dailyBaselineFP += 10 }) {
-                        Icon(Icons.Filled.Add, contentDescription = "Increase")
-                    }
-                }
-            }
+@Composable
+private fun EconomyDetailRows(vm: SettingsViewModel) {
+    SettingsDivider()
+    DailyBaselineRow(
+        value = vm.dailyBaselineFP,
+        onDecrease = { if (vm.dailyBaselineFP >= BASELINE_MIN_FP) vm.dailyBaselineFP -= BASELINE_STEP_FP },
+        onIncrease = { if (vm.dailyBaselineFP <= BASELINE_MAX_FP) vm.dailyBaselineFP += BASELINE_STEP_FP },
+    )
+    SettingsDivider()
+    SettingsSwitchRow(
+        icon = Icons.Filled.Security,
+        label = "Anti-Gaming Protection",
+        checked = vm.antiGamingEnabled,
+        onCheckedChange = { vm.antiGamingEnabled = it },
+    )
+}
 
-            SettingsDivider()
-
-            SettingsSwitchRow(
-                icon = Icons.Filled.Security,
-                label = "Anti-Gaming Protection",
-                checked = vm.antiGamingEnabled,
-                onCheckedChange = { vm.antiGamingEnabled = it },
+@Composable
+private fun DailyBaselineRow(
+    value: Int,
+    onDecrease: () -> Unit,
+    onIncrease: () -> Unit,
+) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Column {
+            Text("Daily Baseline", style = MaterialTheme.typography.bodyLarge)
+            Text(
+                "FP awarded each day",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+        }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            IconButton(onClick = onDecrease) {
+                Icon(Icons.Filled.Remove, contentDescription = "Decrease")
+            }
+            Text(
+                "$value FP",
+                modifier = Modifier.width(BASELINE_VALUE_WIDTH_DP.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            )
+            IconButton(onClick = onIncrease) {
+                Icon(Icons.Filled.Add, contentDescription = "Increase")
+            }
         }
     }
 }
@@ -495,150 +521,6 @@ private fun AboutSection(onPrivacyClick: () -> Unit) {
     }
 }
 
-// MARK: - Reusable setting row components
-
-@Composable
-fun SettingsGroup(
-    title: String,
-    content: @Composable ColumnScope.() -> Unit,
-) {
-    Column {
-        Text(
-            text = title.uppercase(),
-            style = MaterialTheme.typography.labelSmall,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
-        )
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            modifier = Modifier.fillMaxWidth(),
-        ) {
-            Column(content = content)
-        }
-    }
-}
-
-@Composable
-fun SettingsDivider() {
-    HorizontalDivider(
-        modifier = Modifier.padding(start = 56.dp),
-        thickness = 0.5.dp,
-        color = MaterialTheme.colorScheme.outlineVariant,
-    )
-}
-
-@Composable
-fun SettingsSwitchRow(
-    icon: ImageVector,
-    label: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-        Switch(checked = checked, onCheckedChange = onCheckedChange)
-    }
-}
-
-@Composable
-fun SettingsPickerRow(
-    icon: ImageVector,
-    label: String,
-    value: String,
-    onClick: () -> Unit,
-) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-        Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(modifier = Modifier.width(4.dp))
-        Icon(
-            Icons.Filled.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
-        )
-    }
-}
-
-@Composable
-fun SettingsArrowRow(
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit = {},
-) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-        Icon(
-            Icons.Filled.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
-        )
-    }
-}
-
-@Composable
-fun SettingsActionRow(
-    icon: ImageVector,
-    label: String,
-    onClick: () -> Unit,
-    isDestructive: Boolean = false,
-    isLoading: Boolean = false,
-) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable(enabled = !isLoading, onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            tint = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(22.dp),
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Text(
-            label,
-            modifier = Modifier.weight(1f),
-            style = MaterialTheme.typography.bodyLarge,
-            color = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
-        )
-        if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-        }
-    }
-}
-
 // MARK: - Pickers
 
 @Composable
@@ -701,12 +583,4 @@ fun SharingLevelPicker(
         },
         confirmButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun SettingsScreenPreview() {
-    MaterialTheme {
-        SettingsScreen()
-    }
 }
