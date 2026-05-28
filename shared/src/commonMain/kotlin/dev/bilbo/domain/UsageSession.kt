@@ -10,5 +10,5 @@ data class UsageSession(
     val startTime: Instant,
     val endTime: Instant?,
     val durationSeconds: Long,
-    val wasTracked: Boolean = true
+    val wasTracked: Boolean = true,
 )

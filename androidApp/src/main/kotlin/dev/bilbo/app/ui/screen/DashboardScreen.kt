@@ -77,9 +77,10 @@ internal fun DashboardScreenContent(
         when {
             uiState.isLoading && uiState.apps.isEmpty() -> {
                 Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues),
                     contentAlignment = Alignment.Center,
                 ) {
                     CircularProgressIndicator()
@@ -88,11 +89,12 @@ internal fun DashboardScreenContent(
 
             else -> {
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues)
-                        .verticalScroll(rememberScrollState())
-                        .padding(horizontal = 16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues)
+                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Spacer(modifier = Modifier.height(8.dp))
@@ -156,8 +158,9 @@ private fun EmptyAppsCard() {
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Grant usage-access permission and keep the tracking service " +
-                    "running to see live app totals appear here.",
+                text =
+                    "Grant usage-access permission and keep the tracking service " +
+                        "running to see live app totals appear here.",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -187,26 +190,29 @@ private fun AppUsageRow(app: AppUsage) {
     }
 }
 
-private fun AppCategory.displayLabel(): String = when (this) {
-    AppCategory.NUTRITIVE -> "Nutritive"
-    AppCategory.NEUTRAL -> "Neutral"
-    AppCategory.EMPTY_CALORIES -> "Empty calories"
-}
+private fun AppCategory.displayLabel(): String =
+    when (this) {
+        AppCategory.NUTRITIVE -> "Nutritive"
+        AppCategory.NEUTRAL -> "Neutral"
+        AppCategory.EMPTY_CALORIES -> "Empty calories"
+    }
 
 @Preview(showBackground = true)
 @Composable
 private fun DashboardScreenPreview() {
     BilboTheme {
         DashboardScreenContent(
-            uiState = DashboardUiState(
-                isLoading = false,
-                totalMinutes = 135,
-                apps = listOf(
-                    AppUsage("com.instagram.android", "Instagram", 45, AppCategory.EMPTY_CALORIES),
-                    AppUsage("com.google.android.youtube", "YouTube", 60, AppCategory.NEUTRAL),
-                    AppUsage("com.duolingo", "Duolingo", 30, AppCategory.NUTRITIVE),
+            uiState =
+                DashboardUiState(
+                    isLoading = false,
+                    totalMinutes = 135,
+                    apps =
+                        listOf(
+                            AppUsage("com.instagram.android", "Instagram", 45, AppCategory.EMPTY_CALORIES),
+                            AppUsage("com.google.android.youtube", "YouTube", 60, AppCategory.NEUTRAL),
+                            AppUsage("com.duolingo", "Duolingo", 30, AppCategory.NUTRITIVE),
+                        ),
                 ),
-            ),
             onNavigateToInsights = {},
             onNavigateToSettings = {},
         )

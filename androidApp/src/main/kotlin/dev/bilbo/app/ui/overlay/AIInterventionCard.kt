@@ -7,13 +7,11 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -43,15 +41,15 @@ import androidx.compose.ui.unit.sp
 import dev.bilbo.domain.Emotion
 
 // ── Intervention palette: warm, supportive, non-judgmental ────────────────────
-private val AiBackground  = Color(0x80000000)    // scrim
-private val AiCard        = Color(0xFF1E1528)    // deep warm violet-grey
-private val AiPurple      = Color(0xFFB08DFF)    // soft lilac accent
-private val AiPurpleDim   = Color(0xFF7C5CBF)    // dim purple
-private val AiOnSurface   = Color(0xFFEDE8F8)    // lavender-white
-private val AiSubtle      = Color(0xFF998AB8)    // muted lavender
-private val AiSurface     = Color(0xFF2A1E3C)    // slightly lighter card
-private val AiGreen       = Color(0xFF6BCB77)    // breathe button
-private val AiNeutral     = Color(0xFF5A5A6A)    // continue button outline
+private val AiBackground = Color(0x80000000) // scrim
+private val AiCard = Color(0xFF1E1528) // deep warm violet-grey
+private val AiPurple = Color(0xFFB08DFF) // soft lilac accent
+private val AiPurpleDim = Color(0xFF7C5CBF) // dim purple
+private val AiOnSurface = Color(0xFFEDE8F8) // lavender-white
+private val AiSubtle = Color(0xFF998AB8) // muted lavender
+private val AiSurface = Color(0xFF2A1E3C) // slightly lighter card
+private val AiGreen = Color(0xFF6BCB77) // breathe button
+private val AiNeutral = Color(0xFF5A5A6A) // continue button outline
 
 /**
  * Full-overlay card shown after a negative emotion check-in on an Empty Calorie app.
@@ -79,34 +77,38 @@ fun AIInterventionCard(
     LaunchedEffect(Unit) { visible = true }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(AiBackground),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(AiBackground),
         contentAlignment = Alignment.Center,
     ) {
         AnimatedVisibility(
             visible = visible,
-            enter = fadeIn(tween(280)) + slideInVertically(
-                initialOffsetY = { it / 3 },
-                animationSpec = tween(360),
-            ),
+            enter =
+                fadeIn(tween(280)) +
+                    slideInVertically(
+                        initialOffsetY = { it / 3 },
+                        animationSpec = tween(360),
+                    ),
         ) {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(horizontal = 20.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .padding(horizontal = 20.dp),
                 shape = RoundedCornerShape(24.dp),
                 colors = CardDefaults.cardColors(containerColor = AiCard),
                 elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(28.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(28.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-
                     // ── Brain/insight icon ────────────────────────────────────
                     Text(text = "✨", fontSize = 36.sp)
 
@@ -132,11 +134,12 @@ fun AIInterventionCard(
                     // ── Breathe suggestion ────────────────────────────────────
                     Text(
                         text = "Would you like to try 2 minutes\nof breathing instead?",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            color = AiOnSurface,
-                            fontWeight = FontWeight.Medium,
-                            lineHeight = 24.sp,
-                        ),
+                        style =
+                            MaterialTheme.typography.bodyLarge.copy(
+                                color = AiOnSurface,
+                                fontWeight = FontWeight.Medium,
+                                lineHeight = 24.sp,
+                            ),
                         textAlign = TextAlign.Center,
                     )
 
@@ -145,18 +148,20 @@ fun AIInterventionCard(
                     // ── Breathe CTA ───────────────────────────────────────────
                     Button(
                         onClick = onBreathe,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(54.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(54.dp),
                         shape = RoundedCornerShape(14.dp),
                         colors = ButtonDefaults.buttonColors(containerColor = AiGreen),
                     ) {
                         Text(
                             text = "Yes, let me breathe 🌬️",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color(0xFF001A0D),
-                            ),
+                            style =
+                                MaterialTheme.typography.titleMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color(0xFF001A0D),
+                                ),
                         )
                     }
 
@@ -165,16 +170,20 @@ fun AIInterventionCard(
                     // ── Continue anyway ───────────────────────────────────────
                     OutlinedButton(
                         onClick = onContinue,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(48.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(48.dp),
                         shape = RoundedCornerShape(14.dp),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = AiSubtle,
-                        ),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp, AiNeutral.copy(alpha = 0.5f)
-                        ),
+                        colors =
+                            ButtonDefaults.outlinedButtonColors(
+                                contentColor = AiSubtle,
+                            ),
+                        border =
+                            androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                AiNeutral.copy(alpha = 0.5f),
+                            ),
                     ) {
                         Text(
                             text = "Continue to $appName",
@@ -200,45 +209,48 @@ private fun PatternObservationText(
     val postMoodLabel = postMood?.displayLabel()
 
     Text(
-        text = buildAnnotatedString {
-            append("When you feel ")
-            withStyle(SpanStyle(color = AiPurple, fontWeight = FontWeight.SemiBold)) {
-                append(emotionLabel)
-            }
-            append(", you tend to use ")
-            withStyle(SpanStyle(color = AiPurple, fontWeight = FontWeight.SemiBold)) {
-                append(appName)
-            }
-            append(" for about ")
-            withStyle(SpanStyle(color = AiPurple, fontWeight = FontWeight.SemiBold)) {
-                append("$avgDurationMins min")
-            }
-            append(".")
-
-            if (postMoodLabel != null) {
-                append(" Afterward you usually feel ")
+        text =
+            buildAnnotatedString {
+                append("When you feel ")
                 withStyle(SpanStyle(color = AiPurple, fontWeight = FontWeight.SemiBold)) {
-                    append(postMoodLabel)
+                    append(emotionLabel)
+                }
+                append(", you tend to use ")
+                withStyle(SpanStyle(color = AiPurple, fontWeight = FontWeight.SemiBold)) {
+                    append(appName)
+                }
+                append(" for about ")
+                withStyle(SpanStyle(color = AiPurple, fontWeight = FontWeight.SemiBold)) {
+                    append("$avgDurationMins min")
                 }
                 append(".")
-            }
-        },
-        style = MaterialTheme.typography.bodyMedium.copy(
-            color = AiSubtle,
-            lineHeight = 22.sp,
-        ),
+
+                if (postMoodLabel != null) {
+                    append(" Afterward you usually feel ")
+                    withStyle(SpanStyle(color = AiPurple, fontWeight = FontWeight.SemiBold)) {
+                        append(postMoodLabel)
+                    }
+                    append(".")
+                }
+            },
+        style =
+            MaterialTheme.typography.bodyMedium.copy(
+                color = AiSubtle,
+                lineHeight = 22.sp,
+            ),
         textAlign = TextAlign.Center,
     )
 }
 
 // ── Emotion display helpers ───────────────────────────────────────────────────
 
-private fun Emotion.displayLabel(): String = when (this) {
-    Emotion.HAPPY    -> "happy 😊"
-    Emotion.CALM     -> "calm 😌"
-    Emotion.BORED    -> "bored 😑"
-    Emotion.STRESSED -> "stressed 😫"
-    Emotion.ANXIOUS  -> "anxious 😰"
-    Emotion.SAD      -> "sad 😢"
-    Emotion.LONELY   -> "lonely 😔"
-}
+private fun Emotion.displayLabel(): String =
+    when (this) {
+        Emotion.HAPPY -> "happy 😊"
+        Emotion.CALM -> "calm 😌"
+        Emotion.BORED -> "bored 😑"
+        Emotion.STRESSED -> "stressed 😫"
+        Emotion.ANXIOUS -> "anxious 😰"
+        Emotion.SAD -> "sad 😢"
+        Emotion.LONELY -> "lonely 😔"
+    }

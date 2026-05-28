@@ -13,7 +13,6 @@ import kotlinx.datetime.*
  * All mutations return a new [DopamineBudget] (immutable update pattern).
  */
 class FocusPointsEngine {
-
     companion object {
         private val EARN_RATE = FPEconomy.EARN_PER_NUTRITIVE_MINUTE
         private val COST_RATE = FPEconomy.COST_PER_EMPTY_CALORIE_MINUTE
@@ -33,7 +32,10 @@ class FocusPointsEngine {
      * @param sessionMinutes Duration of the Nutritive session in whole minutes.
      * @return Pair of (updated budget, actual FP awarded after cap).
      */
-    fun earnPoints(budget: DopamineBudget, sessionMinutes: Int): Pair<DopamineBudget, Int> {
+    fun earnPoints(
+        budget: DopamineBudget,
+        sessionMinutes: Int,
+    ): Pair<DopamineBudget, Int> {
         val rawEarn = sessionMinutes * EARN_RATE
         val alreadyEarned = budget.fpEarned
         val headroom = EARN_CAP - alreadyEarned
@@ -49,7 +51,10 @@ class FocusPointsEngine {
      * @param sessionMinutes Duration of empty-calorie usage in whole minutes.
      * @return Pair of (updated budget, FP deducted).
      */
-    fun spendPoints(budget: DopamineBudget, sessionMinutes: Int): Pair<DopamineBudget, Int> {
+    fun spendPoints(
+        budget: DopamineBudget,
+        sessionMinutes: Int,
+    ): Pair<DopamineBudget, Int> {
         val cost = sessionMinutes * COST_RATE
         return budget.copy(fpSpent = budget.fpSpent + cost) to cost
     }
@@ -63,9 +68,11 @@ class FocusPointsEngine {
      * @param reason Human-readable reason for the bonus (for logging).
      * @return Updated budget.
      */
-    fun applyBonus(budget: DopamineBudget, bonusAmount: Int, reason: String = ""): DopamineBudget {
-        return budget.copy(fpBonus = budget.fpBonus + bonusAmount)
-    }
+    fun applyBonus(
+        budget: DopamineBudget,
+        bonusAmount: Int,
+        reason: String = "",
+    ): DopamineBudget = budget.copy(fpBonus = budget.fpBonus + bonusAmount)
 
     /**
      * Applies a penalty (e.g. overriding a hard lock, ignoring a nudge).
@@ -76,9 +83,11 @@ class FocusPointsEngine {
      * @param reason Human-readable reason (for logging).
      * @return Updated budget.
      */
-    fun applyPenalty(budget: DopamineBudget, penaltyAmount: Int, reason: String = ""): DopamineBudget {
-        return budget.copy(fpSpent = budget.fpSpent + penaltyAmount)
-    }
+    fun applyPenalty(
+        budget: DopamineBudget,
+        penaltyAmount: Int,
+        reason: String = "",
+    ): DopamineBudget = budget.copy(fpSpent = budget.fpSpent + penaltyAmount)
 
     /**
      * Returns the current FP balance for the given budget.
@@ -115,8 +124,7 @@ class FocusPointsEngine {
         applyPenalty(budget, FPEconomy.PENALTY_HARD_LOCK_OVERRIDE, "Hard lock overridden")
 
     /** Applies the nudge-ignored penalty. */
-    fun penalizeNudgeIgnored(budget: DopamineBudget): DopamineBudget =
-        applyPenalty(budget, FPEconomy.PENALTY_NUDGE_IGNORE, "Nudge ignored")
+    fun penalizeNudgeIgnored(budget: DopamineBudget): DopamineBudget = applyPenalty(budget, FPEconomy.PENALTY_NUDGE_IGNORE, "Nudge ignored")
 
     // -------------------------------------------------------------------------
     // Rollover calculation
@@ -135,7 +143,10 @@ class FocusPointsEngine {
     /**
      * Creates a fresh [DopamineBudget] for [date], carrying over rollover from [previousDay].
      */
-    fun createDayBudget(date: LocalDate, previousDay: DopamineBudget?): DopamineBudget {
+    fun createDayBudget(
+        date: LocalDate,
+        previousDay: DopamineBudget?,
+    ): DopamineBudget {
         val rollover = previousDay?.let { calculateRollover(it) } ?: 0
         return DopamineBudget(
             date = date,
@@ -146,7 +157,7 @@ class FocusPointsEngine {
             fpRolloverOut = previousDay?.let { calculateRollover(it) } ?: 0,
             nutritiveMinutes = 0,
             emptyCalorieMinutes = 0,
-            neutralMinutes = 0
+            neutralMinutes = 0,
         )
     }
 

@@ -11,7 +11,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,9 +29,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -49,19 +46,18 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import kotlinx.coroutines.delay
 
 // ── Hard lock palette: deep blue / purple calming ─────────────────────────────
-private val LockBackground  = Color(0xFF060B18)    // near-black deep space
-private val LockGradientTop = Color(0xFF0D1B3E)    // deep navy
-private val LockGradientBot = Color(0xFF1A0D33)    // deep purple
-private val LockPurple      = Color(0xFF7B61FF)    // soft purple accent
-private val LockPurpleDim   = Color(0xFF4A3B99)    // dimmer purple
-private val LockOnSurface   = Color(0xFFDDE3F5)    // cool lavender-white
-private val LockSubtle      = Color(0xFF8892B0)    // muted blue-grey
-private val LockSurface     = Color(0xFF131B34)    // card surface
-private val LockRed         = Color(0xFFFF6B6B)    // override warning
-private val LockGreen       = Color(0xFF64D9A8)    // home button
+private val LockBackground = Color(0xFF060B18) // near-black deep space
+private val LockGradientTop = Color(0xFF0D1B3E) // deep navy
+private val LockGradientBot = Color(0xFF1A0D33) // deep purple
+private val LockPurple = Color(0xFF7B61FF) // soft purple accent
+private val LockPurpleDim = Color(0xFF4A3B99) // dimmer purple
+private val LockOnSurface = Color(0xFFDDE3F5) // cool lavender-white
+private val LockSubtle = Color(0xFF8892B0) // muted blue-grey
+private val LockSurface = Color(0xFF131B34) // card surface
+private val LockRed = Color(0xFFFF6B6B) // override warning
+private val LockGreen = Color(0xFF64D9A8) // home button
 
 /**
  * Full-screen, opaque Hard Lock overlay shown when [EnforcementMode.HARD_LOCK] fires.
@@ -96,37 +92,40 @@ fun HardLockOverlayScreen(
     val pulse by infiniteTransition.animateFloat(
         initialValue = 0.95f,
         targetValue = 1.05f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(2000, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse,
-        ),
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(2000, easing = LinearEasing),
+                repeatMode = RepeatMode.Reverse,
+            ),
         label = "PulseScale",
     )
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(listOf(LockGradientTop, LockGradientBot))
-            ),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(listOf(LockGradientTop, LockGradientBot)),
+                ),
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 28.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
-
             // ── Lock icon ─────────────────────────────────────────────────────
             Box(
-                modifier = Modifier
-                    .scale(pulse)
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(LockPurple.copy(alpha = 0.15f))
-                    .border(1.dp, LockPurple.copy(alpha = 0.4f), CircleShape),
+                modifier =
+                    Modifier
+                        .scale(pulse)
+                        .size(80.dp)
+                        .clip(CircleShape)
+                        .background(LockPurple.copy(alpha = 0.15f))
+                        .border(1.dp, LockPurple.copy(alpha = 0.4f), CircleShape),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(text = "🔒", fontSize = 36.sp)
@@ -136,18 +135,20 @@ fun HardLockOverlayScreen(
 
             // ── Header ────────────────────────────────────────────────────────
             Text(
-                text = buildAnnotatedString {
-                    append("Time's up. ")
-                    withStyle(SpanStyle(color = LockPurple, fontWeight = FontWeight.Bold)) {
-                        append(appName)
-                    }
-                    append(" is locked for $cooldownMinutes minutes.")
-                },
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    color = LockOnSurface,
-                    fontWeight = FontWeight.SemiBold,
-                    lineHeight = 32.sp,
-                ),
+                text =
+                    buildAnnotatedString {
+                        append("Time's up. ")
+                        withStyle(SpanStyle(color = LockPurple, fontWeight = FontWeight.Bold)) {
+                            append(appName)
+                        }
+                        append(" is locked for $cooldownMinutes minutes.")
+                    },
+                style =
+                    MaterialTheme.typography.headlineSmall.copy(
+                        color = LockOnSurface,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 32.sp,
+                    ),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
             )
@@ -164,9 +165,11 @@ fun HardLockOverlayScreen(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(16.dp),
                 colors = CardDefaults.cardColors(containerColor = LockSurface),
-                border = androidx.compose.foundation.BorderStroke(
-                    1.dp, LockPurple.copy(alpha = 0.2f)
-                ),
+                border =
+                    androidx.compose.foundation.BorderStroke(
+                        1.dp,
+                        LockPurple.copy(alpha = 0.2f),
+                    ),
             ) {
                 Column(
                     modifier = Modifier.padding(18.dp),
@@ -174,18 +177,20 @@ fun HardLockOverlayScreen(
                 ) {
                     Text(
                         text = "While you wait, try:",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            color = LockSubtle,
-                            letterSpacing = 0.8.sp,
-                        ),
+                        style =
+                            MaterialTheme.typography.labelMedium.copy(
+                                color = LockSubtle,
+                                letterSpacing = 0.8.sp,
+                            ),
                     )
                     Spacer(Modifier.height(6.dp))
                     Text(
                         text = suggestion,
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            color = LockOnSurface,
-                            fontWeight = FontWeight.Medium,
-                        ),
+                        style =
+                            MaterialTheme.typography.bodyLarge.copy(
+                                color = LockOnSurface,
+                                fontWeight = FontWeight.Medium,
+                            ),
                         textAlign = TextAlign.Center,
                     )
                 }
@@ -196,18 +201,20 @@ fun HardLockOverlayScreen(
             // ── Go Home (primary) ─────────────────────────────────────────────
             Button(
                 onClick = onGoHome,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
                 colors = ButtonDefaults.buttonColors(containerColor = LockGreen),
             ) {
                 Text(
                     text = "Go Home",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color(0xFF001A0D),
-                    ),
+                    style =
+                        MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF001A0D),
+                        ),
                 )
             }
 
@@ -220,9 +227,10 @@ fun HardLockOverlayScreen(
             ) {
                 Text(
                     text = if (canOverride) "Override (costs 10 FP)" else "Override (not enough FP)",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                        color = if (canOverride) LockRed.copy(alpha = 0.8f) else LockSubtle,
-                    ),
+                    style =
+                        MaterialTheme.typography.bodyMedium.copy(
+                            color = if (canOverride) LockRed.copy(alpha = 0.8f) else LockSubtle,
+                        ),
                 )
             }
 
@@ -243,10 +251,11 @@ fun HardLockOverlayScreen(
             title = {
                 Text(
                     text = "Override Lock?",
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        color = LockOnSurface,
-                        fontWeight = FontWeight.Bold,
-                    ),
+                    style =
+                        MaterialTheme.typography.titleLarge.copy(
+                            color = LockOnSurface,
+                            fontWeight = FontWeight.Bold,
+                        ),
                 )
             },
             text = {
@@ -293,33 +302,36 @@ fun HardLockOverlayScreen(
 
 @Composable
 private fun CooldownCounterDisplay(remainingSeconds: Long) {
-    val hours   = remainingSeconds / 3600
+    val hours = remainingSeconds / 3600
     val minutes = (remainingSeconds % 3600) / 60
     val seconds = remainingSeconds % 60
 
-    val timeStr = if (hours > 0) {
-        "%02d:%02d:%02d".format(hours, minutes, seconds)
-    } else {
-        "%02d:%02d".format(minutes, seconds)
-    }
+    val timeStr =
+        if (hours > 0) {
+            "%02d:%02d:%02d".format(hours, minutes, seconds)
+        } else {
+            "%02d:%02d".format(minutes, seconds)
+        }
 
     Box(
-        modifier = Modifier
-            .wrapContentSize()
-            .clip(RoundedCornerShape(20.dp))
-            .background(LockPurpleDim.copy(alpha = 0.25f))
-            .border(1.dp, LockPurple.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
-            .padding(horizontal = 32.dp, vertical = 16.dp),
+        modifier =
+            Modifier
+                .wrapContentSize()
+                .clip(RoundedCornerShape(20.dp))
+                .background(LockPurpleDim.copy(alpha = 0.25f))
+                .border(1.dp, LockPurple.copy(alpha = 0.3f), RoundedCornerShape(20.dp))
+                .padding(horizontal = 32.dp, vertical = 16.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(
             text = timeStr,
-            style = MaterialTheme.typography.displayMedium.copy(
-                color = LockOnSurface,
-                fontWeight = FontWeight.Light,
-                letterSpacing = 4.sp,
-                fontSize = 52.sp,
-            ),
+            style =
+                MaterialTheme.typography.displayMedium.copy(
+                    color = LockOnSurface,
+                    fontWeight = FontWeight.Light,
+                    letterSpacing = 4.sp,
+                    fontSize = 52.sp,
+                ),
         )
     }
 }

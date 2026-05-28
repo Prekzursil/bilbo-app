@@ -11,7 +11,7 @@ data class DopamineBudget(
     val fpRolloverOut: Int,
     val nutritiveMinutes: Int,
     val emptyCalorieMinutes: Int,
-    val neutralMinutes: Int
+    val neutralMinutes: Int,
 ) {
     fun currentBalance(): Int = FPEconomy.DAILY_BASELINE + fpEarned + fpBonus + fpRolloverIn - fpSpent
 }

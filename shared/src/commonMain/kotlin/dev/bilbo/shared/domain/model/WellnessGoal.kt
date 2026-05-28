@@ -22,8 +22,15 @@ data class WellnessGoal(
 
 @Serializable
 enum class GoalType {
-    @SerialName("screen_time_limit") SCREEN_TIME_LIMIT,
-    @SerialName("app_block") APP_BLOCK,
-    @SerialName("focus_session") FOCUS_SESSION,
-    @SerialName("bedtime") BEDTIME,
+    @SerialName("screen_time_limit")
+    SCREEN_TIME_LIMIT,
+
+    @SerialName("app_block")
+    APP_BLOCK,
+
+    @SerialName("focus_session")
+    FOCUS_SESSION,
+
+    @SerialName("bedtime")
+    BEDTIME,
 }

@@ -13,7 +13,7 @@ import kotlinx.serialization.Serializable
 enum class DefaultEnforcementMode {
     SOFT_LOCK,
     HARD_LOCK,
-    TRACK_ONLY
+    TRACK_ONLY,
 }
 
 // MARK: - Sharing level enum (shared)
@@ -22,7 +22,7 @@ enum class SharingLevelPref {
     PRIVATE,
     FRIENDS,
     CIRCLE,
-    PUBLIC
+    PUBLIC,
 }
 
 // MARK: - Notification preference model
@@ -36,7 +36,7 @@ data class NotificationPreferences(
     val quietStartHour: Int = 22,
     val quietStartMinute: Int = 0,
     val quietEndHour: Int = 8,
-    val quietEndMinute: Int = 0
+    val quietEndMinute: Int = 0,
 )
 
 // MARK: - BilboPreferences interface
@@ -46,11 +46,10 @@ data class NotificationPreferences(
  * Implemented per-platform via expect/actual.
  */
 interface BilboPreferences {
-
     // ── Enforcement ──────────────────────────────────────────────────────
     var defaultEnforcementMode: DefaultEnforcementMode
     var cooldownMinutes: Int
-    var bypassList: List<String>            // Bundle IDs / package names exempt from enforcement
+    var bypassList: List<String> // Bundle IDs / package names exempt from enforcement
 
     // ── Economy ──────────────────────────────────────────────────────────
     var fpEnabled: Boolean
@@ -67,7 +66,7 @@ interface BilboPreferences {
 
     // ── Social ───────────────────────────────────────────────────────────
     var sharingLevel: SharingLevelPref
-    var userInterests: List<String>         // Tags used for analog suggestions
+    var userInterests: List<String> // Tags used for analog suggestions
 
     // ── Notifications ────────────────────────────────────────────────────
     var notificationPreferences: NotificationPreferences

@@ -23,7 +23,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,38 +40,40 @@ import dev.bilbo.domain.SuggestionCategory
 import dev.bilbo.domain.TimeOfDay
 
 // ── Nature-inspired green palette ─────────────────────────────────────────────
-private val CardGreen       = Color(0xFF2D6A4F)
-private val CardGreenLight  = Color(0xFF52B788)
-private val CardGreenSurface= Color(0xFF40916C)
-private val CardOnGreen     = Color(0xFFD8F3DC)
-private val CardSubtle      = Color(0xFFB7E4C7)
+private val CardGreen = Color(0xFF2D6A4F)
+private val CardGreenLight = Color(0xFF52B788)
+private val CardGreenSurface = Color(0xFF40916C)
+private val CardOnGreen = Color(0xFFD8F3DC)
+private val CardSubtle = Color(0xFFB7E4C7)
 
 // ── Category emoji map ────────────────────────────────────────────────────────
-private fun SuggestionCategory.emoji(): String = when (this) {
-    SuggestionCategory.EXERCISE          -> "💪"
-    SuggestionCategory.CREATIVE          -> "🎨"
-    SuggestionCategory.SOCIAL            -> "👥"
-    SuggestionCategory.MINDFULNESS       -> "🧘"
-    SuggestionCategory.LEARNING          -> "📖"
-    SuggestionCategory.NATURE            -> "🌿"
-    SuggestionCategory.COOKING           -> "🍳"
-    SuggestionCategory.MUSIC             -> "🎵"
-    SuggestionCategory.GAMING_PHYSICAL   -> "🎲"
-    SuggestionCategory.READING           -> "📚"
-}
+private fun SuggestionCategory.emoji(): String =
+    when (this) {
+        SuggestionCategory.EXERCISE -> "💪"
+        SuggestionCategory.CREATIVE -> "🎨"
+        SuggestionCategory.SOCIAL -> "👥"
+        SuggestionCategory.MINDFULNESS -> "🧘"
+        SuggestionCategory.LEARNING -> "📖"
+        SuggestionCategory.NATURE -> "🌿"
+        SuggestionCategory.COOKING -> "🍳"
+        SuggestionCategory.MUSIC -> "🎵"
+        SuggestionCategory.GAMING_PHYSICAL -> "🎲"
+        SuggestionCategory.READING -> "📚"
+    }
 
-private fun SuggestionCategory.label(): String = when (this) {
-    SuggestionCategory.EXERCISE          -> "Exercise"
-    SuggestionCategory.CREATIVE          -> "Creative"
-    SuggestionCategory.SOCIAL            -> "Social"
-    SuggestionCategory.MINDFULNESS       -> "Mindfulness"
-    SuggestionCategory.LEARNING          -> "Learning"
-    SuggestionCategory.NATURE            -> "Nature"
-    SuggestionCategory.COOKING           -> "Cooking"
-    SuggestionCategory.MUSIC             -> "Music"
-    SuggestionCategory.GAMING_PHYSICAL   -> "Physical Games"
-    SuggestionCategory.READING           -> "Reading"
-}
+private fun SuggestionCategory.label(): String =
+    when (this) {
+        SuggestionCategory.EXERCISE -> "Exercise"
+        SuggestionCategory.CREATIVE -> "Creative"
+        SuggestionCategory.SOCIAL -> "Social"
+        SuggestionCategory.MINDFULNESS -> "Mindfulness"
+        SuggestionCategory.LEARNING -> "Learning"
+        SuggestionCategory.NATURE -> "Nature"
+        SuggestionCategory.COOKING -> "Cooking"
+        SuggestionCategory.MUSIC -> "Music"
+        SuggestionCategory.GAMING_PHYSICAL -> "Physical Games"
+        SuggestionCategory.READING -> "Reading"
+    }
 
 /**
  * A card that displays a single [AnalogSuggestion].
@@ -108,12 +109,13 @@ fun AnalogSuggestionCard(
     )
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .graphicsLayer {
-                rotationX = rotation
-                cameraDistance = 12f * density
-            },
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .graphicsLayer {
+                    rotationX = rotation
+                    cameraDistance = 12f * density
+                },
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = CardGreen),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
@@ -122,16 +124,16 @@ fun AnalogSuggestionCard(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-
             // ── Category badge ────────────────────────────────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .background(CardGreenLight.copy(alpha = 0.3f), CircleShape),
+                    modifier =
+                        Modifier
+                            .size(36.dp)
+                            .background(CardGreenLight.copy(alpha = 0.3f), CircleShape),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
@@ -141,10 +143,11 @@ fun AnalogSuggestionCard(
                 }
                 Text(
                     text = suggestion.category.label(),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        color = CardSubtle,
-                        fontWeight = FontWeight.Medium,
-                    ),
+                    style =
+                        MaterialTheme.typography.labelMedium.copy(
+                            color = CardSubtle,
+                            fontWeight = FontWeight.Medium,
+                        ),
                 )
                 suggestion.timeOfDay?.let { tod ->
                     Spacer(modifier = Modifier.weight(1f))
@@ -158,10 +161,11 @@ fun AnalogSuggestionCard(
             // ── Suggestion text ───────────────────────────────────────────
             Text(
                 text = suggestion.text,
-                style = MaterialTheme.typography.bodyLarge.copy(
-                    color = CardOnGreen,
-                    fontWeight = FontWeight.Medium,
-                ),
+                style =
+                    MaterialTheme.typography.bodyLarge.copy(
+                        color = CardOnGreen,
+                        fontWeight = FontWeight.Medium,
+                    ),
             )
 
             Spacer(modifier = Modifier.height(4.dp))
@@ -171,10 +175,11 @@ fun AnalogSuggestionCard(
                 onClick = onAccept,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = CardGreenLight,
-                    contentColor = Color.White,
-                ),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = CardGreenLight,
+                        contentColor = Color.White,
+                    ),
             ) {
                 Text(
                     text = "I'll do this! (+5 FP)",
@@ -203,13 +208,14 @@ private fun AnalogSuggestionCardPreview() {
     BilboTheme {
         Box(modifier = Modifier.padding(16.dp)) {
             AnalogSuggestionCard(
-                suggestion = AnalogSuggestion(
-                    id = 1,
-                    text = "Step outside for a 10-minute walk around the block.",
-                    category = SuggestionCategory.EXERCISE,
-                    tags = listOf("outdoors", "quick"),
-                    timeOfDay = TimeOfDay.MORNING,
-                ),
+                suggestion =
+                    AnalogSuggestion(
+                        id = 1,
+                        text = "Step outside for a 10-minute walk around the block.",
+                        category = SuggestionCategory.EXERCISE,
+                        tags = listOf("outdoors", "quick"),
+                        timeOfDay = TimeOfDay.MORNING,
+                    ),
                 onAccept = {},
                 onShowAnother = {},
             )

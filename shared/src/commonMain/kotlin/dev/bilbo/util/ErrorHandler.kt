@@ -14,27 +14,44 @@ import kotlinx.coroutines.delay
 // MARK: - Error categories
 
 sealed class BilboError : Exception() {
-
     /** No internet connection. */
-    data class Offline(override val message: String = "You're offline. Check your connection.") : BilboError()
+    data class Offline(
+        override val message: String = "You're offline. Check your connection.",
+    ) : BilboError()
 
     /** Server-side error (5xx). */
-    data class ServerError(val statusCode: Int, override val message: String = "Server error ($statusCode). Try again shortly.") : BilboError()
+    data class ServerError(
+        val statusCode: Int,
+        override val message: String = "Server error ($statusCode). Try again shortly.",
+    ) : BilboError()
 
     /** Client-side error (4xx). */
-    data class ClientError(val statusCode: Int, override val message: String) : BilboError()
+    data class ClientError(
+        val statusCode: Int,
+        override val message: String,
+    ) : BilboError()
 
     /** Authentication / session expired. */
-    data class Unauthorized(override val message: String = "Session expired. Please sign in again.") : BilboError()
+    data class Unauthorized(
+        override val message: String = "Session expired. Please sign in again.",
+    ) : BilboError()
 
     /** Data not found. */
-    data class NotFound(override val message: String = "The requested data was not found.") : BilboError()
+    data class NotFound(
+        override val message: String = "The requested data was not found.",
+    ) : BilboError()
 
     /** Local database or parsing error. */
-    data class DataError(override val cause: Throwable? = null, override val message: String = "A data error occurred. Try reopening Bilbo.") : BilboError()
+    data class DataError(
+        override val cause: Throwable? = null,
+        override val message: String = "A data error occurred. Try reopening Bilbo.",
+    ) : BilboError()
 
     /** Unexpected / unknown error. */
-    data class Unknown(override val cause: Throwable? = null, override val message: String = "Something went wrong. Please try again.") : BilboError()
+    data class Unknown(
+        override val cause: Throwable? = null,
+        override val message: String = "Something went wrong. Please try again.",
+    ) : BilboError()
 }
 
 // MARK: - ErrorHandler interface
@@ -44,7 +61,6 @@ sealed class BilboError : Exception() {
  * Register a listener to receive user-visible error messages.
  */
 interface ErrorHandler {
-
     /** Map any throwable to a user-friendly [BilboError]. */
     fun map(throwable: Throwable): BilboError
 
@@ -68,30 +84,31 @@ fun interface ErrorListener {
 // MARK: - Default implementation
 
 class DefaultErrorHandler : ErrorHandler {
-
     private val listeners = mutableListOf<ErrorListener>()
 
-    override fun map(throwable: Throwable): BilboError {
-        return when (throwable) {
-            is BilboError -> throwable  // Already mapped
-            is OfflineException       -> BilboError.Offline()
-            is NetworkException -> when {
-                throwable.statusCode == 401 || throwable.statusCode == 403 -> BilboError.Unauthorized()
-                throwable.statusCode == 404 -> BilboError.NotFound()
-                throwable.statusCode in 400..499 -> BilboError.ClientError(
-                    statusCode = throwable.statusCode,
-                    message = throwable.message ?: "Request failed (${throwable.statusCode})."
+    override fun map(throwable: Throwable): BilboError =
+        when (throwable) {
+            is BilboError -> throwable // Already mapped
+            is OfflineException -> BilboError.Offline()
+            is NetworkException ->
+                when {
+                    throwable.statusCode == 401 || throwable.statusCode == 403 -> BilboError.Unauthorized()
+                    throwable.statusCode == 404 -> BilboError.NotFound()
+                    throwable.statusCode in 400..499 ->
+                        BilboError.ClientError(
+                            statusCode = throwable.statusCode,
+                            message = throwable.message ?: "Request failed (${throwable.statusCode}).",
+                        )
+                    throwable.statusCode in 500..599 -> BilboError.ServerError(throwable.statusCode)
+                    else -> BilboError.Unknown(cause = throwable)
+                }
+            is kotlinx.serialization.SerializationException ->
+                BilboError.DataError(
+                    cause = throwable,
+                    message = "Failed to read data. The app may need updating.",
                 )
-                throwable.statusCode in 500..599 -> BilboError.ServerError(throwable.statusCode)
-                else -> BilboError.Unknown(cause = throwable)
-            }
-            is kotlinx.serialization.SerializationException -> BilboError.DataError(
-                cause = throwable,
-                message = "Failed to read data. The app may need updating."
-            )
             else -> BilboError.Unknown(cause = throwable)
         }
-    }
 
     override fun handle(throwable: Throwable): BilboError {
         val error = map(throwable)
@@ -115,10 +132,15 @@ class DefaultErrorHandler : ErrorHandler {
 // MARK: - Platform exceptions (wrapped by network layer)
 
 /** Thrown when the device has no internet connectivity. */
-class OfflineException(message: String = "No internet connection") : Exception(message)
+class OfflineException(
+    message: String = "No internet connection",
+) : Exception(message)
 
 /** Thrown for HTTP errors with a status code. */
-class NetworkException(val statusCode: Int, message: String) : Exception(message)
+class NetworkException(
+    val statusCode: Int,
+    message: String,
+) : Exception(message)
 
 // MARK: - Offline detection helper
 
@@ -141,7 +163,7 @@ suspend fun <T> withRetry(
     initialDelay: Long = 500L,
     factor: Double = 2.0,
     errorHandler: ErrorHandler = DefaultErrorHandler(),
-    block: suspend () -> T
+    block: suspend () -> T,
 ): T {
     var currentDelay = initialDelay
     repeat(maxAttempts - 1) { attempt ->
@@ -167,19 +189,17 @@ suspend fun <T> withRetry(
  */
 suspend fun <T> safeCall(
     errorHandler: ErrorHandler = DefaultErrorHandler(),
-    block: suspend () -> T
-): Result<T> {
-    return try {
+    block: suspend () -> T,
+): Result<T> =
+    try {
         Result.success(block())
     } catch (e: Exception) {
         Result.failure(errorHandler.map(e))
     }
-}
 
 /** Returns a user-friendly display message for any [Throwable]. */
-fun Throwable.toUserMessage(): String {
-    return when (this) {
+fun Throwable.toUserMessage(): String =
+    when (this) {
         is BilboError -> this.message ?: "An error occurred."
         else -> DefaultErrorHandler().map(this).message ?: "An error occurred."
     }
-}

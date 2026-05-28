@@ -7,13 +7,16 @@ data class AppProfile(
     val enforcementMode: EnforcementMode,
     val coolingOffEnabled: Boolean = false,
     val isBypassed: Boolean = false,
-    val isCustomClassification: Boolean = false
+    val isCustomClassification: Boolean = false,
 )
 
 enum class AppCategory {
-    NUTRITIVE, NEUTRAL, EMPTY_CALORIES
+    NUTRITIVE,
+    NEUTRAL,
+    EMPTY_CALORIES,
 }
 
 enum class EnforcementMode {
-    NUDGE, HARD_LOCK
+    NUDGE,
+    HARD_LOCK,
 }

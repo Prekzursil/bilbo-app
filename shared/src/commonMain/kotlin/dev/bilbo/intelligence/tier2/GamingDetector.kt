@@ -13,7 +13,6 @@ import kotlinx.datetime.*
  *  4. Daily FP earn is capped at [FPEconomy.DAILY_EARN_CAP] (60 FP).
  */
 class GamingDetector {
-
     companion object {
         private const val MIN_SESSION_SECONDS = FPEconomy.MIN_SESSION_SECONDS.toLong()
         private const val MAX_LAUNCHES_PER_DAY = 20
@@ -24,14 +23,14 @@ class GamingDetector {
         SESSION_TOO_SHORT,
         EXCESSIVE_RELAUNCHES,
         SCREEN_OFF_DURING_SESSION,
-        DAILY_EARN_CAP_HIT
+        DAILY_EARN_CAP_HIT,
     }
 
     data class SessionAuditResult(
         val session: UsageSession,
         val isEligible: Boolean,
         val flags: Set<GamingFlag>,
-        val earnedFP: Int
+        val earnedFP: Int,
     )
 
     data class DailyEarnResult(
@@ -39,7 +38,7 @@ class GamingDetector {
         val totalRawFP: Int,
         val cappedFP: Int,
         val capHit: Boolean,
-        val flaggedPackages: Set<String>
+        val flaggedPackages: Set<String>,
     )
 
     /**
@@ -52,7 +51,7 @@ class GamingDetector {
     fun auditSession(
         session: UsageSession,
         dailyLaunchCounts: Map<String, Int> = emptyMap(),
-        hadScreenOff: Boolean = false
+        hadScreenOff: Boolean = false,
     ): SessionAuditResult {
         require(session.category == AppCategory.NUTRITIVE) {
             "GamingDetector.auditSession only evaluates NUTRITIVE sessions."
@@ -77,17 +76,18 @@ class GamingDetector {
         }
 
         val isEligible = flags.isEmpty()
-        val earned = if (isEligible) {
-            (session.durationSeconds / 60L).toInt().coerceAtMost(DAILY_EARN_CAP)
-        } else {
-            0
-        }
+        val earned =
+            if (isEligible) {
+                (session.durationSeconds / 60L).toInt().coerceAtMost(DAILY_EARN_CAP)
+            } else {
+                0
+            }
 
         return SessionAuditResult(
             session = session,
             isEligible = isEligible,
             flags = flags,
-            earnedFP = earned
+            earnedFP = earned,
         )
     }
 
@@ -101,11 +101,12 @@ class GamingDetector {
     fun auditDay(
         sessions: List<UsageSession>,
         screenOffPackages: Set<String> = emptySet(),
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): DailyEarnResult {
-        val nutritiveSessions = sessions
-            .filter { it.category == AppCategory.NUTRITIVE }
-            .sortedBy { it.startTime }
+        val nutritiveSessions =
+            sessions
+                .filter { it.category == AppCategory.NUTRITIVE }
+                .sortedBy { it.startTime }
 
         val launchCounts = mutableMapOf<String, Int>()
         val auditedSessions = mutableListOf<SessionAuditResult>()
@@ -115,11 +116,12 @@ class GamingDetector {
             val currentLaunches = launchCounts[session.packageName] ?: 0
             val hadScreenOff = session.packageName in screenOffPackages
 
-            val result = auditSession(
-                session = session,
-                dailyLaunchCounts = launchCounts,
-                hadScreenOff = hadScreenOff
-            )
+            val result =
+                auditSession(
+                    session = session,
+                    dailyLaunchCounts = launchCounts,
+                    hadScreenOff = hadScreenOff,
+                )
 
             // Track launch count regardless of eligibility
             launchCounts[session.packageName] = currentLaunches + 1
@@ -130,31 +132,33 @@ class GamingDetector {
         val cappedFP = minOf(cumulativeFP, DAILY_EARN_CAP)
         val capHit = cumulativeFP > DAILY_EARN_CAP
 
-        val flaggedPackages = auditedSessions
-            .filter { it.flags.isNotEmpty() }
-            .map { it.session.packageName }
-            .toSet()
+        val flaggedPackages =
+            auditedSessions
+                .filter { it.flags.isNotEmpty() }
+                .map { it.session.packageName }
+                .toSet()
 
         return DailyEarnResult(
             auditedSessions = auditedSessions,
             totalRawFP = cumulativeFP,
             cappedFP = cappedFP,
             capHit = capHit,
-            flaggedPackages = flaggedPackages
+            flaggedPackages = flaggedPackages,
         )
     }
 
     /**
      * Returns a human-readable explanation for a given [GamingFlag].
      */
-    fun explainFlag(flag: GamingFlag): String = when (flag) {
-        GamingFlag.SESSION_TOO_SHORT ->
-            "Session was under 60 seconds — too short to earn Focus Points."
-        GamingFlag.EXCESSIVE_RELAUNCHES ->
-            "This app was opened more than $MAX_LAUNCHES_PER_DAY times today. FP earning is paused."
-        GamingFlag.SCREEN_OFF_DURING_SESSION ->
-            "Screen turned off during the session — no Focus Points awarded."
-        GamingFlag.DAILY_EARN_CAP_HIT ->
-            "Daily earn cap of ${DAILY_EARN_CAP} FP reached. Keep going tomorrow!"
-    }
+    fun explainFlag(flag: GamingFlag): String =
+        when (flag) {
+            GamingFlag.SESSION_TOO_SHORT ->
+                "Session was under 60 seconds — too short to earn Focus Points."
+            GamingFlag.EXCESSIVE_RELAUNCHES ->
+                "This app was opened more than $MAX_LAUNCHES_PER_DAY times today. FP earning is paused."
+            GamingFlag.SCREEN_OFF_DURING_SESSION ->
+                "Screen turned off during the session — no Focus Points awarded."
+            GamingFlag.DAILY_EARN_CAP_HIT ->
+                "Daily earn cap of ${DAILY_EARN_CAP} FP reached. Keep going tomorrow!"
+        }
 }

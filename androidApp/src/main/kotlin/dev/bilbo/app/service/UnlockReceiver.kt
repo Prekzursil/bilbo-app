@@ -26,8 +26,10 @@ import timber.log.Timber
  * or after the process is killed.
  */
 class UnlockReceiver : BroadcastReceiver() {
-
-    override fun onReceive(context: Context, intent: Intent?) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent?,
+    ) {
         when (intent?.action) {
             Intent.ACTION_USER_PRESENT -> {
                 Timber.d("UnlockReceiver: device unlocked — ensuring UsageTrackingService is running")
@@ -45,9 +47,10 @@ class UnlockReceiver : BroadcastReceiver() {
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     private fun startTrackingService(context: Context) {
-        val serviceIntent = Intent(context, UsageTrackingService::class.java).apply {
-            action = UsageTrackingService.ACTION_START
-        }
+        val serviceIntent =
+            Intent(context, UsageTrackingService::class.java).apply {
+                action = UsageTrackingService.ACTION_START
+            }
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 context.startForegroundService(serviceIntent)
@@ -59,10 +62,14 @@ class UnlockReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun forwardToService(context: Context, action: String) {
-        val serviceIntent = Intent(context, UsageTrackingService::class.java).apply {
-            this.action = action
-        }
+    private fun forwardToService(
+        context: Context,
+        action: String,
+    ) {
+        val serviceIntent =
+            Intent(context, UsageTrackingService::class.java).apply {
+                this.action = action
+            }
         try {
             context.startService(serviceIntent)
         } catch (_: Exception) {

@@ -1,16 +1,10 @@
 package dev.bilbo.app.ui.components
 
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.FilterChip
@@ -35,31 +29,33 @@ import dev.bilbo.domain.SuggestionCategory
 import dev.bilbo.domain.TimeOfDay
 
 // ── Chip accent ────────────────────────────────────────────────────────────────
-private val ChipSelected   = Color(0xFF40916C)
+private val ChipSelected = Color(0xFF40916C)
 private val ChipSelectedOn = Color(0xFFD8F3DC)
 
 // ── Metadata maps ──────────────────────────────────────────────────────────────
 
-private val categoryEntries: List<Pair<SuggestionCategory, String>> = listOf(
-    SuggestionCategory.READING         to "📚 Reading",
-    SuggestionCategory.EXERCISE        to "💪 Exercise",
-    SuggestionCategory.COOKING         to "🍳 Cooking",
-    SuggestionCategory.CREATIVE        to "🎨 Creative",
-    SuggestionCategory.MUSIC           to "🎵 Music",
-    SuggestionCategory.NATURE          to "🌿 Nature",
-    SuggestionCategory.SOCIAL          to "👥 Social",
-    SuggestionCategory.MINDFULNESS     to "🧘 Mindfulness",
-    SuggestionCategory.GAMING_PHYSICAL to "🎲 Physical Games",
-    SuggestionCategory.LEARNING        to "📖 Learning",
-)
+private val categoryEntries: List<Pair<SuggestionCategory, String>> =
+    listOf(
+        SuggestionCategory.READING to "📚 Reading",
+        SuggestionCategory.EXERCISE to "💪 Exercise",
+        SuggestionCategory.COOKING to "🍳 Cooking",
+        SuggestionCategory.CREATIVE to "🎨 Creative",
+        SuggestionCategory.MUSIC to "🎵 Music",
+        SuggestionCategory.NATURE to "🌿 Nature",
+        SuggestionCategory.SOCIAL to "👥 Social",
+        SuggestionCategory.MINDFULNESS to "🧘 Mindfulness",
+        SuggestionCategory.GAMING_PHYSICAL to "🎲 Physical Games",
+        SuggestionCategory.LEARNING to "📖 Learning",
+    )
 
-private val timeOfDayEntries: List<Pair<TimeOfDay?, String>> = listOf(
-    null                  to "⏰ Any time",
-    TimeOfDay.MORNING     to "🌅 Morning",
-    TimeOfDay.AFTERNOON   to "☀️ Afternoon",
-    TimeOfDay.EVENING     to "🌙 Evening",
-    TimeOfDay.NIGHT       to "🌃 Night",
-)
+private val timeOfDayEntries: List<Pair<TimeOfDay?, String>> =
+    listOf(
+        null to "⏰ Any time",
+        TimeOfDay.MORNING to "🌅 Morning",
+        TimeOfDay.AFTERNOON to "☀️ Afternoon",
+        TimeOfDay.EVENING to "🌙 Evening",
+        TimeOfDay.NIGHT to "🌃 Night",
+    )
 
 /**
  * Dialog for creating a custom analog suggestion.
@@ -81,20 +77,21 @@ fun CustomSuggestionDialog(
     initialText: String = "",
 ) {
     // ── Local state ────────────────────────────────────────────────────────
-    var text         by remember { mutableStateOf(initialText) }
-    var category     by remember { mutableStateOf<SuggestionCategory?>(null) }
-    var timeOfDay    by remember { mutableStateOf<TimeOfDay?>(null) }
-    var textError    by remember { mutableStateOf<String?>(null) }
+    var text by remember { mutableStateOf(initialText) }
+    var category by remember { mutableStateOf<SuggestionCategory?>(null) }
+    var timeOfDay by remember { mutableStateOf<TimeOfDay?>(null) }
+    var textError by remember { mutableStateOf<String?>(null) }
     var categoryError by remember { mutableStateOf<String?>(null) }
 
     // ── Validation ─────────────────────────────────────────────────────────
     fun validate(): Boolean {
-        textError = when {
-            text.isBlank()   -> "Please enter a suggestion."
-            text.length < 5  -> "Too short — be a bit more descriptive."
-            text.length > 200 -> "Keep it under 200 characters."
-            else             -> null
-        }
+        textError =
+            when {
+                text.isBlank() -> "Please enter a suggestion."
+                text.length < 5 -> "Too short — be a bit more descriptive."
+                text.length > 200 -> "Keep it under 200 characters."
+                else -> null
+            }
         categoryError = if (category == null) "Pick a category." else null
         return textError == null && categoryError == null
     }
@@ -110,7 +107,6 @@ fun CustomSuggestionDialog(
         },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-
                 // ── Text input ─────────────────────────────────────────
                 OutlinedTextField(
                     value = text,
@@ -121,9 +117,10 @@ fun CustomSuggestionDialog(
                     label = { Text("What will you do?") },
                     placeholder = { Text("e.g. Make a cup of tea and read a chapter") },
                     isError = textError != null,
-                    supportingText = textError?.let { err ->
-                        { Text(err, color = MaterialTheme.colorScheme.error) }
-                    },
+                    supportingText =
+                        textError?.let { err ->
+                            { Text(err, color = MaterialTheme.colorScheme.error) }
+                        },
                     singleLine = false,
                     maxLines = 3,
                     modifier = Modifier.fillMaxWidth(),
@@ -134,9 +131,10 @@ fun CustomSuggestionDialog(
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = "Category",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Medium,
-                        ),
+                        style =
+                            MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Medium,
+                            ),
                     )
                     if (categoryError != null) {
                         Text(
@@ -158,10 +156,11 @@ fun CustomSuggestionDialog(
                                     categoryError = null
                                 },
                                 label = { Text(label, style = MaterialTheme.typography.labelSmall) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = ChipSelected,
-                                    selectedLabelColor     = ChipSelectedOn,
-                                ),
+                                colors =
+                                    FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = ChipSelected,
+                                        selectedLabelColor = ChipSelectedOn,
+                                    ),
                             )
                         }
                     }
@@ -171,9 +170,10 @@ fun CustomSuggestionDialog(
                 Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                     Text(
                         text = "Time of day (optional)",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Medium,
-                        ),
+                        style =
+                            MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.Medium,
+                            ),
                     )
                     FlowRow(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -183,12 +183,13 @@ fun CustomSuggestionDialog(
                             val selected = timeOfDay == tod
                             FilterChip(
                                 selected = selected,
-                                onClick  = { timeOfDay = if (selected) null else tod },
+                                onClick = { timeOfDay = if (selected) null else tod },
                                 label = { Text(label, style = MaterialTheme.typography.labelSmall) },
-                                colors = FilterChipDefaults.filterChipColors(
-                                    selectedContainerColor = ChipSelected,
-                                    selectedLabelColor     = ChipSelectedOn,
-                                ),
+                                colors =
+                                    FilterChipDefaults.filterChipColors(
+                                        selectedContainerColor = ChipSelected,
+                                        selectedLabelColor = ChipSelectedOn,
+                                    ),
                             )
                         }
                     }
@@ -201,13 +202,13 @@ fun CustomSuggestionDialog(
                     if (validate()) {
                         onSave(
                             AnalogSuggestion(
-                                id         = 0,
-                                text       = text.trim(),
-                                category   = category!!,
-                                tags       = emptyList(),
-                                timeOfDay  = timeOfDay,
-                                isCustom   = true,
-                            )
+                                id = 0,
+                                text = text.trim(),
+                                category = category!!,
+                                tags = emptyList(),
+                                timeOfDay = timeOfDay,
+                                isCustom = true,
+                            ),
                         )
                     }
                 },

@@ -3,8 +3,8 @@ package dev.bilbo.platform
 import android.content.Context
 import app.cash.sqldelight.db.SqlDriver
 import dev.bilbo.data.AndroidDatabaseDriver
-import dev.bilbo.data.DatabaseDriverFactory
 import dev.bilbo.data.BilboDatabase
+import dev.bilbo.data.DatabaseDriverFactory
 
 /**
  * Android-specific dependency wiring for the shared module.
@@ -22,8 +22,9 @@ import dev.bilbo.data.BilboDatabase
  * @param context The application [Context]. Avoid passing Activity contexts to
  *   prevent memory leaks; always use [Context.getApplicationContext].
  */
-class PlatformModule(context: Context) {
-
+class PlatformModule(
+    context: Context,
+) {
     private val appContext: Context = context.applicationContext
 
     /**

@@ -1,7 +1,6 @@
 package dev.bilbo.app
 
 import android.app.Application
-import com.posthog.PostHog
 import com.posthog.android.PostHogAndroid
 import com.posthog.android.PostHogAndroidConfig
 import dagger.hilt.android.HiltAndroidApp
@@ -10,7 +9,6 @@ import timber.log.Timber
 
 @HiltAndroidApp
 class BilboApplication : Application() {
-
     override fun onCreate() {
         super.onCreate()
 
@@ -35,14 +33,15 @@ class BilboApplication : Application() {
     }
 
     private fun initPostHog() {
-        val config = PostHogAndroidConfig(
-            apiKey = BuildConfig.POSTHOG_API_KEY,
-            host = "https://app.posthog.com",
-        ).apply {
-            captureApplicationLifecycleEvents = true
-            captureDeepLinks = true
-            captureScreenViews = false // manual tracking for privacy
-        }
+        val config =
+            PostHogAndroidConfig(
+                apiKey = BuildConfig.POSTHOG_API_KEY,
+                host = "https://app.posthog.com",
+            ).apply {
+                captureApplicationLifecycleEvents = true
+                captureDeepLinks = true
+                captureScreenViews = false // manual tracking for privacy
+            }
         PostHogAndroid.setup(this, config)
     }
 }

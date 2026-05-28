@@ -17,7 +17,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import dev.bilbo.social.LeaderboardCalculator
 import kotlinx.datetime.Instant
 
 // ── UI models ─────────────────────────────────────────────────────────────────
@@ -31,7 +30,9 @@ data class LeaderboardUiState(
     val isLoading: Boolean = false,
 )
 
-enum class LeaderboardCategory(val label: String) {
+enum class LeaderboardCategory(
+    val label: String,
+) {
     MOST_FP("Most FP"),
     BEST_STREAK("Best Streak"),
     MOST_IMPROVED("Most Improved"),
@@ -42,7 +43,7 @@ data class LeaderboardEntryUiItem(
     val rank: Int,
     val userId: String,
     val displayName: String,
-    val valueLabel: String,       // e.g. "312 FP" or "7 days"
+    val valueLabel: String, // e.g. "312 FP" or "7 days"
     val isCurrentUser: Boolean,
 )
 
@@ -133,15 +134,25 @@ fun LeaderboardScreen(
                         color = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                     )
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 8.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween,
                     ) {
-                        Text("All Rankings", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "All Rankings",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         state.currentUserRank?.let {
-                            Text("You: #$it", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                "You: #$it",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.primary,
+                                fontWeight = FontWeight.SemiBold,
+                            )
                         }
                     }
                 }
@@ -154,8 +165,18 @@ fun LeaderboardScreen(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(12.dp),
                         ) {
-                            Icon(Icons.Outlined.BarChart, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f), modifier = Modifier.size(48.dp))
-                            Text("No data yet. Keep tracking your wellness!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                            Icon(
+                                Icons.Outlined.BarChart,
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                                modifier = Modifier.size(48.dp),
+                            )
+                            Text(
+                                "No data yet. Keep tracking your wellness!",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                textAlign = TextAlign.Center,
+                            )
                         }
                     }
                 } else {
@@ -175,16 +196,18 @@ private fun PodiumRow(
     top3: kotlin.collections.List<LeaderboardEntryUiItem>,
     category: LeaderboardCategory,
 ) {
-    val reordered = buildList {
-        top3.getOrNull(1)?.let { add(it) }  // 2nd (left)
-        top3.getOrNull(0)?.let { add(it) }  // 1st (center)
-        top3.getOrNull(2)?.let { add(it) }  // 3rd (right)
-    }
+    val reordered =
+        buildList {
+            top3.getOrNull(1)?.let { add(it) } // 2nd (left)
+            top3.getOrNull(0)?.let { add(it) } // 1st (center)
+            top3.getOrNull(2)?.let { add(it) } // 3rd (right)
+        }
 
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 16.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
         verticalAlignment = Alignment.Bottom,
         horizontalArrangement = Arrangement.SpaceEvenly,
     ) {
@@ -195,13 +218,17 @@ private fun PodiumRow(
 }
 
 @Composable
-private fun PodiumSlot(entry: LeaderboardEntryUiItem, category: LeaderboardCategory) {
-    val (podiumHeight, medalEmoji, medalColor) = when (entry.rank) {
-        1 -> Triple(100.dp, "🥇", Color(0xFFFFD700))
-        2 -> Triple(72.dp, "🥈", Color(0xFFC0C0C0))
-        3 -> Triple(52.dp, "🥉", Color(0xFFCD7F32))
-        else -> Triple(52.dp, "#${entry.rank}", MaterialTheme.colorScheme.onSurfaceVariant)
-    }
+private fun PodiumSlot(
+    entry: LeaderboardEntryUiItem,
+    category: LeaderboardCategory,
+) {
+    val (podiumHeight, medalEmoji, medalColor) =
+        when (entry.rank) {
+            1 -> Triple(100.dp, "🥇", Color(0xFFFFD700))
+            2 -> Triple(72.dp, "🥈", Color(0xFFC0C0C0))
+            3 -> Triple(52.dp, "🥉", Color(0xFFCD7F32))
+            else -> Triple(52.dp, "#${entry.rank}", MaterialTheme.colorScheme.onSurfaceVariant)
+        }
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -228,9 +255,10 @@ private fun PodiumSlot(entry: LeaderboardEntryUiItem, category: LeaderboardCateg
         Surface(
             shape = RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp),
             color = medalColor.copy(alpha = 0.2f),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(podiumHeight),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(podiumHeight),
         ) {
             Box(contentAlignment = Alignment.Center) {
                 Text(
@@ -248,30 +276,35 @@ private fun PodiumSlot(entry: LeaderboardEntryUiItem, category: LeaderboardCateg
 
 @Composable
 private fun LeaderboardRow(entry: LeaderboardEntryUiItem) {
-    val (bgColor, textColor) = if (entry.isCurrentUser)
-        Pair(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f), MaterialTheme.colorScheme.primary)
-    else
-        Pair(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface)
+    val (bgColor, textColor) =
+        if (entry.isCurrentUser) {
+            Pair(MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.35f), MaterialTheme.colorScheme.primary)
+        } else {
+            Pair(MaterialTheme.colorScheme.surface, MaterialTheme.colorScheme.onSurface)
+        }
 
-    val rankEmoji = when (entry.rank) {
-        1 -> "🥇"
-        2 -> "🥈"
-        3 -> "🥉"
-        else -> null
-    }
+    val rankEmoji =
+        when (entry.rank) {
+            1 -> "🥇"
+            2 -> "🥈"
+            3 -> "🥉"
+            else -> null
+        }
 
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
         shape = RoundedCornerShape(12.dp),
         color = bgColor,
         tonalElevation = if (entry.isCurrentUser) 0.dp else 1.dp,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 14.dp, vertical = 10.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -296,8 +329,12 @@ private fun LeaderboardRow(entry: LeaderboardEntryUiItem) {
             // Avatar
             Surface(
                 shape = CircleShape,
-                color = if (entry.isCurrentUser) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                        else MaterialTheme.colorScheme.secondaryContainer,
+                color =
+                    if (entry.isCurrentUser) {
+                        MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                    } else {
+                        MaterialTheme.colorScheme.secondaryContainer
+                    },
                 modifier = Modifier.size(36.dp),
             ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -336,9 +373,10 @@ private fun LeaderboardRow(entry: LeaderboardEntryUiItem) {
 @Composable
 private fun WeeklyResetBanner(nextReset: Instant) {
     Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
         shape = RoundedCornerShape(10.dp),
         color = MaterialTheme.colorScheme.secondaryContainer,
     ) {

@@ -1,10 +1,5 @@
 package dev.bilbo.app.ui.screen
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -16,8 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -27,12 +20,12 @@ import androidx.compose.ui.unit.sp
 // ── UI models ─────────────────────────────────────────────────────────────────
 
 data class CommunityDigestData(
-    val weekLabel: String = "Apr 7–13",           // e.g. "Apr 7–13"
+    val weekLabel: String = "Apr 7–13", // e.g. "Apr 7–13"
     val totalActiveUsers: Int = 0,
     val collectiveHoursSaved: Int = 0,
     val topAnalogSuggestion: String = "",
     val topCircleAchievement: String = "",
-    val anonymousTips: kotlin.collections.List<String> = emptyList(),  // max 3
+    val anonymousTips: kotlin.collections.List<String> = emptyList(), // max 3
     val isLoading: Boolean = false,
 )
 
@@ -71,9 +64,10 @@ fun DigestScreen(
             ) {
                 Button(
                     onClick = onDismiss,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
                 ) {
                     Text("Got it")
                 }
@@ -86,9 +80,10 @@ fun DigestScreen(
             }
         } else {
             LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
@@ -146,14 +141,16 @@ private fun DigestHeroBanner(weekLabel: String) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
@@ -175,7 +172,10 @@ private fun DigestHeroBanner(weekLabel: String) {
 }
 
 @Composable
-private fun DigestStatsRow(activeUsers: Int, hoursSaved: Int) {
+private fun DigestStatsRow(
+    activeUsers: Int,
+    hoursSaved: Int,
+) {
     Row(
         modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -237,7 +237,11 @@ private fun DigestStatsRow(activeUsers: Int, hoursSaved: Int) {
 }
 
 @Composable
-private fun DigestHighlightCard(icon: String, label: String, text: String) {
+private fun DigestHighlightCard(
+    icon: String,
+    label: String,
+    text: String,
+) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
@@ -245,9 +249,10 @@ private fun DigestHighlightCard(icon: String, label: String, text: String) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -277,9 +282,10 @@ private fun AnonymousTipCard(tip: String) {
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(10.dp),
         ) {
@@ -295,8 +301,9 @@ private fun AnonymousTipCard(tip: String) {
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-private fun formatCompact(n: Int): String = when {
-    n >= 1_000_000 -> "${n / 1_000_000}M"
-    n >= 1_000     -> "${n / 1_000}K"
-    else           -> n.toString()
-}
+private fun formatCompact(n: Int): String =
+    when {
+        n >= 1_000_000 -> "${n / 1_000_000}M"
+        n >= 1_000 -> "${n / 1_000}K"
+        else -> n.toString()
+    }

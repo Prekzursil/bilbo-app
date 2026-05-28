@@ -10,29 +10,44 @@ import dev.bilbo.domain.*
  */
 class AppClassifier(
     private val builtInDefaults: Map<String, AppClassification>,
-    private val userOverrides: MutableMap<String, AppClassification> = mutableMapOf()
+    private val userOverrides: MutableMap<String, AppClassification> = mutableMapOf(),
 ) {
-
     data class AppClassification(
         val packageName: String,
         val appLabel: String,
         val category: AppCategory,
-        val defaultEnforcementMode: EnforcementMode
+        val defaultEnforcementMode: EnforcementMode,
     )
 
     // Package-name prefix heuristics for unknown apps
-    private val knownSocialPrefixes = listOf(
-        "com.facebook", "com.instagram", "com.twitter", "com.snapchat",
-        "com.tiktok", "com.reddit", "com.tumblr", "com.pinterest"
-    )
-    private val knownProductivityPrefixes = listOf(
-        "com.google.android.apps.docs", "com.microsoft", "com.slack",
-        "com.notion", "com.todoist", "com.evernote"
-    )
-    private val knownLearningPrefixes = listOf(
-        "com.duolingo", "com.coursera", "org.khanacademy",
-        "com.audible", "com.amazon.kindle"
-    )
+    private val knownSocialPrefixes =
+        listOf(
+            "com.facebook",
+            "com.instagram",
+            "com.twitter",
+            "com.snapchat",
+            "com.tiktok",
+            "com.reddit",
+            "com.tumblr",
+            "com.pinterest",
+        )
+    private val knownProductivityPrefixes =
+        listOf(
+            "com.google.android.apps.docs",
+            "com.microsoft",
+            "com.slack",
+            "com.notion",
+            "com.todoist",
+            "com.evernote",
+        )
+    private val knownLearningPrefixes =
+        listOf(
+            "com.duolingo",
+            "com.coursera",
+            "org.khanacademy",
+            "com.audible",
+            "com.amazon.kindle",
+        )
 
     // -------------------------------------------------------------------------
     // Classification lookup
@@ -42,23 +57,25 @@ class AppClassifier(
      * Returns the effective [AppClassification] for [packageName].
      * Priority: user override → built-in default → heuristic guess → null.
      */
-    fun classify(packageName: String): AppClassification? {
-        return userOverrides[packageName]
+    fun classify(packageName: String): AppClassification? =
+        userOverrides[packageName]
             ?: builtInDefaults[packageName]
             ?: inferFromPackageName(packageName)
-    }
 
     /**
      * Returns the [AppProfile] for [packageName], or null if unclassified.
      */
-    fun getProfile(packageName: String, appLabel: String): AppProfile? {
+    fun getProfile(
+        packageName: String,
+        appLabel: String,
+    ): AppProfile? {
         val classification = classify(packageName) ?: return null
         return AppProfile(
             packageName = packageName,
             appLabel = appLabel,
             category = classification.category,
             enforcementMode = classification.defaultEnforcementMode,
-            isCustomClassification = userOverrides.containsKey(packageName)
+            isCustomClassification = userOverrides.containsKey(packageName),
         )
     }
 
@@ -73,14 +90,15 @@ class AppClassifier(
         packageName: String,
         appLabel: String,
         category: AppCategory,
-        enforcementMode: EnforcementMode
+        enforcementMode: EnforcementMode,
     ) {
-        userOverrides[packageName] = AppClassification(
-            packageName = packageName,
-            appLabel = appLabel,
-            category = category,
-            defaultEnforcementMode = enforcementMode
-        )
+        userOverrides[packageName] =
+            AppClassification(
+                packageName = packageName,
+                appLabel = appLabel,
+                category = category,
+                defaultEnforcementMode = enforcementMode,
+            )
     }
 
     /**
@@ -107,8 +125,7 @@ class AppClassifier(
     /**
      * Returns all known classifications (built-in + user overrides merged).
      */
-    fun getAllClassifications(): Map<String, AppClassification> =
-        builtInDefaults + userOverrides
+    fun getAllClassifications(): Map<String, AppClassification> = builtInDefaults + userOverrides
 
     /**
      * Returns all apps in a given [category].
@@ -119,8 +136,7 @@ class AppClassifier(
     /**
      * Returns a list of package names with no classification (requires user input).
      */
-    fun getUnclassified(installedPackages: List<String>): List<String> =
-        installedPackages.filter { classify(it) == null }
+    fun getUnclassified(installedPackages: List<String>): List<String> = installedPackages.filter { classify(it) == null }
 
     // -------------------------------------------------------------------------
     // Factory / seed loading
@@ -134,7 +150,7 @@ class AppClassifier(
 
         fun fromDefaults(
             defaults: List<AppClassification>,
-            overrides: List<AppClassification>
+            overrides: List<AppClassification>,
         ): AppClassifier {
             val defaultMap = defaults.associateBy { it.packageName }
             val overrideMap = overrides.associateBy { it.packageName }.toMutableMap()
@@ -149,21 +165,26 @@ class AppClassifier(
     private fun inferFromPackageName(packageName: String): AppClassification? {
         val lower = packageName.lowercase()
 
-        val category = when {
-            knownSocialPrefixes.any { lower.startsWith(it) } -> AppCategory.EMPTY_CALORIES
-            knownLearningPrefixes.any { lower.startsWith(it) } -> AppCategory.NUTRITIVE
-            knownProductivityPrefixes.any { lower.startsWith(it) } -> AppCategory.NEUTRAL
-            else -> return null
-        }
+        val category =
+            when {
+                knownSocialPrefixes.any { lower.startsWith(it) } -> AppCategory.EMPTY_CALORIES
+                knownLearningPrefixes.any { lower.startsWith(it) } -> AppCategory.NUTRITIVE
+                knownProductivityPrefixes.any { lower.startsWith(it) } -> AppCategory.NEUTRAL
+                else -> return null
+            }
 
-        val enforcement = if (category == AppCategory.EMPTY_CALORIES)
-            EnforcementMode.NUDGE else EnforcementMode.NUDGE
+        val enforcement =
+            if (category == AppCategory.EMPTY_CALORIES) {
+                EnforcementMode.NUDGE
+            } else {
+                EnforcementMode.NUDGE
+            }
 
         return AppClassification(
             packageName = packageName,
             appLabel = packageName.substringAfterLast('.').replaceFirstChar { it.uppercase() },
             category = category,
-            defaultEnforcementMode = enforcement
+            defaultEnforcementMode = enforcement,
         )
     }
 }

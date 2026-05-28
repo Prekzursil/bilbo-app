@@ -1,26 +1,25 @@
 package dev.bilbo.app.ui.screen
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.*
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.bilbo.social.BuddyManager
-import dev.bilbo.social.CircleManager
 import dev.bilbo.social.ChallengeEngine
 
 // ── UI state models ───────────────────────────────────────────────────────────
@@ -34,7 +33,7 @@ data class BuddyPairUiItem(
     val pairId: String,
     val buddyDisplayName: String,
     val sharingLevel: BuddyManager.SharingLevel,
-    val statusSummary: String,    // e.g. "312 FP · 5-day streak"
+    val statusSummary: String, // e.g. "312 FP · 5-day streak"
 )
 
 data class CircleUiState(
@@ -86,11 +85,12 @@ fun SocialHubScreen(
     onBack: () -> Unit = {},
 ) {
     var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf(
-        Triple("Buddies",    Icons.Outlined.People,      Icons.Filled.People),
-        Triple("Circles",    Icons.Outlined.Group,       Icons.Filled.Group),
-        Triple("Challenges", Icons.Outlined.EmojiEvents, Icons.Filled.EmojiEvents),
-    )
+    val tabs =
+        listOf(
+            Triple("Buddies", Icons.Outlined.People, Icons.Filled.People),
+            Triple("Circles", Icons.Outlined.Group, Icons.Filled.Group),
+            Triple("Challenges", Icons.Outlined.EmojiEvents, Icons.Filled.EmojiEvents),
+        )
 
     Scaffold(
         topBar = {
@@ -102,9 +102,10 @@ fun SocialHubScreen(
                             Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                         }
                     },
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                    ),
+                    colors =
+                        TopAppBarDefaults.topAppBarColors(
+                            containerColor = MaterialTheme.colorScheme.surface,
+                        ),
                 )
                 TabRow(
                     selectedTabIndex = selectedTab,
@@ -128,28 +129,32 @@ fun SocialHubScreen(
         },
     ) { paddingValues ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
         ) {
             when (selectedTab) {
-                0 -> BuddiesTab(
-                    state = buddyState,
-                    onInvite = onInviteBuddy,
-                    onEnterCode = onEnterBuddyCode,
-                    onPairTap = onBuddyPairTap,
-                )
-                1 -> CirclesTab(
-                    state = circleState,
-                    onCreate = onCreateCircle,
-                    onJoin = onJoinCircle,
-                    onCircleTap = onCircleTap,
-                )
-                2 -> ChallengesTab(
-                    state = challengeState,
-                    onCreate = onCreateChallenge,
-                    onChallengeTap = onChallengeTap,
-                )
+                0 ->
+                    BuddiesTab(
+                        state = buddyState,
+                        onInvite = onInviteBuddy,
+                        onEnterCode = onEnterBuddyCode,
+                        onPairTap = onBuddyPairTap,
+                    )
+                1 ->
+                    CirclesTab(
+                        state = circleState,
+                        onCreate = onCreateCircle,
+                        onJoin = onJoinCircle,
+                        onCircleTap = onCircleTap,
+                    )
+                2 ->
+                    ChallengesTab(
+                        state = challengeState,
+                        onCreate = onCreateChallenge,
+                        onChallengeTap = onChallengeTap,
+                    )
             }
         }
     }
@@ -206,7 +211,10 @@ private fun BuddiesTab(
 }
 
 @Composable
-private fun BuddyPairListItem(pair: BuddyPairUiItem, onClick: () -> Unit) {
+private fun BuddyPairListItem(
+    pair: BuddyPairUiItem,
+    onClick: () -> Unit,
+) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -215,9 +223,10 @@ private fun BuddyPairListItem(pair: BuddyPairUiItem, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -243,19 +252,25 @@ private fun BuddyPairListItem(pair: BuddyPairUiItem, onClick: () -> Unit) {
 
             SharingLevelChip(level = pair.sharingLevel)
 
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp),
+            )
         }
     }
 }
 
 @Composable
 private fun SharingLevelChip(level: BuddyManager.SharingLevel) {
-    val (label, color) = when (level) {
-        BuddyManager.SharingLevel.MINIMAL  -> "Minimal"  to MaterialTheme.colorScheme.outline
-        BuddyManager.SharingLevel.BASIC    -> "Basic"    to Color(0xFF2196F3)
-        BuddyManager.SharingLevel.STANDARD -> "Standard" to MaterialTheme.colorScheme.primary
-        BuddyManager.SharingLevel.DETAILED -> "Detailed" to Color(0xFF4CAF50)
-    }
+    val (label, color) =
+        when (level) {
+            BuddyManager.SharingLevel.MINIMAL -> "Minimal" to MaterialTheme.colorScheme.outline
+            BuddyManager.SharingLevel.BASIC -> "Basic" to Color(0xFF2196F3)
+            BuddyManager.SharingLevel.STANDARD -> "Standard" to MaterialTheme.colorScheme.primary
+            BuddyManager.SharingLevel.DETAILED -> "Detailed" to Color(0xFF4CAF50)
+        }
     Surface(
         shape = RoundedCornerShape(8.dp),
         color = color.copy(alpha = 0.12f),
@@ -312,7 +327,10 @@ private fun CirclesTab(
 }
 
 @Composable
-private fun CircleListItem(circle: CircleUiItem, onClick: () -> Unit) {
+private fun CircleListItem(
+    circle: CircleUiItem,
+    onClick: () -> Unit,
+) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -321,9 +339,10 @@ private fun CircleListItem(circle: CircleUiItem, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -346,7 +365,12 @@ private fun CircleListItem(circle: CircleUiItem, onClick: () -> Unit) {
                 )
             }
 
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp),
+            )
         }
     }
 }
@@ -383,7 +407,10 @@ private fun ChallengesTab(
 }
 
 @Composable
-private fun ChallengeListItem(challenge: ChallengeUiItem, onClick: () -> Unit) {
+private fun ChallengeListItem(
+    challenge: ChallengeUiItem,
+    onClick: () -> Unit,
+) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -392,9 +419,10 @@ private fun ChallengeListItem(challenge: ChallengeUiItem, onClick: () -> Unit) {
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
@@ -410,15 +438,21 @@ private fun ChallengeListItem(challenge: ChallengeUiItem, onClick: () -> Unit) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp),
+                )
             }
 
             LinearProgressIndicator(
                 progress = { challenge.progressPercent / 100f },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(6.dp)
-                    .clip(RoundedCornerShape(3.dp)),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(6.dp)
+                        .clip(RoundedCornerShape(3.dp)),
                 color = MaterialTheme.colorScheme.primary,
                 trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
             )
@@ -435,11 +469,15 @@ private fun ChallengeListItem(challenge: ChallengeUiItem, onClick: () -> Unit) {
 // ── Shared empty state ────────────────────────────────────────────────────────
 
 @Composable
-private fun SocialEmptyState(icon: ImageVector, message: String) {
+private fun SocialEmptyState(
+    icon: ImageVector,
+    message: String,
+) {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 48.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {

@@ -6,8 +6,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.MaterialTheme
@@ -28,13 +26,13 @@ import dev.bilbo.app.ui.theme.BilboTheme
 import dev.bilbo.domain.FPEconomy
 
 // ── Semantic colour thresholds ─────────────────────────────────────────────────
-private val FpGreen  = Color(0xFF4CAF50)
+private val FpGreen = Color(0xFF4CAF50)
 private val FpYellow = Color(0xFFFFC107)
-private val FpRed    = Color(0xFFE53935)
+private val FpRed = Color(0xFFE53935)
 
-private const val HIGH_THRESHOLD   = 30
-private const val LOW_THRESHOLD    = 10
-private const val DAILY_CAP        = FPEconomy.DAILY_EARN_CAP.toFloat()   // 60
+private const val HIGH_THRESHOLD = 30
+private const val LOW_THRESHOLD = 10
+private const val DAILY_CAP = FPEconomy.DAILY_EARN_CAP.toFloat() // 60
 
 /**
  * Reusable Focus Points balance widget.
@@ -58,11 +56,12 @@ fun FPBalanceWidget(
 ) {
     // Colour transitions smoothly when the balance crosses thresholds.
     val balanceColor by animateColorAsState(
-        targetValue = when {
-            currentBalance > HIGH_THRESHOLD -> FpGreen
-            currentBalance > LOW_THRESHOLD  -> FpYellow
-            else                            -> FpRed
-        },
+        targetValue =
+            when {
+                currentBalance > HIGH_THRESHOLD -> FpGreen
+                currentBalance > LOW_THRESHOLD -> FpYellow
+                else -> FpRed
+            },
         animationSpec = tween(durationMillis = 600),
         label = "FpColor",
     )
@@ -109,18 +108,20 @@ fun FPBalanceWidget(
         ) {
             Text(
                 text = currentBalance.toString(),
-                style = MaterialTheme.typography.displaySmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    color = balanceColor,
-                    fontSize = (size.value * 0.25f).sp,
-                ),
+                style =
+                    MaterialTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        color = balanceColor,
+                        fontSize = (size.value * 0.25f).sp,
+                    ),
             )
             Text(
                 text = "Focus Points",
-                style = MaterialTheme.typography.labelSmall.copy(
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    fontSize = (size.value * 0.1f).sp,
-                ),
+                style =
+                    MaterialTheme.typography.labelSmall.copy(
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        fontSize = (size.value * 0.1f).sp,
+                    ),
             )
         }
     }

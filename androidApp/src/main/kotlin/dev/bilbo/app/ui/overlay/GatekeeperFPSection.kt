@@ -32,13 +32,13 @@ import dev.bilbo.app.ui.components.FPBalanceWidget
 import dev.bilbo.app.ui.theme.BilboTheme
 
 // ── Colours reused from the gatekeeper palette ────────────────────────────────
-private val GkPrimary   = Color(0xFF48B8A0)
-private val FpGreen     = Color(0xFF4CAF50)
-private val FpYellow    = Color(0xFFFFC107)
-private val FpRed       = Color(0xFFE53935)
+private val GkPrimary = Color(0xFF48B8A0)
+private val FpGreen = Color(0xFF4CAF50)
+private val FpYellow = Color(0xFFFFC107)
+private val FpRed = Color(0xFFE53935)
 private val GkOnSurface = Color(0xFFE0EEF5)
-private val GkSurface   = Color(0xFF243344)
-private val GkSubtle    = Color(0xFF8AAFC4)
+private val GkSurface = Color(0xFF243344)
+private val GkSubtle = Color(0xFF8AAFC4)
 
 /**
  * Focus Points section shown inside [GatekeeperScreen] for Empty Calorie apps.
@@ -69,14 +69,14 @@ fun GatekeeperFPSection(
         exit = fadeOut(),
     ) {
         Column(
-            modifier = modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(GkSurface)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(GkSurface)
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
-
             // ── Balance + ring ────────────────────────────────────────────
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -91,32 +91,36 @@ fun GatekeeperFPSection(
                 Column {
                     Text(
                         text = "Your Focus Points",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            color = GkSubtle,
-                        ),
+                        style =
+                            MaterialTheme.typography.labelMedium.copy(
+                                color = GkSubtle,
+                            ),
                     )
                     Spacer(modifier = Modifier.height(2.dp))
                     Text(
                         text = "This will cost ~$estimatedCostFp FP",
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            color = GkOnSurface,
-                            fontWeight = FontWeight.Medium,
-                        ),
+                        style =
+                            MaterialTheme.typography.bodyMedium.copy(
+                                color = GkOnSurface,
+                                fontWeight = FontWeight.Medium,
+                            ),
                     )
                 }
             }
 
             // ── Status message ────────────────────────────────────────────
             when {
-                currentBalance <= 0 -> FpStatusBanner(
-                    message = "No Focus Points remaining. Earn more first.",
-                    color = FpRed,
-                )
-                currentBalance < 10 -> FpStatusBanner(
-                    message = "Low balance. $currentBalance FP remaining.",
-                    color = FpYellow,
-                )
-                else -> {}   // All good — no banner needed
+                currentBalance <= 0 ->
+                    FpStatusBanner(
+                        message = "No Focus Points remaining. Earn more first.",
+                        color = FpRed,
+                    )
+                currentBalance < 10 ->
+                    FpStatusBanner(
+                        message = "Low balance. $currentBalance FP remaining.",
+                        color = FpYellow,
+                    )
+                else -> {} // All good — no banner needed
             }
         }
     }
@@ -125,18 +129,21 @@ fun GatekeeperFPSection(
 // ── Status banner ─────────────────────────────────────────────────────────────
 
 @Composable
-private fun FpStatusBanner(message: String, color: Color) {
+private fun FpStatusBanner(
+    message: String,
+    color: Color,
+) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(8.dp))
-            .border(
-                width = 1.dp,
-                color = color.copy(alpha = 0.5f),
-                shape = RoundedCornerShape(8.dp),
-            )
-            .background(color.copy(alpha = 0.1f))
-            .padding(horizontal = 12.dp, vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(8.dp))
+                .border(
+                    width = 1.dp,
+                    color = color.copy(alpha = 0.5f),
+                    shape = RoundedCornerShape(8.dp),
+                ).background(color.copy(alpha = 0.1f))
+                .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {

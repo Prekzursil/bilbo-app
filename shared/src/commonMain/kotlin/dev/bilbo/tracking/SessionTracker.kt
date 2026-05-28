@@ -8,8 +8,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import kotlinx.datetime.Instant
+import kotlin.time.Clock
 
 /**
  * Tracks app-usage sessions by listening to foreground-app transitions and
@@ -31,7 +31,6 @@ class SessionTracker(
     private val usageRepository: UsageRepository,
     private val appProfileRepository: AppProfileRepository,
 ) {
-
     companion object {
         /** Sessions shorter than this threshold are silently discarded. */
         const val MIN_SESSION_SECONDS = 3L
@@ -80,19 +79,22 @@ class SessionTracker(
         currentSessionId = null
 
         scope.launch {
-            val category = appProfileRepository.getByPackageName(newApp.packageName)
-                ?.category
-                ?: AppCategory.NEUTRAL
+            val category =
+                appProfileRepository
+                    .getByPackageName(newApp.packageName)
+                    ?.category
+                    ?: AppCategory.NEUTRAL
 
-            val session = UsageSession(
-                packageName = newApp.packageName,
-                appLabel = newApp.appLabel,
-                category = category,
-                startTime = now,
-                endTime = null,
-                durationSeconds = 0L,
-                wasTracked = true,
-            )
+            val session =
+                UsageSession(
+                    packageName = newApp.packageName,
+                    appLabel = newApp.appLabel,
+                    category = category,
+                    startTime = now,
+                    endTime = null,
+                    durationSeconds = 0L,
+                    wasTracked = true,
+                )
             val id = usageRepository.insert(session)
             currentSessionId = id
         }

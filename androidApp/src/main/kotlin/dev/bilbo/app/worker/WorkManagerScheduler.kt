@@ -17,38 +17,40 @@ import javax.inject.Singleton
  * then [cancelSyncWork] if the user signs out.
  */
 @Singleton
-class WorkManagerScheduler @Inject constructor(
-    private val workManager: WorkManager,
-) {
+class WorkManagerScheduler
+    @Inject
+    constructor(
+        private val workManager: WorkManager,
+    ) {
+        fun scheduleSyncWork() {
+            val constraints =
+                Constraints
+                    .Builder()
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiresBatteryNotLow(false)
+                    .build()
 
-    fun scheduleSyncWork() {
-        val constraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .setRequiresBatteryNotLow(false)
-            .build()
+            val syncRequest =
+                PeriodicWorkRequestBuilder<SyncWorker>(
+                    repeatInterval = 1L,
+                    repeatIntervalTimeUnit = TimeUnit.HOURS,
+                    flexTimeInterval = 15L,
+                    flexTimeIntervalUnit = TimeUnit.MINUTES,
+                ).setConstraints(constraints)
+                    .setBackoffCriteria(
+                        BackoffPolicy.EXPONENTIAL,
+                        30L,
+                        TimeUnit.MINUTES,
+                    ).build()
 
-        val syncRequest = PeriodicWorkRequestBuilder<SyncWorker>(
-            repeatInterval = 1L,
-            repeatIntervalTimeUnit = TimeUnit.HOURS,
-            flexTimeInterval = 15L,
-            flexTimeIntervalUnit = TimeUnit.MINUTES,
-        )
-            .setConstraints(constraints)
-            .setBackoffCriteria(
-                BackoffPolicy.EXPONENTIAL,
-                30L,
-                TimeUnit.MINUTES,
+            workManager.enqueueUniquePeriodicWork(
+                SyncWorker.WORK_NAME,
+                ExistingPeriodicWorkPolicy.KEEP,
+                syncRequest,
             )
-            .build()
+        }
 
-        workManager.enqueueUniquePeriodicWork(
-            SyncWorker.WORK_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            syncRequest,
-        )
+        fun cancelSyncWork() {
+            workManager.cancelUniqueWork(SyncWorker.WORK_NAME)
+        }
     }
-
-    fun cancelSyncWork() {
-        workManager.cancelUniqueWork(SyncWorker.WORK_NAME)
-    }
-}

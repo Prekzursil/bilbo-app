@@ -6,9 +6,9 @@ import dev.bilbo.domain.AnalogSuggestion
 import dev.bilbo.domain.FPEconomy
 import dev.bilbo.domain.SuggestionCategory
 import dev.bilbo.domain.TimeOfDay
-import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 /**
  * Selects, scores, and records interactions with [AnalogSuggestion] items.
@@ -35,7 +35,6 @@ class SuggestionEngine(
     private val currentTimeOfDay: () -> TimeOfDay = { resolveTimeOfDay() },
     private val clock: Clock = Clock.System,
 ) {
-
     // ── Public API ─────────────────────────────────────────────────────────────
 
     /**
@@ -47,19 +46,21 @@ class SuggestionEngine(
         val interests = userInterests()
 
         // Step 2 – filter by time of day (include null = any time)
-        val timeFiltered = allSuggestions.filter { s ->
-            s.timeOfDay == null || s.timeOfDay == tod
-        }
+        val timeFiltered =
+            allSuggestions.filter { s ->
+                s.timeOfDay == null || s.timeOfDay == tod
+            }
 
         // Step 3 – filter by user interests; fall back if too few results
         val interestFiltered = timeFiltered.filter { s -> s.category in interests }
         val pool = if (interestFiltered.size >= count) interestFiltered else timeFiltered
 
         // Step 4 – sort: least shown first, then highest acceptance rate
-        val sorted = pool.sortedWith(
-            compareBy<AnalogSuggestion> { it.timesShown }
-                .thenByDescending { it.acceptanceRate }
-        )
+        val sorted =
+            pool.sortedWith(
+                compareBy<AnalogSuggestion> { it.timesShown }
+                    .thenByDescending { it.acceptanceRate },
+            )
 
         // Step 5 – top N
         return sorted.take(count)
@@ -114,14 +115,16 @@ class SuggestionEngine(
          *   - 21:00–04:59 → NIGHT
          */
         fun resolveTimeOfDay(clock: Clock = Clock.System): TimeOfDay {
-            val hour = clock.now()
-                .toLocalDateTime(TimeZone.currentSystemDefault())
-                .hour
+            val hour =
+                clock
+                    .now()
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .hour
             return when (hour) {
-                in 5..11  -> TimeOfDay.MORNING
+                in 5..11 -> TimeOfDay.MORNING
                 in 12..16 -> TimeOfDay.AFTERNOON
                 in 17..20 -> TimeOfDay.EVENING
-                else      -> TimeOfDay.NIGHT
+                else -> TimeOfDay.NIGHT
             }
         }
     }

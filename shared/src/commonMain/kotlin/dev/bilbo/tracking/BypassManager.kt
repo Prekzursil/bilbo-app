@@ -8,59 +8,51 @@ package dev.bilbo.tracking
  * in [shouldBypass] without a restart.
  */
 class BypassManager {
-
     companion object {
         /**
          * Default package names that are bypassed out of the box.
          * Covers the most common AOSP and OEM system apps.
          */
-        val DEFAULT_BYPASS_PACKAGES: Set<String> = setOf(
-            // Phone / Dialer
-            "com.android.dialer",
-            "com.google.android.dialer",
-            "com.samsung.android.dialer",
-
-            // Messaging / SMS
-            "com.android.mms",
-            "com.google.android.apps.messaging",
-            "com.samsung.android.messaging",
-
-            // Maps / Navigation
-            "com.google.android.apps.maps",
-            "com.waze",
-
-            // Camera
-            "com.android.camera",
-            "com.android.camera2",
-            "com.google.android.GoogleCamera",
-            "com.samsung.android.app.camera",
-
-            // System Settings
-            "com.android.settings",
-            "com.samsung.android.settings",
-
-            // Clock / Alarms
-            "com.android.deskclock",
-            "com.google.android.deskclock",
-            "com.samsung.android.app.clockpackage",
-
-            // Calculator
-            "com.android.calculator2",
-            "com.google.android.calculator",
-            "com.samsung.android.app.calculator",
-
-            // Bilbo itself
-            "dev.bilbo.app",
-            "dev.bilbo.app.github",
-            "dev.bilbo.app.debug",
-
-            // Emergency / accessibility
-            "com.android.emergency",
-            "com.android.systemui",
-            "com.android.launcher3",
-            "com.google.android.apps.nexuslauncher",
-            "com.samsung.android.app.launcher",
-        )
+        val DEFAULT_BYPASS_PACKAGES: Set<String> =
+            setOf(
+                // Phone / Dialer
+                "com.android.dialer",
+                "com.google.android.dialer",
+                "com.samsung.android.dialer",
+                // Messaging / SMS
+                "com.android.mms",
+                "com.google.android.apps.messaging",
+                "com.samsung.android.messaging",
+                // Maps / Navigation
+                "com.google.android.apps.maps",
+                "com.waze",
+                // Camera
+                "com.android.camera",
+                "com.android.camera2",
+                "com.google.android.GoogleCamera",
+                "com.samsung.android.app.camera",
+                // System Settings
+                "com.android.settings",
+                "com.samsung.android.settings",
+                // Clock / Alarms
+                "com.android.deskclock",
+                "com.google.android.deskclock",
+                "com.samsung.android.app.clockpackage",
+                // Calculator
+                "com.android.calculator2",
+                "com.google.android.calculator",
+                "com.samsung.android.app.calculator",
+                // Bilbo itself
+                "dev.bilbo.app",
+                "dev.bilbo.app.github",
+                "dev.bilbo.app.debug",
+                // Emergency / accessibility
+                "com.android.emergency",
+                "com.android.systemui",
+                "com.android.launcher3",
+                "com.google.android.apps.nexuslauncher",
+                "com.samsung.android.app.launcher",
+            )
     }
 
     /** Mutable set combining defaults and user additions. */

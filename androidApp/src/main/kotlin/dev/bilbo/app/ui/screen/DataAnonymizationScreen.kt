@@ -15,7 +15,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -64,21 +63,22 @@ fun DataAnonymizationScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                    ),
             )
         },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .verticalScroll(verticalScrollState)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .verticalScroll(verticalScrollState)
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp),
         ) {
-
             // ── Disclosure banner ─────────────────────────────────────────────
             DisclosureBanner()
 
@@ -110,9 +110,10 @@ private fun DisclosureBanner() {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -136,9 +137,10 @@ private fun DisclosureBanner() {
                 )
             }
             Text(
-                text = "This is exactly what we send to the AI service — no more, no less. " +
-                    "All data is aggregated and anonymized. Your name, device ID, and " +
-                    "specific app names are never included.",
+                text =
+                    "This is exactly what we send to the AI service — no more, no less. " +
+                        "All data is aggregated and anonymized. Your name, device ID, and " +
+                        "specific app names are never included.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onPrimaryContainer,
             )
@@ -154,15 +156,17 @@ private fun CloudAiToggleCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -172,8 +176,9 @@ private fun CloudAiToggleCard(
                     fontWeight = FontWeight.SemiBold,
                 )
                 Text(
-                    text = "Send anonymized weekly data to generate a personalized narrative. " +
-                        "Rate-limited to once per week.",
+                    text =
+                        "Send anonymized weekly data to generate a personalized narrative. " +
+                            "Rate-limited to once per week.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -196,12 +201,12 @@ private fun JsonPayloadCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -243,18 +248,20 @@ private fun JsonPayloadCard(
             // Scrollable monospace JSON display
             val hScrollState = rememberScrollState()
             Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp)),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp)),
                 color = MaterialTheme.colorScheme.surface,
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 340.dp)
-                        .verticalScroll(rememberScrollState())
-                        .horizontalScroll(hScrollState)
-                        .padding(12.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 340.dp)
+                            .verticalScroll(rememberScrollState())
+                            .horizontalScroll(hScrollState)
+                            .padding(12.dp),
                 ) {
                     Text(
                         text = jsonPayload.formatJson(),
@@ -280,14 +287,16 @@ private fun PrivacyReassuranceCard() {
             imageVector = Icons.Outlined.Lock,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .size(18.dp)
-                .padding(top = 2.dp),
+            modifier =
+                Modifier
+                    .size(18.dp)
+                    .padding(top = 2.dp),
         )
         Text(
-            text = "Your data stays on your device. Only the aggregated statistics shown above " +
-                "are ever transmitted — and only when you enable AI insights. The AI service " +
-                "cannot identify you from this data. You can disable this at any time.",
+            text =
+                "Your data stays on your device. Only the aggregated statistics shown above " +
+                    "are ever transmitted — and only when you enable AI insights. The AI service " +
+                    "cannot identify you from this data. You can disable this at any time.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
         )

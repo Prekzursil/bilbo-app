@@ -22,47 +22,48 @@ import javax.inject.Singleton
  * its first event.
  */
 @Singleton
-class AccessibilityAppMonitor @Inject constructor(
-    private val context: Context,
-) : AppMonitor {
+class AccessibilityAppMonitor
+    @Inject
+    constructor(
+        private val context: Context,
+    ) : AppMonitor {
+        private var appChangedCallback: ((AppInfo) -> Unit)? = null
+        private var isMonitoring = false
 
-    private var appChangedCallback: ((AppInfo) -> Unit)? = null
-    private var isMonitoring = false
+        /** Last-known foreground app as observed from LiveData. */
+        private var lastKnownApp: AppInfo? = null
 
-    /** Last-known foreground app as observed from LiveData. */
-    private var lastKnownApp: AppInfo? = null
+        // ── AppMonitor impl ───────────────────────────────────────────────────────
 
-    // ── AppMonitor impl ───────────────────────────────────────────────────────
+        override fun getCurrentForegroundApp(): AppInfo? = lastKnownApp
 
-    override fun getCurrentForegroundApp(): AppInfo? = lastKnownApp
+        override fun startMonitoring() {
+            if (isMonitoring) return
+            isMonitoring = true
 
-    override fun startMonitoring() {
-        if (isMonitoring) return
-        isMonitoring = true
+            // Observe LiveData on the main thread; callback is forwarded on every
+            // distinct package change.
+            ForegroundAppBridge.foregroundAppLiveData.observeForever { appInfo ->
+                if (!isMonitoring) return@observeForever
+                if (appInfo == null) return@observeForever
+                if (appInfo.packageName == lastKnownApp?.packageName) return@observeForever
 
-        // Observe LiveData on the main thread; callback is forwarded on every
-        // distinct package change.
-        ForegroundAppBridge.foregroundAppLiveData.observeForever { appInfo ->
-            if (!isMonitoring) return@observeForever
-            if (appInfo == null) return@observeForever
-            if (appInfo.packageName == lastKnownApp?.packageName) return@observeForever
-
-            Timber.d("AccessibilityAppMonitor: foreground → ${appInfo.packageName}")
-            lastKnownApp = appInfo
-            appChangedCallback?.invoke(appInfo)
+                Timber.d("AccessibilityAppMonitor: foreground → ${appInfo.packageName}")
+                lastKnownApp = appInfo
+                appChangedCallback?.invoke(appInfo)
+            }
+            Timber.d("AccessibilityAppMonitor: started — waiting for accessibility events")
         }
-        Timber.d("AccessibilityAppMonitor: started — waiting for accessibility events")
-    }
 
-    override fun stopMonitoring() {
-        if (!isMonitoring) return
-        isMonitoring = false
-        // Removing the observer here would require a LifecycleOwner reference;
-        // instead we gate processing on the isMonitoring flag.
-        Timber.d("AccessibilityAppMonitor: stopped")
-    }
+        override fun stopMonitoring() {
+            if (!isMonitoring) return
+            isMonitoring = false
+            // Removing the observer here would require a LifecycleOwner reference;
+            // instead we gate processing on the isMonitoring flag.
+            Timber.d("AccessibilityAppMonitor: stopped")
+        }
 
-    override fun onAppChanged(callback: (AppInfo) -> Unit) {
-        appChangedCallback = callback
+        override fun onAppChanged(callback: (AppInfo) -> Unit) {
+            appChangedCallback = callback
+        }
     }
-}

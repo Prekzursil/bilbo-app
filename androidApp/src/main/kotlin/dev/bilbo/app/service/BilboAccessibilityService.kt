@@ -23,16 +23,16 @@ import timber.log.Timber
  * Settings → Accessibility → Downloaded apps.
  */
 class BilboAccessibilityService : AccessibilityService() {
-
     private var currentPackageName: String? = null
 
     override fun onServiceConnected() {
         super.onServiceConnected()
-        serviceInfo = serviceInfo.apply {
-            eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
-            feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
-            notificationTimeout = 100
-        }
+        serviceInfo =
+            serviceInfo.apply {
+                eventTypes = AccessibilityEvent.TYPE_WINDOW_STATE_CHANGED
+                feedbackType = AccessibilityServiceInfo.FEEDBACK_GENERIC
+                notificationTimeout = 100
+            }
         Timber.d("BilboAccessibilityService connected")
     }
 
@@ -49,11 +49,12 @@ class BilboAccessibilityService : AccessibilityService() {
         // Resolve a human-readable label via PackageManager.
         val appLabel = resolveLabel(packageName)
 
-        val appInfo = AppInfo(
-            packageName = packageName,
-            appLabel = appLabel,
-            category = null, // resolved later by SessionTracker
-        )
+        val appInfo =
+            AppInfo(
+                packageName = packageName,
+                appLabel = appLabel,
+                category = null, // resolved later by SessionTracker
+            )
 
         // Post to the bridge so AccessibilityAppMonitor can pick it up.
         try {
@@ -75,13 +76,12 @@ class BilboAccessibilityService : AccessibilityService() {
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
-    private fun resolveLabel(packageName: String): String {
-        return try {
+    private fun resolveLabel(packageName: String): String =
+        try {
             val pm = packageManager
             val appInfo = pm.getApplicationInfo(packageName, 0)
             pm.getApplicationLabel(appInfo).toString()
         } catch (_: Exception) {
             packageName
         }
-    }
 }

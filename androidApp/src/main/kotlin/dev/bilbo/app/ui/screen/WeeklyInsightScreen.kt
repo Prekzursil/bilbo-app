@@ -1,11 +1,7 @@
 package dev.bilbo.app.ui.screen
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -41,34 +37,36 @@ import kotlinx.datetime.LocalDate
 
 // ── Sample / preview data helpers ────────────────────────────────────────────
 
-private val PreviewInsight = WeeklyInsight(
-    weekStart = LocalDate(2026, 4, 7),
-    tier2Insights = listOf(
-        dev.bilbo.domain.HeuristicInsight(
-            type = InsightType.ACHIEVEMENT,
-            message = "You stayed under your daily average for 5 days in a row this week.",
-            confidence = 0.92f,
-        ),
-        dev.bilbo.domain.HeuristicInsight(
-            type = InsightType.CORRELATION,
-            message = "When you feel Stressed, there's a strong correlation with using scrolling apps more.",
-            confidence = 0.78f,
-        ),
-        dev.bilbo.domain.HeuristicInsight(
-            type = InsightType.TREND,
-            message = "Mondays tend to be your highest-usage day. Consider scheduling a focus block.",
-            confidence = 0.65f,
-        ),
-    ),
-    tier3Narrative = null,
-    totalScreenTimeMinutes = 312,
-    nutritiveMinutes = 87,
-    emptyCalorieMinutes = 148,
-    fpEarned = 105,
-    fpSpent = 60,
-    intentAccuracyPercent = 0.78f,
-    streakDays = 5,
-)
+private val PreviewInsight =
+    WeeklyInsight(
+        weekStart = LocalDate(2026, 4, 7),
+        tier2Insights =
+            listOf(
+                dev.bilbo.domain.HeuristicInsight(
+                    type = InsightType.ACHIEVEMENT,
+                    message = "You stayed under your daily average for 5 days in a row this week.",
+                    confidence = 0.92f,
+                ),
+                dev.bilbo.domain.HeuristicInsight(
+                    type = InsightType.CORRELATION,
+                    message = "When you feel Stressed, there's a strong correlation with using scrolling apps more.",
+                    confidence = 0.78f,
+                ),
+                dev.bilbo.domain.HeuristicInsight(
+                    type = InsightType.TREND,
+                    message = "Mondays tend to be your highest-usage day. Consider scheduling a focus block.",
+                    confidence = 0.65f,
+                ),
+            ),
+        tier3Narrative = null,
+        totalScreenTimeMinutes = 312,
+        nutritiveMinutes = 87,
+        emptyCalorieMinutes = 148,
+        fpEarned = 105,
+        fpSpent = 60,
+        intentAccuracyPercent = 0.78f,
+        streakDays = 5,
+    )
 
 // ── Screen ────────────────────────────────────────────────────────────────────
 
@@ -110,16 +108,18 @@ fun WeeklyInsightScreen(
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                ),
+                colors =
+                    TopAppBarDefaults.topAppBarColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                    ),
             )
         },
     ) { paddingValues ->
         PullToRefreshBox(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
             state = pullState,
             isRefreshing = isRefreshing,
             onRefresh = {
@@ -175,9 +175,10 @@ private fun WeeklyInsightContent(
         }
 
         // Correlation insight cards (top 3, sorted by confidence)
-        val topInsights = insight.tier2Insights
-            .sortedByDescending { it.confidence }
-            .take(3)
+        val topInsights =
+            insight.tier2Insights
+                .sortedByDescending { it.confidence }
+                .take(3)
 
         if (topInsights.isNotEmpty()) {
             item {
@@ -221,17 +222,22 @@ private fun NarrativeHeroCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (isCloudInsight)
-                MaterialTheme.colorScheme.primaryContainer
-            else MaterialTheme.colorScheme.surfaceVariant,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (isCloudInsight) {
+                        MaterialTheme.colorScheme.primaryContainer
+                    } else {
+                        MaterialTheme.colorScheme.surfaceVariant
+                    },
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
         ) {
             if (isCloudInsight) {
                 // AI badge
@@ -261,10 +267,11 @@ private fun NarrativeHeroCard(
                 Spacer(Modifier.height(12.dp))
                 Text(
                     text = narrative,
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        fontStyle = FontStyle.Italic,
-                        lineHeight = 26.sp,
-                    ),
+                    style =
+                        MaterialTheme.typography.bodyLarge.copy(
+                            fontStyle = FontStyle.Italic,
+                            lineHeight = 26.sp,
+                        ),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                 )
             } else {
@@ -293,10 +300,18 @@ private fun StatsRow(insight: WeeklyInsight) {
     val mins = insight.totalScreenTimeMinutes % 60
     val timeLabel = if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
 
-    val nutritivePct = if (insight.totalScreenTimeMinutes > 0)
-        (insight.nutritiveMinutes * 100 / insight.totalScreenTimeMinutes) else 0
-    val emptyPct = if (insight.totalScreenTimeMinutes > 0)
-        (insight.emptyCalorieMinutes * 100 / insight.totalScreenTimeMinutes) else 0
+    val nutritivePct =
+        if (insight.totalScreenTimeMinutes > 0) {
+            (insight.nutritiveMinutes * 100 / insight.totalScreenTimeMinutes)
+        } else {
+            0
+        }
+    val emptyPct =
+        if (insight.totalScreenTimeMinutes > 0) {
+            (insight.emptyCalorieMinutes * 100 / insight.totalScreenTimeMinutes)
+        } else {
+            0
+        }
 
     LazyRow(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -346,9 +361,10 @@ private fun StatCard(
     Card(
         modifier = Modifier.width(110.dp),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(14.dp),
@@ -379,10 +395,11 @@ private fun StatCard(
 @Composable
 private fun TrendChartCard(dailyMinutes: List<Int>) {
     val days = listOf("M", "T", "W", "T", "F", "S", "S")
-    val values = dailyMinutes.take(7).let { list ->
-        // Pad to 7 if needed
-        list + List(maxOf(0, 7 - list.size)) { 0 }
-    }
+    val values =
+        dailyMinutes.take(7).let { list ->
+            // Pad to 7 if needed
+            list + List(maxOf(0, 7 - list.size)) { 0 }
+        }
     val maxVal = values.max().coerceAtLeast(1).toFloat()
     val primary = MaterialTheme.colorScheme.primary
     val onSurface = MaterialTheme.colorScheme.onSurface
@@ -390,9 +407,10 @@ private fun TrendChartCard(dailyMinutes: List<Int>) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -404,46 +422,51 @@ private fun TrendChartCard(dailyMinutes: List<Int>) {
 
             // Canvas line chart
             Canvas(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(120.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(120.dp),
             ) {
                 val width = size.width
                 val height = size.height
                 val stepX = width / (values.size - 1).coerceAtLeast(1).toFloat()
                 val padding = 8.dp.toPx()
 
-                val points = values.mapIndexed { i, v ->
-                    Offset(
-                        x = i * stepX,
-                        y = height - padding - (v / maxVal) * (height - padding * 2),
-                    )
-                }
+                val points =
+                    values.mapIndexed { i, v ->
+                        Offset(
+                            x = i * stepX,
+                            y = height - padding - (v / maxVal) * (height - padding * 2),
+                        )
+                    }
 
                 // Gradient fill under the line
-                val gradientPath = Path().apply {
-                    if (points.isNotEmpty()) {
-                        moveTo(points.first().x, height)
-                        points.forEach { lineTo(it.x, it.y) }
-                        lineTo(points.last().x, height)
-                        close()
+                val gradientPath =
+                    Path().apply {
+                        if (points.isNotEmpty()) {
+                            moveTo(points.first().x, height)
+                            points.forEach { lineTo(it.x, it.y) }
+                            lineTo(points.last().x, height)
+                            close()
+                        }
                     }
-                }
                 drawPath(
                     path = gradientPath,
-                    brush = Brush.verticalGradient(
-                        colors = listOf(primary.copy(alpha = 0.25f), Color.Transparent),
-                        startY = 0f,
-                        endY = height,
-                    ),
+                    brush =
+                        Brush.verticalGradient(
+                            colors = listOf(primary.copy(alpha = 0.25f), Color.Transparent),
+                            startY = 0f,
+                            endY = height,
+                        ),
                 )
 
                 // Line
-                val linePath = Path().apply {
-                    points.forEachIndexed { i, pt ->
-                        if (i == 0) moveTo(pt.x, pt.y) else lineTo(pt.x, pt.y)
+                val linePath =
+                    Path().apply {
+                        points.forEachIndexed { i, pt ->
+                            if (i == 0) moveTo(pt.x, pt.y) else lineTo(pt.x, pt.y)
+                        }
                     }
-                }
                 drawPath(
                     path = linePath,
                     color = primary,
@@ -484,37 +507,42 @@ private fun TrendChartCard(dailyMinutes: List<Int>) {
 
 @Composable
 private fun InsightCard(insight: HeuristicInsight) {
-    val (icon, tint) = when (insight.type) {
-        InsightType.CORRELATION -> Pair(Icons.Outlined.TrendingUp, Color(0xFF2196F3))
-        InsightType.TREND       -> Pair(Icons.Outlined.ShowChart, Color(0xFFFF9800))
-        InsightType.ANOMALY     -> Pair(Icons.Outlined.Warning, Color(0xFFF44336))
-        InsightType.ACHIEVEMENT -> Pair(Icons.Outlined.EmojiEvents, Color(0xFF4CAF50))
-    }
+    val (icon, tint) =
+        when (insight.type) {
+            InsightType.CORRELATION -> Pair(Icons.Outlined.TrendingUp, Color(0xFF2196F3))
+            InsightType.TREND -> Pair(Icons.Outlined.ShowChart, Color(0xFFFF9800))
+            InsightType.ANOMALY -> Pair(Icons.Outlined.Warning, Color(0xFFF44336))
+            InsightType.ACHIEVEMENT -> Pair(Icons.Outlined.EmojiEvents, Color(0xFF4CAF50))
+        }
 
     val confidencePct = (insight.confidence * 100).toInt()
-    val confidenceLabel = when {
-        insight.confidence >= 0.8f -> "High"
-        insight.confidence >= 0.6f -> "Medium"
-        else -> "Low"
-    }
-    val confidenceColor = when {
-        insight.confidence >= 0.8f -> Color(0xFF4CAF50)
-        insight.confidence >= 0.6f -> Color(0xFFFF9800)
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
+    val confidenceLabel =
+        when {
+            insight.confidence >= 0.8f -> "High"
+            insight.confidence >= 0.6f -> "Medium"
+            else -> "Low"
+        }
+    val confidenceColor =
+        when {
+            insight.confidence >= 0.8f -> Color(0xFF4CAF50)
+            insight.confidence >= 0.6f -> Color(0xFFFF9800)
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        }
 
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surface,
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
@@ -567,9 +595,10 @@ private fun StreakCard(streakDays: Int) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
     ) {
         Column(
             modifier = Modifier.padding(16.dp),
@@ -598,12 +627,13 @@ private fun StreakCard(streakDays: Int) {
                             val dotIndex = week * 7 + day
                             val isActive = dotIndex >= (totalDots - activeDots)
                             Box(
-                                modifier = Modifier
-                                    .size(12.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (isActive) primary else outline.copy(alpha = 0.3f),
-                                    ),
+                                modifier =
+                                    Modifier
+                                        .size(12.dp)
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (isActive) primary else outline.copy(alpha = 0.3f),
+                                        ),
                             )
                         }
                     }
@@ -653,18 +683,20 @@ private fun RateLimitBanner() {
 @Composable
 private fun WeeklyInsightSkeleton() {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         repeat(4) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(if (it == 0) 140.dp else 80.dp)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(MaterialTheme.colorScheme.surfaceVariant),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(if (it == 0) 140.dp else 80.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant),
             )
         }
     }
@@ -677,6 +709,9 @@ private fun buildFallbackNarrative(insight: WeeklyInsight): String {
     val mins = insight.totalScreenTimeMinutes % 60
     val timeStr = if (hours > 0) "${hours}h ${mins}m" else "${mins}m"
     return "This week you spent $timeStr on your phone. " +
-        if (insight.streakDays >= 3) "You kept a ${insight.streakDays}-day streak — great work!"
-        else "Keep building your streak — every day counts."
+        if (insight.streakDays >= 3) {
+            "You kept a ${insight.streakDays}-day streak — great work!"
+        } else {
+            "Keep building your streak — every day counts."
+        }
 }

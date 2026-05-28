@@ -9,9 +9,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FlashOn
-import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material.icons.filled.Groups
-import androidx.compose.material.icons.filled.TrendingUp
+import androidx.compose.material.icons.filled.Psychology
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -29,49 +28,50 @@ import androidx.compose.ui.unit.sp
 private data class FeatureHighlight(
     val icon: ImageVector,
     val title: String,
-    val description: String
+    val description: String,
 )
 
 @Composable
-fun WelcomeScreen(
-    onGetStarted: () -> Unit
-) {
-    val features = listOf(
-        FeatureHighlight(
-            icon = Icons.Filled.FlashOn,
-            title = "Focus Points",
-            description = "Earn rewards for intentional screen time"
-        ),
-        FeatureHighlight(
-            icon = Icons.Filled.Psychology,
-            title = "Intent Gatekeeper",
-            description = "Pause before opening distracting apps"
-        ),
-        FeatureHighlight(
-            icon = Icons.Filled.Groups,
-            title = "Social Accountability",
-            description = "Grow alongside friends and circles"
+fun WelcomeScreen(onGetStarted: () -> Unit) {
+    val features =
+        listOf(
+            FeatureHighlight(
+                icon = Icons.Filled.FlashOn,
+                title = "Focus Points",
+                description = "Earn rewards for intentional screen time",
+            ),
+            FeatureHighlight(
+                icon = Icons.Filled.Psychology,
+                title = "Intent Gatekeeper",
+                description = "Pause before opening distracting apps",
+            ),
+            FeatureHighlight(
+                icon = Icons.Filled.Groups,
+                title = "Social Accountability",
+                description = "Grow alongside friends and circles",
+            ),
         )
-    )
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color(0xFF0F2240), // deep navy
-                        Color(0xFF1A0F3C)  // deep purple
-                    )
-                )
-            )
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0xFF0F2240), // deep navy
+                            Color(0xFF1A0F3C), // deep purple
+                        ),
+                    ),
+                ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 32.dp)
-                .padding(top = 72.dp, bottom = 40.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 32.dp)
+                    .padding(top = 72.dp, bottom = 40.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             // Logo / brand mark
             BilboLogoMark()
@@ -80,13 +80,14 @@ fun WelcomeScreen(
 
             Text(
                 text = "Take control of\nyour screen time",
-                style = MaterialTheme.typography.headlineLarge.copy(
-                    fontWeight = FontWeight.Black,
-                    fontSize = 36.sp,
-                    lineHeight = 44.sp
-                ),
+                style =
+                    MaterialTheme.typography.headlineLarge.copy(
+                        fontWeight = FontWeight.Black,
+                        fontSize = 36.sp,
+                        lineHeight = 44.sp,
+                    ),
                 color = Color.White,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -95,7 +96,7 @@ fun WelcomeScreen(
                 text = "Bilbo helps you build intentional digital habits.",
                 style = MaterialTheme.typography.bodyLarge,
                 color = Color.White.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
 
             Spacer(modifier = Modifier.height(48.dp))
@@ -111,20 +112,23 @@ fun WelcomeScreen(
             // CTA
             Button(
                 onClick = onGetStarted,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
                 shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color(0xFFFFB300) // Bilbo amber
-                )
+                colors =
+                    ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFFFFB300), // Bilbo amber
+                    ),
             ) {
                 Text(
                     text = "Get Started",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold
-                    ),
-                    color = Color(0xFF0F2240)
+                    style =
+                        MaterialTheme.typography.titleMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                        ),
+                    color = Color(0xFF0F2240),
                 )
             }
         }
@@ -134,17 +138,18 @@ fun WelcomeScreen(
 @Composable
 private fun BilboLogoMark() {
     Box(
-        modifier = Modifier
-            .size(96.dp)
-            .clip(CircleShape)
-            .background(Color(0xFF5C33A3).copy(alpha = 0.8f)),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .size(96.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF5C33A3).copy(alpha = 0.8f)),
+        contentAlignment = Alignment.Center,
     ) {
         Icon(
             imageVector = Icons.Filled.FlashOn,
             contentDescription = "Bilbo logo",
             tint = Color(0xFFFFB300),
-            modifier = Modifier.size(56.dp)
+            modifier = Modifier.size(56.dp),
         )
     }
 }
@@ -153,20 +158,21 @@ private fun BilboLogoMark() {
 private fun FeatureRow(feature: FeatureHighlight) {
     Row(
         modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
-                .size(48.dp)
-                .clip(RoundedCornerShape(14.dp))
-                .background(Color(0xFF5C33A3).copy(alpha = 0.5f)),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color(0xFF5C33A3).copy(alpha = 0.5f)),
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = feature.icon,
                 contentDescription = null,
                 tint = Color(0xFFFFB300),
-                modifier = Modifier.size(26.dp)
+                modifier = Modifier.size(26.dp),
             )
         }
 
@@ -176,12 +182,12 @@ private fun FeatureRow(feature: FeatureHighlight) {
             Text(
                 text = feature.title,
                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                color = Color.White
+                color = Color.White,
             )
             Text(
                 text = feature.description,
                 style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.65f)
+                color = Color.White.copy(alpha = 0.65f),
             )
         }
     }

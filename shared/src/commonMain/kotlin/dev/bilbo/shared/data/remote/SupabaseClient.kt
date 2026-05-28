@@ -20,12 +20,13 @@ import io.github.jan.supabase.realtime.Realtime
 fun createBilboSupabaseClient(
     supabaseUrl: String,
     supabaseKey: String,
-): SupabaseClient = createSupabaseClient(
-    supabaseUrl = supabaseUrl,
-    supabaseKey = supabaseKey,
-) {
-    install(Auth)
-    install(Postgrest)
-    install(Realtime)
-    install(Functions)
-}
+): SupabaseClient =
+    createSupabaseClient(
+        supabaseUrl = supabaseUrl,
+        supabaseKey = supabaseKey,
+    ) {
+        install(Auth)
+        install(Postgrest)
+        install(Realtime)
+        install(Functions)
+    }

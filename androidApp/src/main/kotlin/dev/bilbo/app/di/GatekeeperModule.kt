@@ -9,8 +9,8 @@ import dagger.hilt.components.SingletonComponent
 import dev.bilbo.app.overlay.GatekeeperController
 import dev.bilbo.app.overlay.OverlayManager
 import dev.bilbo.data.IntentRepository
-import dev.bilbo.tracking.BypassManager
 import dev.bilbo.tracking.AppMonitor
+import dev.bilbo.tracking.BypassManager
 import javax.inject.Singleton
 
 /**
@@ -24,7 +24,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object GatekeeperModule {
-
     @Provides
     @Singleton
     fun provideOverlayManager(
@@ -42,10 +41,11 @@ object GatekeeperModule {
         overlayManager: OverlayManager,
         bypassManager: BypassManager,
         intentRepository: IntentRepository,
-    ): GatekeeperController = GatekeeperController(
-        context = context,
-        overlayManager = overlayManager,
-        bypassManager = bypassManager,
-        intentRepository = intentRepository,
-    )
+    ): GatekeeperController =
+        GatekeeperController(
+            context = context,
+            overlayManager = overlayManager,
+            bypassManager = bypassManager,
+            intentRepository = intentRepository,
+        )
 }

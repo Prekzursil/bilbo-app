@@ -2,12 +2,12 @@ package dev.bilbo.coverage
 
 import dev.bilbo.preferences.*
 import dev.bilbo.shared.domain.model.*
-import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
 import dev.bilbo.shared.util.*
 import dev.bilbo.util.*
 import kotlinx.datetime.*
 import kotlinx.serialization.json.Json
 import kotlin.test.*
+import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
 
 // =============================================================================
 //  NotificationPreferences serialization & coverage
@@ -29,16 +29,17 @@ class NotificationPreferencesSerializationTest {
     }
 
     @Test fun serializationRoundTrip() {
-        val prefs = NotificationPreferences(
-            nudgeEnabled = false,
-            weeklyInsightEnabled = false,
-            challengeUpdateEnabled = false,
-            quietHoursEnabled = false,
-            quietStartHour = 20,
-            quietStartMinute = 30,
-            quietEndHour = 7,
-            quietEndMinute = 15
-        )
+        val prefs =
+            NotificationPreferences(
+                nudgeEnabled = false,
+                weeklyInsightEnabled = false,
+                challengeUpdateEnabled = false,
+                quietHoursEnabled = false,
+                quietStartHour = 20,
+                quietStartMinute = 30,
+                quietEndHour = 7,
+                quietEndMinute = 15,
+            )
         val str = json.encodeToString(NotificationPreferences.serializer(), prefs)
         val decoded = json.decodeFromString(NotificationPreferences.serializer(), str)
         assertEquals(prefs, decoded)
@@ -84,11 +85,17 @@ class SharedDomainModelEqualityTest {
     private val json = Json { ignoreUnknownKeys = true }
 
     @Test fun appUsageSessionEquality() {
-        val s1 = AppUsageSession(
-            id = "s1", userId = "u1", packageName = "com.test", appName = "Test",
-            startTime = Instant.fromEpochSeconds(1000), endTime = Instant.fromEpochSeconds(2000),
-            durationMs = 1000000, category = SharedAppCategory.SOCIAL
-        )
+        val s1 =
+            AppUsageSession(
+                id = "s1",
+                userId = "u1",
+                packageName = "com.test",
+                appName = "Test",
+                startTime = Instant.fromEpochSeconds(1000),
+                endTime = Instant.fromEpochSeconds(2000),
+                durationMs = 1000000,
+                category = SharedAppCategory.SOCIAL,
+            )
         val s2 = s1.copy()
         assertEquals(s1, s2)
         assertEquals(s1.hashCode(), s2.hashCode())
@@ -108,13 +115,19 @@ class SharedDomainModelEqualityTest {
     }
 
     @Test fun dailyInsightEquality() {
-        val d1 = DailyInsight(
-            id = "i1", userId = "u1", date = "2025-01-15", summary = "Good",
-            highlights = listOf("h1"), suggestions = listOf("s1"),
-            totalScreenTimeMinutes = 120,
-            topApps = listOf(AppUsageSummary("com.test", "Test", 60, SharedAppCategory.SOCIAL)),
-            tier = 1, mood = MoodScore(8, "happy")
-        )
+        val d1 =
+            DailyInsight(
+                id = "i1",
+                userId = "u1",
+                date = "2025-01-15",
+                summary = "Good",
+                highlights = listOf("h1"),
+                suggestions = listOf("s1"),
+                totalScreenTimeMinutes = 120,
+                topApps = listOf(AppUsageSummary("com.test", "Test", 60, SharedAppCategory.SOCIAL)),
+                tier = 1,
+                mood = MoodScore(8, "happy"),
+            )
         val d2 = d1.copy()
         assertEquals(d1, d2)
         assertEquals(d1.hashCode(), d2.hashCode())
@@ -135,11 +148,18 @@ class SharedDomainModelEqualityTest {
     }
 
     @Test fun wellnessGoalEquality() {
-        val g1 = WellnessGoal(
-            id = "g1", userId = "u1", name = "Reduce", description = "Less",
-            type = GoalType.SCREEN_TIME_LIMIT, targetApps = listOf("com.test"),
-            dailyLimitMinutes = 60, isActive = true, createdAt = "2025-01-01"
-        )
+        val g1 =
+            WellnessGoal(
+                id = "g1",
+                userId = "u1",
+                name = "Reduce",
+                description = "Less",
+                type = GoalType.SCREEN_TIME_LIMIT,
+                targetApps = listOf("com.test"),
+                dailyLimitMinutes = 60,
+                isActive = true,
+                createdAt = "2025-01-01",
+            )
         val g2 = g1.copy()
         assertEquals(g1, g2)
         assertEquals(g1.hashCode(), g2.hashCode())
@@ -154,51 +174,63 @@ class SharedDomainModelEqualityTest {
 // =============================================================================
 
 class ResultBranchCoverageTest {
-
     @Test fun getOrNullOnLoading() {
         val result: dev.bilbo.shared.util.Result<String> = dev.bilbo.shared.util.Result.Loading
         assertNull(result.getOrNull())
     }
 
     @Test fun getOrNullOnError() {
-        val result: dev.bilbo.shared.util.Result<String> = dev.bilbo.shared.util.Result.Error(RuntimeException("fail"))
+        val result: dev.bilbo.shared.util.Result<String> =
+            dev.bilbo.shared.util.Result
+                .Error(RuntimeException("fail"))
         assertNull(result.getOrNull())
     }
 
     @Test fun getOrNullOnSuccess() {
-        val result: dev.bilbo.shared.util.Result<String> = dev.bilbo.shared.util.Result.Success("ok")
+        val result: dev.bilbo.shared.util.Result<String> =
+            dev.bilbo.shared.util.Result
+                .Success("ok")
         assertEquals("ok", result.getOrNull())
     }
 
     @Test fun getOrThrowOnLoading() {
         val result: dev.bilbo.shared.util.Result<String> = dev.bilbo.shared.util.Result.Loading
-        val ex = assertFailsWith<IllegalStateException> {
-            result.getOrThrow()
-        }
+        val ex =
+            assertFailsWith<IllegalStateException> {
+                result.getOrThrow()
+            }
         assertTrue(ex.message!!.contains("Loading"))
     }
 
     @Test fun getOrThrowOnError() {
-        val result: dev.bilbo.shared.util.Result<String> = dev.bilbo.shared.util.Result.Error(RuntimeException("test error"))
+        val result: dev.bilbo.shared.util.Result<String> =
+            dev.bilbo.shared.util.Result
+                .Error(RuntimeException("test error"))
         assertFailsWith<RuntimeException> {
             result.getOrThrow()
         }
     }
 
     @Test fun getOrThrowOnSuccess() {
-        val result: dev.bilbo.shared.util.Result<String> = dev.bilbo.shared.util.Result.Success("data")
+        val result: dev.bilbo.shared.util.Result<String> =
+            dev.bilbo.shared.util.Result
+                .Success("data")
         assertEquals("data", result.getOrThrow())
     }
 
     @Test fun mapOnSuccess() {
-        val result: dev.bilbo.shared.util.Result<Int> = dev.bilbo.shared.util.Result.Success(42)
+        val result: dev.bilbo.shared.util.Result<Int> =
+            dev.bilbo.shared.util.Result
+                .Success(42)
         val mapped = result.map { it * 2 }
         assertEquals(84, (mapped as dev.bilbo.shared.util.Result.Success).data)
     }
 
     @Test fun mapOnError() {
         val ex = RuntimeException("fail")
-        val result: dev.bilbo.shared.util.Result<Int> = dev.bilbo.shared.util.Result.Error(ex)
+        val result: dev.bilbo.shared.util.Result<Int> =
+            dev.bilbo.shared.util.Result
+                .Error(ex)
         val mapped = result.map { it * 2 }
         assertTrue(mapped is dev.bilbo.shared.util.Result.Error)
     }
@@ -210,7 +242,9 @@ class ResultBranchCoverageTest {
     }
 
     @Test fun mapOnSuccessTransformation() {
-        val result: dev.bilbo.shared.util.Result<String> = dev.bilbo.shared.util.Result.Success("hello")
+        val result: dev.bilbo.shared.util.Result<String> =
+            dev.bilbo.shared.util.Result
+                .Success("hello")
         val mapped = result.map { it.length }
         val success = mapped as dev.bilbo.shared.util.Result.Success
         assertEquals(5, success.data)
@@ -222,7 +256,6 @@ class ResultBranchCoverageTest {
 // =============================================================================
 
 class ErrorHandlerBranchCoverageTest {
-
     @Test fun mapSerializationException() {
         val handler = DefaultErrorHandler()
         val error = handler.map(kotlinx.serialization.SerializationException("bad"))

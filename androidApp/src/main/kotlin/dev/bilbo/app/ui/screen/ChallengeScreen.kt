@@ -3,7 +3,6 @@ package dev.bilbo.app.ui.screen
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -18,18 +17,22 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import dev.bilbo.social.ChallengeEngine
-import kotlin.time.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 
 // ── UI models ─────────────────────────────────────────────────────────────────
 
 sealed class ChallengeScreenMode {
     data object List : ChallengeScreenMode()
-    data class Detail(val challengeId: String) : ChallengeScreenMode()
+
+    data class Detail(
+        val challengeId: String,
+    ) : ChallengeScreenMode()
+
     data object Create : ChallengeScreenMode()
 }
 
@@ -63,8 +66,8 @@ data class ChallengeDetailItem(
     val status: ChallengeEngine.ChallengeStatus,
     val myProgress: Int,
     val myProgressPercent: Int,
-    val leaderboard: kotlin.collections.List<ChallengeLeaderboardEntry>,       // competitive
-    val groupProgressPercent: Int,                                              // cooperative
+    val leaderboard: kotlin.collections.List<ChallengeLeaderboardEntry>, // competitive
+    val groupProgressPercent: Int, // cooperative
 )
 
 data class ChallengeLeaderboardEntry(
@@ -108,11 +111,12 @@ fun ChallengeScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = when (mode) {
-                            ChallengeScreenMode.List   -> "Challenges"
-                            is ChallengeScreenMode.Detail -> state.selectedChallenge?.title ?: "Challenge"
-                            ChallengeScreenMode.Create -> "Create Challenge"
-                        },
+                        text =
+                            when (mode) {
+                                ChallengeScreenMode.List -> "Challenges"
+                                is ChallengeScreenMode.Detail -> state.selectedChallenge?.title ?: "Challenge"
+                                ChallengeScreenMode.Create -> "Create Challenge"
+                            },
                         fontWeight = FontWeight.SemiBold,
                     )
                 },
@@ -132,12 +136,13 @@ fun ChallengeScreen(
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             when (mode) {
-                ChallengeScreenMode.List -> ChallengeListContent(
-                    challenges = state.challenges,
-                    isLoading = state.isLoading,
-                    onCreate = { onModeChange(ChallengeScreenMode.Create) },
-                    onChallengeTap = { id -> onModeChange(ChallengeScreenMode.Detail(id)) },
-                )
+                ChallengeScreenMode.List ->
+                    ChallengeListContent(
+                        challenges = state.challenges,
+                        isLoading = state.isLoading,
+                        onCreate = { onModeChange(ChallengeScreenMode.Create) },
+                        onChallengeTap = { id -> onModeChange(ChallengeScreenMode.Detail(id)) },
+                    )
                 is ChallengeScreenMode.Detail -> {
                     val challenge = state.selectedChallenge
                     if (challenge != null) {
@@ -178,9 +183,23 @@ private fun ChallengeListContent(
             item { Box(Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) { CircularProgressIndicator() } }
         } else if (challenges.isEmpty()) {
             item {
-                Column(Modifier.fillMaxWidth().padding(vertical = 40.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                    Icon(Icons.Outlined.EmojiEvents, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f), modifier = Modifier.size(48.dp))
-                    Text("No active challenges. Create one to stay motivated!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                Column(
+                    Modifier.fillMaxWidth().padding(vertical = 40.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                ) {
+                    Icon(
+                        Icons.Outlined.EmojiEvents,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                        modifier = Modifier.size(48.dp),
+                    )
+                    Text(
+                        "No active challenges. Create one to stay motivated!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
                 }
             }
         } else {
@@ -192,7 +211,10 @@ private fun ChallengeListContent(
 }
 
 @Composable
-private fun ChallengeListCard(challenge: ChallengeListItem, onClick: () -> Unit) {
+private fun ChallengeListCard(
+    challenge: ChallengeListItem,
+    onClick: () -> Unit,
+) {
     val typeColor = challengeTypeColor(challenge.type)
 
     Card(
@@ -203,20 +225,42 @@ private fun ChallengeListCard(challenge: ChallengeListItem, onClick: () -> Unit)
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(modifier = Modifier.fillMaxWidth().padding(14.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+            ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(challenge.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp), verticalAlignment = Alignment.CenterVertically) {
                         Surface(shape = RoundedCornerShape(6.dp), color = typeColor.copy(alpha = 0.12f)) {
-                            Text(challenge.type.displayName(), style = MaterialTheme.typography.labelSmall, color = typeColor, modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp))
+                            Text(
+                                challenge.type.displayName(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = typeColor,
+                                modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
+                            )
                         }
                         Text("·", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(if (challenge.isTeam) "Team" else "Solo", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            if (challenge.isTeam) "Team" else "Solo",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                         Text("·", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text("${challenge.daysRemaining}d left", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        Text(
+                            "${challenge.daysRemaining}d left",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
                     }
                 }
-                Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                Icon(
+                    Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp),
+                )
             }
 
             Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
@@ -226,7 +270,11 @@ private fun ChallengeListCard(challenge: ChallengeListItem, onClick: () -> Unit)
                     color = typeColor,
                     trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                 )
-                Text("${challenge.progressPercent}% complete", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "${challenge.progressPercent}% complete",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
         }
     }
@@ -235,7 +283,10 @@ private fun ChallengeListCard(challenge: ChallengeListItem, onClick: () -> Unit)
 // ── Detail content ────────────────────────────────────────────────────────────
 
 @Composable
-private fun ChallengeDetailContent(challenge: ChallengeDetailItem, onJoin: () -> Unit) {
+private fun ChallengeDetailContent(
+    challenge: ChallengeDetailItem,
+    onJoin: () -> Unit,
+) {
     val isCompetitive = !challenge.isTeam
     val typeColor = challengeTypeColor(challenge.type)
 
@@ -254,27 +305,59 @@ private fun ChallengeDetailContent(challenge: ChallengeDetailItem, onJoin: () ->
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(8.dp), verticalAlignment = Alignment.CenterVertically) {
                         Surface(shape = RoundedCornerShape(8.dp), color = typeColor.copy(alpha = 0.2f)) {
-                            Text(challenge.type.displayName(), style = MaterialTheme.typography.labelSmall, color = typeColor, fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                            Text(
+                                challenge.type.displayName(),
+                                style = MaterialTheme.typography.labelSmall,
+                                color = typeColor,
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            )
                         }
-                        Surface(shape = RoundedCornerShape(8.dp), color = if (challenge.isTeam) Color(0xFF4CAF50).copy(alpha = 0.15f) else Color(0xFF2196F3).copy(alpha = 0.15f)) {
-                            Text(if (challenge.isTeam) "Cooperative" else "Competitive", style = MaterialTheme.typography.labelSmall, color = if (challenge.isTeam) Color(0xFF4CAF50) else Color(0xFF2196F3), fontWeight = FontWeight.SemiBold, modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp))
+                        Surface(
+                            shape = RoundedCornerShape(8.dp),
+                            color = if (challenge.isTeam) Color(0xFF4CAF50).copy(alpha = 0.15f) else Color(0xFF2196F3).copy(alpha = 0.15f),
+                        ) {
+                            Text(
+                                if (challenge.isTeam) "Cooperative" else "Competitive",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = if (challenge.isTeam) Color(0xFF4CAF50) else Color(0xFF2196F3),
+                                fontWeight = FontWeight.SemiBold,
+                                modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                            )
                         }
                     }
                     if (challenge.description.isNotBlank()) {
-                        Text(challenge.description, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurface)
+                        Text(
+                            challenge.description,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
                     }
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                         Column {
                             Text("Start", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text(challenge.startDate.toString(), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
+                            Text(
+                                challenge.startDate.toString(),
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                            )
                         }
                         Column {
                             Text("End", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             Text(challenge.endDate.toString(), style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
                         }
                         Column {
-                            Text("Days Left", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("${challenge.daysRemaining}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = typeColor)
+                            Text(
+                                "Days Left",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                "${challenge.daysRemaining}",
+                                style = MaterialTheme.typography.bodySmall,
+                                fontWeight = FontWeight.SemiBold,
+                                color = typeColor,
+                            )
                         }
                     }
                 }
@@ -297,8 +380,17 @@ private fun ChallengeDetailContent(challenge: ChallengeDetailItem, onJoin: () ->
                         trackColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.2f),
                     )
                     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Text("${challenge.myProgress} / ${challenge.targetValue}", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold)
-                        Text("${challenge.myProgressPercent}%", style = MaterialTheme.typography.bodySmall, color = typeColor, fontWeight = FontWeight.Bold)
+                        Text(
+                            "${challenge.myProgress} / ${challenge.targetValue}",
+                            style = MaterialTheme.typography.bodySmall,
+                            fontWeight = FontWeight.SemiBold,
+                        )
+                        Text(
+                            "${challenge.myProgressPercent}%",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = typeColor,
+                            fontWeight = FontWeight.Bold,
+                        )
                     }
                 }
             }
@@ -340,24 +432,29 @@ private fun ChallengeDetailContent(challenge: ChallengeDetailItem, onJoin: () ->
 
 @Composable
 private fun ChallengeLeaderboardRow(entry: ChallengeLeaderboardEntry) {
-    val rankColor = when (entry.rank) {
-        1 -> Color(0xFFFFD700)
-        2 -> Color(0xFFC0C0C0)
-        3 -> Color(0xFFCD7F32)
-        else -> MaterialTheme.colorScheme.onSurfaceVariant
-    }
-    val rankEmoji = when (entry.rank) {
-        1 -> "🥇"
-        2 -> "🥈"
-        3 -> "🥉"
-        else -> "#${entry.rank}"
-    }
+    val rankColor =
+        when (entry.rank) {
+            1 -> Color(0xFFFFD700)
+            2 -> Color(0xFFC0C0C0)
+            3 -> Color(0xFFCD7F32)
+            else -> MaterialTheme.colorScheme.onSurfaceVariant
+        }
+    val rankEmoji =
+        when (entry.rank) {
+            1 -> "🥇"
+            2 -> "🥈"
+            3 -> "🥉"
+            else -> "#${entry.rank}"
+        }
 
     Surface(
         shape = RoundedCornerShape(12.dp),
-        color = if (entry.isCurrentUser)
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
-        else MaterialTheme.colorScheme.surface,
+        color =
+            if (entry.isCurrentUser) {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f)
+            } else {
+                MaterialTheme.colorScheme.surface
+            },
         modifier = Modifier.fillMaxWidth(),
         tonalElevation = if (entry.isCurrentUser) 0.dp else 2.dp,
     ) {
@@ -367,7 +464,12 @@ private fun ChallengeLeaderboardRow(entry: ChallengeLeaderboardEntry) {
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(rankEmoji, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.width(32.dp), textAlign = TextAlign.Center)
-            Text(entry.displayName, style = MaterialTheme.typography.bodyMedium, fontWeight = if (entry.isCurrentUser) FontWeight.Bold else FontWeight.Normal, modifier = Modifier.weight(1f))
+            Text(
+                entry.displayName,
+                style = MaterialTheme.typography.bodyMedium,
+                fontWeight = if (entry.isCurrentUser) FontWeight.Bold else FontWeight.Normal,
+                modifier = Modifier.weight(1f),
+            )
             Text(entry.progressLabel, style = MaterialTheme.typography.bodySmall, color = rankColor, fontWeight = FontWeight.SemiBold)
         }
     }
@@ -376,9 +478,7 @@ private fun ChallengeLeaderboardRow(entry: ChallengeLeaderboardEntry) {
 // ── Create challenge form ─────────────────────────────────────────────────────
 
 @Composable
-private fun CreateChallengeForm(
-    onCreate: (String, ChallengeEngine.ChallengeType, Boolean, Int, LocalDate, LocalDate) -> Unit,
-) {
+private fun CreateChallengeForm(onCreate: (String, ChallengeEngine.ChallengeType, Boolean, Int, LocalDate, LocalDate) -> Unit) {
     var title by remember { mutableStateOf("") }
     var selectedType by remember { mutableStateOf(ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES) }
     var isTeam by remember { mutableStateOf(false) }
@@ -414,7 +514,11 @@ private fun CreateChallengeForm(
                         RadioButton(selected = selectedType == type, onClick = { selectedType = type })
                         Column {
                             Text(type.displayName(), style = MaterialTheme.typography.bodyMedium)
-                            Text(type.description(), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                type.description(),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                     }
                 }
@@ -453,8 +557,11 @@ private fun CreateChallengeForm(
         }
 
         item {
-            val today = Clock.System.now()
-                .toLocalDateTime(TimeZone.currentSystemDefault()).date
+            val today =
+                Clock.System
+                    .now()
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
             val endDate = today.plus(DatePeriod(days = durationDays))
 
             Button(
@@ -477,39 +584,43 @@ private fun CreateChallengeForm(
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
-private fun ChallengeEngine.ChallengeType.displayName(): String = when (this) {
-    ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES  -> "Reduce Scrolling"
-    ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES -> "Earn Nutritive Time"
-    ChallengeEngine.ChallengeType.REACH_FP_BALANCE       -> "Reach FP Balance"
-    ChallengeEngine.ChallengeType.DAILY_STREAK           -> "Daily Streak"
-    ChallengeEngine.ChallengeType.GROUP_FP_POOL          -> "Group FP Pool"
-    ChallengeEngine.ChallengeType.ANALOG_COMPLETIONS     -> "Analog Activities"
-}
+private fun ChallengeEngine.ChallengeType.displayName(): String =
+    when (this) {
+        ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES -> "Reduce Scrolling"
+        ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES -> "Earn Nutritive Time"
+        ChallengeEngine.ChallengeType.REACH_FP_BALANCE -> "Reach FP Balance"
+        ChallengeEngine.ChallengeType.DAILY_STREAK -> "Daily Streak"
+        ChallengeEngine.ChallengeType.GROUP_FP_POOL -> "Group FP Pool"
+        ChallengeEngine.ChallengeType.ANALOG_COMPLETIONS -> "Analog Activities"
+    }
 
-private fun ChallengeEngine.ChallengeType.description(): String = when (this) {
-    ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES  -> "Reduce empty-calorie minutes below a target"
-    ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES -> "Accumulate nutritive screen time"
-    ChallengeEngine.ChallengeType.REACH_FP_BALANCE       -> "Reach a Focus Points balance"
-    ChallengeEngine.ChallengeType.DAILY_STREAK           -> "Maintain a consecutive-day streak"
-    ChallengeEngine.ChallengeType.GROUP_FP_POOL          -> "Collectively earn Focus Points"
-    ChallengeEngine.ChallengeType.ANALOG_COMPLETIONS     -> "Complete analog activity suggestions"
-}
+private fun ChallengeEngine.ChallengeType.description(): String =
+    when (this) {
+        ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES -> "Reduce empty-calorie minutes below a target"
+        ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES -> "Accumulate nutritive screen time"
+        ChallengeEngine.ChallengeType.REACH_FP_BALANCE -> "Reach a Focus Points balance"
+        ChallengeEngine.ChallengeType.DAILY_STREAK -> "Maintain a consecutive-day streak"
+        ChallengeEngine.ChallengeType.GROUP_FP_POOL -> "Collectively earn Focus Points"
+        ChallengeEngine.ChallengeType.ANALOG_COMPLETIONS -> "Complete analog activity suggestions"
+    }
 
-private fun ChallengeEngine.ChallengeType.unit(): String = when (this) {
-    ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES  -> "max minutes"
-    ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES -> "minutes"
-    ChallengeEngine.ChallengeType.REACH_FP_BALANCE       -> "FP"
-    ChallengeEngine.ChallengeType.DAILY_STREAK           -> "days"
-    ChallengeEngine.ChallengeType.GROUP_FP_POOL          -> "FP total"
-    ChallengeEngine.ChallengeType.ANALOG_COMPLETIONS     -> "activities"
-}
+private fun ChallengeEngine.ChallengeType.unit(): String =
+    when (this) {
+        ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES -> "max minutes"
+        ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES -> "minutes"
+        ChallengeEngine.ChallengeType.REACH_FP_BALANCE -> "FP"
+        ChallengeEngine.ChallengeType.DAILY_STREAK -> "days"
+        ChallengeEngine.ChallengeType.GROUP_FP_POOL -> "FP total"
+        ChallengeEngine.ChallengeType.ANALOG_COMPLETIONS -> "activities"
+    }
 
 @Composable
-private fun challengeTypeColor(type: ChallengeEngine.ChallengeType): Color = when (type) {
-    ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES  -> Color(0xFFF44336)
-    ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES -> Color(0xFF4CAF50)
-    ChallengeEngine.ChallengeType.REACH_FP_BALANCE       -> Color(0xFFFF9800)
-    ChallengeEngine.ChallengeType.DAILY_STREAK           -> Color(0xFF9C27B0)
-    ChallengeEngine.ChallengeType.GROUP_FP_POOL          -> Color(0xFF2196F3)
-    ChallengeEngine.ChallengeType.ANALOG_COMPLETIONS     -> Color(0xFF009688)
-}
+private fun challengeTypeColor(type: ChallengeEngine.ChallengeType): Color =
+    when (type) {
+        ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES -> Color(0xFFF44336)
+        ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES -> Color(0xFF4CAF50)
+        ChallengeEngine.ChallengeType.REACH_FP_BALANCE -> Color(0xFFFF9800)
+        ChallengeEngine.ChallengeType.DAILY_STREAK -> Color(0xFF9C27B0)
+        ChallengeEngine.ChallengeType.GROUP_FP_POOL -> Color(0xFF2196F3)
+        ChallengeEngine.ChallengeType.ANALOG_COMPLETIONS -> Color(0xFF009688)
+    }

@@ -45,7 +45,6 @@ import kotlin.test.*
 // =============================================================================
 
 class BypassManagerProductionTest {
-
     private lateinit var manager: dev.bilbo.tracking.BypassManager
 
     @BeforeTest
@@ -57,7 +56,10 @@ class BypassManagerProductionTest {
 
     @Test
     fun defaultBypassPackagesIsNotEmpty() {
-        assertTrue(dev.bilbo.tracking.BypassManager.DEFAULT_BYPASS_PACKAGES.isNotEmpty())
+        assertTrue(
+            dev.bilbo.tracking.BypassManager.DEFAULT_BYPASS_PACKAGES
+                .isNotEmpty(),
+        )
     }
 
     @Test
@@ -364,64 +366,69 @@ class BypassManagerProductionTest {
 // =============================================================================
 
 class AppInfoTest {
-
     @Test
     fun appInfoStoresPackageName() {
-        val info = AppInfo(
-            packageName = "com.example.app",
-            appLabel = "Example",
-            category = null
-        )
+        val info =
+            AppInfo(
+                packageName = "com.example.app",
+                appLabel = "Example",
+                category = null,
+            )
         assertEquals("com.example.app", info.packageName)
     }
 
     @Test
     fun appInfoStoresAppLabel() {
-        val info = AppInfo(
-            packageName = "com.example.app",
-            appLabel = "My App",
-            category = null
-        )
+        val info =
+            AppInfo(
+                packageName = "com.example.app",
+                appLabel = "My App",
+                category = null,
+            )
         assertEquals("My App", info.appLabel)
     }
 
     @Test
     fun appInfoCategoryCanBeNull() {
-        val info = AppInfo(
-            packageName = "com.example.app",
-            appLabel = "Example",
-            category = null
-        )
+        val info =
+            AppInfo(
+                packageName = "com.example.app",
+                appLabel = "Example",
+                category = null,
+            )
         assertNull(info.category)
     }
 
     @Test
     fun appInfoCategoryCanBeNutritive() {
-        val info = AppInfo(
-            packageName = "com.example.app",
-            appLabel = "Example",
-            category = AppCategory.NUTRITIVE
-        )
+        val info =
+            AppInfo(
+                packageName = "com.example.app",
+                appLabel = "Example",
+                category = AppCategory.NUTRITIVE,
+            )
         assertEquals(AppCategory.NUTRITIVE, info.category)
     }
 
     @Test
     fun appInfoCategoryCanBeEmptyCalories() {
-        val info = AppInfo(
-            packageName = "com.example.app",
-            appLabel = "Example",
-            category = AppCategory.EMPTY_CALORIES
-        )
+        val info =
+            AppInfo(
+                packageName = "com.example.app",
+                appLabel = "Example",
+                category = AppCategory.EMPTY_CALORIES,
+            )
         assertEquals(AppCategory.EMPTY_CALORIES, info.category)
     }
 
     @Test
     fun appInfoCategoryCanBeNeutral() {
-        val info = AppInfo(
-            packageName = "com.example.app",
-            appLabel = "Example",
-            category = AppCategory.NEUTRAL
-        )
+        val info =
+            AppInfo(
+                packageName = "com.example.app",
+                appLabel = "Example",
+                category = AppCategory.NEUTRAL,
+            )
         assertEquals(AppCategory.NEUTRAL, info.category)
     }
 
@@ -508,7 +515,6 @@ private class FakeAppMonitor : AppMonitor {
 }
 
 class AppMonitorTest {
-
     private lateinit var monitor: FakeAppMonitor
 
     @BeforeTest
@@ -589,7 +595,6 @@ class AppMonitorTest {
 // =============================================================================
 
 class BilboErrorTest {
-
     @Test
     fun offlineDefaultMessage() {
         val error = BilboError.Offline()
@@ -735,7 +740,6 @@ class BilboErrorTest {
 // =============================================================================
 
 class ExceptionClassesTest {
-
     @Test
     fun offlineExceptionDefaultMessage() {
         val ex = OfflineException()
@@ -776,7 +780,6 @@ class ExceptionClassesTest {
 // =============================================================================
 
 class DefaultErrorHandlerTest {
-
     private lateinit var handler: DefaultErrorHandler
 
     @BeforeTest
@@ -1069,201 +1072,218 @@ class DefaultErrorHandlerTest {
 // =============================================================================
 
 class WithRetryTest {
-
     @Test
-    fun withRetryReturnsValueOnFirstSuccess() = runTest {
-        val result = withRetry { "success" }
-        assertEquals("success", result)
-    }
-
-    @Test
-    fun withRetryRetriesOnOfflineException() = runTest {
-        var attempts = 0
-        val result = withRetry(
-            maxAttempts = 3,
-            initialDelay = 1L,
-            factor = 1.0
-        ) {
-            attempts++
-            if (attempts < 2) throw OfflineException()
-            "recovered"
+    fun withRetryReturnsValueOnFirstSuccess() =
+        runTest {
+            val result = withRetry { "success" }
+            assertEquals("success", result)
         }
-        assertEquals("recovered", result)
-        assertEquals(2, attempts)
-    }
 
     @Test
-    fun withRetryRetriesOnServerError() = runTest {
-        var attempts = 0
-        val result = withRetry(
-            maxAttempts = 3,
-            initialDelay = 1L,
-            factor = 1.0
-        ) {
-            attempts++
-            if (attempts < 2) throw NetworkException(500, "Server Error")
-            "recovered"
+    fun withRetryRetriesOnOfflineException() =
+        runTest {
+            var attempts = 0
+            val result =
+                withRetry(
+                    maxAttempts = 3,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    attempts++
+                    if (attempts < 2) throw OfflineException()
+                    "recovered"
+                }
+            assertEquals("recovered", result)
+            assertEquals(2, attempts)
         }
-        assertEquals("recovered", result)
-        assertEquals(2, attempts)
-    }
 
     @Test
-    fun withRetryThrowsOnClientError() = runTest {
-        assertFailsWith<BilboError.ClientError> {
-            withRetry(
-                maxAttempts = 3,
-                initialDelay = 1L,
-                factor = 1.0
-            ) {
-                throw NetworkException(400, "Bad Request")
+    fun withRetryRetriesOnServerError() =
+        runTest {
+            var attempts = 0
+            val result =
+                withRetry(
+                    maxAttempts = 3,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    attempts++
+                    if (attempts < 2) throw NetworkException(500, "Server Error")
+                    "recovered"
+                }
+            assertEquals("recovered", result)
+            assertEquals(2, attempts)
+        }
+
+    @Test
+    fun withRetryThrowsOnClientError() =
+        runTest {
+            assertFailsWith<BilboError.ClientError> {
+                withRetry(
+                    maxAttempts = 3,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    throw NetworkException(400, "Bad Request")
+                }
             }
         }
-    }
 
     @Test
-    fun withRetryThrowsOnUnauthorized() = runTest {
-        assertFailsWith<BilboError.Unauthorized> {
-            withRetry(
-                maxAttempts = 3,
-                initialDelay = 1L,
-                factor = 1.0
-            ) {
-                throw NetworkException(401, "Unauthorized")
+    fun withRetryThrowsOnUnauthorized() =
+        runTest {
+            assertFailsWith<BilboError.Unauthorized> {
+                withRetry(
+                    maxAttempts = 3,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    throw NetworkException(401, "Unauthorized")
+                }
             }
         }
-    }
 
     @Test
-    fun withRetryThrowsOnNotFound() = runTest {
-        assertFailsWith<BilboError.NotFound> {
-            withRetry(
-                maxAttempts = 3,
-                initialDelay = 1L,
-                factor = 1.0
-            ) {
-                throw NetworkException(404, "Not Found")
+    fun withRetryThrowsOnNotFound() =
+        runTest {
+            assertFailsWith<BilboError.NotFound> {
+                withRetry(
+                    maxAttempts = 3,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    throw NetworkException(404, "Not Found")
+                }
             }
         }
-    }
 
     @Test
-    fun withRetryThrowsOnDataError() = runTest {
-        assertFailsWith<BilboError.DataError> {
-            withRetry(
-                maxAttempts = 3,
-                initialDelay = 1L,
-                factor = 1.0
-            ) {
-                throw SerializationException("bad json")
+    fun withRetryThrowsOnDataError() =
+        runTest {
+            assertFailsWith<BilboError.DataError> {
+                withRetry(
+                    maxAttempts = 3,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    throw SerializationException("bad json")
+                }
             }
         }
-    }
 
     @Test
-    fun withRetryThrowsOnUnknownError() = runTest {
-        assertFailsWith<BilboError.Unknown> {
-            withRetry(
-                maxAttempts = 3,
-                initialDelay = 1L,
-                factor = 1.0
-            ) {
-                throw IllegalStateException("nope")
+    fun withRetryThrowsOnUnknownError() =
+        runTest {
+            assertFailsWith<BilboError.Unknown> {
+                withRetry(
+                    maxAttempts = 3,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    throw IllegalStateException("nope")
+                }
             }
         }
-    }
 
     @Test
-    fun withRetryExhaustsAllAttemptsOnPersistentOffline() = runTest {
-        var attempts = 0
-        assertFailsWith<BilboError.Offline> {
-            withRetry(
-                maxAttempts = 3,
-                initialDelay = 1L,
-                factor = 1.0
-            ) {
-                attempts++
-                throw OfflineException()
+    fun withRetryExhaustsAllAttemptsOnPersistentOffline() =
+        runTest {
+            var attempts = 0
+            assertFailsWith<BilboError.Offline> {
+                withRetry(
+                    maxAttempts = 3,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    attempts++
+                    throw OfflineException()
+                }
             }
+            // Should have attempted maxAttempts - 1 times in the repeat block,
+            // then thrown on the last retry check
+            assertTrue(attempts >= 2)
         }
-        // Should have attempted maxAttempts - 1 times in the repeat block,
-        // then thrown on the last retry check
-        assertTrue(attempts >= 2)
-    }
 
     @Test
-    fun withRetryExhaustsAllAttemptsOnPersistentServerError() = runTest {
-        var attempts = 0
-        assertFailsWith<BilboError.ServerError> {
-            withRetry(
-                maxAttempts = 3,
-                initialDelay = 1L,
-                factor = 1.0
-            ) {
-                attempts++
-                throw NetworkException(503, "Service Unavailable")
+    fun withRetryExhaustsAllAttemptsOnPersistentServerError() =
+        runTest {
+            var attempts = 0
+            assertFailsWith<BilboError.ServerError> {
+                withRetry(
+                    maxAttempts = 3,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    attempts++
+                    throw NetworkException(503, "Service Unavailable")
+                }
             }
+            assertTrue(attempts >= 2)
         }
-        assertTrue(attempts >= 2)
-    }
 
     @Test
-    fun withRetryDefaultMaxAttemptsIs3() = runTest {
-        var attempts = 0
-        assertFailsWith<BilboError.Offline> {
-            withRetry(initialDelay = 1L, factor = 1.0) {
-                attempts++
-                throw OfflineException()
+    fun withRetryDefaultMaxAttemptsIs3() =
+        runTest {
+            var attempts = 0
+            assertFailsWith<BilboError.Offline> {
+                withRetry(initialDelay = 1L, factor = 1.0) {
+                    attempts++
+                    throw OfflineException()
+                }
             }
+            assertTrue(attempts >= 2)
         }
-        assertTrue(attempts >= 2)
-    }
 
     @Test
-    fun withRetrySingleAttemptThrowsImmediately() = runTest {
-        var attempts = 0
-        assertFailsWith<OfflineException> {
-            withRetry(
-                maxAttempts = 1,
-                initialDelay = 1L,
-                factor = 1.0
-            ) {
-                attempts++
-                throw OfflineException()
+    fun withRetrySingleAttemptThrowsImmediately() =
+        runTest {
+            var attempts = 0
+            assertFailsWith<OfflineException> {
+                withRetry(
+                    maxAttempts = 1,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    attempts++
+                    throw OfflineException()
+                }
             }
+            assertEquals(1, attempts)
         }
-        assertEquals(1, attempts)
-    }
 
     @Test
-    fun withRetrySucceedsOnSecondAttempt() = runTest {
-        var attempts = 0
-        val result = withRetry(
-            maxAttempts = 3,
-            initialDelay = 1L,
-            factor = 1.0
-        ) {
-            attempts++
-            if (attempts == 1) throw OfflineException()
-            42
+    fun withRetrySucceedsOnSecondAttempt() =
+        runTest {
+            var attempts = 0
+            val result =
+                withRetry(
+                    maxAttempts = 3,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                ) {
+                    attempts++
+                    if (attempts == 1) throw OfflineException()
+                    42
+                }
+            assertEquals(42, result)
+            assertEquals(2, attempts)
         }
-        assertEquals(42, result)
-        assertEquals(2, attempts)
-    }
 
     @Test
-    fun withRetryAcceptsCustomErrorHandler() = runTest {
-        val customHandler = DefaultErrorHandler()
-        val result = withRetry(
-            maxAttempts = 2,
-            initialDelay = 1L,
-            factor = 1.0,
-            errorHandler = customHandler
-        ) {
-            "ok"
+    fun withRetryAcceptsCustomErrorHandler() =
+        runTest {
+            val customHandler = DefaultErrorHandler()
+            val result =
+                withRetry(
+                    maxAttempts = 2,
+                    initialDelay = 1L,
+                    factor = 1.0,
+                    errorHandler = customHandler,
+                ) {
+                    "ok"
+                }
+            assertEquals("ok", result)
         }
-        assertEquals("ok", result)
-    }
 }
 
 // =============================================================================
@@ -1271,74 +1291,83 @@ class WithRetryTest {
 // =============================================================================
 
 class SafeCallTest {
+    @Test
+    fun safeCallReturnsSuccessOnSuccess() =
+        runTest {
+            val result = safeCall { "hello" }
+            assertTrue(result.isSuccess)
+            assertEquals("hello", result.getOrNull())
+        }
 
     @Test
-    fun safeCallReturnsSuccessOnSuccess() = runTest {
-        val result = safeCall { "hello" }
-        assertTrue(result.isSuccess)
-        assertEquals("hello", result.getOrNull())
-    }
+    fun safeCallReturnsFailureOnException() =
+        runTest {
+            val result = safeCall { throw OfflineException() }
+            assertTrue(result.isFailure)
+        }
 
     @Test
-    fun safeCallReturnsFailureOnException() = runTest {
-        val result = safeCall { throw OfflineException() }
-        assertTrue(result.isFailure)
-    }
+    fun safeCallMapsExceptionToBilboError() =
+        runTest {
+            val result = safeCall { throw OfflineException() }
+            val error = result.exceptionOrNull()
+            assertTrue(error is BilboError.Offline)
+        }
 
     @Test
-    fun safeCallMapsExceptionToBilboError() = runTest {
-        val result = safeCall { throw OfflineException() }
-        val error = result.exceptionOrNull()
-        assertTrue(error is BilboError.Offline)
-    }
+    fun safeCallMapsNetworkExceptionToServerError() =
+        runTest {
+            val result = safeCall { throw NetworkException(500, "Server Error") }
+            val error = result.exceptionOrNull()
+            assertTrue(error is BilboError.ServerError)
+        }
 
     @Test
-    fun safeCallMapsNetworkExceptionToServerError() = runTest {
-        val result = safeCall { throw NetworkException(500, "Server Error") }
-        val error = result.exceptionOrNull()
-        assertTrue(error is BilboError.ServerError)
-    }
+    fun safeCallMapsRuntimeExceptionToUnknown() =
+        runTest {
+            val result = safeCall { throw RuntimeException("oops") }
+            val error = result.exceptionOrNull()
+            assertTrue(error is BilboError.Unknown)
+        }
 
     @Test
-    fun safeCallMapsRuntimeExceptionToUnknown() = runTest {
-        val result = safeCall { throw RuntimeException("oops") }
-        val error = result.exceptionOrNull()
-        assertTrue(error is BilboError.Unknown)
-    }
+    fun safeCallMapsSerializationExceptionToDataError() =
+        runTest {
+            val result = safeCall { throw SerializationException("bad data") }
+            val error = result.exceptionOrNull()
+            assertTrue(error is BilboError.DataError)
+        }
 
     @Test
-    fun safeCallMapsSerializationExceptionToDataError() = runTest {
-        val result = safeCall { throw SerializationException("bad data") }
-        val error = result.exceptionOrNull()
-        assertTrue(error is BilboError.DataError)
-    }
+    fun safeCallUsesCustomErrorHandler() =
+        runTest {
+            val customHandler = DefaultErrorHandler()
+            val result = safeCall(customHandler) { throw OfflineException() }
+            assertTrue(result.isFailure)
+            assertTrue(result.exceptionOrNull() is BilboError.Offline)
+        }
 
     @Test
-    fun safeCallUsesCustomErrorHandler() = runTest {
-        val customHandler = DefaultErrorHandler()
-        val result = safeCall(customHandler) { throw OfflineException() }
-        assertTrue(result.isFailure)
-        assertTrue(result.exceptionOrNull() is BilboError.Offline)
-    }
+    fun safeCallReturnsCorrectSuccessValue() =
+        runTest {
+            val result = safeCall { 42 }
+            assertEquals(42, result.getOrNull())
+        }
 
     @Test
-    fun safeCallReturnsCorrectSuccessValue() = runTest {
-        val result = safeCall { 42 }
-        assertEquals(42, result.getOrNull())
-    }
+    fun safeCallSuccessWithNullValue() =
+        runTest {
+            val result = safeCall<String?> { null }
+            assertTrue(result.isSuccess)
+            assertNull(result.getOrNull())
+        }
 
     @Test
-    fun safeCallSuccessWithNullValue() = runTest {
-        val result = safeCall<String?> { null }
-        assertTrue(result.isSuccess)
-        assertNull(result.getOrNull())
-    }
-
-    @Test
-    fun safeCallSuccessWithListValue() = runTest {
-        val result = safeCall { listOf(1, 2, 3) }
-        assertEquals(listOf(1, 2, 3), result.getOrNull())
-    }
+    fun safeCallSuccessWithListValue() =
+        runTest {
+            val result = safeCall { listOf(1, 2, 3) }
+            assertEquals(listOf(1, 2, 3), result.getOrNull())
+        }
 }
 
 // =============================================================================
@@ -1346,7 +1375,6 @@ class SafeCallTest {
 // =============================================================================
 
 class ToUserMessageTest {
-
     @Test
     fun bilboOfflineToUserMessage() {
         val msg = BilboError.Offline().toUserMessage()
@@ -1426,7 +1454,6 @@ class ToUserMessageTest {
 // =============================================================================
 
 class SharedResultTest {
-
     // ── Loading ──────────────────────────────────────────────────────────
 
     @Test
@@ -1602,7 +1629,6 @@ class SharedResultTest {
 // =============================================================================
 
 class DefaultEnforcementModeTest {
-
     @Test
     fun softLockExists() {
         assertEquals("SOFT_LOCK", DefaultEnforcementMode.SOFT_LOCK.name)
@@ -1674,7 +1700,6 @@ class DefaultEnforcementModeTest {
 // =============================================================================
 
 class SharingLevelPrefTest {
-
     @Test
     fun privateExists() {
         assertEquals("PRIVATE", SharingLevelPref.PRIVATE.name)
@@ -1752,7 +1777,6 @@ class SharingLevelPrefTest {
 // =============================================================================
 
 class NotificationPreferencesTest {
-
     @Test
     fun defaultNudgeEnabled() {
         val prefs = NotificationPreferences()
@@ -1880,16 +1904,17 @@ class NotificationPreferencesTest {
 
     @Test
     fun allFieldsCustomized() {
-        val prefs = NotificationPreferences(
-            nudgeEnabled = false,
-            weeklyInsightEnabled = false,
-            challengeUpdateEnabled = false,
-            quietHoursEnabled = false,
-            quietStartHour = 0,
-            quietStartMinute = 15,
-            quietEndHour = 6,
-            quietEndMinute = 30
-        )
+        val prefs =
+            NotificationPreferences(
+                nudgeEnabled = false,
+                weeklyInsightEnabled = false,
+                challengeUpdateEnabled = false,
+                quietHoursEnabled = false,
+                quietStartHour = 0,
+                quietStartMinute = 15,
+                quietEndHour = 6,
+                quietEndMinute = 30,
+            )
         assertFalse(prefs.nudgeEnabled)
         assertFalse(prefs.weeklyInsightEnabled)
         assertFalse(prefs.challengeUpdateEnabled)
@@ -1908,7 +1933,7 @@ class NotificationPreferencesTest {
 // ── Fake / Mock implementations ─────────────────────────────────────────
 
 private class FakeResourceReader(
-    private val files: Map<String, String> = emptyMap()
+    private val files: Map<String, String> = emptyMap(),
 ) : ResourceReader {
     var readCallCount = 0
     val readFileNames = mutableListOf<String>()
@@ -1922,7 +1947,7 @@ private class FakeResourceReader(
 }
 
 private class FakeSeedPreferenceStore(
-    private var seeded: Boolean = false
+    private var seeded: Boolean = false,
 ) : SeedPreferenceStore {
     var markSeededCallCount = 0
     var clearSeededCallCount = 0
@@ -1945,28 +1970,52 @@ private class FakeAppProfileRepository : AppProfileRepository {
     var insertCallCount = 0
 
     override fun observeAll(): Flow<List<AppProfile>> = flowOf(stored.values.toList())
+
     override suspend fun getAll(): List<AppProfile> = stored.values.toList()
+
     override suspend fun getByPackageName(packageName: String): AppProfile? = stored[packageName]
+
     override fun observeByPackageName(packageName: String): Flow<AppProfile?> = flowOf(stored[packageName])
-    override suspend fun getByCategory(category: AppCategory): List<AppProfile> =
-        stored.values.filter { it.category == category }
+
+    override suspend fun getByCategory(category: AppCategory): List<AppProfile> = stored.values.filter { it.category == category }
+
     override suspend fun getByEnforcementMode(enforcementMode: EnforcementMode): List<AppProfile> =
         stored.values.filter { it.enforcementMode == enforcementMode }
+
     override suspend fun getBypassed(): List<AppProfile> = stored.values.filter { it.isBypassed }
+
     override suspend fun getCustomClassified(): List<AppProfile> = stored.values.filter { it.isCustomClassification }
+
     override suspend fun insert(profile: AppProfile) {
         insertCallCount++
         stored[profile.packageName] = profile
     }
-    override suspend fun update(profile: AppProfile) { stored[profile.packageName] = profile }
-    override suspend fun upsert(profile: AppProfile) { stored[profile.packageName] = profile }
-    override suspend fun updateCategory(packageName: String, category: AppCategory) {
+
+    override suspend fun update(profile: AppProfile) {
+        stored[profile.packageName] = profile
+    }
+
+    override suspend fun upsert(profile: AppProfile) {
+        stored[profile.packageName] = profile
+    }
+
+    override suspend fun updateCategory(
+        packageName: String,
+        category: AppCategory,
+    ) {
         stored[packageName]?.let { stored[packageName] = it.copy(category = category) }
     }
-    override suspend fun updateBypass(packageName: String, isBypassed: Boolean) {
+
+    override suspend fun updateBypass(
+        packageName: String,
+        isBypassed: Boolean,
+    ) {
         stored[packageName]?.let { stored[packageName] = it.copy(isBypassed = isBypassed) }
     }
-    override suspend fun deleteByPackageName(packageName: String) { stored.remove(packageName) }
+
+    override suspend fun deleteByPackageName(packageName: String) {
+        stored.remove(packageName)
+    }
 }
 
 private class FakeSuggestionRepository : SuggestionRepository {
@@ -1975,43 +2024,57 @@ private class FakeSuggestionRepository : SuggestionRepository {
     private var nextId = 1L
 
     override fun observeAll(): Flow<List<AnalogSuggestion>> = flowOf(stored.toList())
+
     override suspend fun getAll(): List<AnalogSuggestion> = stored.toList()
+
     override suspend fun getById(id: Long): AnalogSuggestion? = stored.find { it.id == id }
-    override suspend fun getByCategory(category: SuggestionCategory): List<AnalogSuggestion> =
-        stored.filter { it.category == category }
+
+    override suspend fun getByCategory(category: SuggestionCategory): List<AnalogSuggestion> = stored.filter { it.category == category }
+
     override suspend fun getByTimeOfDay(timeOfDay: TimeOfDay): List<AnalogSuggestion> =
         stored.filter { it.timeOfDay == timeOfDay || it.timeOfDay == null }
+
     override suspend fun getByCategoryAndTimeOfDay(
         category: SuggestionCategory,
-        timeOfDay: TimeOfDay
+        timeOfDay: TimeOfDay,
     ): List<AnalogSuggestion> = stored.filter { it.category == category && (it.timeOfDay == timeOfDay || it.timeOfDay == null) }
+
     override suspend fun getCustom(): List<AnalogSuggestion> = stored.filter { it.isCustom }
+
     override suspend fun getTopAccepted(limit: Long): List<AnalogSuggestion> =
         stored.sortedByDescending { it.timesAccepted }.take(limit.toInt())
+
     override suspend fun insert(suggestion: AnalogSuggestion): Long {
         insertCallCount++
         val id = nextId++
         stored.add(suggestion.copy(id = id))
         return id
     }
+
     override suspend fun update(suggestion: AnalogSuggestion) {
         val idx = stored.indexOfFirst { it.id == suggestion.id }
         if (idx >= 0) stored[idx] = suggestion
     }
+
     override suspend fun recordShown(id: Long) {
         val idx = stored.indexOfFirst { it.id == id }
         if (idx >= 0) stored[idx] = stored[idx].copy(timesShown = stored[idx].timesShown + 1)
     }
+
     override suspend fun recordAccepted(id: Long) {
         val idx = stored.indexOfFirst { it.id == id }
         if (idx >= 0) stored[idx] = stored[idx].copy(timesAccepted = stored[idx].timesAccepted + 1)
     }
-    override suspend fun deleteById(id: Long) { stored.removeAll { it.id == id } }
+
+    override suspend fun deleteById(id: Long) {
+        stored.removeAll { it.id == id }
+    }
 }
 
 // ── Test JSON fixtures ──────────────────────────────────────────────────
 
-private val CLASSIFICATIONS_JSON = """
+private val CLASSIFICATIONS_JSON =
+    """
 [
     {
         "packageName": "com.instagram.android",
@@ -2026,9 +2089,10 @@ private val CLASSIFICATIONS_JSON = """
         "defaultEnforcementMode": "NUDGE"
     }
 ]
-""".trimIndent()
+    """.trimIndent()
 
-private val SUGGESTIONS_JSON = """
+private val SUGGESTIONS_JSON =
+    """
 [
     {
         "id": 0,
@@ -2052,12 +2116,11 @@ private val SUGGESTIONS_JSON = """
         "timeOfDay": null
     }
 ]
-""".trimIndent()
+    """.trimIndent()
 
 private val EMPTY_JSON = "[]"
 
 class SeedDataLoaderTest {
-
     private lateinit var appProfileRepo: FakeAppProfileRepository
     private lateinit var suggestionRepo: FakeSuggestionRepository
     private lateinit var resourceReader: FakeResourceReader
@@ -2067,16 +2130,17 @@ class SeedDataLoaderTest {
     private fun createLoader(
         classJson: String = CLASSIFICATIONS_JSON,
         suggestJson: String = SUGGESTIONS_JSON,
-        alreadySeeded: Boolean = false
+        alreadySeeded: Boolean = false,
     ) {
         appProfileRepo = FakeAppProfileRepository()
         suggestionRepo = FakeSuggestionRepository()
-        resourceReader = FakeResourceReader(
-            mapOf(
-                "default_app_classifications.json" to classJson,
-                "default_analog_suggestions.json" to suggestJson
+        resourceReader =
+            FakeResourceReader(
+                mapOf(
+                    "default_app_classifications.json" to classJson,
+                    "default_analog_suggestions.json" to suggestJson,
+                ),
             )
-        )
         prefStore = FakeSeedPreferenceStore(seeded = alreadySeeded)
         loader = SeedDataLoader(appProfileRepo, suggestionRepo, resourceReader, prefStore)
     }
@@ -2084,422 +2148,494 @@ class SeedDataLoaderTest {
     // ── load() ───────────────────────────────────────────────────────────
 
     @Test
-    fun loadReturnsTrueOnFirstRun() = runTest {
-        createLoader()
-        val result = loader.load()
-        assertTrue(result)
-    }
+    fun loadReturnsTrueOnFirstRun() =
+        runTest {
+            createLoader()
+            val result = loader.load()
+            assertTrue(result)
+        }
 
     @Test
-    fun loadReturnsFalseIfAlreadySeeded() = runTest {
-        createLoader(alreadySeeded = true)
-        val result = loader.load()
-        assertFalse(result)
-    }
+    fun loadReturnsFalseIfAlreadySeeded() =
+        runTest {
+            createLoader(alreadySeeded = true)
+            val result = loader.load()
+            assertFalse(result)
+        }
 
     @Test
-    fun loadMarksAsSeeded() = runTest {
-        createLoader()
-        loader.load()
-        assertTrue(prefStore.isSeeded())
-        assertEquals(1, prefStore.markSeededCallCount)
-    }
+    fun loadMarksAsSeeded() =
+        runTest {
+            createLoader()
+            loader.load()
+            assertTrue(prefStore.isSeeded())
+            assertEquals(1, prefStore.markSeededCallCount)
+        }
 
     @Test
-    fun loadDoesNotMarkSeededIfAlreadySeeded() = runTest {
-        createLoader(alreadySeeded = true)
-        loader.load()
-        assertEquals(0, prefStore.markSeededCallCount)
-    }
+    fun loadDoesNotMarkSeededIfAlreadySeeded() =
+        runTest {
+            createLoader(alreadySeeded = true)
+            loader.load()
+            assertEquals(0, prefStore.markSeededCallCount)
+        }
 
     @Test
-    fun loadInsertsAppProfiles() = runTest {
-        createLoader()
-        loader.load()
-        assertEquals(2, appProfileRepo.stored.size)
-        assertNotNull(appProfileRepo.stored["com.instagram.android"])
-        assertNotNull(appProfileRepo.stored["com.duolingo"])
-    }
+    fun loadInsertsAppProfiles() =
+        runTest {
+            createLoader()
+            loader.load()
+            assertEquals(2, appProfileRepo.stored.size)
+            assertNotNull(appProfileRepo.stored["com.instagram.android"])
+            assertNotNull(appProfileRepo.stored["com.duolingo"])
+        }
 
     @Test
-    fun loadInsertsCorrectAppCategory() = runTest {
-        createLoader()
-        loader.load()
-        val instagram = appProfileRepo.stored["com.instagram.android"]!!
-        assertEquals(AppCategory.EMPTY_CALORIES, instagram.category)
-    }
+    fun loadInsertsCorrectAppCategory() =
+        runTest {
+            createLoader()
+            loader.load()
+            val instagram = appProfileRepo.stored["com.instagram.android"]!!
+            assertEquals(AppCategory.EMPTY_CALORIES, instagram.category)
+        }
 
     @Test
-    fun loadInsertsCorrectEnforcementMode() = runTest {
-        createLoader()
-        loader.load()
-        val instagram = appProfileRepo.stored["com.instagram.android"]!!
-        assertEquals(EnforcementMode.HARD_LOCK, instagram.enforcementMode)
-    }
+    fun loadInsertsCorrectEnforcementMode() =
+        runTest {
+            createLoader()
+            loader.load()
+            val instagram = appProfileRepo.stored["com.instagram.android"]!!
+            assertEquals(EnforcementMode.HARD_LOCK, instagram.enforcementMode)
+        }
 
     @Test
-    fun loadInsertsCorrectNutritiveCategory() = runTest {
-        createLoader()
-        loader.load()
-        val duolingo = appProfileRepo.stored["com.duolingo"]!!
-        assertEquals(AppCategory.NUTRITIVE, duolingo.category)
-    }
+    fun loadInsertsCorrectNutritiveCategory() =
+        runTest {
+            createLoader()
+            loader.load()
+            val duolingo = appProfileRepo.stored["com.duolingo"]!!
+            assertEquals(AppCategory.NUTRITIVE, duolingo.category)
+        }
 
     @Test
-    fun loadInsertsNudgeEnforcementMode() = runTest {
-        createLoader()
-        loader.load()
-        val duolingo = appProfileRepo.stored["com.duolingo"]!!
-        assertEquals(EnforcementMode.NUDGE, duolingo.enforcementMode)
-    }
+    fun loadInsertsNudgeEnforcementMode() =
+        runTest {
+            createLoader()
+            loader.load()
+            val duolingo = appProfileRepo.stored["com.duolingo"]!!
+            assertEquals(EnforcementMode.NUDGE, duolingo.enforcementMode)
+        }
 
     @Test
-    fun loadInsertsAppProfileWithCorrectLabel() = runTest {
-        createLoader()
-        loader.load()
-        assertEquals("Instagram", appProfileRepo.stored["com.instagram.android"]!!.appLabel)
-        assertEquals("Duolingo", appProfileRepo.stored["com.duolingo"]!!.appLabel)
-    }
+    fun loadInsertsAppProfileWithCorrectLabel() =
+        runTest {
+            createLoader()
+            loader.load()
+            assertEquals("Instagram", appProfileRepo.stored["com.instagram.android"]!!.appLabel)
+            assertEquals("Duolingo", appProfileRepo.stored["com.duolingo"]!!.appLabel)
+        }
 
     @Test
-    fun loadInsertsAppProfileNotBypassed() = runTest {
-        createLoader()
-        loader.load()
-        assertFalse(appProfileRepo.stored["com.instagram.android"]!!.isBypassed)
-    }
+    fun loadInsertsAppProfileNotBypassed() =
+        runTest {
+            createLoader()
+            loader.load()
+            assertFalse(appProfileRepo.stored["com.instagram.android"]!!.isBypassed)
+        }
 
     @Test
-    fun loadInsertsAppProfileNotCustomClassified() = runTest {
-        createLoader()
-        loader.load()
-        assertFalse(appProfileRepo.stored["com.instagram.android"]!!.isCustomClassification)
-    }
+    fun loadInsertsAppProfileNotCustomClassified() =
+        runTest {
+            createLoader()
+            loader.load()
+            assertFalse(appProfileRepo.stored["com.instagram.android"]!!.isCustomClassification)
+        }
 
     @Test
-    fun loadInsertsSuggestions() = runTest {
-        createLoader()
-        loader.load()
-        assertEquals(3, suggestionRepo.stored.size)
-    }
+    fun loadInsertsSuggestions() =
+        runTest {
+            createLoader()
+            loader.load()
+            assertEquals(3, suggestionRepo.stored.size)
+        }
 
     @Test
-    fun loadInsertsSuggestionWithCorrectCategory() = runTest {
-        createLoader()
-        loader.load()
-        val exercise = suggestionRepo.stored.find { it.text == "Go for a 20-minute walk" }
-        assertNotNull(exercise)
-        assertEquals(SuggestionCategory.EXERCISE, exercise.category)
-    }
+    fun loadInsertsSuggestionWithCorrectCategory() =
+        runTest {
+            createLoader()
+            loader.load()
+            val exercise = suggestionRepo.stored.find { it.text == "Go for a 20-minute walk" }
+            assertNotNull(exercise)
+            assertEquals(SuggestionCategory.EXERCISE, exercise.category)
+        }
 
     @Test
-    fun loadInsertsSuggestionWithCorrectTimeOfDay() = runTest {
-        createLoader()
-        loader.load()
-        val walk = suggestionRepo.stored.find { it.text == "Go for a 20-minute walk" }
-        assertNotNull(walk)
-        assertEquals(TimeOfDay.MORNING, walk.timeOfDay)
-    }
+    fun loadInsertsSuggestionWithCorrectTimeOfDay() =
+        runTest {
+            createLoader()
+            loader.load()
+            val walk = suggestionRepo.stored.find { it.text == "Go for a 20-minute walk" }
+            assertNotNull(walk)
+            assertEquals(TimeOfDay.MORNING, walk.timeOfDay)
+        }
 
     @Test
-    fun loadInsertsSuggestionWithNullTimeOfDay() = runTest {
-        createLoader()
-        loader.load()
-        val guitar = suggestionRepo.stored.find { it.text == "Play guitar for 15 minutes" }
-        assertNotNull(guitar)
-        assertNull(guitar.timeOfDay)
-    }
+    fun loadInsertsSuggestionWithNullTimeOfDay() =
+        runTest {
+            createLoader()
+            loader.load()
+            val guitar = suggestionRepo.stored.find { it.text == "Play guitar for 15 minutes" }
+            assertNotNull(guitar)
+            assertNull(guitar.timeOfDay)
+        }
 
     @Test
-    fun loadInsertsSuggestionWithTags() = runTest {
-        createLoader()
-        loader.load()
-        val walk = suggestionRepo.stored.find { it.text == "Go for a 20-minute walk" }
-        assertNotNull(walk)
-        assertEquals(listOf("outdoor", "easy"), walk.tags)
-    }
+    fun loadInsertsSuggestionWithTags() =
+        runTest {
+            createLoader()
+            loader.load()
+            val walk = suggestionRepo.stored.find { it.text == "Go for a 20-minute walk" }
+            assertNotNull(walk)
+            assertEquals(listOf("outdoor", "easy"), walk.tags)
+        }
 
     @Test
-    fun loadInsertsSuggestionNotCustom() = runTest {
-        createLoader()
-        loader.load()
-        suggestionRepo.stored.forEach { assertFalse(it.isCustom) }
-    }
+    fun loadInsertsSuggestionNotCustom() =
+        runTest {
+            createLoader()
+            loader.load()
+            suggestionRepo.stored.forEach { assertFalse(it.isCustom) }
+        }
 
     @Test
-    fun loadReadsCorrectResourceFiles() = runTest {
-        createLoader()
-        loader.load()
-        assertEquals(2, resourceReader.readCallCount)
-        assertTrue("default_app_classifications.json" in resourceReader.readFileNames)
-        assertTrue("default_analog_suggestions.json" in resourceReader.readFileNames)
-    }
+    fun loadReadsCorrectResourceFiles() =
+        runTest {
+            createLoader()
+            loader.load()
+            assertEquals(2, resourceReader.readCallCount)
+            assertTrue("default_app_classifications.json" in resourceReader.readFileNames)
+            assertTrue("default_analog_suggestions.json" in resourceReader.readFileNames)
+        }
 
     @Test
-    fun loadDoesNotReadResourcesIfAlreadySeeded() = runTest {
-        createLoader(alreadySeeded = true)
-        loader.load()
-        assertEquals(0, resourceReader.readCallCount)
-    }
+    fun loadDoesNotReadResourcesIfAlreadySeeded() =
+        runTest {
+            createLoader(alreadySeeded = true)
+            loader.load()
+            assertEquals(0, resourceReader.readCallCount)
+        }
 
     @Test
-    fun loadSkipsDuplicateAppProfiles() = runTest {
-        createLoader()
-        // Pre-populate a profile
-        appProfileRepo.stored["com.instagram.android"] = AppProfile(
-            packageName = "com.instagram.android",
-            appLabel = "Instagram Custom",
-            category = AppCategory.NEUTRAL,
-            enforcementMode = EnforcementMode.NUDGE
-        )
-        loader.load()
-        // The existing profile should NOT be overwritten
-        assertEquals("Instagram Custom", appProfileRepo.stored["com.instagram.android"]!!.appLabel)
-        assertEquals(AppCategory.NEUTRAL, appProfileRepo.stored["com.instagram.android"]!!.category)
-    }
+    fun loadSkipsDuplicateAppProfiles() =
+        runTest {
+            createLoader()
+            // Pre-populate a profile
+            appProfileRepo.stored["com.instagram.android"] =
+                AppProfile(
+                    packageName = "com.instagram.android",
+                    appLabel = "Instagram Custom",
+                    category = AppCategory.NEUTRAL,
+                    enforcementMode = EnforcementMode.NUDGE,
+                )
+            loader.load()
+            // The existing profile should NOT be overwritten
+            assertEquals("Instagram Custom", appProfileRepo.stored["com.instagram.android"]!!.appLabel)
+            assertEquals(AppCategory.NEUTRAL, appProfileRepo.stored["com.instagram.android"]!!.category)
+        }
 
     @Test
-    fun loadSkipsSuggestionsIfNonCustomExist() = runTest {
-        createLoader()
-        // Pre-populate a non-custom suggestion
-        suggestionRepo.stored.add(
-            AnalogSuggestion(
-                id = 99,
-                text = "Existing suggestion",
-                category = SuggestionCategory.EXERCISE,
-                tags = emptyList(),
-                isCustom = false
+    fun loadSkipsSuggestionsIfNonCustomExist() =
+        runTest {
+            createLoader()
+            // Pre-populate a non-custom suggestion
+            suggestionRepo.stored.add(
+                AnalogSuggestion(
+                    id = 99,
+                    text = "Existing suggestion",
+                    category = SuggestionCategory.EXERCISE,
+                    tags = emptyList(),
+                    isCustom = false,
+                ),
             )
-        )
-        loader.load()
-        // Should not have added new suggestions
-        assertEquals(1, suggestionRepo.stored.size)
-    }
+            loader.load()
+            // Should not have added new suggestions
+            assertEquals(1, suggestionRepo.stored.size)
+        }
 
     @Test
-    fun loadInsertsSuggestionsIfOnlyCustomExist() = runTest {
-        createLoader()
-        // Pre-populate only a custom suggestion
-        suggestionRepo.stored.add(
-            AnalogSuggestion(
-                id = 99,
-                text = "My custom suggestion",
-                category = SuggestionCategory.CREATIVE,
-                tags = emptyList(),
-                isCustom = true
+    fun loadInsertsSuggestionsIfOnlyCustomExist() =
+        runTest {
+            createLoader()
+            // Pre-populate only a custom suggestion
+            suggestionRepo.stored.add(
+                AnalogSuggestion(
+                    id = 99,
+                    text = "My custom suggestion",
+                    category = SuggestionCategory.CREATIVE,
+                    tags = emptyList(),
+                    isCustom = true,
+                ),
             )
-        )
-        loader.load()
-        // Custom suggestions don't count; new ones should be inserted
-        assertEquals(4, suggestionRepo.stored.size) // 1 custom + 3 seeded
-    }
+            loader.load()
+            // Custom suggestions don't count; new ones should be inserted
+            assertEquals(4, suggestionRepo.stored.size) // 1 custom + 3 seeded
+        }
 
     @Test
-    fun loadWithEmptyClassificationsJson() = runTest {
-        createLoader(classJson = EMPTY_JSON)
-        loader.load()
-        assertEquals(0, appProfileRepo.stored.size)
-        // Suggestions should still be loaded
-        assertEquals(3, suggestionRepo.stored.size)
-    }
+    fun loadWithEmptyClassificationsJson() =
+        runTest {
+            createLoader(classJson = EMPTY_JSON)
+            loader.load()
+            assertEquals(0, appProfileRepo.stored.size)
+            // Suggestions should still be loaded
+            assertEquals(3, suggestionRepo.stored.size)
+        }
 
     @Test
-    fun loadWithEmptySuggestionsJson() = runTest {
-        createLoader(suggestJson = EMPTY_JSON)
-        loader.load()
-        // App profiles should still be loaded
-        assertEquals(2, appProfileRepo.stored.size)
-        assertEquals(0, suggestionRepo.stored.size)
-    }
+    fun loadWithEmptySuggestionsJson() =
+        runTest {
+            createLoader(suggestJson = EMPTY_JSON)
+            loader.load()
+            // App profiles should still be loaded
+            assertEquals(2, appProfileRepo.stored.size)
+            assertEquals(0, suggestionRepo.stored.size)
+        }
 
     @Test
-    fun loadIsIdempotent() = runTest {
-        createLoader()
-        val first = loader.load()
-        val second = loader.load()
-        assertTrue(first)
-        assertFalse(second)
-    }
+    fun loadIsIdempotent() =
+        runTest {
+            createLoader()
+            val first = loader.load()
+            val second = loader.load()
+            assertTrue(first)
+            assertFalse(second)
+        }
 
     // ── forceReload() ────────────────────────────────────────────────────
 
     @Test
-    fun forceReloadClearsSeededFlagAndReseeds() = runTest {
-        createLoader()
-        loader.load()
-        assertTrue(prefStore.isSeeded())
+    fun forceReloadClearsSeededFlagAndReseeds() =
+        runTest {
+            createLoader()
+            loader.load()
+            assertTrue(prefStore.isSeeded())
 
-        loader.forceReload()
-        assertTrue(prefStore.isSeeded()) // re-seeded
-        assertEquals(1, prefStore.clearSeededCallCount)
-    }
-
-    @Test
-    fun forceReloadCallsClearSeeded() = runTest {
-        createLoader()
-        loader.forceReload()
-        assertEquals(1, prefStore.clearSeededCallCount)
-    }
+            loader.forceReload()
+            assertTrue(prefStore.isSeeded()) // re-seeded
+            assertEquals(1, prefStore.clearSeededCallCount)
+        }
 
     @Test
-    fun forceReloadReloadsData() = runTest {
-        createLoader()
-        loader.load()
-        val initialSuggestionCount = suggestionRepo.stored.size
-
-        // Clear stored suggestions so forceReload re-inserts them
-        suggestionRepo.stored.clear()
-        loader.forceReload()
-        // forceReload clears seeded flag and calls load again, re-inserting suggestions
-        assertEquals(initialSuggestionCount, suggestionRepo.stored.size)
-    }
+    fun forceReloadCallsClearSeeded() =
+        runTest {
+            createLoader()
+            loader.forceReload()
+            assertEquals(1, prefStore.clearSeededCallCount)
+        }
 
     @Test
-    fun forceReloadOnNeverSeededInstance() = runTest {
-        createLoader()
-        loader.forceReload()
-        assertTrue(prefStore.isSeeded())
-        assertEquals(1, prefStore.clearSeededCallCount)
-        assertEquals(2, appProfileRepo.stored.size)
-    }
+    fun forceReloadReloadsData() =
+        runTest {
+            createLoader()
+            loader.load()
+            val initialSuggestionCount = suggestionRepo.stored.size
+
+            // Clear stored suggestions so forceReload re-inserts them
+            suggestionRepo.stored.clear()
+            loader.forceReload()
+            // forceReload clears seeded flag and calls load again, re-inserting suggestions
+            assertEquals(initialSuggestionCount, suggestionRepo.stored.size)
+        }
+
+    @Test
+    fun forceReloadOnNeverSeededInstance() =
+        runTest {
+            createLoader()
+            loader.forceReload()
+            assertTrue(prefStore.isSeeded())
+            assertEquals(1, prefStore.clearSeededCallCount)
+            assertEquals(2, appProfileRepo.stored.size)
+        }
 
     // ── Category string mapping edge cases ───────────────────────────────
 
     @Test
-    fun neutralCategoryMapsCorrectly() = runTest {
-        val json = """
-        [{"packageName":"com.test","appLabel":"Test","category":"NEUTRAL","defaultEnforcementMode":"NUDGE"}]
-        """.trimIndent()
-        createLoader(classJson = json)
-        loader.load()
-        assertEquals(AppCategory.NEUTRAL, appProfileRepo.stored["com.test"]!!.category)
-    }
+    fun neutralCategoryMapsCorrectly() =
+        runTest {
+            val json =
+                """
+                [{"packageName":"com.test","appLabel":"Test","category":"NEUTRAL","defaultEnforcementMode":"NUDGE"}]
+                """.trimIndent()
+            createLoader(classJson = json)
+            loader.load()
+            assertEquals(AppCategory.NEUTRAL, appProfileRepo.stored["com.test"]!!.category)
+        }
 
     @Test
-    fun unknownCategoryDefaultsToNeutral() = runTest {
-        val json = """
-        [{"packageName":"com.test","appLabel":"Test","category":"UNKNOWN_CATEGORY","defaultEnforcementMode":"NUDGE"}]
-        """.trimIndent()
-        createLoader(classJson = json)
-        loader.load()
-        assertEquals(AppCategory.NEUTRAL, appProfileRepo.stored["com.test"]!!.category)
-    }
+    fun unknownCategoryDefaultsToNeutral() =
+        runTest {
+            val json =
+                """
+                [{"packageName":"com.test","appLabel":"Test","category":"UNKNOWN_CATEGORY","defaultEnforcementMode":"NUDGE"}]
+                """.trimIndent()
+            createLoader(classJson = json)
+            loader.load()
+            assertEquals(AppCategory.NEUTRAL, appProfileRepo.stored["com.test"]!!.category)
+        }
 
     @Test
-    fun unknownEnforcementModeDefaultsToNudge() = runTest {
-        val json = """
-        [{"packageName":"com.test","appLabel":"Test","category":"NEUTRAL","defaultEnforcementMode":"UNKNOWN_MODE"}]
-        """.trimIndent()
-        createLoader(classJson = json)
-        loader.load()
-        assertEquals(EnforcementMode.NUDGE, appProfileRepo.stored["com.test"]!!.enforcementMode)
-    }
+    fun unknownEnforcementModeDefaultsToNudge() =
+        runTest {
+            val json =
+                """
+                [{"packageName":"com.test","appLabel":"Test","category":"NEUTRAL","defaultEnforcementMode":"UNKNOWN_MODE"}]
+                """.trimIndent()
+            createLoader(classJson = json)
+            loader.load()
+            assertEquals(EnforcementMode.NUDGE, appProfileRepo.stored["com.test"]!!.enforcementMode)
+        }
 
     @Test
-    fun hardLockEnforcementModeMapCorrectly() = runTest {
-        val json = """
-        [{"packageName":"com.test","appLabel":"Test","category":"NEUTRAL","defaultEnforcementMode":"HARD_LOCK"}]
-        """.trimIndent()
-        createLoader(classJson = json)
-        loader.load()
-        assertEquals(EnforcementMode.HARD_LOCK, appProfileRepo.stored["com.test"]!!.enforcementMode)
-    }
+    fun hardLockEnforcementModeMapCorrectly() =
+        runTest {
+            val json =
+                """
+                [{"packageName":"com.test","appLabel":"Test","category":"NEUTRAL","defaultEnforcementMode":"HARD_LOCK"}]
+                """.trimIndent()
+            createLoader(classJson = json)
+            loader.load()
+            assertEquals(EnforcementMode.HARD_LOCK, appProfileRepo.stored["com.test"]!!.enforcementMode)
+        }
 
     // ── Suggestion category mapping edge cases ──────────────────────────
 
     @Test
-    fun allSuggestionCategoriesMap() = runTest {
-        val categories = listOf(
-            "EXERCISE", "CREATIVE", "SOCIAL", "MINDFULNESS",
-            "LEARNING", "NATURE", "COOKING", "MUSIC",
-            "GAMING_PHYSICAL", "READING"
-        )
-        val expectedEnums = listOf(
-            SuggestionCategory.EXERCISE, SuggestionCategory.CREATIVE,
-            SuggestionCategory.SOCIAL, SuggestionCategory.MINDFULNESS,
-            SuggestionCategory.LEARNING, SuggestionCategory.NATURE,
-            SuggestionCategory.COOKING, SuggestionCategory.MUSIC,
-            SuggestionCategory.GAMING_PHYSICAL, SuggestionCategory.READING
-        )
-        for ((i, cat) in categories.withIndex()) {
-            val json = """
-            [{"id":0,"text":"Test $cat","category":"$cat","tags":[],"timeOfDay":null}]
-            """.trimIndent()
-            createLoader(classJson = EMPTY_JSON, suggestJson = json)
-            loader.load()
-            assertEquals(expectedEnums[i], suggestionRepo.stored.first().category,
-                "Expected ${expectedEnums[i]} for category string $cat")
+    fun allSuggestionCategoriesMap() =
+        runTest {
+            val categories =
+                listOf(
+                    "EXERCISE",
+                    "CREATIVE",
+                    "SOCIAL",
+                    "MINDFULNESS",
+                    "LEARNING",
+                    "NATURE",
+                    "COOKING",
+                    "MUSIC",
+                    "GAMING_PHYSICAL",
+                    "READING",
+                )
+            val expectedEnums =
+                listOf(
+                    SuggestionCategory.EXERCISE,
+                    SuggestionCategory.CREATIVE,
+                    SuggestionCategory.SOCIAL,
+                    SuggestionCategory.MINDFULNESS,
+                    SuggestionCategory.LEARNING,
+                    SuggestionCategory.NATURE,
+                    SuggestionCategory.COOKING,
+                    SuggestionCategory.MUSIC,
+                    SuggestionCategory.GAMING_PHYSICAL,
+                    SuggestionCategory.READING,
+                )
+            for ((i, cat) in categories.withIndex()) {
+                val json =
+                    """
+                    [{"id":0,"text":"Test $cat","category":"$cat","tags":[],"timeOfDay":null}]
+                    """.trimIndent()
+                createLoader(classJson = EMPTY_JSON, suggestJson = json)
+                loader.load()
+                assertEquals(
+                    expectedEnums[i],
+                    suggestionRepo.stored.first().category,
+                    "Expected ${expectedEnums[i]} for category string $cat",
+                )
+            }
         }
-    }
 
     @Test
-    fun unknownSuggestionCategoryDefaultsToReading() = runTest {
-        val json = """
-        [{"id":0,"text":"Unknown cat","category":"NONEXISTENT","tags":[],"timeOfDay":null}]
-        """.trimIndent()
-        createLoader(classJson = EMPTY_JSON, suggestJson = json)
-        loader.load()
-        assertEquals(SuggestionCategory.READING, suggestionRepo.stored.first().category)
-    }
+    fun unknownSuggestionCategoryDefaultsToReading() =
+        runTest {
+            val json =
+                """
+                [{"id":0,"text":"Unknown cat","category":"NONEXISTENT","tags":[],"timeOfDay":null}]
+                """.trimIndent()
+            createLoader(classJson = EMPTY_JSON, suggestJson = json)
+            loader.load()
+            assertEquals(SuggestionCategory.READING, suggestionRepo.stored.first().category)
+        }
 
     // ── TimeOfDay mapping ────────────────────────────────────────────────
 
     @Test
-    fun morningTimeOfDayMaps() = runTest {
-        val json = """
-        [{"id":0,"text":"Morning","category":"EXERCISE","tags":[],"timeOfDay":"MORNING"}]
-        """.trimIndent()
-        createLoader(classJson = EMPTY_JSON, suggestJson = json)
-        loader.load()
-        assertEquals(TimeOfDay.MORNING, suggestionRepo.stored.first().timeOfDay)
-    }
+    fun morningTimeOfDayMaps() =
+        runTest {
+            val json =
+                """
+                [{"id":0,"text":"Morning","category":"EXERCISE","tags":[],"timeOfDay":"MORNING"}]
+                """.trimIndent()
+            createLoader(classJson = EMPTY_JSON, suggestJson = json)
+            loader.load()
+            assertEquals(TimeOfDay.MORNING, suggestionRepo.stored.first().timeOfDay)
+        }
 
     @Test
-    fun afternoonTimeOfDayMaps() = runTest {
-        val json = """
-        [{"id":0,"text":"Afternoon","category":"EXERCISE","tags":[],"timeOfDay":"AFTERNOON"}]
-        """.trimIndent()
-        createLoader(classJson = EMPTY_JSON, suggestJson = json)
-        loader.load()
-        assertEquals(TimeOfDay.AFTERNOON, suggestionRepo.stored.first().timeOfDay)
-    }
+    fun afternoonTimeOfDayMaps() =
+        runTest {
+            val json =
+                """
+                [{"id":0,"text":"Afternoon","category":"EXERCISE","tags":[],"timeOfDay":"AFTERNOON"}]
+                """.trimIndent()
+            createLoader(classJson = EMPTY_JSON, suggestJson = json)
+            loader.load()
+            assertEquals(TimeOfDay.AFTERNOON, suggestionRepo.stored.first().timeOfDay)
+        }
 
     @Test
-    fun eveningTimeOfDayMaps() = runTest {
-        val json = """
-        [{"id":0,"text":"Evening","category":"EXERCISE","tags":[],"timeOfDay":"EVENING"}]
-        """.trimIndent()
-        createLoader(classJson = EMPTY_JSON, suggestJson = json)
-        loader.load()
-        assertEquals(TimeOfDay.EVENING, suggestionRepo.stored.first().timeOfDay)
-    }
+    fun eveningTimeOfDayMaps() =
+        runTest {
+            val json =
+                """
+                [{"id":0,"text":"Evening","category":"EXERCISE","tags":[],"timeOfDay":"EVENING"}]
+                """.trimIndent()
+            createLoader(classJson = EMPTY_JSON, suggestJson = json)
+            loader.load()
+            assertEquals(TimeOfDay.EVENING, suggestionRepo.stored.first().timeOfDay)
+        }
 
     @Test
-    fun nightTimeOfDayMaps() = runTest {
-        val json = """
-        [{"id":0,"text":"Night","category":"EXERCISE","tags":[],"timeOfDay":"NIGHT"}]
-        """.trimIndent()
-        createLoader(classJson = EMPTY_JSON, suggestJson = json)
-        loader.load()
-        assertEquals(TimeOfDay.NIGHT, suggestionRepo.stored.first().timeOfDay)
-    }
+    fun nightTimeOfDayMaps() =
+        runTest {
+            val json =
+                """
+                [{"id":0,"text":"Night","category":"EXERCISE","tags":[],"timeOfDay":"NIGHT"}]
+                """.trimIndent()
+            createLoader(classJson = EMPTY_JSON, suggestJson = json)
+            loader.load()
+            assertEquals(TimeOfDay.NIGHT, suggestionRepo.stored.first().timeOfDay)
+        }
 
     @Test
-    fun unknownTimeOfDayDefaultsToMorning() = runTest {
-        val json = """
-        [{"id":0,"text":"Unknown tod","category":"EXERCISE","tags":[],"timeOfDay":"MIDNIGHT"}]
-        """.trimIndent()
-        createLoader(classJson = EMPTY_JSON, suggestJson = json)
-        loader.load()
-        assertEquals(TimeOfDay.MORNING, suggestionRepo.stored.first().timeOfDay)
-    }
+    fun unknownTimeOfDayDefaultsToMorning() =
+        runTest {
+            val json =
+                """
+                [{"id":0,"text":"Unknown tod","category":"EXERCISE","tags":[],"timeOfDay":"MIDNIGHT"}]
+                """.trimIndent()
+            createLoader(classJson = EMPTY_JSON, suggestJson = json)
+            loader.load()
+            assertEquals(TimeOfDay.MORNING, suggestionRepo.stored.first().timeOfDay)
+        }
 
     @Test
-    fun nullTimeOfDayRemainsNull() = runTest {
-        val json = """
-        [{"id":0,"text":"No tod","category":"EXERCISE","tags":[],"timeOfDay":null}]
-        """.trimIndent()
-        createLoader(classJson = EMPTY_JSON, suggestJson = json)
-        loader.load()
-        assertNull(suggestionRepo.stored.first().timeOfDay)
-    }
+    fun nullTimeOfDayRemainsNull() =
+        runTest {
+            val json =
+                """
+                [{"id":0,"text":"No tod","category":"EXERCISE","tags":[],"timeOfDay":null}]
+                """.trimIndent()
+            createLoader(classJson = EMPTY_JSON, suggestJson = json)
+            loader.load()
+            assertNull(suggestionRepo.stored.first().timeOfDay)
+        }
 }

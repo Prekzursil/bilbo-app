@@ -10,9 +10,8 @@ import kotlinx.datetime.LocalDate
  * No PII is included — only aggregated usage statistics and heuristic insight types.
  */
 class InsightPromptBuilder {
-
     data class WeeklySummaryPayload(
-        val weekStart: String,                    // ISO date, e.g. "2025-03-10"
+        val weekStart: String, // ISO date, e.g. "2025-03-10"
         val totalScreenTimeMinutes: Int,
         val emptyCalorieMinutes: Int,
         val nutritiveMinutes: Int,
@@ -22,12 +21,12 @@ class InsightPromptBuilder {
         val fpBalance: Int,
         val intentAccuracyPercent: Float,
         val streakDays: Int,
-        val topEmotions: List<String>,            // e.g. ["STRESSED", "BORED"]
-        val spikeDays: List<String>,              // e.g. ["MONDAY", "THURSDAY"]
-        val heuristicInsightTypes: List<String>,  // e.g. ["CORRELATION", "ACHIEVEMENT"]
-        val weekOverWeekChange: Double?,          // e.g. -0.12 means 12% reduction
-        val topNutritiveApps: List<String>,       // app labels only, no package names
-        val topEmptyCalorieApps: List<String>
+        val topEmotions: List<String>, // e.g. ["STRESSED", "BORED"]
+        val spikeDays: List<String>, // e.g. ["MONDAY", "THURSDAY"]
+        val heuristicInsightTypes: List<String>, // e.g. ["CORRELATION", "ACHIEVEMENT"]
+        val weekOverWeekChange: Double?, // e.g. -0.12 means 12% reduction
+        val topNutritiveApps: List<String>, // app labels only, no package names
+        val topEmptyCalorieApps: List<String>,
     )
 
     /**
@@ -46,40 +45,45 @@ class InsightPromptBuilder {
         insight: WeeklyInsight,
         checkIns: List<EmotionalCheckIn>,
         sessions: List<UsageSession>,
-        weekOverWeekChange: Double? = null
+        weekOverWeekChange: Double? = null,
     ): WeeklySummaryPayload {
-        val topEmotions = checkIns
-            .groupBy { it.preSessionEmotion }
-            .entries
-            .sortedByDescending { it.value.size }
-            .take(3)
-            .map { it.key.name }
+        val topEmotions =
+            checkIns
+                .groupBy { it.preSessionEmotion }
+                .entries
+                .sortedByDescending { it.value.size }
+                .take(3)
+                .map { it.key.name }
 
-        val nutritiveByApp = sessions
-            .filter { it.category == AppCategory.NUTRITIVE }
-            .groupBy { it.appLabel }
-            .entries
-            .sortedByDescending { it.value.sumOf { s -> s.durationSeconds } }
-            .take(3)
-            .map { it.key }
+        val nutritiveByApp =
+            sessions
+                .filter { it.category == AppCategory.NUTRITIVE }
+                .groupBy { it.appLabel }
+                .entries
+                .sortedByDescending { it.value.sumOf { s -> s.durationSeconds } }
+                .take(3)
+                .map { it.key }
 
-        val emptyByApp = sessions
-            .filter { it.category == AppCategory.EMPTY_CALORIES }
-            .groupBy { it.appLabel }
-            .entries
-            .sortedByDescending { it.value.sumOf { s -> s.durationSeconds } }
-            .take(3)
-            .map { it.key }
+        val emptyByApp =
+            sessions
+                .filter { it.category == AppCategory.EMPTY_CALORIES }
+                .groupBy { it.appLabel }
+                .entries
+                .sortedByDescending { it.value.sumOf { s -> s.durationSeconds } }
+                .take(3)
+                .map { it.key }
 
-        val spikeDays = insight.tier2Insights
-            .filter { it.type == InsightType.ANOMALY }
-            .mapNotNull { it.message.extractDayOfWeek() }
-            .distinct()
+        val spikeDays =
+            insight.tier2Insights
+                .filter { it.type == InsightType.ANOMALY }
+                .mapNotNull { it.message.extractDayOfWeek() }
+                .distinct()
 
         val insightTypes = insight.tier2Insights.map { it.type.name }.distinct()
 
-        val balance = FPEconomy.DAILY_BASELINE +
-            budget.fpEarned + budget.fpBonus + budget.fpRolloverIn - budget.fpSpent
+        val balance =
+            FPEconomy.DAILY_BASELINE +
+                budget.fpEarned + budget.fpBonus + budget.fpRolloverIn - budget.fpSpent
 
         return WeeklySummaryPayload(
             weekStart = weekStart.toString(),
@@ -97,7 +101,7 @@ class InsightPromptBuilder {
             heuristicInsightTypes = insightTypes,
             weekOverWeekChange = weekOverWeekChange,
             topNutritiveApps = nutritiveByApp,
-            topEmptyCalorieApps = emptyByApp
+            topEmptyCalorieApps = emptyByApp,
         )
     }
 
@@ -107,7 +111,9 @@ class InsightPromptBuilder {
      */
     fun toJson(payload: WeeklySummaryPayload): String {
         fun String.jsonStr() = "\"${this.replace("\"", "\\\"")}\""
+
         fun List<String>.jsonArr() = "[${joinToString(",") { it.jsonStr() }}]"
+
         fun Double?.jsonNum() = this?.toString() ?: "null"
 
         return buildString {
@@ -136,11 +142,16 @@ class InsightPromptBuilder {
     // Helpers
     // ---------------------------------------------------------------------------
 
-    private val dayNames = listOf(
-        "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"
-    )
+    private val dayNames =
+        listOf(
+            "Monday",
+            "Tuesday",
+            "Wednesday",
+            "Thursday",
+            "Friday",
+            "Saturday",
+            "Sunday",
+        )
 
-    private fun String.extractDayOfWeek(): String? {
-        return dayNames.firstOrNull { this.contains(it, ignoreCase = true) }?.uppercase()
-    }
+    private fun String.extractDayOfWeek(): String? = dayNames.firstOrNull { this.contains(it, ignoreCase = true) }?.uppercase()
 }

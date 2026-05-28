@@ -21,12 +21,13 @@ import kotlin.time.Duration.Companion.minutes
 class CooldownManager(
     private val persistence: CooldownPersistence = NoOpCooldownPersistence,
 ) {
-
     /**
      * Internal record holding when a cooldown expires.
      * [expiryEpochSeconds] is a Unix timestamp in seconds.
      */
-    private data class CooldownEntry(val expiryEpochSeconds: Long)
+    private data class CooldownEntry(
+        val expiryEpochSeconds: Long,
+    )
 
     private val cooldowns: MutableMap<String, CooldownEntry> = mutableMapOf()
 
@@ -36,7 +37,10 @@ class CooldownManager(
      * Put [packageName] into cooldown for [durationMinutes] minutes.
      * If already locked, the existing lock is extended to whichever expiry is later.
      */
-    fun lockApp(packageName: String, durationMinutes: Int) {
+    fun lockApp(
+        packageName: String,
+        durationMinutes: Int,
+    ) {
         val nowSecs = Clock.System.now().epochSeconds
         val newExpiry = nowSecs + durationMinutes.minutes.inWholeSeconds
         val existingExpiry = cooldowns[packageName]?.expiryEpochSeconds ?: 0L
@@ -110,9 +114,10 @@ class CooldownManager(
     fun getAllLockedApps(): List<String> {
         val nowSecs = Clock.System.now().epochSeconds
         // Purge expired entries
-        val expired = cooldowns.entries
-            .filter { (_, entry) -> nowSecs >= entry.expiryEpochSeconds }
-            .map { it.key }
+        val expired =
+            cooldowns.entries
+                .filter { (_, entry) -> nowSecs >= entry.expiryEpochSeconds }
+                .map { it.key }
         expired.forEach { pkg ->
             cooldowns.remove(pkg)
             persistence.clear(pkg)
@@ -145,7 +150,10 @@ class CooldownManager(
  */
 interface CooldownPersistence {
     /** Persist [expiryEpochSeconds] for [packageName]. */
-    fun save(packageName: String, expiryEpochSeconds: Long)
+    fun save(
+        packageName: String,
+        expiryEpochSeconds: Long,
+    )
 
     /** Remove the persisted entry for [packageName]. */
     fun clear(packageName: String)
@@ -156,7 +164,12 @@ interface CooldownPersistence {
 
 /** No-op implementation — state is in-memory only, does not survive process death. */
 object NoOpCooldownPersistence : CooldownPersistence {
-    override fun save(packageName: String, expiryEpochSeconds: Long) = Unit
+    override fun save(
+        packageName: String,
+        expiryEpochSeconds: Long,
+    ) = Unit
+
     override fun clear(packageName: String) = Unit
+
     override fun loadAll(): Map<String, Long> = emptyMap()
 }

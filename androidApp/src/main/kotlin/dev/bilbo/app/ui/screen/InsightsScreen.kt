@@ -20,9 +20,7 @@ import dev.bilbo.app.ui.theme.BilboTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InsightsScreen(
-    onNavigateBack: () -> Unit,
-) {
+fun InsightsScreen(onNavigateBack: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -31,14 +29,15 @@ fun InsightsScreen(
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
-                }
+                },
             )
-        }
+        },
     ) { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {

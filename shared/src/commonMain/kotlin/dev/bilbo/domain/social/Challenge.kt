@@ -24,7 +24,7 @@ data class Challenge(
     val completedAt: Instant? = null,
     val winnerId: String? = null,
     val localUserProgress: Float = 0f,
-    val leaderboard: List<ChallengeParticipantProgress> = emptyList()
+    val leaderboard: List<ChallengeParticipantProgress> = emptyList(),
 )
 
 /**
@@ -50,7 +50,7 @@ enum class ChallengeType {
     BEST_INTENT_ACCURACY,
 
     /** Complete a set number of breathing exercises. */
-    BREATHING_EXERCISES_COUNT
+    BREATHING_EXERCISES_COUNT,
 }
 
 /**
@@ -61,7 +61,7 @@ enum class ChallengeMode {
     COMPETITIVE,
 
     /** All participants collectively must reach the combined goal. */
-    COOPERATIVE
+    COOPERATIVE,
 }
 
 /**
@@ -78,7 +78,7 @@ enum class ChallengeStatus {
     COMPLETED,
 
     /** Creator or all participants cancelled before completion. */
-    CANCELLED
+    CANCELLED,
 }
 
 /**
@@ -92,7 +92,7 @@ enum class ChallengeStatus {
 data class ChallengeGoal(
     val targetValue: Int,
     val unit: String,
-    val perParticipant: Boolean = true
+    val perParticipant: Boolean = true,
 )
 
 /**
@@ -104,5 +104,5 @@ data class ChallengeParticipantProgress(
     val avatarUrl: String? = null,
     val currentValue: Float,
     val rank: Int,
-    val lastUpdatedAt: Instant
+    val lastUpdatedAt: Instant,
 )

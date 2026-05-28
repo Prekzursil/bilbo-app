@@ -1,8 +1,8 @@
 package dev.bilbo.intelligence
 
 import dev.bilbo.domain.*
-import dev.bilbo.intelligence.tier1.LaunchDecision
 import dev.bilbo.intelligence.tier1.EnforcementAction
+import dev.bilbo.intelligence.tier1.LaunchDecision
 import dev.bilbo.intelligence.tier1.RuleEngine
 import dev.bilbo.intelligence.tier2.CorrelationAnalyzer
 import dev.bilbo.intelligence.tier2.GamingDetector
@@ -10,8 +10,8 @@ import dev.bilbo.intelligence.tier2.HeuristicEngine
 import dev.bilbo.intelligence.tier2.TrendDetector
 import dev.bilbo.intelligence.tier3.CloudInsightClient
 import dev.bilbo.intelligence.tier3.InsightPromptBuilder
-import kotlin.time.Clock
 import kotlinx.datetime.*
+import kotlin.time.Clock
 
 /**
  * Top-level orchestrator for all three intelligence tiers.
@@ -25,21 +25,19 @@ class DecisionEngine(
     private val appProfileProvider: (String) -> AppProfile?,
     private val budgetProvider: () -> DopamineBudget,
     private val cooldownChecker: (String) -> Int?,
-
     // Tier 3 dependencies
     private val cloudInsightClient: CloudInsightClient,
     private val anonymousUserId: String,
-
     // Optional overrides for testing / dependency injection
     private val ruleEngine: RuleEngine = RuleEngine(appProfileProvider, budgetProvider, cooldownChecker),
-    private val heuristicEngine: HeuristicEngine = HeuristicEngine(
-        correlationAnalyzer = CorrelationAnalyzer(),
-        trendDetector = TrendDetector(),
-        gamingDetector = GamingDetector()
-    ),
-    private val promptBuilder: InsightPromptBuilder = InsightPromptBuilder()
+    private val heuristicEngine: HeuristicEngine =
+        HeuristicEngine(
+            correlationAnalyzer = CorrelationAnalyzer(),
+            trendDetector = TrendDetector(),
+            gamingDetector = GamingDetector(),
+        ),
+    private val promptBuilder: InsightPromptBuilder = InsightPromptBuilder(),
 ) {
-
     // -------------------------------------------------------------------------
     // Tier 1 — Real-time decisions
     // -------------------------------------------------------------------------
@@ -48,14 +46,12 @@ class DecisionEngine(
      * Evaluates whether [packageName] should be allowed to launch.
      * Called synchronously on the UI thread when the user opens an app.
      */
-    fun evaluateAppLaunch(packageName: String): LaunchDecision =
-        ruleEngine.evaluateAppLaunch(packageName)
+    fun evaluateAppLaunch(packageName: String): LaunchDecision = ruleEngine.evaluateAppLaunch(packageName)
 
     /**
      * Evaluates what enforcement action to take when a session timer expires.
      */
-    fun evaluateTimerExpiry(profile: AppProfile): EnforcementAction =
-        ruleEngine.evaluateTimerExpiry(profile)
+    fun evaluateTimerExpiry(profile: AppProfile): EnforcementAction = ruleEngine.evaluateTimerExpiry(profile)
 
     // -------------------------------------------------------------------------
     // Tier 2 — Batch weekly analysis (run off main thread)
@@ -74,16 +70,17 @@ class DecisionEngine(
         intents: List<IntentDeclaration>,
         budget: DopamineBudget,
         priorWeekSessions: List<UsageSession> = emptyList(),
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): WeeklyInsight {
-        val heuristicInsights = heuristicEngine.analyzeWeek(
-            weekStart = weekStart,
-            sessions = sessions,
-            checkIns = checkIns,
-            intents = intents,
-            priorWeekSessions = priorWeekSessions,
-            timeZone = timeZone
-        )
+        val heuristicInsights =
+            heuristicEngine.analyzeWeek(
+                weekStart = weekStart,
+                sessions = sessions,
+                checkIns = checkIns,
+                intents = intents,
+                priorWeekSessions = priorWeekSessions,
+                timeZone = timeZone,
+            )
 
         val nutritiveSessions = sessions.filter { it.category == AppCategory.NUTRITIVE }
         val emptySessions = sessions.filter { it.category == AppCategory.EMPTY_CALORIES }
@@ -94,14 +91,14 @@ class DecisionEngine(
         return WeeklyInsight(
             weekStart = weekStart,
             tier2Insights = heuristicInsights,
-            tier3Narrative = null,  // filled in by Tier-3 after cloud call
+            tier3Narrative = null, // filled in by Tier-3 after cloud call
             totalScreenTimeMinutes = (sessions.sumOf { it.durationSeconds } / 60L).toInt(),
             nutritiveMinutes = (nutritiveSessions.sumOf { it.durationSeconds } / 60L).toInt(),
             emptyCalorieMinutes = (emptySessions.sumOf { it.durationSeconds } / 60L).toInt(),
             fpEarned = budget.fpEarned,
             fpSpent = budget.fpSpent,
             intentAccuracyPercent = intentAccuracy,
-            streakDays = streakDays
+            streakDays = streakDays,
         )
     }
 
@@ -121,31 +118,32 @@ class DecisionEngine(
         budget: DopamineBudget,
         checkIns: List<EmotionalCheckIn>,
         sessions: List<UsageSession>,
-        weekOverWeekChange: Double? = null
+        weekOverWeekChange: Double? = null,
     ): WeeklyInsight {
         if (!cloudInsightClient.canRequest()) return weeklyInsight
 
-        val payload = promptBuilder.buildPayload(
-            weekStart = weeklyInsight.weekStart,
-            budget = budget,
-            insight = weeklyInsight,
-            checkIns = checkIns,
-            sessions = sessions,
-            weekOverWeekChange = weekOverWeekChange
-        )
+        val payload =
+            promptBuilder.buildPayload(
+                weekStart = weeklyInsight.weekStart,
+                budget = budget,
+                insight = weeklyInsight,
+                checkIns = checkIns,
+                sessions = sessions,
+                weekOverWeekChange = weekOverWeekChange,
+            )
 
         return when (val result = cloudInsightClient.fetchNarrativeForWeek(payload, anonymousUserId)) {
             is CloudInsightClient.InsightResult.Success ->
                 weeklyInsight.copy(tier3Narrative = result.narrative)
 
             is CloudInsightClient.InsightResult.RateLimited ->
-                weeklyInsight  // silently skip — already rate-limited server-side
+                weeklyInsight // silently skip — already rate-limited server-side
 
             is CloudInsightClient.InsightResult.NetworkError ->
-                weeklyInsight  // offline or transient error — return as-is
+                weeklyInsight // offline or transient error — return as-is
 
             is CloudInsightClient.InsightResult.ServerError ->
-                weeklyInsight  // server-side issue — return as-is
+                weeklyInsight // server-side issue — return as-is
         }
     }
 
@@ -163,17 +161,18 @@ class DecisionEngine(
         priorWeekSessions: List<UsageSession> = emptyList(),
         weekOverWeekChange: Double? = null,
         attemptCloudNarrative: Boolean = true,
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): WeeklyInsight {
-        val tier2Insight = runWeeklyAnalysis(
-            weekStart = weekStart,
-            sessions = sessions,
-            checkIns = checkIns,
-            intents = intents,
-            budget = budget,
-            priorWeekSessions = priorWeekSessions,
-            timeZone = timeZone
-        )
+        val tier2Insight =
+            runWeeklyAnalysis(
+                weekStart = weekStart,
+                sessions = sessions,
+                checkIns = checkIns,
+                intents = intents,
+                budget = budget,
+                priorWeekSessions = priorWeekSessions,
+                timeZone = timeZone,
+            )
 
         return if (attemptCloudNarrative) {
             enrichWithCloudNarrative(
@@ -181,7 +180,7 @@ class DecisionEngine(
                 budget = budget,
                 checkIns = checkIns,
                 sessions = sessions,
-                weekOverWeekChange = weekOverWeekChange
+                weekOverWeekChange = weekOverWeekChange,
             )
         } else {
             tier2Insight
@@ -196,28 +195,34 @@ class DecisionEngine(
         val completed = intents.filter { it.actualDurationMinutes != null }
         if (completed.isEmpty()) return 0f
 
-        val accurate = completed.count { intent ->
-            val declared = intent.declaredDurationMinutes
-            val actual = intent.actualDurationMinutes ?: return@count false
-            val delta = kotlin.math.abs(actual - declared).toDouble() / declared
-            delta <= 0.20
-        }
+        val accurate =
+            completed.count { intent ->
+                val declared = intent.declaredDurationMinutes
+                val actual = intent.actualDurationMinutes ?: return@count false
+                val delta = kotlin.math.abs(actual - declared).toDouble() / declared
+                delta <= 0.20
+            }
         return accurate.toFloat() / completed.size.toFloat()
     }
 
     private fun computeStreakDays(
         sessions: List<UsageSession>,
-        timeZone: TimeZone
+        timeZone: TimeZone,
     ): Int {
         if (sessions.isEmpty()) return 0
 
         // Count consecutive days (ending today) with at least one nutritive session
-        val nutritiveDates = sessions
-            .filter { it.category == AppCategory.NUTRITIVE }
-            .map { it.startTime.toLocalDateTime(timeZone).date }
-            .toSet()
+        val nutritiveDates =
+            sessions
+                .filter { it.category == AppCategory.NUTRITIVE }
+                .map { it.startTime.toLocalDateTime(timeZone).date }
+                .toSet()
 
-        val today = Clock.System.now().toLocalDateTime(timeZone).date
+        val today =
+            Clock.System
+                .now()
+                .toLocalDateTime(timeZone)
+                .date
         var streak = 0
         var current = today
         while (current in nutritiveDates) {

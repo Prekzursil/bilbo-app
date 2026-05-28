@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -27,7 +26,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -44,13 +42,13 @@ import androidx.compose.ui.unit.sp
 import dev.bilbo.domain.Emotion
 
 // ── Check-in palette: soft neutral warm tones ─────────────────────────────────
-private val CiBackground    = Color(0xFF0F1520)   // dark navy background
-private val CiCard          = Color(0xFF1B2535)   // card surface
-private val CiSelected      = Color(0xFF48B8A0)   // teal highlight
-private val CiSelectedBg    = Color(0x2048B8A0)   // teal tint background
-private val CiOnSurface     = Color(0xFFE0EEF5)   // near-white text
-private val CiSubtle        = Color(0xFF8AAFC4)   // muted blue
-private val CiSurface       = Color(0xFF243344)   // slightly lighter surface
+private val CiBackground = Color(0xFF0F1520) // dark navy background
+private val CiCard = Color(0xFF1B2535) // card surface
+private val CiSelected = Color(0xFF48B8A0) // teal highlight
+private val CiSelectedBg = Color(0x2048B8A0) // teal tint background
+private val CiOnSurface = Color(0xFFE0EEF5) // near-white text
+private val CiSubtle = Color(0xFF8AAFC4) // muted blue
+private val CiSurface = Color(0xFF243344) // slightly lighter surface
 
 /**
  * Emotion selection grid inserted between the gatekeeper and app launch.
@@ -69,22 +67,23 @@ fun EmotionalCheckInScreen(
     var selectedEmotion by remember { mutableStateOf<Emotion?>(null) }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(CiBackground, Color(0xFF0D1B2A))
-                )
-            ),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(CiBackground, Color(0xFF0D1B2A)),
+                    ),
+                ),
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
             Spacer(Modifier.height(48.dp))
 
             // ── Header ────────────────────────────────────────────────────────
@@ -97,11 +96,12 @@ fun EmotionalCheckInScreen(
 
             Text(
                 text = "How are you feeling\nright now?",
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    color = CiOnSurface,
-                    fontWeight = FontWeight.SemiBold,
-                    lineHeight = 34.sp,
-                ),
+                style =
+                    MaterialTheme.typography.headlineSmall.copy(
+                        color = CiOnSurface,
+                        fontWeight = FontWeight.SemiBold,
+                        lineHeight = 34.sp,
+                    ),
                 textAlign = TextAlign.Center,
             )
 
@@ -141,10 +141,11 @@ fun EmotionalCheckInScreen(
             TextButton(onClick = onSkip) {
                 Text(
                     text = "Skip",
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = CiSubtle,
-                        fontWeight = FontWeight.Medium,
-                    ),
+                    style =
+                        MaterialTheme.typography.bodyLarge.copy(
+                            color = CiSubtle,
+                            fontWeight = FontWeight.Medium,
+                        ),
                 )
             }
 
@@ -173,25 +174,28 @@ private fun EmotionCard(
     )
 
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .clickable { onClick() }
-            .border(
-                width = if (isSelected) 2.dp else 1.dp,
-                color = borderColor,
-                shape = RoundedCornerShape(16.dp),
-            ),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(16.dp))
+                .clickable { onClick() }
+                .border(
+                    width = if (isSelected) 2.dp else 1.dp,
+                    color = borderColor,
+                    shape = RoundedCornerShape(16.dp),
+                ),
         shape = RoundedCornerShape(16.dp),
         colors = CardDefaults.cardColors(containerColor = bgColor),
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isSelected) 4.dp else 0.dp,
-        ),
+        elevation =
+            CardDefaults.cardElevation(
+                defaultElevation = if (isSelected) 4.dp else 0.dp,
+            ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 20.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {
@@ -202,10 +206,11 @@ private fun EmotionCard(
             Spacer(Modifier.height(6.dp))
             Text(
                 text = item.label,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    color = if (isSelected) CiSelected else CiOnSurface,
-                    fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-                ),
+                style =
+                    MaterialTheme.typography.bodyMedium.copy(
+                        color = if (isSelected) CiSelected else CiOnSurface,
+                        fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                    ),
             )
         }
     }
@@ -219,12 +224,13 @@ private data class EmotionItem(
     val label: String,
 )
 
-private val EMOTION_ITEMS = listOf(
-    EmotionItem(Emotion.HAPPY,   "😊", "Happy"),
-    EmotionItem(Emotion.CALM,    "😌", "Calm"),
-    EmotionItem(Emotion.BORED,   "😑", "Bored"),
-    EmotionItem(Emotion.STRESSED,"😫", "Stressed"),
-    EmotionItem(Emotion.ANXIOUS, "😰", "Anxious"),
-    EmotionItem(Emotion.SAD,     "😢", "Sad"),
-    EmotionItem(Emotion.LONELY,  "😔", "Lonely"),
-)
+private val EMOTION_ITEMS =
+    listOf(
+        EmotionItem(Emotion.HAPPY, "😊", "Happy"),
+        EmotionItem(Emotion.CALM, "😌", "Calm"),
+        EmotionItem(Emotion.BORED, "😑", "Bored"),
+        EmotionItem(Emotion.STRESSED, "😫", "Stressed"),
+        EmotionItem(Emotion.ANXIOUS, "😰", "Anxious"),
+        EmotionItem(Emotion.SAD, "😢", "Sad"),
+        EmotionItem(Emotion.LONELY, "😔", "Lonely"),
+    )

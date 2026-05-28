@@ -8,7 +8,6 @@ import kotlinx.datetime.*
  * user's personal average.
  */
 class TrendDetector {
-
     companion object {
         /** A day is flagged as a spike if it exceeds the average by this proportion. */
         const val SPIKE_THRESHOLD = 0.40
@@ -23,14 +22,14 @@ class TrendDetector {
         val emptyCalorieMinutes: Long,
         val nutritiveMinutes: Long,
         val neutralMinutes: Long,
-        val sessionCount: Int
+        val sessionCount: Int,
     )
 
     data class TrendResult(
         val dayOfWeek: DayOfWeek,
         val averageMinutes: Double,
         val isSpike: Boolean,
-        val percentAboveAverage: Double
+        val percentAboveAverage: Double,
     )
 
     data class WeeklyTrendSummary(
@@ -38,9 +37,9 @@ class TrendDetector {
         val overallAverage: Double,
         val spikeDays: List<DailyUsageSummary>,
         val dayOfWeekTrends: Map<DayOfWeek, TrendResult>,
-        val weekOverWeekChange: Double?,  // null if no prior week data
-        val longestStreak: Int,           // consecutive days under average
-        val busiestDayOfWeek: DayOfWeek?
+        val weekOverWeekChange: Double?, // null if no prior week data
+        val longestStreak: Int, // consecutive days under average
+        val busiestDayOfWeek: DayOfWeek?,
     )
 
     /**
@@ -48,35 +47,34 @@ class TrendDetector {
      */
     fun buildDailySummaries(
         sessions: List<UsageSession>,
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
-    ): List<DailyUsageSummary> {
-        return sessions
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
+    ): List<DailyUsageSummary> =
+        sessions
             .groupBy { it.startTime.toLocalDateTime(timeZone).date }
             .map { (date, daySessions) ->
                 DailyUsageSummary(
                     date = date,
                     totalMinutes = daySessions.sumOf { it.durationSeconds } / 60L,
-                    emptyCalorieMinutes = daySessions
-                        .filter { it.category == AppCategory.EMPTY_CALORIES }
-                        .sumOf { it.durationSeconds } / 60L,
-                    nutritiveMinutes = daySessions
-                        .filter { it.category == AppCategory.NUTRITIVE }
-                        .sumOf { it.durationSeconds } / 60L,
-                    neutralMinutes = daySessions
-                        .filter { it.category == AppCategory.NEUTRAL }
-                        .sumOf { it.durationSeconds } / 60L,
-                    sessionCount = daySessions.size
+                    emptyCalorieMinutes =
+                        daySessions
+                            .filter { it.category == AppCategory.EMPTY_CALORIES }
+                            .sumOf { it.durationSeconds } / 60L,
+                    nutritiveMinutes =
+                        daySessions
+                            .filter { it.category == AppCategory.NUTRITIVE }
+                            .sumOf { it.durationSeconds } / 60L,
+                    neutralMinutes =
+                        daySessions
+                            .filter { it.category == AppCategory.NEUTRAL }
+                            .sumOf { it.durationSeconds } / 60L,
+                    sessionCount = daySessions.size,
                 )
-            }
-            .sortedBy { it.date }
-    }
+            }.sortedBy { it.date }
 
     /**
      * Detects spike days — days where total usage exceeds the personal average by >[SPIKE_THRESHOLD].
      */
-    fun detectSpikeDays(
-        dailySummaries: List<DailyUsageSummary>
-    ): List<DailyUsageSummary> {
+    fun detectSpikeDays(dailySummaries: List<DailyUsageSummary>): List<DailyUsageSummary> {
         if (dailySummaries.size < MIN_DAYS_FOR_TREND) return emptyList()
 
         val average = dailySummaries.map { it.totalMinutes }.average()
@@ -88,9 +86,7 @@ class TrendDetector {
     /**
      * Computes per-day-of-week averages and flags days that consistently run high.
      */
-    fun analyzeDayOfWeekTrends(
-        dailySummaries: List<DailyUsageSummary>
-    ): Map<DayOfWeek, TrendResult> {
+    fun analyzeDayOfWeekTrends(dailySummaries: List<DailyUsageSummary>): Map<DayOfWeek, TrendResult> {
         if (dailySummaries.isEmpty()) return emptyMap()
 
         val overallAverage = dailySummaries.map { it.totalMinutes }.average()
@@ -104,7 +100,7 @@ class TrendDetector {
                     dayOfWeek = dow,
                     averageMinutes = avg,
                     isSpike = pctAbove > SPIKE_THRESHOLD,
-                    percentAboveAverage = pctAbove
+                    percentAboveAverage = pctAbove,
                 )
             }
     }
@@ -134,7 +130,7 @@ class TrendDetector {
      */
     fun computeWeekOverWeekChange(
         currentWeek: List<DailyUsageSummary>,
-        priorWeek: List<DailyUsageSummary>
+        priorWeek: List<DailyUsageSummary>,
     ): Double? {
         if (priorWeek.isEmpty()) return null
         val prior = priorWeek.sumOf { it.emptyCalorieMinutes }.toDouble()
@@ -149,21 +145,26 @@ class TrendDetector {
     fun analyzeWeek(
         currentWeekSessions: List<UsageSession>,
         priorWeekSessions: List<UsageSession> = emptyList(),
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): WeeklyTrendSummary {
         val dailySummaries = buildDailySummaries(currentWeekSessions, timeZone)
         val priorSummaries = buildDailySummaries(priorWeekSessions, timeZone)
 
-        val overallAverage = if (dailySummaries.isNotEmpty())
-            dailySummaries.map { it.totalMinutes }.average() else 0.0
+        val overallAverage =
+            if (dailySummaries.isNotEmpty()) {
+                dailySummaries.map { it.totalMinutes }.average()
+            } else {
+                0.0
+            }
 
         val spikeDays = detectSpikeDays(dailySummaries)
         val dowTrends = analyzeDayOfWeekTrends(dailySummaries)
         val streak = computeUnderAverageStreak(dailySummaries)
         val weekChange = computeWeekOverWeekChange(dailySummaries, priorSummaries)
-        val busiestDay = dowTrends.entries
-            .maxByOrNull { it.value.averageMinutes }
-            ?.key
+        val busiestDay =
+            dowTrends.entries
+                .maxByOrNull { it.value.averageMinutes }
+                ?.key
 
         return WeeklyTrendSummary(
             dailySummaries = dailySummaries,
@@ -172,7 +173,7 @@ class TrendDetector {
             dayOfWeekTrends = dowTrends,
             weekOverWeekChange = weekChange,
             longestStreak = streak,
-            busiestDayOfWeek = busiestDay
+            busiestDayOfWeek = busiestDay,
         )
     }
 }

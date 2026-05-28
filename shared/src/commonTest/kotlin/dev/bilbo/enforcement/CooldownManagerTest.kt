@@ -1,7 +1,7 @@
 package dev.bilbo.enforcement
 
-import kotlin.time.Clock
 import kotlin.test.*
+import kotlin.time.Clock
 
 // =============================================================================
 //  CooldownManager Tests
@@ -11,7 +11,10 @@ private class FakeCooldownPersistence : CooldownPersistence {
     val saved = mutableMapOf<String, Long>()
     var clearCalls = mutableListOf<String>()
 
-    override fun save(packageName: String, expiryEpochSeconds: Long) {
+    override fun save(
+        packageName: String,
+        expiryEpochSeconds: Long,
+    ) {
         saved[packageName] = expiryEpochSeconds
     }
 
@@ -24,7 +27,6 @@ private class FakeCooldownPersistence : CooldownPersistence {
 }
 
 class CooldownManagerLockTest {
-
     @Test fun lockAppMakesItLocked() {
         val manager = CooldownManager()
         manager.lockApp("com.test", 10)
@@ -53,7 +55,6 @@ class CooldownManagerLockTest {
 }
 
 class CooldownManagerIsLockedTest {
-
     @Test fun isLockedReturnsFalseForUnknown() {
         val manager = CooldownManager()
         assertFalse(manager.isLocked("com.nonexistent"))
@@ -67,7 +68,6 @@ class CooldownManagerIsLockedTest {
 }
 
 class CooldownManagerRemainingTest {
-
     @Test fun getRemainingMinutesNull() {
         val manager = CooldownManager()
         assertNull(manager.getRemainingMinutes("com.nonexistent"))
@@ -108,7 +108,6 @@ class CooldownManagerRemainingTest {
 }
 
 class CooldownManagerUnlockTest {
-
     @Test fun unlockAppRemoves() {
         val persistence = FakeCooldownPersistence()
         val manager = CooldownManager(persistence)
@@ -128,7 +127,6 @@ class CooldownManagerUnlockTest {
 }
 
 class CooldownManagerGetAllTest {
-
     @Test fun getAllLockedAppsEmpty() {
         val manager = CooldownManager()
         assertTrue(manager.getAllLockedApps().isEmpty())
@@ -146,7 +144,6 @@ class CooldownManagerGetAllTest {
 }
 
 class CooldownManagerPersistenceTest {
-
     @Test fun restoreFromPersistenceLoadsActive() {
         val persistence = FakeCooldownPersistence()
         val futureExpiry = Clock.System.now().epochSeconds + 3600
@@ -179,7 +176,6 @@ class CooldownManagerPersistenceTest {
 }
 
 class NoOpCooldownPersistenceTest {
-
     @Test fun saveIsNoOp() {
         NoOpCooldownPersistence.save("com.test", 12345L)
         // No exception

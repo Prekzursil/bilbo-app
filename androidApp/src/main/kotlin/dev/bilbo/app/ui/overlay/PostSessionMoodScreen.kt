@@ -7,13 +7,11 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -49,13 +47,13 @@ import dev.bilbo.domain.Emotion
 import kotlinx.coroutines.delay
 
 // ── Post-session palette: compact, warm-neutral ───────────────────────────────
-private val PsBackground  = Color(0x99000000)   // scrim
-private val PsCard        = Color(0xFF1E2535)   // dark card
-private val PsAccent      = Color(0xFFF5A623)   // warm amber
-private val PsOnSurface   = Color(0xFFE0EEF5)   // cool white
-private val PsSubtle      = Color(0xFF8AAFC4)   // muted blue
-private val PsSurface     = Color(0xFF243344)   // chip background
-private val PsSelected    = Color(0xFF48B8A0)   // selected teal
+private val PsBackground = Color(0x99000000) // scrim
+private val PsCard = Color(0xFF1E2535) // dark card
+private val PsAccent = Color(0xFFF5A623) // warm amber
+private val PsOnSurface = Color(0xFFE0EEF5) // cool white
+private val PsSubtle = Color(0xFF8AAFC4) // muted blue
+private val PsSurface = Color(0xFF243344) // chip background
+private val PsSelected = Color(0xFF48B8A0) // selected teal
 
 private const val AUTO_DISMISS_SECS = 10
 
@@ -94,44 +92,51 @@ fun PostSessionMoodScreen(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(PsBackground),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(PsBackground),
         contentAlignment = Alignment.BottomCenter,
     ) {
         AnimatedVisibility(
             visible = visible,
-            enter = fadeIn(tween(250)) + slideInVertically(
-                initialOffsetY = { it / 2 },
-                animationSpec = tween(340),
-            ),
-            exit = fadeOut(tween(200)) + slideOutVertically(
-                targetOffsetY = { it },
-                animationSpec = tween(260),
-            ),
+            enter =
+                fadeIn(tween(250)) +
+                    slideInVertically(
+                        initialOffsetY = { it / 2 },
+                        animationSpec = tween(340),
+                    ),
+            exit =
+                fadeOut(tween(200)) +
+                    slideOutVertically(
+                        targetOffsetY = { it },
+                        animationSpec = tween(260),
+                    ),
         ) {
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight(),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight(),
                 shape = RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp),
                 colors = CardDefaults.cardColors(containerColor = PsCard),
                 elevation = CardDefaults.cardElevation(defaultElevation = 16.dp),
             ) {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 24.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 20.dp, vertical = 24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-
                     // ── Auto-dismiss progress ─────────────────────────────────
                     LinearProgressIndicator(
                         progress = { progress },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(3.dp)
-                            .clip(RoundedCornerShape(2.dp)),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(3.dp)
+                                .clip(RoundedCornerShape(2.dp)),
                         color = PsAccent,
                         trackColor = PsSurface,
                         strokeCap = StrokeCap.Round,
@@ -142,10 +147,11 @@ fun PostSessionMoodScreen(
                     // ── Header ────────────────────────────────────────────────
                     Text(
                         text = "How do you feel now?",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            color = PsOnSurface,
-                            fontWeight = FontWeight.SemiBold,
-                        ),
+                        style =
+                            MaterialTheme.typography.titleMedium.copy(
+                                color = PsOnSurface,
+                                fontWeight = FontWeight.SemiBold,
+                            ),
                         textAlign = TextAlign.Center,
                     )
 
@@ -164,9 +170,11 @@ fun PostSessionMoodScreen(
                         contentPadding = PaddingValues(0.dp),
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(130.dp), // fixed height for 2 rows
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(130.dp),
+                        // fixed height for 2 rows
                     ) {
                         items(EMOTION_ITEMS_COMPACT) { item ->
                             CompactEmotionChip(
@@ -208,11 +216,12 @@ private fun CompactEmotionChip(
     onClick: () -> Unit,
 ) {
     Column(
-        modifier = Modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(PsSurface)
-            .clickable { onClick() }
-            .padding(vertical = 10.dp, horizontal = 4.dp),
+        modifier =
+            Modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(PsSurface)
+                .clickable { onClick() }
+                .padding(vertical = 10.dp, horizontal = 4.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
     ) {
@@ -220,10 +229,11 @@ private fun CompactEmotionChip(
         Spacer(Modifier.height(3.dp))
         Text(
             text = label,
-            style = MaterialTheme.typography.labelSmall.copy(
-                color = PsOnSurface,
-                fontSize = 10.sp,
-            ),
+            style =
+                MaterialTheme.typography.labelSmall.copy(
+                    color = PsOnSurface,
+                    fontSize = 10.sp,
+                ),
             maxLines = 1,
         )
     }
@@ -237,12 +247,13 @@ private data class CompactEmotionItem(
     val label: String,
 )
 
-private val EMOTION_ITEMS_COMPACT = listOf(
-    CompactEmotionItem(Emotion.HAPPY,   "😊", "Happy"),
-    CompactEmotionItem(Emotion.CALM,    "😌", "Calm"),
-    CompactEmotionItem(Emotion.BORED,   "😑", "Bored"),
-    CompactEmotionItem(Emotion.STRESSED,"😫", "Stressed"),
-    CompactEmotionItem(Emotion.ANXIOUS, "😰", "Anxious"),
-    CompactEmotionItem(Emotion.SAD,     "😢", "Sad"),
-    CompactEmotionItem(Emotion.LONELY,  "😔", "Lonely"),
-)
+private val EMOTION_ITEMS_COMPACT =
+    listOf(
+        CompactEmotionItem(Emotion.HAPPY, "😊", "Happy"),
+        CompactEmotionItem(Emotion.CALM, "😌", "Calm"),
+        CompactEmotionItem(Emotion.BORED, "😑", "Bored"),
+        CompactEmotionItem(Emotion.STRESSED, "😫", "Stressed"),
+        CompactEmotionItem(Emotion.ANXIOUS, "😰", "Anxious"),
+        CompactEmotionItem(Emotion.SAD, "😢", "Sad"),
+        CompactEmotionItem(Emotion.LONELY, "😔", "Lonely"),
+    )

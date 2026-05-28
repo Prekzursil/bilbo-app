@@ -18,7 +18,7 @@ data class Circle(
     val inviteCode: String? = null,
     val createdAt: Instant,
     val memberCount: Int = 0,
-    val members: List<CircleMember> = emptyList()
+    val members: List<CircleMember> = emptyList(),
 )
 
 /**
@@ -34,7 +34,7 @@ data class CircleMember(
     val isActive: Boolean = true,
     val currentStreakDays: Int = 0,
     val weeklyFpEarned: Int = 0,
-    val weeklyFpBalance: Int = 0
+    val weeklyFpBalance: Int = 0,
 )
 
 /**
@@ -48,5 +48,5 @@ enum class CircleRole {
     MODERATOR,
 
     /** Full control including deletion and ownership transfer. */
-    OWNER
+    OWNER,
 }

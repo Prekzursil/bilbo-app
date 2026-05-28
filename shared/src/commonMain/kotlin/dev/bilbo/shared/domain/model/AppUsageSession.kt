@@ -30,11 +30,24 @@ data class AppUsageSession(
 
 @Serializable
 enum class AppCategory {
-    @SerialName("social") SOCIAL,
-    @SerialName("entertainment") ENTERTAINMENT,
-    @SerialName("productivity") PRODUCTIVITY,
-    @SerialName("games") GAMES,
-    @SerialName("health") HEALTH,
-    @SerialName("news") NEWS,
-    @SerialName("other") OTHER,
+    @SerialName("social")
+    SOCIAL,
+
+    @SerialName("entertainment")
+    ENTERTAINMENT,
+
+    @SerialName("productivity")
+    PRODUCTIVITY,
+
+    @SerialName("games")
+    GAMES,
+
+    @SerialName("health")
+    HEALTH,
+
+    @SerialName("news")
+    NEWS,
+
+    @SerialName("other")
+    OTHER,
 }

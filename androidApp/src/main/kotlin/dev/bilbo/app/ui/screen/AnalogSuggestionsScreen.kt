@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.slideInVertically
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -51,8 +50,8 @@ import dev.bilbo.domain.SuggestionCategory
 import dev.bilbo.domain.TimeOfDay
 
 // ── Palette ────────────────────────────────────────────────────────────────────
-private val GreenDeep   = Color(0xFF2D6A4F)
-private val GreenLight  = Color(0xFF52B788)
+private val GreenDeep = Color(0xFF2D6A4F)
+private val GreenLight = Color(0xFF52B788)
 private val GreenSurface = Color(0xFF1B4332)
 
 // ── UI State ──────────────────────────────────────────────────────────────────
@@ -120,9 +119,10 @@ fun AnalogSuggestionsScreen(
         },
     ) { padding ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding),
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
@@ -139,7 +139,7 @@ fun AnalogSuggestionsScreen(
                 ) {
                     AnalogSuggestionCard(
                         suggestion = suggestion,
-                        onAccept   = { onAccept(suggestion.id) },
+                        onAccept = { onAccept(suggestion.id) },
                         onShowAnother = { onShowAnother(suggestion.id) },
                     )
                 }
@@ -151,9 +151,10 @@ fun AnalogSuggestionsScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
                         text = "Your Custom Suggestions",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                        ),
+                        style =
+                            MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                            ),
                         modifier = Modifier.padding(vertical = 4.dp),
                     )
                 }
@@ -161,7 +162,7 @@ fun AnalogSuggestionsScreen(
                 itemsIndexed(uiState.customSuggestions) { _, suggestion ->
                     CustomSuggestionRow(
                         suggestion = suggestion,
-                        onDelete   = { onDeleteCustom(suggestion.id) },
+                        onDelete = { onDeleteCustom(suggestion.id) },
                     )
                 }
             }
@@ -174,7 +175,7 @@ fun AnalogSuggestionsScreen(
     // ── Add dialog ────────────────────────────────────────────────────────
     if (showAddDialog) {
         CustomSuggestionDialog(
-            onSave   = { newSuggestion ->
+            onSave = { newSuggestion ->
                 onAddCustom(newSuggestion)
                 showAddDialog = false
             },
@@ -188,15 +189,17 @@ fun AnalogSuggestionsScreen(
 @Composable
 private fun InspirationHeader() {
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 8.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(vertical = 8.dp),
     ) {
         Text(
             text = "Need inspiration?",
-            style = MaterialTheme.typography.headlineMedium.copy(
-                fontWeight = FontWeight.Bold,
-            ),
+            style =
+                MaterialTheme.typography.headlineMedium.copy(
+                    fontWeight = FontWeight.Bold,
+                ),
         )
         Spacer(modifier = Modifier.height(4.dp))
         Text(
@@ -217,9 +220,10 @@ private fun CustomSuggestionRow(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
@@ -259,31 +263,33 @@ private fun CustomSuggestionRow(
 
 // ── Category helpers (duplicated from card to avoid cross-component coupling) ──
 
-private fun SuggestionCategory.emoji(): String = when (this) {
-    SuggestionCategory.EXERCISE        -> "💪"
-    SuggestionCategory.CREATIVE        -> "🎨"
-    SuggestionCategory.SOCIAL          -> "👥"
-    SuggestionCategory.MINDFULNESS     -> "🧘"
-    SuggestionCategory.LEARNING        -> "📖"
-    SuggestionCategory.NATURE          -> "🌿"
-    SuggestionCategory.COOKING         -> "🍳"
-    SuggestionCategory.MUSIC           -> "🎵"
-    SuggestionCategory.GAMING_PHYSICAL -> "🎲"
-    SuggestionCategory.READING         -> "📚"
-}
+private fun SuggestionCategory.emoji(): String =
+    when (this) {
+        SuggestionCategory.EXERCISE -> "💪"
+        SuggestionCategory.CREATIVE -> "🎨"
+        SuggestionCategory.SOCIAL -> "👥"
+        SuggestionCategory.MINDFULNESS -> "🧘"
+        SuggestionCategory.LEARNING -> "📖"
+        SuggestionCategory.NATURE -> "🌿"
+        SuggestionCategory.COOKING -> "🍳"
+        SuggestionCategory.MUSIC -> "🎵"
+        SuggestionCategory.GAMING_PHYSICAL -> "🎲"
+        SuggestionCategory.READING -> "📚"
+    }
 
-private fun SuggestionCategory.label(): String = when (this) {
-    SuggestionCategory.EXERCISE        -> "Exercise"
-    SuggestionCategory.CREATIVE        -> "Creative"
-    SuggestionCategory.SOCIAL          -> "Social"
-    SuggestionCategory.MINDFULNESS     -> "Mindfulness"
-    SuggestionCategory.LEARNING        -> "Learning"
-    SuggestionCategory.NATURE          -> "Nature"
-    SuggestionCategory.COOKING         -> "Cooking"
-    SuggestionCategory.MUSIC           -> "Music"
-    SuggestionCategory.GAMING_PHYSICAL -> "Physical Games"
-    SuggestionCategory.READING         -> "Reading"
-}
+private fun SuggestionCategory.label(): String =
+    when (this) {
+        SuggestionCategory.EXERCISE -> "Exercise"
+        SuggestionCategory.CREATIVE -> "Creative"
+        SuggestionCategory.SOCIAL -> "Social"
+        SuggestionCategory.MINDFULNESS -> "Mindfulness"
+        SuggestionCategory.LEARNING -> "Learning"
+        SuggestionCategory.NATURE -> "Nature"
+        SuggestionCategory.COOKING -> "Cooking"
+        SuggestionCategory.MUSIC -> "Music"
+        SuggestionCategory.GAMING_PHYSICAL -> "Physical Games"
+        SuggestionCategory.READING -> "Reading"
+    }
 
 // ── Preview ───────────────────────────────────────────────────────────────────
 
@@ -292,40 +298,43 @@ private fun SuggestionCategory.label(): String = when (this) {
 private fun AnalogSuggestionsScreenPreview() {
     BilboTheme {
         AnalogSuggestionsScreen(
-            uiState = AnalogSuggestionsUiState(
-                activeSuggestions = listOf(
-                    AnalogSuggestion(
-                        id = 1,
-                        text = "Step outside for a 10-minute walk around the block.",
-                        category = SuggestionCategory.EXERCISE,
-                        tags = listOf("outdoors", "quick"),
-                        timeOfDay = TimeOfDay.MORNING,
-                    ),
-                    AnalogSuggestion(
-                        id = 2,
-                        text = "Make a cup of tea and read for 15 minutes.",
-                        category = SuggestionCategory.READING,
-                        tags = listOf("calm", "cozy"),
-                        timeOfDay = null,
-                    ),
-                    AnalogSuggestion(
-                        id = 3,
-                        text = "Sketch something from memory — no references.",
-                        category = SuggestionCategory.CREATIVE,
-                        tags = listOf("art", "creative"),
-                        timeOfDay = TimeOfDay.EVENING,
-                    ),
+            uiState =
+                AnalogSuggestionsUiState(
+                    activeSuggestions =
+                        listOf(
+                            AnalogSuggestion(
+                                id = 1,
+                                text = "Step outside for a 10-minute walk around the block.",
+                                category = SuggestionCategory.EXERCISE,
+                                tags = listOf("outdoors", "quick"),
+                                timeOfDay = TimeOfDay.MORNING,
+                            ),
+                            AnalogSuggestion(
+                                id = 2,
+                                text = "Make a cup of tea and read for 15 minutes.",
+                                category = SuggestionCategory.READING,
+                                tags = listOf("calm", "cozy"),
+                                timeOfDay = null,
+                            ),
+                            AnalogSuggestion(
+                                id = 3,
+                                text = "Sketch something from memory — no references.",
+                                category = SuggestionCategory.CREATIVE,
+                                tags = listOf("art", "creative"),
+                                timeOfDay = TimeOfDay.EVENING,
+                            ),
+                        ),
+                    customSuggestions =
+                        listOf(
+                            AnalogSuggestion(
+                                id = 100,
+                                text = "Water the plants and tidy the windowsill.",
+                                category = SuggestionCategory.NATURE,
+                                tags = listOf("home", "plants"),
+                                isCustom = true,
+                            ),
+                        ),
                 ),
-                customSuggestions = listOf(
-                    AnalogSuggestion(
-                        id = 100,
-                        text = "Water the plants and tidy the windowsill.",
-                        category = SuggestionCategory.NATURE,
-                        tags = listOf("home", "plants"),
-                        isCustom = true,
-                    ),
-                ),
-            ),
             onAccept = {},
             onShowAnother = {},
             onAddCustom = {},

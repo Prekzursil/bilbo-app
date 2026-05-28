@@ -22,11 +22,11 @@ import dev.bilbo.tracking.SessionTracker
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.android.Android
 import kotlinx.coroutines.runBlocking
-import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import java.util.UUID
 import javax.inject.Singleton
+import kotlin.time.Clock
 
 /**
  * Provides engine, manager, and tracker singletons that depend on the
@@ -35,7 +35,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object EngineModule {
-
     // ── Economy layer ────────────────────────────────────────────────────────
 
     @Provides
@@ -44,9 +43,7 @@ object EngineModule {
 
     @Provides
     @Singleton
-    fun provideBudgetEnforcer(
-        fpEngine: FocusPointsEngine,
-    ): BudgetEnforcer = BudgetEnforcer(fpEngine)
+    fun provideBudgetEnforcer(fpEngine: FocusPointsEngine): BudgetEnforcer = BudgetEnforcer(fpEngine)
 
     @Provides
     @Singleton
@@ -73,12 +70,13 @@ object EngineModule {
     fun provideCloudInsightClient(
         httpClient: HttpClient,
         promptBuilder: InsightPromptBuilder,
-    ): CloudInsightClient = CloudInsightClient(
-        httpClient = httpClient,
-        supabaseUrl = BuildConfig.SUPABASE_URL,
-        supabaseAnonKey = BuildConfig.SUPABASE_ANON_KEY,
-        promptBuilder = promptBuilder,
-    )
+    ): CloudInsightClient =
+        CloudInsightClient(
+            httpClient = httpClient,
+            supabaseUrl = BuildConfig.SUPABASE_URL,
+            supabaseAnonKey = BuildConfig.SUPABASE_ANON_KEY,
+            promptBuilder = promptBuilder,
+        )
 
     // ── Intelligence — Tier 1 ────────────────────────────────────────────────
 
@@ -88,35 +86,39 @@ object EngineModule {
         appProfileRepository: AppProfileRepository,
         budgetRepository: BudgetRepository,
         cooldownManager: CooldownManager,
-    ): RuleEngine = RuleEngine(
-        appProfileProvider = { packageName ->
-            runBlocking { appProfileRepository.getByPackageName(packageName) }
-        },
-        budgetProvider = {
-            runBlocking {
-                budgetRepository.getByDate(
-                    Clock.System.now()
-                        .toLocalDateTime(TimeZone.currentSystemDefault())
-                        .date
+    ): RuleEngine =
+        RuleEngine(
+            appProfileProvider = { packageName ->
+                runBlocking { appProfileRepository.getByPackageName(packageName) }
+            },
+            budgetProvider = {
+                runBlocking {
+                    budgetRepository.getByDate(
+                        Clock.System
+                            .now()
+                            .toLocalDateTime(TimeZone.currentSystemDefault())
+                            .date,
+                    )
+                } ?: dev.bilbo.domain.DopamineBudget(
+                    date =
+                        Clock.System
+                            .now()
+                            .toLocalDateTime(TimeZone.currentSystemDefault())
+                            .date,
+                    fpEarned = 0,
+                    fpSpent = 0,
+                    fpBonus = 0,
+                    fpRolloverIn = 0,
+                    fpRolloverOut = 0,
+                    nutritiveMinutes = 0,
+                    emptyCalorieMinutes = 0,
+                    neutralMinutes = 0,
                 )
-            } ?: dev.bilbo.domain.DopamineBudget(
-                date = Clock.System.now()
-                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                    .date,
-                fpEarned = 0,
-                fpSpent = 0,
-                fpBonus = 0,
-                fpRolloverIn = 0,
-                fpRolloverOut = 0,
-                nutritiveMinutes = 0,
-                emptyCalorieMinutes = 0,
-                neutralMinutes = 0,
-            )
-        },
-        cooldownChecker = { packageName ->
-            cooldownManager.getRemainingMinutes(packageName)
-        },
-    )
+            },
+            cooldownChecker = { packageName ->
+                cooldownManager.getRemainingMinutes(packageName)
+            },
+        )
 
     // ── Intelligence — Orchestrator ──────────────────────────────────────────
 
@@ -137,14 +139,17 @@ object EngineModule {
         val budgetProvider: () -> dev.bilbo.domain.DopamineBudget = {
             runBlocking {
                 budgetRepository.getByDate(
-                    Clock.System.now()
+                    Clock.System
+                        .now()
                         .toLocalDateTime(TimeZone.currentSystemDefault())
-                        .date
+                        .date,
                 )
             } ?: dev.bilbo.domain.DopamineBudget(
-                date = Clock.System.now()
-                    .toLocalDateTime(TimeZone.currentSystemDefault())
-                    .date,
+                date =
+                    Clock.System
+                        .now()
+                        .toLocalDateTime(TimeZone.currentSystemDefault())
+                        .date,
                 fpEarned = 0,
                 fpSpent = 0,
                 fpBonus = 0,
@@ -175,9 +180,7 @@ object EngineModule {
 
     @Provides
     @Singleton
-    fun provideCooldownManager(
-        persistence: CooldownPersistence,
-    ): CooldownManager = CooldownManager(persistence)
+    fun provideCooldownManager(persistence: CooldownPersistence): CooldownManager = CooldownManager(persistence)
 
     // ── Tracking ─────────────────────────────────────────────────────────────
 

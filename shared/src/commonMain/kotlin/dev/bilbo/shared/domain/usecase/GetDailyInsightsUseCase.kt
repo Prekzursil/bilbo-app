@@ -15,13 +15,11 @@ import kotlinx.coroutines.flow.Flow
 class GetDailyInsightsUseCase(
     private val repository: InsightRepository,
 ) {
-
     /**
      * Execute the use case.
      *
      * @param limit Maximum number of insight records to return (default 30).
      * @return A [Flow] emitting [Result] states wrapping a list of [DailyInsight].
      */
-    operator fun invoke(limit: Int = 30): Flow<Result<List<DailyInsight>>> =
-        repository.getDailyInsights(limit)
+    operator fun invoke(limit: Int = 30): Flow<Result<List<DailyInsight>>> = repository.getDailyInsights(limit)
 }

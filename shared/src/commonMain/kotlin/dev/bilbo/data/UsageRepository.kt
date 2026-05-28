@@ -10,7 +10,6 @@ import kotlinx.datetime.Instant
  * All suspend functions are safe to call from any coroutine context.
  */
 interface UsageRepository {
-
     /**
      * Observe all sessions, ordered by start time descending.
      * Emits a new list whenever the underlying data changes.
@@ -36,7 +35,10 @@ interface UsageRepository {
      * Return all sessions whose [UsageSession.startTime] falls within
      * [[from], [to]] inclusive, newest first.
      */
-    suspend fun getByDateRange(from: Instant, to: Instant): List<UsageSession>
+    suspend fun getByDateRange(
+        from: Instant,
+        to: Instant,
+    ): List<UsageSession>
 
     /**
      * Return all sessions belonging to [category], newest first.
@@ -49,7 +51,7 @@ interface UsageRepository {
     suspend fun getByDateRangeAndCategory(
         from: Instant,
         to: Instant,
-        category: AppCategory
+        category: AppCategory,
     ): List<UsageSession>
 
     /**
@@ -61,7 +63,11 @@ interface UsageRepository {
     /**
      * Update the [endTime] and [durationSeconds] of an existing session.
      */
-    suspend fun updateEndTime(id: Long, endTime: Instant, durationSeconds: Long)
+    suspend fun updateEndTime(
+        id: Long,
+        endTime: Instant,
+        durationSeconds: Long,
+    )
 
     /**
      * Remove the session with [id].
@@ -83,5 +89,8 @@ interface UsageRepository {
      * Return a map of category name to total duration in seconds for the given
      * date range.
      */
-    suspend fun sumDurationByCategory(from: Instant, to: Instant): Map<AppCategory, Long>
+    suspend fun sumDurationByCategory(
+        from: Instant,
+        to: Instant,
+    ): Map<AppCategory, Long>
 }

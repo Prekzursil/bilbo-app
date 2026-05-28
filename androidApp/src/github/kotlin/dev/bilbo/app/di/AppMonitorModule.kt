@@ -20,7 +20,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppMonitorModule {
-
     @Provides
     @Singleton
     fun provideAppMonitor(

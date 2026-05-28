@@ -33,30 +33,30 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.graphics.lerp
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 // ── Cooling-off palette: soft teal to light blue ──────────────────────────────
-private val CoBgTop     = Color(0xFF0A1A24)    // deep teal-black
-private val CoBgBot     = Color(0xFF0D2133)    // dark ocean
-private val CoCircleIn  = Color(0xFF48B8A0)    // inhale teal
-private val CoCircleOut = Color(0xFF6EA8C8)    // exhale blue
-private val CoGlow      = Color(0x3048B8A0)    // circle glow
-private val CoOnSurface = Color(0xFFD5EDF5)    // cool white
-private val CoSubtle    = Color(0xFF7FB4CA)    // muted text
-private val CoProgress  = Color(0xFF48B8A0)    // progress bar
-private val CoProgressBg= Color(0xFF1A3344)    // progress bg
+private val CoBgTop = Color(0xFF0A1A24) // deep teal-black
+private val CoBgBot = Color(0xFF0D2133) // dark ocean
+private val CoCircleIn = Color(0xFF48B8A0) // inhale teal
+private val CoCircleOut = Color(0xFF6EA8C8) // exhale blue
+private val CoGlow = Color(0x3048B8A0) // circle glow
+private val CoOnSurface = Color(0xFFD5EDF5) // cool white
+private val CoSubtle = Color(0xFF7FB4CA) // muted text
+private val CoProgress = Color(0xFF48B8A0) // progress bar
+private val CoProgressBg = Color(0xFF1A3344) // progress bg
 
 // Breathing cycle: 4s in, 4s out, 2s hold = 10s total
 private const val TOTAL_DURATION_SECS = 10
-private const val INHALE_DURATION_MS  = 4_000
-private const val EXHALE_DURATION_MS  = 4_000
-private const val HOLD_DURATION_MS    = 2_000
+private const val INHALE_DURATION_MS = 4_000
+private const val EXHALE_DURATION_MS = 4_000
+private const val HOLD_DURATION_MS = 2_000
 
 /**
  * Full-screen 10-second breathing animation screen.
@@ -69,9 +69,7 @@ private const val HOLD_DURATION_MS    = 2_000
  * @param onComplete Called after the 10-second cycle completes (should award FP and open app).
  */
 @Composable
-fun CoolingOffScreen(
-    onComplete: () -> Unit,
-) {
+fun CoolingOffScreen(onComplete: () -> Unit) {
     // Circular radius scale: 0f = minimum, 1f = maximum
     val circleScale = remember { Animatable(0.4f) }
     var instruction by remember { mutableStateOf("Breathe in...") }
@@ -81,12 +79,13 @@ fun CoolingOffScreen(
     // Run the breathing animation sequence — cannot be cancelled by user
     LaunchedEffect(Unit) {
         // Countdown ticker
-        val countdownJob = launch {
-            repeat(TOTAL_DURATION_SECS) {
-                delay(1_000L)
-                remainingSecs = (TOTAL_DURATION_SECS - it - 1).coerceAtLeast(0)
+        val countdownJob =
+            launch {
+                repeat(TOTAL_DURATION_SECS) {
+                    delay(1_000L)
+                    remainingSecs = (TOTAL_DURATION_SECS - it - 1).coerceAtLeast(0)
+                }
             }
-        }
 
         // Inhale: scale 0.4 → 1.0 over 4 seconds
         phase = BreathPhase.INHALE
@@ -115,30 +114,32 @@ fun CoolingOffScreen(
     }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(listOf(CoBgTop, CoBgBot))
-            ),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(listOf(CoBgTop, CoBgBot)),
+                ),
         contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-
             Spacer(Modifier.height(64.dp))
 
             // ── Instruction text ──────────────────────────────────────────────
             Text(
                 text = instruction,
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    color = CoOnSurface,
-                    fontWeight = FontWeight.Light,
-                    letterSpacing = 1.sp,
-                ),
+                style =
+                    MaterialTheme.typography.headlineMedium.copy(
+                        color = CoOnSurface,
+                        fontWeight = FontWeight.Light,
+                        letterSpacing = 1.sp,
+                    ),
                 textAlign = TextAlign.Center,
             )
 
@@ -155,11 +156,12 @@ fun CoolingOffScreen(
             // ── Countdown ─────────────────────────────────────────────────────
             Text(
                 text = "$remainingSecs",
-                style = MaterialTheme.typography.displaySmall.copy(
-                    color = CoSubtle,
-                    fontWeight = FontWeight.Thin,
-                    fontSize = 48.sp,
-                ),
+                style =
+                    MaterialTheme.typography.displaySmall.copy(
+                        color = CoSubtle,
+                        fontWeight = FontWeight.Thin,
+                        fontSize = 48.sp,
+                    ),
             )
 
             Spacer(Modifier.height(6.dp))
@@ -175,10 +177,11 @@ fun CoolingOffScreen(
             val progress = 1f - (remainingSecs.toFloat() / TOTAL_DURATION_SECS.toFloat())
             LinearProgressIndicator(
                 progress = { progress },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp)),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .clip(RoundedCornerShape(2.dp)),
                 color = CoProgress,
                 trackColor = CoProgressBg,
                 strokeCap = StrokeCap.Round,
@@ -188,9 +191,10 @@ fun CoolingOffScreen(
 
             Text(
                 text = "+3 FP on completion",
-                style = MaterialTheme.typography.labelMedium.copy(
-                    color = CoSubtle.copy(alpha = 0.7f),
-                ),
+                style =
+                    MaterialTheme.typography.labelMedium.copy(
+                        color = CoSubtle.copy(alpha = 0.7f),
+                    ),
             )
 
             Spacer(Modifier.height(64.dp))
@@ -203,12 +207,16 @@ fun CoolingOffScreen(
 private enum class BreathPhase { INHALE, EXHALE, HOLD }
 
 @Composable
-private fun BreathingCircle(scale: Float, phase: BreathPhase) {
-    val circleColor = when (phase) {
-        BreathPhase.INHALE -> CoCircleIn
-        BreathPhase.EXHALE -> CoCircleOut
-        BreathPhase.HOLD   -> lerp(CoCircleIn, CoCircleOut, 0.5f)
-    }
+private fun BreathingCircle(
+    scale: Float,
+    phase: BreathPhase,
+) {
+    val circleColor =
+        when (phase) {
+            BreathPhase.INHALE -> CoCircleIn
+            BreathPhase.EXHALE -> CoCircleOut
+            BreathPhase.HOLD -> lerp(CoCircleIn, CoCircleOut, 0.5f)
+        }
 
     Canvas(
         modifier = Modifier.size(220.dp),
@@ -244,17 +252,23 @@ private fun BreathingCircle(scale: Float, phase: BreathPhase) {
     }
 }
 
-private fun DrawScope.drawBreathCircle(center: Offset, radius: Float, color: Color) {
+private fun DrawScope.drawBreathCircle(
+    center: Offset,
+    radius: Float,
+    color: Color,
+) {
     drawCircle(
-        brush = Brush.radialGradient(
-            colors = listOf(
-                color.copy(alpha = 0.55f),
-                color.copy(alpha = 0.20f),
-                color.copy(alpha = 0.05f),
+        brush =
+            Brush.radialGradient(
+                colors =
+                    listOf(
+                        color.copy(alpha = 0.55f),
+                        color.copy(alpha = 0.20f),
+                        color.copy(alpha = 0.05f),
+                    ),
+                center = center,
+                radius = radius,
             ),
-            center = center,
-            radius = radius,
-        ),
         radius = radius,
         center = center,
     )

@@ -20,26 +20,29 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalUriHandler
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.bilbo.app.BuildConfig
 
 // MARK: - Enforcement mode
 
-enum class EnforcementMode(val label: String) {
+enum class EnforcementMode(
+    val label: String,
+) {
     SOFT_LOCK("Soft Lock"),
     HARD_LOCK("Hard Lock"),
-    TRACK_ONLY("Track Only")
+    TRACK_ONLY("Track Only"),
 }
 
 // MARK: - Sharing level
 
-enum class SharingLevel(val label: String) {
+enum class SharingLevel(
+    val label: String,
+) {
     PRIVATE("Private"),
     FRIENDS("Friends"),
     CIRCLE("Circle"),
-    PUBLIC("Public")
+    PUBLIC("Public"),
 }
 
 // MARK: - ViewModel
@@ -100,7 +103,9 @@ class SettingsViewModel : androidx.lifecycle.ViewModel() {
 
 @Composable
 fun SettingsScreen(
-    viewModel: SettingsViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
+    viewModel: SettingsViewModel =
+        androidx.lifecycle.viewmodel.compose
+            .viewModel(),
 ) {
     val uriHandler = LocalUriHandler.current
 
@@ -114,12 +119,12 @@ fun SettingsScreen(
                     onClick = {
                         viewModel.deleteAllData()
                         viewModel.showDeleteDialog = false
-                    }
+                    },
                 ) { Text("Delete", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.showDeleteDialog = false }) { Text("Cancel") }
-            }
+            },
         )
     }
 
@@ -133,12 +138,12 @@ fun SettingsScreen(
                     onClick = {
                         viewModel.deleteAccount()
                         viewModel.showDeleteAccountDialog = false
-                    }
+                    },
                 ) { Text("Delete Account", color = MaterialTheme.colorScheme.error) }
             },
             dismissButton = {
                 TextButton(onClick = { viewModel.showDeleteAccountDialog = false }) { Text("Cancel") }
-            }
+            },
         )
     }
 
@@ -149,7 +154,7 @@ fun SettingsScreen(
                 viewModel.defaultMode = it
                 viewModel.showEnforcementPicker = false
             },
-            onDismiss = { viewModel.showEnforcementPicker = false }
+            onDismiss = { viewModel.showEnforcementPicker = false },
         )
     }
 
@@ -160,16 +165,17 @@ fun SettingsScreen(
                 viewModel.sharingLevel = it
                 viewModel.showSharingPicker = false
             },
-            onDismiss = { viewModel.showSharingPicker = false }
+            onDismiss = { viewModel.showSharingPicker = false },
         )
     }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp),
     ) {
         EnforcementSection(viewModel)
         EconomySection(viewModel)
@@ -191,7 +197,7 @@ private fun EnforcementSection(vm: SettingsViewModel) {
             icon = Icons.Filled.Shield,
             label = "Default Mode",
             value = vm.defaultMode.label,
-            onClick = { vm.showEnforcementPicker = true }
+            onClick = { vm.showEnforcementPicker = true },
         )
 
         SettingsDivider()
@@ -199,14 +205,18 @@ private fun EnforcementSection(vm: SettingsViewModel) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
                 Text("Cooldown Duration", style = MaterialTheme.typography.bodyLarge)
-                Text("${vm.cooldownMinutes.toInt()} min", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "${vm.cooldownMinutes.toInt()} min",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
             }
             Spacer(modifier = Modifier.height(8.dp))
             Slider(
                 value = vm.cooldownMinutes,
                 onValueChange = { vm.cooldownMinutes = it },
                 valueRange = 5f..60f,
-                steps = 10
+                steps = 10,
             )
         }
 
@@ -223,28 +233,37 @@ private fun EconomySection(vm: SettingsViewModel) {
             icon = Icons.Filled.FlashOn,
             label = "Enable Focus Points",
             checked = vm.fpEnabled,
-            onCheckedChange = { vm.fpEnabled = it }
+            onCheckedChange = { vm.fpEnabled = it },
         )
 
         if (vm.fpEnabled) {
             SettingsDivider()
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
                     Text("Daily Baseline", style = MaterialTheme.typography.bodyLarge)
-                    Text("FP awarded each day", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        "FP awarded each day",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     IconButton(onClick = { if (vm.dailyBaselineFP >= 10) vm.dailyBaselineFP -= 10 }) {
                         Icon(Icons.Filled.Remove, contentDescription = "Decrease")
                     }
-                    Text("${vm.dailyBaselineFP} FP", modifier = Modifier.width(56.dp), textAlign = androidx.compose.ui.text.style.TextAlign.Center)
+                    Text(
+                        "${vm.dailyBaselineFP} FP",
+                        modifier = Modifier.width(56.dp),
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                    )
                     IconButton(onClick = { if (vm.dailyBaselineFP <= 190) vm.dailyBaselineFP += 10 }) {
                         Icon(Icons.Filled.Add, contentDescription = "Increase")
                     }
@@ -257,7 +276,7 @@ private fun EconomySection(vm: SettingsViewModel) {
                 icon = Icons.Filled.Security,
                 label = "Anti-Gaming Protection",
                 checked = vm.antiGamingEnabled,
-                onCheckedChange = { vm.antiGamingEnabled = it }
+                onCheckedChange = { vm.antiGamingEnabled = it },
             )
         }
     }
@@ -270,7 +289,7 @@ private fun EmotionalSection(vm: SettingsViewModel) {
             icon = Icons.Filled.Favorite,
             label = "Emotional Check-Ins",
             checked = vm.checkInEnabled,
-            onCheckedChange = { vm.checkInEnabled = it }
+            onCheckedChange = { vm.checkInEnabled = it },
         )
         if (vm.checkInEnabled) {
             SettingsDivider()
@@ -278,7 +297,7 @@ private fun EmotionalSection(vm: SettingsViewModel) {
                 icon = Icons.Filled.AcUnit,
                 label = "Cooling-Off Mode",
                 checked = vm.coolingOffEnabled,
-                onCheckedChange = { vm.coolingOffEnabled = it }
+                onCheckedChange = { vm.coolingOffEnabled = it },
             )
         }
     }
@@ -291,7 +310,7 @@ private fun AiSection(vm: SettingsViewModel) {
             icon = Icons.Filled.Psychology,
             label = "Cloud AI Insights",
             checked = vm.cloudInsightsEnabled,
-            onCheckedChange = { vm.cloudInsightsEnabled = it }
+            onCheckedChange = { vm.cloudInsightsEnabled = it },
         )
         if (vm.cloudInsightsEnabled) {
             SettingsDivider()
@@ -299,7 +318,7 @@ private fun AiSection(vm: SettingsViewModel) {
                 icon = Icons.Filled.VisibilityOff,
                 label = "Anonymize Before Sending",
                 checked = vm.viewAnonymization,
-                onCheckedChange = { vm.viewAnonymization = it }
+                onCheckedChange = { vm.viewAnonymization = it },
             )
             SettingsDivider()
             SettingsArrowRow(icon = Icons.Filled.Preview, label = "Preview Data Sent to AI")
@@ -314,7 +333,7 @@ private fun SocialSection(vm: SettingsViewModel) {
             icon = Icons.Filled.Lock,
             label = "Sharing Level",
             value = vm.sharingLevel.label,
-            onClick = { vm.showSharingPicker = true }
+            onClick = { vm.showSharingPicker = true },
         )
         SettingsDivider()
         SettingsArrowRow(icon = Icons.Filled.People, label = "Manage Accountability Buddies")
@@ -336,10 +355,11 @@ private fun NotificationsSection(vm: SettingsViewModel) {
         if (vm.quietHoursEnabled) {
             SettingsDivider()
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
                 Column {
                     Text("Start", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -361,21 +381,21 @@ private fun DataSection(vm: SettingsViewModel) {
             icon = Icons.Filled.FileDownload,
             label = "Export All Data as JSON",
             onClick = { vm.exportData() },
-            isLoading = vm.isExporting
+            isLoading = vm.isExporting,
         )
         SettingsDivider()
         SettingsActionRow(
             icon = Icons.Filled.Delete,
             label = "Delete All Data",
             onClick = { vm.showDeleteDialog = true },
-            isDestructive = true
+            isDestructive = true,
         )
         SettingsDivider()
         SettingsActionRow(
             icon = Icons.Filled.PersonRemove,
             label = "Delete Account",
             onClick = { vm.showDeleteAccountDialog = true },
-            isDestructive = true
+            isDestructive = true,
         )
     }
 }
@@ -384,10 +404,11 @@ private fun DataSection(vm: SettingsViewModel) {
 private fun AboutSection(onPrivacyClick: () -> Unit) {
     SettingsGroup(title = "About") {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 14.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
         ) {
             Text("Version", style = MaterialTheme.typography.bodyLarge)
             Text(BuildConfig.VERSION_NAME, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -404,19 +425,19 @@ private fun AboutSection(onPrivacyClick: () -> Unit) {
 @Composable
 fun SettingsGroup(
     title: String,
-    content: @Composable ColumnScope.() -> Unit
+    content: @Composable ColumnScope.() -> Unit,
 ) {
     Column {
         Text(
             text = title.uppercase(),
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 4.dp, bottom = 6.dp)
+            modifier = Modifier.padding(start = 4.dp, bottom = 6.dp),
         )
         Card(
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-            modifier = Modifier.fillMaxWidth()
+            modifier = Modifier.fillMaxWidth(),
         ) {
             Column(content = content)
         }
@@ -428,7 +449,7 @@ fun SettingsDivider() {
     HorizontalDivider(
         modifier = Modifier.padding(start = 56.dp),
         thickness = 0.5.dp,
-        color = MaterialTheme.colorScheme.outlineVariant
+        color = MaterialTheme.colorScheme.outlineVariant,
     )
 }
 
@@ -437,13 +458,14 @@ fun SettingsSwitchRow(
     icon: ImageVector,
     label: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
         Spacer(modifier = Modifier.width(12.dp))
@@ -457,21 +479,27 @@ fun SettingsPickerRow(
     icon: ImageVector,
     label: String,
     value: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
         Spacer(modifier = Modifier.width(12.dp))
         Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
         Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
         Spacer(modifier = Modifier.width(4.dp))
-        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+        Icon(
+            Icons.Filled.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }
 
@@ -479,19 +507,25 @@ fun SettingsPickerRow(
 fun SettingsArrowRow(
     icon: ImageVector,
     label: String,
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
         Spacer(modifier = Modifier.width(12.dp))
         Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-        Icon(Icons.Filled.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(20.dp))
+        Icon(
+            Icons.Filled.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(20.dp),
+        )
     }
 }
 
@@ -501,26 +535,28 @@ fun SettingsActionRow(
     label: String,
     onClick: () -> Unit,
     isDestructive: Boolean = false,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(enabled = !isLoading, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clickable(enabled = !isLoading, onClick = onClick)
+                .padding(horizontal = 16.dp, vertical = 14.dp),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(
-            icon, contentDescription = null,
+            icon,
+            contentDescription = null,
             tint = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(22.dp)
+            modifier = Modifier.size(22.dp),
         )
         Spacer(modifier = Modifier.width(12.dp))
         Text(
             label,
             modifier = Modifier.weight(1f),
             style = MaterialTheme.typography.bodyLarge,
-            color = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface
+            color = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         )
         if (isLoading) {
             CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
@@ -534,7 +570,7 @@ fun SettingsActionRow(
 fun EnforcementModePicker(
     selected: EnforcementMode,
     onSelect: (EnforcementMode) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -543,11 +579,12 @@ fun EnforcementModePicker(
             Column {
                 EnforcementMode.entries.forEach { mode ->
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(mode) }
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { onSelect(mode) }
+                                .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(selected = mode == selected, onClick = { onSelect(mode) })
                         Spacer(modifier = Modifier.width(8.dp))
@@ -556,7 +593,7 @@ fun EnforcementModePicker(
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }
 
@@ -564,7 +601,7 @@ fun EnforcementModePicker(
 fun SharingLevelPicker(
     selected: SharingLevel,
     onSelect: (SharingLevel) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -573,11 +610,12 @@ fun SharingLevelPicker(
             Column {
                 SharingLevel.entries.forEach { level ->
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onSelect(level) }
-                            .padding(vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { onSelect(level) }
+                                .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(selected = level == selected, onClick = { onSelect(level) })
                         Spacer(modifier = Modifier.width(8.dp))
@@ -586,7 +624,7 @@ fun SharingLevelPicker(
                 }
             }
         },
-        confirmButton = { TextButton(onClick = onDismiss) { Text("Cancel") } }
+        confirmButton = { TextButton(onClick = onDismiss) { Text("Cancel") } },
     )
 }
 

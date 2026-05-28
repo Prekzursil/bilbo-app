@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -34,34 +33,26 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.StrokeJoin
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import dev.bilbo.app.ui.components.FPBalanceWidget
 import dev.bilbo.app.ui.theme.BilboTheme
-import dev.bilbo.domain.DopamineBudget
 import dev.bilbo.domain.FPEconomy
-import kotlinx.datetime.LocalDate
 
 // ── Palette helpers ────────────────────────────────────────────────────────────
-private val FpGreen  = Color(0xFF4CAF50)
-private val FpRed    = Color(0xFFE53935)
+private val FpGreen = Color(0xFF4CAF50)
+private val FpRed = Color(0xFFE53935)
 private val FpNeutral = Color(0xFF9E9E9E)
-private val FpAmber  = Color(0xFFFFC107)
+private val FpAmber = Color(0xFFFFC107)
 
 // ── Data representation fed into the screen ────────────────────────────────────
 
@@ -119,15 +110,17 @@ fun BudgetDashboardScreen(
             isRefreshing = uiState.isRefreshing,
             onRefresh = onRefresh,
             state = pullState,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding),
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 16.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
             ) {
                 // ── 1. FP Balance widget ─────────────────────────────────────
@@ -155,9 +148,10 @@ fun BudgetDashboardScreen(
                 SectionCard(title = "This Week") {
                     WeeklyChart(
                         balances = uiState.weeklyBalances,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(120.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .height(120.dp),
                     )
                 }
 
@@ -184,7 +178,11 @@ fun BudgetDashboardScreen(
 // ── Today's Activity ──────────────────────────────────────────────────────────
 
 @Composable
-private fun TodayActivitySection(earned: Int, spent: Int, bonus: Int) {
+private fun TodayActivitySection(
+    earned: Int,
+    spent: Int,
+    bonus: Int,
+) {
     val total = (earned + spent).coerceAtLeast(1)
     val earnedFrac by animateFloatAsState(
         targetValue = earned.toFloat() / total,
@@ -200,23 +198,26 @@ private fun TodayActivitySection(earned: Int, spent: Int, bonus: Int) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         // Horizontal split bar
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(12.dp)
-                .clip(RoundedCornerShape(6.dp))
-                .background(MaterialTheme.colorScheme.surfaceVariant),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(12.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant),
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(earnedFrac)
-                    .height(12.dp)
-                    .background(FpGreen),
+                modifier =
+                    Modifier
+                        .fillMaxWidth(earnedFrac)
+                        .height(12.dp)
+                        .background(FpGreen),
             )
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(spentFrac)
-                    .height(12.dp)
-                    .background(FpRed),
+                modifier =
+                    Modifier
+                        .fillMaxWidth(spentFrac)
+                        .height(12.dp)
+                        .background(FpRed),
             )
         }
 
@@ -241,9 +242,10 @@ private fun WeeklyChart(
     val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
 
     val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
-    val data = balances.takeLast(7).let { list ->
-        if (list.size < 7) List(7 - list.size) { 0 } + list else list
-    }
+    val data =
+        balances.takeLast(7).let { list ->
+            if (list.size < 7) List(7 - list.size) { 0 } + list else list
+        }
     val maxVal = data.max().coerceAtLeast(1).toFloat()
 
     Canvas(modifier = modifier) {
@@ -253,11 +255,12 @@ private fun WeeklyChart(
         val chartH = h - padding * 2
         val stepX = if (data.size > 1) (w - padding * 2) / (data.size - 1) else w
 
-        val points = data.mapIndexed { i, v ->
-            val x = padding + i * stepX
-            val y = padding + chartH * (1f - v.toFloat() / maxVal)
-            Offset(x, y)
-        }
+        val points =
+            data.mapIndexed { i, v ->
+                val x = padding + i * stepX
+                val y = padding + chartH * (1f - v.toFloat() / maxVal)
+                Offset(x, y)
+            }
 
         // Lines
         for (i in 0 until points.size - 1) {
@@ -298,15 +301,19 @@ private fun TimeBreakdownSection(
     emptyCalorieMinutes: Int,
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        TimeBar(label = "Nutritive",     minutes = nutritiveMinutes,     color = FpGreen)
-        TimeBar(label = "Neutral",       minutes = neutralMinutes,       color = FpNeutral)
-        TimeBar(label = "Empty Calories",minutes = emptyCalorieMinutes,  color = FpRed)
+        TimeBar(label = "Nutritive", minutes = nutritiveMinutes, color = FpGreen)
+        TimeBar(label = "Neutral", minutes = neutralMinutes, color = FpNeutral)
+        TimeBar(label = "Empty Calories", minutes = emptyCalorieMinutes, color = FpRed)
     }
 }
 
 @Composable
-private fun TimeBar(label: String, minutes: Int, color: Color) {
-    val totalMin = 480f  // 8 hours max for visual scale
+private fun TimeBar(
+    label: String,
+    minutes: Int,
+    color: Color,
+) {
+    val totalMin = 480f // 8 hours max for visual scale
     val fraction by animateFloatAsState(
         targetValue = (minutes.toFloat() / totalMin).coerceIn(0f, 1f),
         animationSpec = tween(700),
@@ -324,17 +331,19 @@ private fun TimeBar(label: String, minutes: Int, color: Color) {
             color = MaterialTheme.colorScheme.onSurface,
         )
         Box(
-            modifier = Modifier
-                .weight(1f)
-                .height(8.dp)
-                .clip(RoundedCornerShape(4.dp))
-                .background(color.copy(alpha = 0.15f)),
+            modifier =
+                Modifier
+                    .weight(1f)
+                    .height(8.dp)
+                    .clip(RoundedCornerShape(4.dp))
+                    .background(color.copy(alpha = 0.15f)),
         ) {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth(fraction)
-                    .height(8.dp)
-                    .background(color),
+                modifier =
+                    Modifier
+                        .fillMaxWidth(fraction)
+                        .height(8.dp)
+                        .background(color),
             )
         }
         Text(
@@ -386,9 +395,10 @@ private fun SectionCard(
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -409,17 +419,18 @@ private fun SectionCard(
 private fun BudgetDashboardPreview() {
     BilboTheme {
         BudgetDashboardScreen(
-            uiState = BudgetDashboardUiState(
-                currentBalance = 38,
-                fpEarned = 25,
-                fpSpent = 10,
-                fpBonus = 5,
-                nutritiveMinutes = 40,
-                neutralMinutes = 60,
-                emptyCalorieMinutes = 30,
-                streakDays = 9,
-                weeklyBalances = listOf(20, 35, 28, 42, 15, 50, 38),
-            ),
+            uiState =
+                BudgetDashboardUiState(
+                    currentBalance = 38,
+                    fpEarned = 25,
+                    fpSpent = 10,
+                    fpBonus = 5,
+                    nutritiveMinutes = 40,
+                    neutralMinutes = 60,
+                    emptyCalorieMinutes = 30,
+                    streakDays = 9,
+                    weeklyBalances = listOf(20, 35, 28, 42, 15, 50, 38),
+                ),
             onRefresh = {},
         )
     }

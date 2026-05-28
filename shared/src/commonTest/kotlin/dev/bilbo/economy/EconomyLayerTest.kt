@@ -1,9 +1,9 @@
 package dev.bilbo.economy
 
 import dev.bilbo.domain.*
-import kotlin.time.Clock
 import kotlinx.datetime.*
 import kotlin.test.*
+import kotlin.time.Clock
 
 // =============================================================================
 //  FocusPointsEngine Tests
@@ -11,11 +11,18 @@ import kotlin.test.*
 
 class FocusPointsEngineEarnPointsTest {
     private val engine = FocusPointsEngine()
-    private val baseBudget = DopamineBudget(
-        date = LocalDate(2025, 1, 1), fpEarned = 0, fpSpent = 0, fpBonus = 0,
-        fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-        emptyCalorieMinutes = 0, neutralMinutes = 0
-    )
+    private val baseBudget =
+        DopamineBudget(
+            date = LocalDate(2025, 1, 1),
+            fpEarned = 0,
+            fpSpent = 0,
+            fpBonus = 0,
+            fpRolloverIn = 0,
+            fpRolloverOut = 0,
+            nutritiveMinutes = 0,
+            emptyCalorieMinutes = 0,
+            neutralMinutes = 0,
+        )
 
     @Test fun earnPointsBasic() {
         val (updated, earned) = engine.earnPoints(baseBudget, 10)
@@ -46,11 +53,18 @@ class FocusPointsEngineEarnPointsTest {
 
 class FocusPointsEngineSpendPointsTest {
     private val engine = FocusPointsEngine()
-    private val baseBudget = DopamineBudget(
-        date = LocalDate(2025, 1, 1), fpEarned = 0, fpSpent = 0, fpBonus = 0,
-        fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-        emptyCalorieMinutes = 0, neutralMinutes = 0
-    )
+    private val baseBudget =
+        DopamineBudget(
+            date = LocalDate(2025, 1, 1),
+            fpEarned = 0,
+            fpSpent = 0,
+            fpBonus = 0,
+            fpRolloverIn = 0,
+            fpRolloverOut = 0,
+            nutritiveMinutes = 0,
+            emptyCalorieMinutes = 0,
+            neutralMinutes = 0,
+        )
 
     @Test fun spendPointsBasic() {
         val (updated, spent) = engine.spendPoints(baseBudget, 5)
@@ -68,11 +82,18 @@ class FocusPointsEngineSpendPointsTest {
 
 class FocusPointsEngineBonusPenaltyTest {
     private val engine = FocusPointsEngine()
-    private val baseBudget = DopamineBudget(
-        date = LocalDate(2025, 1, 1), fpEarned = 0, fpSpent = 0, fpBonus = 0,
-        fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-        emptyCalorieMinutes = 0, neutralMinutes = 0
-    )
+    private val baseBudget =
+        DopamineBudget(
+            date = LocalDate(2025, 1, 1),
+            fpEarned = 0,
+            fpSpent = 0,
+            fpBonus = 0,
+            fpRolloverIn = 0,
+            fpRolloverOut = 0,
+            nutritiveMinutes = 0,
+            emptyCalorieMinutes = 0,
+            neutralMinutes = 0,
+        )
 
     @Test fun applyBonusAddsToFpBonus() {
         val updated = engine.applyBonus(baseBudget, 10, "test")
@@ -136,11 +157,18 @@ class FocusPointsEngineBonusPenaltyTest {
 
 class FocusPointsEngineRolloverTest {
     private val engine = FocusPointsEngine()
-    private val baseBudget = DopamineBudget(
-        date = LocalDate(2025, 1, 1), fpEarned = 0, fpSpent = 0, fpBonus = 0,
-        fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-        emptyCalorieMinutes = 0, neutralMinutes = 0
-    )
+    private val baseBudget =
+        DopamineBudget(
+            date = LocalDate(2025, 1, 1),
+            fpEarned = 0,
+            fpSpent = 0,
+            fpBonus = 0,
+            fpRolloverIn = 0,
+            fpRolloverOut = 0,
+            nutritiveMinutes = 0,
+            emptyCalorieMinutes = 0,
+            neutralMinutes = 0,
+        )
 
     @Test fun calculateRolloverPositiveBalance() {
         val budget = baseBudget.copy(fpEarned = 20) // balance = 15 + 20 = 35
@@ -189,9 +217,10 @@ class FocusPointsEngineRolloverTest {
 // =============================================================================
 
 class AppClassifierClassifyTest {
-    private val defaults = listOf(
-        AppClassifier.AppClassification("com.known.app", "Known", AppCategory.NUTRITIVE, EnforcementMode.NUDGE)
-    )
+    private val defaults =
+        listOf(
+            AppClassifier.AppClassification("com.known.app", "Known", AppCategory.NUTRITIVE, EnforcementMode.NUDGE),
+        )
     private val classifier = AppClassifier.fromDefaults(defaults)
 
     @Test fun classifyBuiltIn() {
@@ -244,9 +273,10 @@ class AppClassifierClassifyTest {
 }
 
 class AppClassifierGetProfileTest {
-    private val defaults = listOf(
-        AppClassifier.AppClassification("com.known", "Known", AppCategory.NEUTRAL, EnforcementMode.NUDGE)
-    )
+    private val defaults =
+        listOf(
+            AppClassifier.AppClassification("com.known", "Known", AppCategory.NEUTRAL, EnforcementMode.NUDGE),
+        )
     private val classifier = AppClassifier.fromDefaults(defaults)
 
     @Test fun getProfileExisting() {
@@ -287,10 +317,11 @@ class AppClassifierOverridesTest {
 }
 
 class AppClassifierBulkTest {
-    private val defaults = listOf(
-        AppClassifier.AppClassification("com.a", "A", AppCategory.NUTRITIVE, EnforcementMode.NUDGE),
-        AppClassifier.AppClassification("com.b", "B", AppCategory.NEUTRAL, EnforcementMode.NUDGE)
-    )
+    private val defaults =
+        listOf(
+            AppClassifier.AppClassification("com.a", "A", AppCategory.NUTRITIVE, EnforcementMode.NUDGE),
+            AppClassifier.AppClassification("com.b", "B", AppCategory.NEUTRAL, EnforcementMode.NUDGE),
+        )
     private val classifier = AppClassifier.fromDefaults(defaults)
 
     @Test fun getAllClassificationsIncludesOverrides() {
@@ -430,12 +461,14 @@ class AppClassifierHeuristicEdgeCaseTest {
 
 class AppClassifierFactoryTest {
     @Test fun fromDefaultsWithOverrides() {
-        val defaults = listOf(
-            AppClassifier.AppClassification("com.a", "A", AppCategory.NUTRITIVE, EnforcementMode.NUDGE)
-        )
-        val overrides = listOf(
-            AppClassifier.AppClassification("com.a", "A Override", AppCategory.EMPTY_CALORIES, EnforcementMode.HARD_LOCK)
-        )
+        val defaults =
+            listOf(
+                AppClassifier.AppClassification("com.a", "A", AppCategory.NUTRITIVE, EnforcementMode.NUDGE),
+            )
+        val overrides =
+            listOf(
+                AppClassifier.AppClassification("com.a", "A Override", AppCategory.EMPTY_CALORIES, EnforcementMode.HARD_LOCK),
+            )
         val classifier = AppClassifier.fromDefaults(defaults, overrides)
         val result = classifier.classify("com.a")
         assertNotNull(result)
@@ -457,7 +490,9 @@ class AppClassifierFactoryTest {
 //  BudgetEnforcer Tests
 // =============================================================================
 
-private class FakeClock(var instant: Instant) : Clock {
+private class FakeClock(
+    var instant: Instant,
+) : Clock {
     override fun now(): Instant = instant
 }
 
@@ -468,11 +503,18 @@ class BudgetEnforcerResetTest {
     private val tz = TimeZone.UTC
 
     @Test fun resetForNewDayWithPrevious() {
-        val prev = DopamineBudget(
-            date = LocalDate(2025, 6, 14), fpEarned = 20, fpSpent = 5, fpBonus = 0,
-            fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val prev =
+            DopamineBudget(
+                date = LocalDate(2025, 6, 14),
+                fpEarned = 20,
+                fpSpent = 5,
+                fpBonus = 0,
+                fpRolloverIn = 0,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         val budget = enforcer.resetForNewDay(prev, tz)
         assertEquals(LocalDate(2025, 6, 15), budget.date)
         assertTrue(budget.fpRolloverIn > 0)
@@ -485,39 +527,67 @@ class BudgetEnforcerResetTest {
     }
 
     @Test fun isTodayBudgetTrue() {
-        val budget = DopamineBudget(
-            date = LocalDate(2025, 6, 15), fpEarned = 0, fpSpent = 0, fpBonus = 0,
-            fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val budget =
+            DopamineBudget(
+                date = LocalDate(2025, 6, 15),
+                fpEarned = 0,
+                fpSpent = 0,
+                fpBonus = 0,
+                fpRolloverIn = 0,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         assertTrue(enforcer.isTodayBudget(budget, tz))
     }
 
     @Test fun isTodayBudgetFalse() {
-        val budget = DopamineBudget(
-            date = LocalDate(2025, 6, 14), fpEarned = 0, fpSpent = 0, fpBonus = 0,
-            fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val budget =
+            DopamineBudget(
+                date = LocalDate(2025, 6, 14),
+                fpEarned = 0,
+                fpSpent = 0,
+                fpBonus = 0,
+                fpRolloverIn = 0,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         assertFalse(enforcer.isTodayBudget(budget, tz))
     }
 
     @Test fun ensureTodayBudgetReturnsSameIfToday() {
-        val budget = DopamineBudget(
-            date = LocalDate(2025, 6, 15), fpEarned = 10, fpSpent = 5, fpBonus = 0,
-            fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val budget =
+            DopamineBudget(
+                date = LocalDate(2025, 6, 15),
+                fpEarned = 10,
+                fpSpent = 5,
+                fpBonus = 0,
+                fpRolloverIn = 0,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         val result = enforcer.ensureTodayBudget(budget, tz)
         assertEquals(budget, result)
     }
 
     @Test fun ensureTodayBudgetCreatesNewIfOldDate() {
-        val budget = DopamineBudget(
-            date = LocalDate(2025, 6, 14), fpEarned = 10, fpSpent = 5, fpBonus = 0,
-            fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val budget =
+            DopamineBudget(
+                date = LocalDate(2025, 6, 14),
+                fpEarned = 10,
+                fpSpent = 5,
+                fpBonus = 0,
+                fpRolloverIn = 0,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         val result = enforcer.ensureTodayBudget(budget, tz)
         assertEquals(LocalDate(2025, 6, 15), result.date)
     }
@@ -534,10 +604,19 @@ class BudgetEnforcerGateTest {
     private val enforcer = BudgetEnforcer(clock = clock)
     private val tz = TimeZone.UTC
 
-    private fun todayBudget(fpEarned: Int = 0, fpSpent: Int = 0) = DopamineBudget(
-        date = LocalDate(2025, 6, 15), fpEarned = fpEarned, fpSpent = fpSpent, fpBonus = 0,
-        fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-        emptyCalorieMinutes = 0, neutralMinutes = 0
+    private fun todayBudget(
+        fpEarned: Int = 0,
+        fpSpent: Int = 0,
+    ) = DopamineBudget(
+        date = LocalDate(2025, 6, 15),
+        fpEarned = fpEarned,
+        fpSpent = fpSpent,
+        fpBonus = 0,
+        fpRolloverIn = 0,
+        fpRolloverOut = 0,
+        nutritiveMinutes = 0,
+        emptyCalorieMinutes = 0,
+        neutralMinutes = 0,
     )
 
     @Test fun gatePermittedWhenPositiveBalance() {
@@ -560,11 +639,18 @@ class BudgetEnforcerGateTest {
     }
 
     @Test fun gateNoBudgetForTodayWhenOldDate() {
-        val oldBudget = DopamineBudget(
-            date = LocalDate(2025, 6, 14), fpEarned = 0, fpSpent = 0, fpBonus = 0,
-            fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val oldBudget =
+            DopamineBudget(
+                date = LocalDate(2025, 6, 14),
+                fpEarned = 0,
+                fpSpent = 0,
+                fpBonus = 0,
+                fpRolloverIn = 0,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         val gate = enforcer.evaluateGate(oldBudget, EnforcementMode.NUDGE, tz)
         assertTrue(gate is BudgetEnforcer.EnforcementGate.NoBudgetForToday)
     }
@@ -587,11 +673,18 @@ class BudgetEnforcerRolloverAndSummaryTest {
     private val clock = FakeClock(fixedInstant)
     private val enforcer = BudgetEnforcer(clock = clock)
 
-    private val baseBudget = DopamineBudget(
-        date = LocalDate(2025, 6, 15), fpEarned = 20, fpSpent = 5, fpBonus = 3,
-        fpRolloverIn = 2, fpRolloverOut = 0, nutritiveMinutes = 30,
-        emptyCalorieMinutes = 10, neutralMinutes = 5
-    )
+    private val baseBudget =
+        DopamineBudget(
+            date = LocalDate(2025, 6, 15),
+            fpEarned = 20,
+            fpSpent = 5,
+            fpBonus = 3,
+            fpRolloverIn = 2,
+            fpRolloverOut = 0,
+            nutritiveMinutes = 30,
+            emptyCalorieMinutes = 10,
+            neutralMinutes = 5,
+        )
 
     @Test fun computeRollover() {
         val rollover = enforcer.computeRollover(baseBudget)
@@ -646,12 +739,20 @@ class BudgetEnforcerRolloverAndSummaryTest {
     }
 
     @Test fun dailySummaryDataClass() {
-        val s1 = BudgetEnforcer.DailySummary(
-            date = LocalDate(2025, 1, 1), balance = 10, fpEarned = 5,
-            fpSpent = 2, fpBonus = 1, fpRolloverIn = 0, projectedRolloverOut = 5,
-            earnCapRemaining = 55, isEarnCapHit = false, nutritiveMinutes = 10,
-            emptyCalorieMinutes = 5
-        )
+        val s1 =
+            BudgetEnforcer.DailySummary(
+                date = LocalDate(2025, 1, 1),
+                balance = 10,
+                fpEarned = 5,
+                fpSpent = 2,
+                fpBonus = 1,
+                fpRolloverIn = 0,
+                projectedRolloverOut = 5,
+                earnCapRemaining = 55,
+                isEarnCapHit = false,
+                nutritiveMinutes = 10,
+                emptyCalorieMinutes = 5,
+            )
         val s2 = s1.copy()
         assertEquals(s1, s2)
     }
@@ -667,13 +768,23 @@ class BudgetEnforcerDefaultTzTest {
 
     @Test fun isTodayBudgetDefaultTz() {
         val enforcer = BudgetEnforcer()
-        val today = Clock.System.now()
-            .toLocalDateTime(TimeZone.currentSystemDefault()).date
-        val budget = DopamineBudget(
-            date = today, fpEarned = 0, fpSpent = 0, fpBonus = 0,
-            fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val today =
+            Clock.System
+                .now()
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+        val budget =
+            DopamineBudget(
+                date = today,
+                fpEarned = 0,
+                fpSpent = 0,
+                fpBonus = 0,
+                fpRolloverIn = 0,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         assertTrue(enforcer.isTodayBudget(budget))
     }
 
@@ -685,13 +796,23 @@ class BudgetEnforcerDefaultTzTest {
 
     @Test fun evaluateGateDefaultTz() {
         val enforcer = BudgetEnforcer()
-        val today = Clock.System.now()
-            .toLocalDateTime(TimeZone.currentSystemDefault()).date
-        val budget = DopamineBudget(
-            date = today, fpEarned = 10, fpSpent = 0, fpBonus = 0,
-            fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val today =
+            Clock.System
+                .now()
+                .toLocalDateTime(TimeZone.currentSystemDefault())
+                .date
+        val budget =
+            DopamineBudget(
+                date = today,
+                fpEarned = 10,
+                fpSpent = 0,
+                fpBonus = 0,
+                fpRolloverIn = 0,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         val gate = enforcer.evaluateGate(budget, EnforcementMode.NUDGE)
         assertTrue(gate is BudgetEnforcer.EnforcementGate.Permitted)
     }
@@ -702,18 +823,25 @@ class BudgetEnforcerFillMissingDaysTest {
     private val clock = FakeClock(fixedInstant)
     private val enforcer = BudgetEnforcer(clock = clock)
 
-    private fun budget(day: Int) = DopamineBudget(
-        date = LocalDate(2025, 1, day), fpEarned = 10, fpSpent = 0, fpBonus = 0,
-        fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-        emptyCalorieMinutes = 0, neutralMinutes = 0
-    )
+    private fun budget(day: Int) =
+        DopamineBudget(
+            date = LocalDate(2025, 1, day),
+            fpEarned = 10,
+            fpSpent = 0,
+            fpBonus = 0,
+            fpRolloverIn = 0,
+            fpRolloverOut = 0,
+            nutritiveMinutes = 0,
+            emptyCalorieMinutes = 0,
+            neutralMinutes = 0,
+        )
 
     @Test fun fillMissingDaysBasic() {
         val budgets = listOf(budget(1), budget(3))
         val result = enforcer.fillMissingDays(budgets, LocalDate(2025, 1, 1), LocalDate(2025, 1, 3))
         assertEquals(3, result.size)
         assertEquals(10, result[0].fpEarned) // Day 1 (existing)
-        assertEquals(0, result[1].fpEarned)  // Day 2 (filled)
+        assertEquals(0, result[1].fpEarned) // Day 2 (filled)
         assertEquals(10, result[2].fpEarned) // Day 3 (existing)
     }
 

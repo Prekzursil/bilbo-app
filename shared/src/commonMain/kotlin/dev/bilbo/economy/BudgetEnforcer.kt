@@ -1,8 +1,8 @@
 package dev.bilbo.economy
 
 import dev.bilbo.domain.*
-import kotlin.time.Clock
 import kotlinx.datetime.*
+import kotlin.time.Clock
 
 /**
  * Handles daily budget lifecycle: reset, rollover calculation, and enforcement checks.
@@ -13,16 +13,22 @@ import kotlinx.datetime.*
  */
 class BudgetEnforcer(
     private val fpEngine: FocusPointsEngine = FocusPointsEngine(),
-    private val clock: Clock = Clock.System
+    private val clock: Clock = Clock.System,
 ) {
-
     sealed class EnforcementGate {
         /** App access is fully permitted. */
         data object Permitted : EnforcementGate()
+
         /** Balance is negative — user should be warned but not hard-blocked (NUDGE mode). */
-        data class LowBalance(val balance: Int) : EnforcementGate()
+        data class LowBalance(
+            val balance: Int,
+        ) : EnforcementGate()
+
         /** Balance is depleted and the app is in HARD_LOCK mode — access denied. */
-        data class HardBlocked(val balance: Int) : EnforcementGate()
+        data class HardBlocked(
+            val balance: Int,
+        ) : EnforcementGate()
+
         /** Budget for today hasn't been created yet — create it first. */
         data object NoBudgetForToday : EnforcementGate()
     }
@@ -41,7 +47,7 @@ class BudgetEnforcer(
      */
     fun resetForNewDay(
         previousBudget: DopamineBudget?,
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): DopamineBudget {
         val today = clock.now().toLocalDateTime(timeZone).date
         return fpEngine.createDayBudget(today, previousBudget)
@@ -52,7 +58,7 @@ class BudgetEnforcer(
      */
     fun isTodayBudget(
         budget: DopamineBudget,
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): Boolean {
         val today = clock.now().toLocalDateTime(timeZone).date
         return budget.date == today
@@ -67,7 +73,7 @@ class BudgetEnforcer(
      */
     fun ensureTodayBudget(
         existingBudget: DopamineBudget?,
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): DopamineBudget {
         if (existingBudget != null && isTodayBudget(existingBudget, timeZone)) {
             return existingBudget
@@ -88,7 +94,7 @@ class BudgetEnforcer(
     fun evaluateGate(
         budget: DopamineBudget,
         enforcementMode: EnforcementMode,
-        timeZone: TimeZone = TimeZone.currentSystemDefault()
+        timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): EnforcementGate {
         if (!isTodayBudget(budget, timeZone)) return EnforcementGate.NoBudgetForToday
 
@@ -145,7 +151,7 @@ class BudgetEnforcer(
             earnCapRemaining = maxOf(0, capRemaining),
             isEarnCapHit = earnedToday >= FPEconomy.DAILY_EARN_CAP,
             nutritiveMinutes = budget.nutritiveMinutes,
-            emptyCalorieMinutes = budget.emptyCalorieMinutes
+            emptyCalorieMinutes = budget.emptyCalorieMinutes,
         )
     }
 
@@ -160,7 +166,7 @@ class BudgetEnforcer(
         val earnCapRemaining: Int,
         val isEarnCapHit: Boolean,
         val nutritiveMinutes: Int,
-        val emptyCalorieMinutes: Int
+        val emptyCalorieMinutes: Int,
     ) {
         /** Percentage of the daily earn cap achieved (0–100). */
         val earnCapPercent: Int get() =
@@ -178,7 +184,7 @@ class BudgetEnforcer(
     fun fillMissingDays(
         budgets: List<DopamineBudget>,
         fromDate: LocalDate,
-        toDate: LocalDate
+        toDate: LocalDate,
     ): List<DopamineBudget> {
         if (budgets.isEmpty()) return emptyList()
         val byDate = budgets.associateBy { it.date }
@@ -194,7 +200,7 @@ class BudgetEnforcer(
                 fpRolloverOut = 0,
                 nutritiveMinutes = 0,
                 emptyCalorieMinutes = 0,
-                neutralMinutes = 0
+                neutralMinutes = 0,
             )
             current = current.plus(1, DateTimeUnit.DAY)
         }

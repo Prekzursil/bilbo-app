@@ -14,13 +14,13 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import kotlin.time.Clock
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.toLocalDateTime
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.time.Clock
 
 /**
  * ViewModel backing [DashboardScreen].
@@ -37,134 +37,141 @@ import javax.inject.Inject
  * [StateFlow] so re-subscribes (e.g. after process death) receive the last value.
  */
 @HiltViewModel
-class DashboardViewModel @Inject constructor(
-    private val usageRepository: UsageRepository,
-    private val appProfileRepository: AppProfileRepository,
-) : ViewModel() {
+class DashboardViewModel
+    @Inject
+    constructor(
+        private val usageRepository: UsageRepository,
+        private val appProfileRepository: AppProfileRepository,
+    ) : ViewModel() {
+        // ── UI state ──────────────────────────────────────────────────────────────
 
-    // ── UI state ──────────────────────────────────────────────────────────────
+        data class AppUsage(
+            val packageName: String,
+            val appLabel: String,
+            val durationMinutes: Int,
+            val category: AppCategory,
+        )
 
-    data class AppUsage(
-        val packageName: String,
-        val appLabel: String,
-        val durationMinutes: Int,
-        val category: AppCategory,
-    )
+        data class DashboardUiState(
+            val isLoading: Boolean = true,
+            val totalMinutes: Int = 0,
+            val dailyGoalMinutes: Int = DEFAULT_DAILY_GOAL_MINUTES,
+            val apps: List<AppUsage> = emptyList(),
+            val error: String? = null,
+        ) {
+            val goalDeltaCopy: String
+                get() {
+                    val delta = dailyGoalMinutes - totalMinutes
+                    return when {
+                        delta >= 0 -> "$delta min under your daily goal"
+                        else -> "${-delta} min over your daily goal"
+                    }
+                }
 
-    data class DashboardUiState(
-        val isLoading: Boolean = true,
-        val totalMinutes: Int = 0,
-        val dailyGoalMinutes: Int = DEFAULT_DAILY_GOAL_MINUTES,
-        val apps: List<AppUsage> = emptyList(),
-        val error: String? = null,
-    ) {
-        val goalDeltaCopy: String
-            get() {
-                val delta = dailyGoalMinutes - totalMinutes
-                return when {
-                    delta >= 0 -> "${delta} min under your daily goal"
-                    else -> "${-delta} min over your daily goal"
+            val formattedTotal: String
+                get() {
+                    val h = totalMinutes / 60
+                    val m = totalMinutes % 60
+                    return if (h > 0) "${h}h ${m}m" else "${m}m"
+                }
+        }
+
+        private val _uiState = MutableStateFlow(DashboardUiState())
+        val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
+
+        init {
+            startObserving()
+        }
+
+        // ── Public API ────────────────────────────────────────────────────────────
+
+        /**
+         * Force a refresh of the dashboard. [UsageRepository.observeAll] already
+         * re-emits on every write, so this primarily gives users pull-to-refresh
+         * feedback while we re-aggregate from the current snapshot.
+         */
+        fun refresh() {
+            viewModelScope.launch {
+                try {
+                    val sessions = usageRepository.getAll()
+                    aggregateAndEmit(sessions)
+                } catch (e: Exception) {
+                    Timber.e(e, "DashboardViewModel: refresh failed")
+                    _uiState.value =
+                        _uiState.value.copy(
+                            isLoading = false,
+                            error = "Could not refresh dashboard",
+                        )
                 }
             }
+        }
 
-        val formattedTotal: String
-            get() {
-                val h = totalMinutes / 60
-                val m = totalMinutes % 60
-                return if (h > 0) "${h}h ${m}m" else "${m}m"
-            }
-    }
+        // ── Internal ──────────────────────────────────────────────────────────────
 
-    private val _uiState = MutableStateFlow(DashboardUiState())
-    val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
+        private fun startObserving() {
+            usageRepository
+                .observeAll()
+                .onEach { aggregateAndEmit(it) }
+                .catch { e ->
+                    Timber.e(e, "DashboardViewModel: observeAll stream error")
+                    _uiState.value =
+                        _uiState.value.copy(
+                            isLoading = false,
+                            error = "Could not load usage data",
+                        )
+                }.launchIn(viewModelScope)
+        }
 
-    init {
-        startObserving()
-    }
+        private suspend fun aggregateAndEmit(sessions: List<UsageSession>) {
+            val tz = TimeZone.currentSystemDefault()
+            val now = Clock.System.now()
+            val today: LocalDate = now.toLocalDateTime(tz).date
+            val startOfToday = today.atStartOfDayIn(tz)
 
-    // ── Public API ────────────────────────────────────────────────────────────
+            // Today's sessions only
+            val todays = sessions.filter { it.startTime >= startOfToday }
 
-    /**
-     * Force a refresh of the dashboard. [UsageRepository.observeAll] already
-     * re-emits on every write, so this primarily gives users pull-to-refresh
-     * feedback while we re-aggregate from the current snapshot.
-     */
-    fun refresh() {
-        viewModelScope.launch {
-            try {
-                val sessions = usageRepository.getAll()
-                aggregateAndEmit(sessions)
-            } catch (e: Exception) {
-                Timber.e(e, "DashboardViewModel: refresh failed")
-                _uiState.value = _uiState.value.copy(
+            // Aggregate per package: sum durations, resolve label + category
+            val perPackage = todays.groupBy { it.packageName }
+            val apps =
+                perPackage
+                    .map { (pkg, group) ->
+                        val totalSeconds = group.sumOf { it.durationSeconds }
+                        val sessionLabel = group.firstOrNull { !it.appLabel.isBlank() }?.appLabel ?: pkg
+                        val sessionCategory = group.firstOrNull()?.category ?: AppCategory.NEUTRAL
+
+                        // Prefer the AppProfile category if one has been set by the user
+                        val profile =
+                            try {
+                                appProfileRepository.getByPackageName(pkg)
+                            } catch (e: Exception) {
+                                Timber.w(e, "DashboardViewModel: profile lookup failed for $pkg")
+                                null
+                            }
+                        AppUsage(
+                            packageName = pkg,
+                            appLabel =
+                                profile?.let { prof -> prof.appLabel.ifBlank { sessionLabel } }
+                                    ?: sessionLabel,
+                            durationMinutes = (totalSeconds / 60L).toInt(),
+                            category = profile?.category ?: sessionCategory,
+                        )
+                    }.filter { it.durationMinutes > 0 }
+                    .sortedByDescending { it.durationMinutes }
+
+            val totalMinutes = apps.sumOf { it.durationMinutes }
+
+            _uiState.value =
+                _uiState.value.copy(
                     isLoading = false,
-                    error = "Could not refresh dashboard",
+                    totalMinutes = totalMinutes,
+                    apps = apps,
+                    error = null,
                 )
-            }
+        }
+
+        companion object {
+            /** Default daily screen-time goal; will be user-configurable in a later release. */
+            const val DEFAULT_DAILY_GOAL_MINUTES = 150
         }
     }
-
-    // ── Internal ──────────────────────────────────────────────────────────────
-
-    private fun startObserving() {
-        usageRepository.observeAll()
-            .onEach { aggregateAndEmit(it) }
-            .catch { e ->
-                Timber.e(e, "DashboardViewModel: observeAll stream error")
-                _uiState.value = _uiState.value.copy(
-                    isLoading = false,
-                    error = "Could not load usage data",
-                )
-            }
-            .launchIn(viewModelScope)
-    }
-
-    private suspend fun aggregateAndEmit(sessions: List<UsageSession>) {
-        val tz = TimeZone.currentSystemDefault()
-        val now = Clock.System.now()
-        val today: LocalDate = now.toLocalDateTime(tz).date
-        val startOfToday = today.atStartOfDayIn(tz)
-
-        // Today's sessions only
-        val todays = sessions.filter { it.startTime >= startOfToday }
-
-        // Aggregate per package: sum durations, resolve label + category
-        val perPackage = todays.groupBy { it.packageName }
-        val apps = perPackage.map { (pkg, group) ->
-            val totalSeconds = group.sumOf { it.durationSeconds }
-            val sessionLabel = group.firstOrNull { !it.appLabel.isBlank() }?.appLabel ?: pkg
-            val sessionCategory = group.firstOrNull()?.category ?: AppCategory.NEUTRAL
-
-            // Prefer the AppProfile category if one has been set by the user
-            val profile = try {
-                appProfileRepository.getByPackageName(pkg)
-            } catch (e: Exception) {
-                Timber.w(e, "DashboardViewModel: profile lookup failed for $pkg")
-                null
-            }
-            AppUsage(
-                packageName = pkg,
-                appLabel = profile?.let { prof -> prof.appLabel.ifBlank { sessionLabel } }
-                    ?: sessionLabel,
-                durationMinutes = (totalSeconds / 60L).toInt(),
-                category = profile?.category ?: sessionCategory,
-            )
-        }
-            .filter { it.durationMinutes > 0 }
-            .sortedByDescending { it.durationMinutes }
-
-        val totalMinutes = apps.sumOf { it.durationMinutes }
-
-        _uiState.value = _uiState.value.copy(
-            isLoading = false,
-            totalMinutes = totalMinutes,
-            apps = apps,
-            error = null,
-        )
-    }
-
-    companion object {
-        /** Default daily screen-time goal; will be user-configurable in a later release. */
-        const val DEFAULT_DAILY_GOAL_MINUTES = 150
-    }
-}

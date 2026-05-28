@@ -25,15 +25,14 @@ import androidx.compose.ui.unit.dp
 import dev.bilbo.app.ui.theme.BilboTheme
 
 @Composable
-fun OnboardingScreen(
-    onNavigateToDashboard: () -> Unit,
-) {
+fun OnboardingScreen(onNavigateToDashboard: () -> Unit) {
     Scaffold { paddingValues ->
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-                .padding(24.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+                    .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
         ) {

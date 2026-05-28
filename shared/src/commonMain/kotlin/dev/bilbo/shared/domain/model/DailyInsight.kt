@@ -34,6 +34,6 @@ data class AppUsageSummary(
 
 @Serializable
 data class MoodScore(
-    val score: Int,  // 1-10
+    val score: Int, // 1-10
     val label: String,
 )

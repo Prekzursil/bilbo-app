@@ -14,31 +14,34 @@ import javax.inject.Singleton
  * in a dedicated `bilbo_cooldowns` preference file.
  */
 @Singleton
-class SharedPrefsCooldownPersistence @Inject constructor(
-    @ApplicationContext context: Context,
-) : CooldownPersistence {
+class SharedPrefsCooldownPersistence
+    @Inject
+    constructor(
+        @ApplicationContext context: Context,
+    ) : CooldownPersistence {
+        private val prefs: SharedPreferences =
+            context.getSharedPreferences("bilbo_cooldowns", Context.MODE_PRIVATE)
 
-    private val prefs: SharedPreferences =
-        context.getSharedPreferences("bilbo_cooldowns", Context.MODE_PRIVATE)
+        private fun prefKey(packageName: String) = "cdl_$packageName"
 
-    private fun prefKey(packageName: String) = "cdl_$packageName"
+        override fun save(
+            packageName: String,
+            expiryEpochSeconds: Long,
+        ) {
+            prefs.edit().putLong(prefKey(packageName), expiryEpochSeconds).apply()
+        }
 
-    override fun save(packageName: String, expiryEpochSeconds: Long) {
-        prefs.edit().putLong(prefKey(packageName), expiryEpochSeconds).apply()
+        override fun clear(packageName: String) {
+            prefs.edit().remove(prefKey(packageName)).apply()
+        }
+
+        override fun loadAll(): Map<String, Long> {
+            return prefs.all
+                .filter { (key, _) -> key.startsWith("cdl_") }
+                .mapNotNull { (key, value) ->
+                    val packageName = key.removePrefix("cdl_")
+                    val expiry = (value as? Long) ?: return@mapNotNull null
+                    packageName to expiry
+                }.toMap()
+        }
     }
-
-    override fun clear(packageName: String) {
-        prefs.edit().remove(prefKey(packageName)).apply()
-    }
-
-    override fun loadAll(): Map<String, Long> {
-        return prefs.all
-            .filter { (key, _) -> key.startsWith("cdl_") }
-            .mapNotNull { (key, value) ->
-                val packageName = key.removePrefix("cdl_")
-                val expiry = (value as? Long) ?: return@mapNotNull null
-                packageName to expiry
-            }
-            .toMap()
-    }
-}

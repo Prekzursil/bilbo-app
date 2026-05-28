@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
  * Repository for persisting and querying [AnalogSuggestion] records.
  */
 interface SuggestionRepository {
-
     /**
      * Observe all suggestions ordered by category then text.
      * Emits whenever the underlying data changes.
@@ -42,7 +41,7 @@ interface SuggestionRepository {
      */
     suspend fun getByCategoryAndTimeOfDay(
         category: SuggestionCategory,
-        timeOfDay: TimeOfDay
+        timeOfDay: TimeOfDay,
     ): List<AnalogSuggestion>
 
     /**

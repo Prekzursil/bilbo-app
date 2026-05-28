@@ -18,7 +18,7 @@ data class BuddyPair(
     val isActive: Boolean = true,
     val streakDays: Int = 0,
     val lastEncouragementSentAt: Instant? = null,
-    val lastEncouragementReceivedAt: Instant? = null
+    val lastEncouragementReceivedAt: Instant? = null,
 )
 
 /**
@@ -39,5 +39,5 @@ enum class SharingLevel {
     APP_TOTALS,
 
     /** Full transparency: all session data including timing and intent accuracy. */
-    FULL
+    FULL,
 }

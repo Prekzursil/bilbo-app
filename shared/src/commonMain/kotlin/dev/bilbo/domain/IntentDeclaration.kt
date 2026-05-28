@@ -11,5 +11,5 @@ data class IntentDeclaration(
     val wasEnforced: Boolean = false,
     val enforcementType: EnforcementMode? = null,
     val wasOverridden: Boolean = false,
-    val emotionalCheckInId: Long? = null
+    val emotionalCheckInId: Long? = null,
 )

@@ -14,8 +14,9 @@ import kotlinx.serialization.json.put
  *
  * All suspend functions must be called from a coroutine.
  */
-class BilboApiService(private val client: SupabaseClient) {
-
+class BilboApiService(
+    private val client: SupabaseClient,
+) {
     // -------------------------------------------------------------------------
     // Daily Insights
     // -------------------------------------------------------------------------
@@ -30,8 +31,7 @@ class BilboApiService(private val client: SupabaseClient) {
             .select {
                 order("date", Order.DESCENDING)
                 this.limit(limit.toLong())
-            }
-            .decodeList()
+            }.decodeList()
 
     /**
      * Triggers the Tier-3 AI insight generation via the Supabase Edge Function
@@ -41,14 +41,17 @@ class BilboApiService(private val client: SupabaseClient) {
      * @return The generated [DailyInsight].
      */
     suspend fun generateAiInsight(date: String): DailyInsight {
-        val response = client.functions.invoke(
-            function = "ai-relay",
-            body = buildJsonObject {
-                put("action", "generate_insight")
-                put("date", date)
-            }
-        )
+        val response =
+            client.functions.invoke(
+                function = "ai-relay",
+                body =
+                    buildJsonObject {
+                        put("action", "generate_insight")
+                        put("date", date)
+                    },
+            )
         val text = response.bodyAsText()
-        return kotlinx.serialization.json.Json.decodeFromString(text)
+        return kotlinx.serialization.json.Json
+            .decodeFromString(text)
     }
 }

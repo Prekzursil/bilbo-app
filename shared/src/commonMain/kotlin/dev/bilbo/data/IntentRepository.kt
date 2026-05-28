@@ -9,7 +9,6 @@ import kotlinx.datetime.Instant
  * Repository for persisting and querying [IntentDeclaration] records.
  */
 interface IntentRepository {
-
     /**
      * Observe all declarations, newest first.
      * Emits whenever the underlying data changes.
@@ -34,7 +33,10 @@ interface IntentRepository {
     /**
      * Return all declarations whose timestamp falls within [[from], [to]].
      */
-    suspend fun getByDateRange(from: Instant, to: Instant): List<IntentDeclaration>
+    suspend fun getByDateRange(
+        from: Instant,
+        to: Instant,
+    ): List<IntentDeclaration>
 
     /**
      * Return all declarations where the user overrode an enforcement action.
@@ -50,7 +52,10 @@ interface IntentRepository {
     /**
      * Record the actual usage duration once a session completes.
      */
-    suspend fun updateActualDuration(id: Long, actualDurationMinutes: Int)
+    suspend fun updateActualDuration(
+        id: Long,
+        actualDurationMinutes: Int,
+    )
 
     /**
      * Record enforcement outcome for a declaration.
@@ -59,7 +64,7 @@ interface IntentRepository {
         id: Long,
         wasEnforced: Boolean,
         enforcementType: EnforcementMode?,
-        wasOverridden: Boolean
+        wasOverridden: Boolean,
     )
 
     /**
@@ -71,18 +76,27 @@ interface IntentRepository {
      * Return the number of "accurate" intents (actual within ±2 min of declared)
      * in [[from], [to]].
      */
-    suspend fun countAccurate(from: Instant, to: Instant): Long
+    suspend fun countAccurate(
+        from: Instant,
+        to: Instant,
+    ): Long
 
     /**
      * Return the total number of intents recorded in [[from], [to]].
      */
-    suspend fun countTotal(from: Instant, to: Instant): Long
+    suspend fun countTotal(
+        from: Instant,
+        to: Instant,
+    ): Long
 
     /**
      * Return the intent accuracy as a percentage (0–100) for [[from], [to]].
      * Returns 0 if there are no intents in the range.
      */
-    suspend fun accuracyPercent(from: Instant, to: Instant): Float {
+    suspend fun accuracyPercent(
+        from: Instant,
+        to: Instant,
+    ): Float {
         val total = countTotal(from, to)
         if (total == 0L) return 0f
         return (countAccurate(from, to).toFloat() / total.toFloat()) * 100f

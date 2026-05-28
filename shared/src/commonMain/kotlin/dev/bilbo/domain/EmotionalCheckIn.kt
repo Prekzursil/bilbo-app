@@ -7,9 +7,15 @@ data class EmotionalCheckIn(
     val timestamp: Instant,
     val preSessionEmotion: Emotion,
     val postSessionMood: Emotion? = null,
-    val linkedIntentId: Long? = null
+    val linkedIntentId: Long? = null,
 )
 
 enum class Emotion {
-    HAPPY, CALM, BORED, STRESSED, ANXIOUS, SAD, LONELY
+    HAPPY,
+    CALM,
+    BORED,
+    STRESSED,
+    ANXIOUS,
+    SAD,
+    LONELY,
 }

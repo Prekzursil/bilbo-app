@@ -8,7 +8,6 @@ import kotlin.math.sqrt
  * Requires a minimum of 14 data points before returning meaningful results.
  */
 class CorrelationAnalyzer {
-
     companion object {
         const val MIN_DATA_POINTS = 14
         const val STRONG_CORRELATION_THRESHOLD = 0.6f
@@ -19,23 +18,24 @@ class CorrelationAnalyzer {
      * Represents a paired data point: an emotion score and an associated usage value.
      */
     data class EmotionUsagePair(
-        val emotionScore: Double,   // numeric encoding of Emotion enum
-        val usageMinutes: Double
+        val emotionScore: Double, // numeric encoding of Emotion enum
+        val usageMinutes: Double,
     )
 
     /**
      * Encodes an [Emotion] to a numeric scale for correlation computation.
      * Negative-valence emotions → lower scores; positive/calm → higher scores.
      */
-    fun encodeEmotion(emotion: Emotion): Double = when (emotion) {
-        Emotion.HAPPY  -> 6.0
-        Emotion.CALM   -> 5.0
-        Emotion.BORED  -> 3.0
-        Emotion.LONELY -> 2.0
-        Emotion.SAD    -> 2.0
-        Emotion.ANXIOUS -> 1.0
-        Emotion.STRESSED -> 0.0
-    }
+    fun encodeEmotion(emotion: Emotion): Double =
+        when (emotion) {
+            Emotion.HAPPY -> 6.0
+            Emotion.CALM -> 5.0
+            Emotion.BORED -> 3.0
+            Emotion.LONELY -> 2.0
+            Emotion.SAD -> 2.0
+            Emotion.ANXIOUS -> 1.0
+            Emotion.STRESSED -> 0.0
+        }
 
     /**
      * Computes the Pearson correlation coefficient between emotion scores and usage minutes.
@@ -76,23 +76,25 @@ class CorrelationAnalyzer {
      */
     fun analyzeEmotionToEmptyCalorieUsage(
         checkIns: List<EmotionalCheckIn>,
-        sessions: List<UsageSession>
+        sessions: List<UsageSession>,
     ): Map<Emotion, Double> {
         // Build a timeline map: hour-of-day → emotion
         val emotionBySession = buildEmotionSessionMap(checkIns, sessions)
 
-        return Emotion.entries.mapNotNull { emotion ->
-            val pairs = emotionBySession
-                .filter { it.preEmotion == emotion }
-                .map { pair ->
-                    EmotionUsagePair(
-                        emotionScore = encodeEmotion(emotion),
-                        usageMinutes = pair.usageMinutes
-                    )
-                }
-            val correlation = computeCorrelation(pairs) ?: return@mapNotNull null
-            emotion to correlation
-        }.toMap()
+        return Emotion.entries
+            .mapNotNull { emotion ->
+                val pairs =
+                    emotionBySession
+                        .filter { it.preEmotion == emotion }
+                        .map { pair ->
+                            EmotionUsagePair(
+                                emotionScore = encodeEmotion(emotion),
+                                usageMinutes = pair.usageMinutes,
+                            )
+                        }
+                val correlation = computeCorrelation(pairs) ?: return@mapNotNull null
+                emotion to correlation
+            }.toMap()
     }
 
     /**
@@ -100,32 +102,35 @@ class CorrelationAnalyzer {
      */
     fun analyzeEmotionToNutritiveUsage(
         checkIns: List<EmotionalCheckIn>,
-        sessions: List<UsageSession>
+        sessions: List<UsageSession>,
     ): Map<Emotion, Double> {
         val emotionBySession = buildNutritiveSessionMap(checkIns, sessions)
 
-        return Emotion.entries.mapNotNull { emotion ->
-            val pairs = emotionBySession
-                .filter { it.preEmotion == emotion }
-                .map { pair ->
-                    EmotionUsagePair(
-                        emotionScore = encodeEmotion(emotion),
-                        usageMinutes = pair.usageMinutes
-                    )
-                }
-            val correlation = computeCorrelation(pairs) ?: return@mapNotNull null
-            emotion to correlation
-        }.toMap()
+        return Emotion.entries
+            .mapNotNull { emotion ->
+                val pairs =
+                    emotionBySession
+                        .filter { it.preEmotion == emotion }
+                        .map { pair ->
+                            EmotionUsagePair(
+                                emotionScore = encodeEmotion(emotion),
+                                usageMinutes = pair.usageMinutes,
+                            )
+                        }
+                val correlation = computeCorrelation(pairs) ?: return@mapNotNull null
+                emotion to correlation
+            }.toMap()
     }
 
     /**
      * Returns a human-readable description of a correlation strength.
      */
-    fun describeCorrelation(strength: Double): String = when {
-        strength >= STRONG_CORRELATION_THRESHOLD -> "strong"
-        strength >= MODERATE_CORRELATION_THRESHOLD -> "moderate"
-        else -> "weak"
-    }
+    fun describeCorrelation(strength: Double): String =
+        when {
+            strength >= STRONG_CORRELATION_THRESHOLD -> "strong"
+            strength >= MODERATE_CORRELATION_THRESHOLD -> "moderate"
+            else -> "weak"
+        }
 
     // ---------------------------------------------------------------------------
     // Internal helpers
@@ -133,47 +138,45 @@ class CorrelationAnalyzer {
 
     private data class EmotionSessionPair(
         val preEmotion: Emotion,
-        val usageMinutes: Double
+        val usageMinutes: Double,
     )
 
     private fun buildEmotionSessionMap(
         checkIns: List<EmotionalCheckIn>,
-        sessions: List<UsageSession>
-    ): List<EmotionSessionPair> {
-        return checkIns.map { checkIn ->
+        sessions: List<UsageSession>,
+    ): List<EmotionSessionPair> =
+        checkIns.map { checkIn ->
             // Find sessions that started within 5 minutes after the check-in
             val windowStartEpoch = checkIn.timestamp.epochSeconds
             val windowEndEpoch = windowStartEpoch + 5 * 60L
 
-            val totalEmptyMinutes = sessions
-                .filter { s ->
-                    s.category == AppCategory.EMPTY_CALORIES &&
-                    s.startTime.epochSeconds >= windowStartEpoch &&
-                    s.startTime.epochSeconds < windowEndEpoch
-                }
-                .sumOf { it.durationSeconds / 60.0 }
+            val totalEmptyMinutes =
+                sessions
+                    .filter { s ->
+                        s.category == AppCategory.EMPTY_CALORIES &&
+                            s.startTime.epochSeconds >= windowStartEpoch &&
+                            s.startTime.epochSeconds < windowEndEpoch
+                    }.sumOf { it.durationSeconds / 60.0 }
 
             EmotionSessionPair(checkIn.preSessionEmotion, totalEmptyMinutes)
         }
-    }
 
     private fun buildNutritiveSessionMap(
         checkIns: List<EmotionalCheckIn>,
-        sessions: List<UsageSession>
-    ): List<EmotionSessionPair> {
-        return checkIns.map { checkIn ->
+        sessions: List<UsageSession>,
+    ): List<EmotionSessionPair> =
+        checkIns.map { checkIn ->
             val windowStartEpoch = checkIn.timestamp.epochSeconds
             val windowEndEpoch = windowStartEpoch + 5 * 60L
 
-            val totalNutritiveMinutes = sessions
-                .filter { s ->
-                    s.category == AppCategory.NUTRITIVE &&
-                    s.startTime.epochSeconds >= windowStartEpoch &&
-                    s.startTime.epochSeconds < windowEndEpoch
-                }
-                .sumOf { it.durationSeconds / 60.0 }
+            val totalNutritiveMinutes =
+                sessions
+                    .filter { s ->
+                        s.category == AppCategory.NUTRITIVE &&
+                            s.startTime.epochSeconds >= windowStartEpoch &&
+                            s.startTime.epochSeconds < windowEndEpoch
+                    }.sumOf { it.durationSeconds / 60.0 }
 
             EmotionSessionPair(checkIn.preSessionEmotion, totalNutritiveMinutes)
         }
-    }
 }

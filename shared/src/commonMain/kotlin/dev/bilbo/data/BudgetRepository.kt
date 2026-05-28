@@ -8,7 +8,6 @@ import kotlinx.datetime.LocalDate
  * Repository for persisting and querying daily [DopamineBudget] records.
  */
 interface BudgetRepository {
-
     /**
      * Observe all budget records, newest date first.
      * Emits whenever the underlying data changes.
@@ -33,7 +32,10 @@ interface BudgetRepository {
     /**
      * Return budgets for dates within [[from], [to]] inclusive, ordered ascending.
      */
-    suspend fun getByDateRange(from: LocalDate, to: LocalDate): List<DopamineBudget>
+    suspend fun getByDateRange(
+        from: LocalDate,
+        to: LocalDate,
+    ): List<DopamineBudget>
 
     /**
      * Return the [limit] most recent budget records.
@@ -59,19 +61,28 @@ interface BudgetRepository {
      * Atomically add [amount] to [fpEarned] for the given [date].
      * If no record exists for [date], a new one is created with defaults.
      */
-    suspend fun incrementFpEarned(date: LocalDate, amount: Int)
+    suspend fun incrementFpEarned(
+        date: LocalDate,
+        amount: Int,
+    )
 
     /**
      * Atomically add [amount] to [fpSpent] for the given [date].
      * If no record exists for [date], a new one is created with defaults.
      */
-    suspend fun incrementFpSpent(date: LocalDate, amount: Int)
+    suspend fun incrementFpSpent(
+        date: LocalDate,
+        amount: Int,
+    )
 
     /**
      * Atomically add [amount] to [fpBonus] for the given [date].
      * If no record exists for [date], a new one is created with defaults.
      */
-    suspend fun incrementFpBonus(date: LocalDate, amount: Int)
+    suspend fun incrementFpBonus(
+        date: LocalDate,
+        amount: Int,
+    )
 
     /**
      * Remove the budget record for [date].
@@ -81,5 +92,8 @@ interface BudgetRepository {
     /**
      * Return the sum of [DopamineBudget.fpEarned] over all dates in [[from], [to]].
      */
-    suspend fun sumFpEarned(from: LocalDate, to: LocalDate): Long
+    suspend fun sumFpEarned(
+        from: LocalDate,
+        to: LocalDate,
+    ): Long
 }

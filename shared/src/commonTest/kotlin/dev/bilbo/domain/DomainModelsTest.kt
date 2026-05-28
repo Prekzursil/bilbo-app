@@ -2,13 +2,12 @@ package dev.bilbo.domain
 
 import dev.bilbo.domain.social.*
 import dev.bilbo.shared.domain.model.*
-import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
 import kotlinx.datetime.*
 import kotlinx.serialization.json.Json
 import kotlin.test.*
+import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
 
 class DomainModelsTest {
-
     // ── AnalogSuggestion ─────────────────────────────────────────────────
 
     @Test fun analogSuggestionDefaults() {
@@ -65,29 +64,50 @@ class DomainModelsTest {
     // ── DopamineBudget ────────────────────────────────────────────────────
 
     @Test fun currentBalanceBasic() {
-        val b = DopamineBudget(
-            date = LocalDate(2025, 1, 1), fpEarned = 10, fpSpent = 5, fpBonus = 3,
-            fpRolloverIn = 2, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val b =
+            DopamineBudget(
+                date = LocalDate(2025, 1, 1),
+                fpEarned = 10,
+                fpSpent = 5,
+                fpBonus = 3,
+                fpRolloverIn = 2,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         assertEquals(25, b.currentBalance())
     }
 
     @Test fun currentBalanceNegative() {
-        val b = DopamineBudget(
-            date = LocalDate(2025, 1, 1), fpEarned = 0, fpSpent = 20, fpBonus = 0,
-            fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val b =
+            DopamineBudget(
+                date = LocalDate(2025, 1, 1),
+                fpEarned = 0,
+                fpSpent = 20,
+                fpBonus = 0,
+                fpRolloverIn = 0,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         assertEquals(-5, b.currentBalance())
     }
 
     @Test fun currentBalanceZero() {
-        val b = DopamineBudget(
-            date = LocalDate(2025, 1, 1), fpEarned = 0, fpSpent = 0, fpBonus = 0,
-            fpRolloverIn = 0, fpRolloverOut = 0, nutritiveMinutes = 0,
-            emptyCalorieMinutes = 0, neutralMinutes = 0
-        )
+        val b =
+            DopamineBudget(
+                date = LocalDate(2025, 1, 1),
+                fpEarned = 0,
+                fpSpent = 0,
+                fpBonus = 0,
+                fpRolloverIn = 0,
+                fpRolloverOut = 0,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                neutralMinutes = 0,
+            )
         assertEquals(FPEconomy.DAILY_BASELINE, b.currentBalance())
     }
 
@@ -138,10 +158,15 @@ class DomainModelsTest {
     // ── UsageSession ──────────────────────────────────────────────────────
 
     @Test fun usageSessionDefaults() {
-        val s = UsageSession(
-            packageName = "com.app", appLabel = "App", category = AppCategory.NEUTRAL,
-            startTime = Instant.fromEpochSeconds(100), endTime = null, durationSeconds = 120
-        )
+        val s =
+            UsageSession(
+                packageName = "com.app",
+                appLabel = "App",
+                category = AppCategory.NEUTRAL,
+                startTime = Instant.fromEpochSeconds(100),
+                endTime = null,
+                durationSeconds = 120,
+            )
         assertEquals(0L, s.id)
         assertTrue(s.wasTracked)
         assertNull(s.endTime)
@@ -156,12 +181,18 @@ class DomainModelsTest {
     }
 
     @Test fun weeklyInsightDefaults() {
-        val w = WeeklyInsight(
-            weekStart = LocalDate(2025, 1, 6),
-            tier2Insights = listOf(HeuristicInsight(InsightType.TREND, "test", 0.8f)),
-            totalScreenTimeMinutes = 100, nutritiveMinutes = 40, emptyCalorieMinutes = 30,
-            fpEarned = 50, fpSpent = 20, intentAccuracyPercent = 0.85f, streakDays = 5
-        )
+        val w =
+            WeeklyInsight(
+                weekStart = LocalDate(2025, 1, 6),
+                tier2Insights = listOf(HeuristicInsight(InsightType.TREND, "test", 0.8f)),
+                totalScreenTimeMinutes = 100,
+                nutritiveMinutes = 40,
+                emptyCalorieMinutes = 30,
+                fpEarned = 50,
+                fpSpent = 20,
+                intentAccuracyPercent = 0.85f,
+                streakDays = 5,
+            )
         assertEquals(0L, w.id)
         assertNull(w.tier3Narrative)
         assertEquals(1, w.tier2Insights.size)
@@ -185,10 +216,14 @@ class DomainModelsTest {
     // ── Social: BuddyPair ─────────────────────────────────────────────────
 
     @Test fun buddyPairDefaults() {
-        val bp = BuddyPair(
-            localUserId = "a", buddyUserId = "b", buddyDisplayName = "Buddy",
-            sharingLevel = SharingLevel.SCORES_ONLY, createdAt = Instant.fromEpochSeconds(0)
-        )
+        val bp =
+            BuddyPair(
+                localUserId = "a",
+                buddyUserId = "b",
+                buddyDisplayName = "Buddy",
+                sharingLevel = SharingLevel.SCORES_ONLY,
+                createdAt = Instant.fromEpochSeconds(0),
+            )
         assertEquals(0L, bp.id)
         assertNull(bp.buddyAvatarUrl)
         assertNull(bp.lastSyncedAt)
@@ -220,14 +255,20 @@ class DomainModelsTest {
     }
 
     @Test fun challengeCreation() {
-        val c = Challenge(
-            remoteId = "r1", title = "Test", type = ChallengeType.MOST_FP_EARNED,
-            mode = ChallengeMode.COMPETITIVE, status = ChallengeStatus.ACTIVE,
-            goal = ChallengeGoal(100, "FP"), creatorId = "u1",
-            participantIds = listOf("u1", "u2"),
-            startDate = LocalDate(2025, 1, 1), endDate = LocalDate(2025, 1, 7),
-            createdAt = Instant.fromEpochSeconds(0)
-        )
+        val c =
+            Challenge(
+                remoteId = "r1",
+                title = "Test",
+                type = ChallengeType.MOST_FP_EARNED,
+                mode = ChallengeMode.COMPETITIVE,
+                status = ChallengeStatus.ACTIVE,
+                goal = ChallengeGoal(100, "FP"),
+                creatorId = "u1",
+                participantIds = listOf("u1", "u2"),
+                startDate = LocalDate(2025, 1, 1),
+                endDate = LocalDate(2025, 1, 7),
+                createdAt = Instant.fromEpochSeconds(0),
+            )
         assertEquals(0L, c.id)
         assertNull(c.description)
         assertNull(c.completedAt)
@@ -237,10 +278,14 @@ class DomainModelsTest {
     }
 
     @Test fun challengeParticipantProgressCreation() {
-        val p = ChallengeParticipantProgress(
-            userId = "u1", displayName = "User", currentValue = 50f,
-            rank = 1, lastUpdatedAt = Instant.fromEpochSeconds(0)
-        )
+        val p =
+            ChallengeParticipantProgress(
+                userId = "u1",
+                displayName = "User",
+                currentValue = 50f,
+                rank = 1,
+                lastUpdatedAt = Instant.fromEpochSeconds(0),
+            )
         assertEquals("u1", p.userId)
         assertNull(p.avatarUrl)
     }
@@ -254,11 +299,14 @@ class DomainModelsTest {
     }
 
     @Test fun circleDefaults() {
-        val c = Circle(
-            remoteId = "r1", name = "Test", ownerId = "u1",
-            sharingLevel = SharingLevel.CATEGORY_BREAKDOWN,
-            createdAt = Instant.fromEpochSeconds(0)
-        )
+        val c =
+            Circle(
+                remoteId = "r1",
+                name = "Test",
+                ownerId = "u1",
+                sharingLevel = SharingLevel.CATEGORY_BREAKDOWN,
+                createdAt = Instant.fromEpochSeconds(0),
+            )
         assertEquals(0L, c.id)
         assertNull(c.description)
         assertNull(c.avatarUrl)
@@ -269,10 +317,14 @@ class DomainModelsTest {
     }
 
     @Test fun circleMemberDefaults() {
-        val m = CircleMember(
-            userId = "u1", displayName = "User", role = CircleRole.MODERATOR,
-            joinedAt = Instant.fromEpochSeconds(0), sharingLevel = SharingLevel.SCORES_ONLY
-        )
+        val m =
+            CircleMember(
+                userId = "u1",
+                displayName = "User",
+                role = CircleRole.MODERATOR,
+                joinedAt = Instant.fromEpochSeconds(0),
+                sharingLevel = SharingLevel.SCORES_ONLY,
+            )
         assertNull(m.avatarUrl)
         assertTrue(m.isActive)
         assertEquals(0, m.currentStreakDays)
@@ -285,11 +337,17 @@ class DomainModelsTest {
     private val json = Json { ignoreUnknownKeys = true }
 
     @Test fun appUsageSessionSerialization() {
-        val s = AppUsageSession(
-            id = "s1", userId = "u1", packageName = "com.test", appName = "Test",
-            startTime = Instant.fromEpochSeconds(1000), endTime = Instant.fromEpochSeconds(2000),
-            durationMs = 1000000, category = SharedAppCategory.SOCIAL
-        )
+        val s =
+            AppUsageSession(
+                id = "s1",
+                userId = "u1",
+                packageName = "com.test",
+                appName = "Test",
+                startTime = Instant.fromEpochSeconds(1000),
+                endTime = Instant.fromEpochSeconds(2000),
+                durationMs = 1000000,
+                category = SharedAppCategory.SOCIAL,
+            )
         val str = json.encodeToString(AppUsageSession.serializer(), s)
         val decoded = json.decodeFromString(AppUsageSession.serializer(), str)
         assertEquals(s, decoded)
@@ -300,35 +358,56 @@ class DomainModelsTest {
     }
 
     @Test fun dailyInsightSerialization() {
-        val d = DailyInsight(
-            id = "i1", userId = "u1", date = "2025-01-15", summary = "Good",
-            highlights = listOf("h1"), suggestions = listOf("s1"),
-            totalScreenTimeMinutes = 120,
-            topApps = listOf(AppUsageSummary("com.test", "Test", 60, SharedAppCategory.SOCIAL)),
-            tier = 1, mood = MoodScore(8, "happy")
-        )
+        val d =
+            DailyInsight(
+                id = "i1",
+                userId = "u1",
+                date = "2025-01-15",
+                summary = "Good",
+                highlights = listOf("h1"),
+                suggestions = listOf("s1"),
+                totalScreenTimeMinutes = 120,
+                topApps = listOf(AppUsageSummary("com.test", "Test", 60, SharedAppCategory.SOCIAL)),
+                tier = 1,
+                mood = MoodScore(8, "happy"),
+            )
         val str = json.encodeToString(DailyInsight.serializer(), d)
         val decoded = json.decodeFromString(DailyInsight.serializer(), str)
         assertEquals(d, decoded)
     }
 
     @Test fun dailyInsightNullMood() {
-        val d = DailyInsight(
-            id = "i2", userId = "u1", date = "2025-01-16", summary = "OK",
-            highlights = emptyList(), suggestions = emptyList(),
-            totalScreenTimeMinutes = 60, topApps = emptyList(), tier = 2, mood = null
-        )
+        val d =
+            DailyInsight(
+                id = "i2",
+                userId = "u1",
+                date = "2025-01-16",
+                summary = "OK",
+                highlights = emptyList(),
+                suggestions = emptyList(),
+                totalScreenTimeMinutes = 60,
+                topApps = emptyList(),
+                tier = 2,
+                mood = null,
+            )
         val str = json.encodeToString(DailyInsight.serializer(), d)
         val decoded = json.decodeFromString(DailyInsight.serializer(), str)
         assertNull(decoded.mood)
     }
 
     @Test fun wellnessGoalSerialization() {
-        val g = WellnessGoal(
-            id = "g1", userId = "u1", name = "Reduce", description = "Less scrolling",
-            type = GoalType.SCREEN_TIME_LIMIT, targetApps = listOf("com.test"),
-            dailyLimitMinutes = 60, isActive = true, createdAt = "2025-01-01"
-        )
+        val g =
+            WellnessGoal(
+                id = "g1",
+                userId = "u1",
+                name = "Reduce",
+                description = "Less scrolling",
+                type = GoalType.SCREEN_TIME_LIMIT,
+                targetApps = listOf("com.test"),
+                dailyLimitMinutes = 60,
+                isActive = true,
+                createdAt = "2025-01-01",
+            )
         val str = json.encodeToString(WellnessGoal.serializer(), g)
         val decoded = json.decodeFromString(WellnessGoal.serializer(), str)
         assertEquals(g, decoded)

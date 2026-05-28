@@ -8,13 +8,13 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import dev.bilbo.app.BuildConfig
 import dev.bilbo.data.AndroidDatabaseDriver
+import dev.bilbo.data.BilboDatabase
 import dev.bilbo.data.DatabaseDriverFactory
+import dev.bilbo.preferences.AndroidBilboPreferences
+import dev.bilbo.preferences.BilboPreferences
 import dev.bilbo.shared.data.remote.BilboApiService
 import dev.bilbo.shared.data.remote.createBilboSupabaseClient
 import dev.bilbo.shared.data.repository.InsightRepository
-import dev.bilbo.data.BilboDatabase
-import dev.bilbo.preferences.AndroidBilboPreferences
-import dev.bilbo.preferences.BilboPreferences
 import dev.bilbo.shared.domain.usecase.GetDailyInsightsUseCase
 import io.github.jan.supabase.SupabaseClient
 import javax.inject.Singleton
@@ -22,7 +22,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object AppModule {
-
     @Provides
     @Singleton
     fun provideSupabaseClient(): SupabaseClient =
@@ -39,25 +38,22 @@ object AppModule {
 
     @Provides
     @Singleton
-    fun provideBilboDatabase(driverFactory: DatabaseDriverFactory): BilboDatabase =
-        BilboDatabase(driverFactory.createDriver())
+    fun provideBilboDatabase(driverFactory: DatabaseDriverFactory): BilboDatabase = BilboDatabase(driverFactory.createDriver())
 
     @Provides
     @Singleton
-    fun provideBilboApiService(client: SupabaseClient): BilboApiService =
-        BilboApiService(client)
+    fun provideBilboApiService(client: SupabaseClient): BilboApiService = BilboApiService(client)
 
     @Provides
     @Singleton
-    fun provideInsightRepository(apiService: BilboApiService): InsightRepository =
-        InsightRepository(apiService)
+    fun provideInsightRepository(apiService: BilboApiService): InsightRepository = InsightRepository(apiService)
 
     @Provides
-    fun provideGetDailyInsightsUseCase(repository: InsightRepository): GetDailyInsightsUseCase =
-        GetDailyInsightsUseCase(repository)
+    fun provideGetDailyInsightsUseCase(repository: InsightRepository): GetDailyInsightsUseCase = GetDailyInsightsUseCase(repository)
 
     @Provides
     @Singleton
-    fun provideBilboPreferences(@ApplicationContext context: Context): BilboPreferences =
-        AndroidBilboPreferences(context)
+    fun provideBilboPreferences(
+        @ApplicationContext context: Context,
+    ): BilboPreferences = AndroidBilboPreferences(context)
 }

@@ -13,15 +13,18 @@ import timber.log.Timber
  * declared in AndroidManifest.xml.
  */
 class BootReceiver : BroadcastReceiver() {
-
-    override fun onReceive(context: Context, intent: Intent?) {
+    override fun onReceive(
+        context: Context,
+        intent: Intent?,
+    ) {
         if (intent?.action != Intent.ACTION_BOOT_COMPLETED) return
 
         Timber.d("BootReceiver: device rebooted — starting UsageTrackingService")
 
-        val serviceIntent = Intent(context, UsageTrackingService::class.java).apply {
-            action = UsageTrackingService.ACTION_START
-        }
+        val serviceIntent =
+            Intent(context, UsageTrackingService::class.java).apply {
+                action = UsageTrackingService.ACTION_START
+            }
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(serviceIntent)

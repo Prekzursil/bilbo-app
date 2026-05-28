@@ -5,8 +5,8 @@ import io.ktor.client.call.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlin.time.Clock
 import kotlinx.datetime.*
+import kotlin.time.Clock
 
 /**
  * Ktor client that sends anonymized weekly summaries to a Supabase Edge Function
@@ -17,12 +17,11 @@ import kotlinx.datetime.*
  */
 class CloudInsightClient(
     private val httpClient: HttpClient,
-    private val supabaseUrl: String,       // e.g. "https://xyz.supabase.co"
+    private val supabaseUrl: String, // e.g. "https://xyz.supabase.co"
     private val supabaseAnonKey: String,
     private val promptBuilder: InsightPromptBuilder = InsightPromptBuilder(),
-    private val clock: Clock = Clock.System
+    private val clock: Clock = Clock.System,
 ) {
-
     companion object {
         private const val EDGE_FUNCTION_PATH = "/functions/v1/weekly-insight"
         private const val RATE_LIMIT_DAYS = 7L
@@ -32,10 +31,20 @@ class CloudInsightClient(
     }
 
     sealed class InsightResult {
-        data class Success(val narrative: String) : InsightResult()
+        data class Success(
+            val narrative: String,
+        ) : InsightResult()
+
         data object RateLimited : InsightResult()
-        data class NetworkError(val message: String) : InsightResult()
-        data class ServerError(val statusCode: Int, val body: String) : InsightResult()
+
+        data class NetworkError(
+            val message: String,
+        ) : InsightResult()
+
+        data class ServerError(
+            val statusCode: Int,
+            val body: String,
+        ) : InsightResult()
     }
 
     // In-memory rate-limit state. In production, persist this via a DataStore/SQLDelight store.
@@ -59,21 +68,22 @@ class CloudInsightClient(
      */
     suspend fun fetchNarrative(
         jsonPayload: String,
-        userId: String
+        userId: String,
     ): InsightResult {
         if (!canRequest()) return InsightResult.RateLimited
 
         val url = "$supabaseUrl$EDGE_FUNCTION_PATH"
 
         return try {
-            val response: HttpResponse = httpClient.post(url) {
-                headers {
-                    append(HttpHeaders.Authorization, "Bearer $supabaseAnonKey")
-                    append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
-                    append("X-User-Id", userId)
+            val response: HttpResponse =
+                httpClient.post(url) {
+                    headers {
+                        append(HttpHeaders.Authorization, "Bearer $supabaseAnonKey")
+                        append(HttpHeaders.ContentType, ContentType.Application.Json.toString())
+                        append("X-User-Id", userId)
+                    }
+                    setBody(jsonPayload)
                 }
-                setBody(jsonPayload)
-            }
 
             when (response.status.value) {
                 200 -> {
@@ -83,10 +93,11 @@ class CloudInsightClient(
                     InsightResult.Success(narrative)
                 }
                 429 -> InsightResult.RateLimited
-                else -> InsightResult.ServerError(
-                    statusCode = response.status.value,
-                    body = response.body()
-                )
+                else ->
+                    InsightResult.ServerError(
+                        statusCode = response.status.value,
+                        body = response.body(),
+                    )
             }
         } catch (e: Exception) {
             InsightResult.NetworkError(e.message ?: "Unknown network error")
@@ -98,7 +109,7 @@ class CloudInsightClient(
      */
     suspend fun fetchNarrativeForWeek(
         weekSummary: InsightPromptBuilder.WeeklySummaryPayload,
-        userId: String
+        userId: String,
     ): InsightResult {
         val json = promptBuilder.toJson(weekSummary)
         return fetchNarrative(json, userId)
@@ -144,19 +155,23 @@ class CloudInsightClient(
         val valueEnd = findClosingQuote(json, valueStart + 1)
         if (valueEnd == -1) return json.trim()
 
-        return json.substring(valueStart + 1, valueEnd)
+        return json
+            .substring(valueStart + 1, valueEnd)
             .replace("\\n", "\n")
             .replace("\\\"", "\"")
             .replace("\\\\", "\\")
     }
 
-    private fun findClosingQuote(str: String, startIndex: Int): Int {
+    private fun findClosingQuote(
+        str: String,
+        startIndex: Int,
+    ): Int {
         var i = startIndex
         while (i < str.length) {
             when {
-                str[i] == '\\' -> i += 2  // skip escape sequence
-                str[i] == '"'  -> return i
-                else           -> i++
+                str[i] == '\\' -> i += 2 // skip escape sequence
+                str[i] == '"' -> return i
+                else -> i++
             }
         }
         return -1

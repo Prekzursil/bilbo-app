@@ -9,7 +9,6 @@ import kotlinx.datetime.Instant
  * Repository for persisting and querying [EmotionalCheckIn] records.
  */
 interface EmotionRepository {
-
     /**
      * Observe all check-ins, ordered by timestamp descending.
      * Emits whenever the underlying data changes.
@@ -29,7 +28,10 @@ interface EmotionRepository {
     /**
      * Return all check-ins whose timestamp falls within [[from], [to]].
      */
-    suspend fun getByDateRange(from: Instant, to: Instant): List<EmotionalCheckIn>
+    suspend fun getByDateRange(
+        from: Instant,
+        to: Instant,
+    ): List<EmotionalCheckIn>
 
     /**
      * Return the check-in linked to [intentId], or null if none exists.
@@ -45,7 +47,10 @@ interface EmotionRepository {
     /**
      * Record the post-session mood on an existing check-in.
      */
-    suspend fun updatePostMood(id: Long, postMood: Emotion)
+    suspend fun updatePostMood(
+        id: Long,
+        postMood: Emotion,
+    )
 
     /**
      * Remove the check-in with [id].

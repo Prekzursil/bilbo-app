@@ -1,14 +1,13 @@
 package dev.bilbo.social
 
-import kotlin.test.*
 import kotlinx.datetime.*
+import kotlin.test.*
 
 // =============================================================================
 //  BuddyManager Tests
 // =============================================================================
 
 class BuddyManagerSharingLevelEnumTest {
-
     @Test
     fun sharingLevelHasFourValues() {
         val values = BuddyManager.SharingLevel.entries
@@ -26,7 +25,6 @@ class BuddyManagerSharingLevelEnumTest {
 }
 
 class BuddyManagerInviteStatusEnumTest {
-
     @Test
     fun inviteStatusHasFiveValues() {
         val values = BuddyManager.InviteStatus.entries
@@ -45,7 +43,6 @@ class BuddyManagerInviteStatusEnumTest {
 }
 
 class BuddyManagerConstantsTest {
-
     @Test
     fun maxBuddyPairsIsThree() {
         assertEquals(3, BuddyManager.MAX_BUDDY_PAIRS)
@@ -53,11 +50,11 @@ class BuddyManagerConstantsTest {
 }
 
 class BuddyManagerCreateInviteTest {
-
     private lateinit var manager: BuddyManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -143,11 +140,11 @@ class BuddyManagerCreateInviteTest {
 }
 
 class BuddyManagerAcceptInviteTest {
-
     private lateinit var manager: BuddyManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -193,9 +190,10 @@ class BuddyManagerAcceptInviteTest {
     @Test
     fun acceptInviteThrowsOnExpiredInvite() {
         val invite = manager.createInvite("user1", clock = fixedClock)
-        val expiredClock = object : Clock {
-            override fun now(): Instant = Instant.parse("2025-06-05T12:00:00Z") // 4 days later
-        }
+        val expiredClock =
+            object : Clock {
+                override fun now(): Instant = Instant.parse("2025-06-05T12:00:00Z") // 4 days later
+            }
         assertFailsWith<IllegalArgumentException> {
             manager.acceptInvite(invite.inviteCode, "user2", expiredClock)
         }
@@ -234,11 +232,11 @@ class BuddyManagerAcceptInviteTest {
 }
 
 class BuddyManagerDeclineInviteTest {
-
     private lateinit var manager: BuddyManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -273,11 +271,11 @@ class BuddyManagerDeclineInviteTest {
 }
 
 class BuddyManagerCancelInviteTest {
-
     private lateinit var manager: BuddyManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -319,11 +317,11 @@ class BuddyManagerCancelInviteTest {
 }
 
 class BuddyManagerPairManagementTest {
-
     private lateinit var manager: BuddyManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -385,11 +383,11 @@ class BuddyManagerPairManagementTest {
 }
 
 class BuddyManagerUpdateSharingLevelTest {
-
     private lateinit var manager: BuddyManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -441,11 +439,11 @@ class BuddyManagerUpdateSharingLevelTest {
 }
 
 class BuddyManagerRemovePairTest {
-
     private lateinit var manager: BuddyManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -512,21 +510,21 @@ class BuddyManagerRemovePairTest {
 }
 
 class BuddyManagerBuildSnapshotTest {
-
     private val manager = BuddyManager()
 
     @Test
     fun buildSnapshotMinimalAllNullsExceptIdentifiers() {
-        val snapshot = manager.buildSnapshot(
-            buddyUserId = "buddy1",
-            sharingLevel = BuddyManager.SharingLevel.MINIMAL,
-            fpBalance = 100,
-            streakDays = 5,
-            fpEarned = 200,
-            fpSpent = 50,
-            nutritiveMinutes = 60,
-            emptyCalorieMinutes = 30
-        )
+        val snapshot =
+            manager.buildSnapshot(
+                buddyUserId = "buddy1",
+                sharingLevel = BuddyManager.SharingLevel.MINIMAL,
+                fpBalance = 100,
+                streakDays = 5,
+                fpEarned = 200,
+                fpSpent = 50,
+                nutritiveMinutes = 60,
+                emptyCalorieMinutes = 30,
+            )
         assertEquals("buddy1", snapshot.buddyUserId)
         assertEquals(BuddyManager.SharingLevel.MINIMAL, snapshot.sharingLevel)
         assertNull(snapshot.fpBalance)
@@ -539,16 +537,17 @@ class BuddyManagerBuildSnapshotTest {
 
     @Test
     fun buildSnapshotBasicSharesBalanceAndStreak() {
-        val snapshot = manager.buildSnapshot(
-            buddyUserId = "buddy1",
-            sharingLevel = BuddyManager.SharingLevel.BASIC,
-            fpBalance = 100,
-            streakDays = 5,
-            fpEarned = 200,
-            fpSpent = 50,
-            nutritiveMinutes = 60,
-            emptyCalorieMinutes = 30
-        )
+        val snapshot =
+            manager.buildSnapshot(
+                buddyUserId = "buddy1",
+                sharingLevel = BuddyManager.SharingLevel.BASIC,
+                fpBalance = 100,
+                streakDays = 5,
+                fpEarned = 200,
+                fpSpent = 50,
+                nutritiveMinutes = 60,
+                emptyCalorieMinutes = 30,
+            )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(5, snapshot.streakDays)
         assertNull(snapshot.fpEarned)
@@ -559,16 +558,17 @@ class BuddyManagerBuildSnapshotTest {
 
     @Test
     fun buildSnapshotStandardSharesBalanceStreakEarnedSpent() {
-        val snapshot = manager.buildSnapshot(
-            buddyUserId = "buddy1",
-            sharingLevel = BuddyManager.SharingLevel.STANDARD,
-            fpBalance = 100,
-            streakDays = 5,
-            fpEarned = 200,
-            fpSpent = 50,
-            nutritiveMinutes = 60,
-            emptyCalorieMinutes = 30
-        )
+        val snapshot =
+            manager.buildSnapshot(
+                buddyUserId = "buddy1",
+                sharingLevel = BuddyManager.SharingLevel.STANDARD,
+                fpBalance = 100,
+                streakDays = 5,
+                fpEarned = 200,
+                fpSpent = 50,
+                nutritiveMinutes = 60,
+                emptyCalorieMinutes = 30,
+            )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(5, snapshot.streakDays)
         assertEquals(200, snapshot.fpEarned)
@@ -579,16 +579,17 @@ class BuddyManagerBuildSnapshotTest {
 
     @Test
     fun buildSnapshotDetailedSharesEverything() {
-        val snapshot = manager.buildSnapshot(
-            buddyUserId = "buddy1",
-            sharingLevel = BuddyManager.SharingLevel.DETAILED,
-            fpBalance = 100,
-            streakDays = 5,
-            fpEarned = 200,
-            fpSpent = 50,
-            nutritiveMinutes = 60,
-            emptyCalorieMinutes = 30
-        )
+        val snapshot =
+            manager.buildSnapshot(
+                buddyUserId = "buddy1",
+                sharingLevel = BuddyManager.SharingLevel.DETAILED,
+                fpBalance = 100,
+                streakDays = 5,
+                fpEarned = 200,
+                fpSpent = 50,
+                nutritiveMinutes = 60,
+                emptyCalorieMinutes = 30,
+            )
         assertEquals(100, snapshot.fpBalance)
         assertEquals(5, snapshot.streakDays)
         assertEquals(200, snapshot.fpEarned)
@@ -612,7 +613,6 @@ class BuddyManagerBuildSnapshotTest {
 // =============================================================================
 
 class ChallengeEngineEnumTest {
-
     @Test
     fun challengeTypeHasSixValues() {
         assertEquals(6, ChallengeEngine.ChallengeType.entries.size)
@@ -649,11 +649,11 @@ class ChallengeEngineEnumTest {
 }
 
 class ChallengeEngineCreateChallengeTest {
-
     private lateinit var engine: ChallengeEngine
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
     private val today: LocalDate
         get() = fixedClock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -664,84 +664,89 @@ class ChallengeEngineCreateChallengeTest {
 
     @Test
     fun createChallengeReturnsActiveChallengeWhenStartDateIsTodayOrPast() {
-        val challenge = engine.createChallenge(
-            title = "Test Challenge",
-            type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "circle1",
-            createdByUserId = "user1",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
-            targetValue = 100,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Test Challenge",
+                type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "circle1",
+                createdByUserId = "user1",
+                startDate = today,
+                endDate = today.plus(7, DateTimeUnit.DAY),
+                targetValue = 100,
+                clock = fixedClock,
+            )
         assertEquals(ChallengeEngine.ChallengeStatus.ACTIVE, challenge.status)
     }
 
     @Test
     fun createChallengeReturnsUpcomingWhenStartDateIsFuture() {
         val futureDate = today.plus(5, DateTimeUnit.DAY)
-        val challenge = engine.createChallenge(
-            title = "Future Challenge",
-            type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "circle1",
-            createdByUserId = "user1",
-            startDate = futureDate,
-            endDate = futureDate.plus(7, DateTimeUnit.DAY),
-            targetValue = 100,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Future Challenge",
+                type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "circle1",
+                createdByUserId = "user1",
+                startDate = futureDate,
+                endDate = futureDate.plus(7, DateTimeUnit.DAY),
+                targetValue = 100,
+                clock = fixedClock,
+            )
         assertEquals(ChallengeEngine.ChallengeStatus.UPCOMING, challenge.status)
     }
 
     @Test
     fun createChallengeAutoEnrollsCreator() {
-        val challenge = engine.createChallenge(
-            title = "Test",
-            type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-            scope = ChallengeEngine.ChallengeScope.BUDDY_PAIR,
-            scopeId = "pair1",
-            createdByUserId = "user1",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
-            targetValue = 5,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Test",
+                type = ChallengeEngine.ChallengeType.DAILY_STREAK,
+                scope = ChallengeEngine.ChallengeScope.BUDDY_PAIR,
+                scopeId = "pair1",
+                createdByUserId = "user1",
+                startDate = today,
+                endDate = today.plus(7, DateTimeUnit.DAY),
+                targetValue = 5,
+                clock = fixedClock,
+            )
         val challenges = engine.getChallengesForUser("user1")
         assertTrue(challenges.any { it.challengeId == challenge.challengeId })
     }
 
     @Test
     fun createChallengeTrimsTitle() {
-        val challenge = engine.createChallenge(
-            title = "  Trimmed Title  ",
-            type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
-            createdByUserId = "u1",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
-            targetValue = 5,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "  Trimmed Title  ",
+                type = ChallengeEngine.ChallengeType.DAILY_STREAK,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "c1",
+                createdByUserId = "u1",
+                startDate = today,
+                endDate = today.plus(7, DateTimeUnit.DAY),
+                targetValue = 5,
+                clock = fixedClock,
+            )
         assertEquals("Trimmed Title", challenge.title)
     }
 
     @Test
     fun createChallengeTrimsDescription() {
-        val challenge = engine.createChallenge(
-            title = "Test",
-            description = "  Some description  ",
-            type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
-            createdByUserId = "u1",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
-            targetValue = 5,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Test",
+                description = "  Some description  ",
+                type = ChallengeEngine.ChallengeType.DAILY_STREAK,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "c1",
+                createdByUserId = "u1",
+                startDate = today,
+                endDate = today.plus(7, DateTimeUnit.DAY),
+                targetValue = 5,
+                clock = fixedClock,
+            )
         assertEquals("Some description", challenge.description)
     }
 
@@ -757,7 +762,7 @@ class ChallengeEngineCreateChallengeTest {
                 startDate = today,
                 endDate = today.plus(7, DateTimeUnit.DAY),
                 targetValue = 5,
-                clock = fixedClock
+                clock = fixedClock,
             )
         }
     }
@@ -774,24 +779,25 @@ class ChallengeEngineCreateChallengeTest {
                 startDate = today.plus(7, DateTimeUnit.DAY),
                 endDate = today,
                 targetValue = 5,
-                clock = fixedClock
+                clock = fixedClock,
             )
         }
     }
 
     @Test
     fun createChallengeAllowsSameStartAndEndDate() {
-        val challenge = engine.createChallenge(
-            title = "Same Day",
-            type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
-            createdByUserId = "u1",
-            startDate = today,
-            endDate = today,
-            targetValue = 5,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Same Day",
+                type = ChallengeEngine.ChallengeType.DAILY_STREAK,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "c1",
+                createdByUserId = "u1",
+                startDate = today,
+                endDate = today,
+                targetValue = 5,
+                clock = fixedClock,
+            )
         assertNotNull(challenge)
     }
 
@@ -807,7 +813,7 @@ class ChallengeEngineCreateChallengeTest {
                 startDate = today,
                 endDate = today.plus(7, DateTimeUnit.DAY),
                 targetValue = 0,
-                clock = fixedClock
+                clock = fixedClock,
             )
         }
     }
@@ -824,26 +830,27 @@ class ChallengeEngineCreateChallengeTest {
                 startDate = today,
                 endDate = today.plus(7, DateTimeUnit.DAY),
                 targetValue = -10,
-                clock = fixedClock
+                clock = fixedClock,
             )
         }
     }
 
     @Test
     fun createChallengeStoresCorrectFields() {
-        val challenge = engine.createChallenge(
-            title = "Focus Week",
-            description = "A week of focus",
-            type = ChallengeEngine.ChallengeType.REACH_FP_BALANCE,
-            scope = ChallengeEngine.ChallengeScope.BUDDY_PAIR,
-            scopeId = "pair99",
-            createdByUserId = "creator1",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
-            targetValue = 500,
-            isTeamChallenge = true,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Focus Week",
+                description = "A week of focus",
+                type = ChallengeEngine.ChallengeType.REACH_FP_BALANCE,
+                scope = ChallengeEngine.ChallengeScope.BUDDY_PAIR,
+                scopeId = "pair99",
+                createdByUserId = "creator1",
+                startDate = today,
+                endDate = today.plus(7, DateTimeUnit.DAY),
+                targetValue = 500,
+                isTeamChallenge = true,
+                clock = fixedClock,
+            )
         assertEquals("Focus Week", challenge.title)
         assertEquals("A week of focus", challenge.description)
         assertEquals(ChallengeEngine.ChallengeType.REACH_FP_BALANCE, challenge.type)
@@ -859,27 +866,28 @@ class ChallengeEngineCreateChallengeTest {
 
     @Test
     fun createChallengeDefaultsTeamChallengeToFalse() {
-        val challenge = engine.createChallenge(
-            title = "Solo",
-            type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
-            createdByUserId = "u1",
-            startDate = today,
-            endDate = today.plus(1, DateTimeUnit.DAY),
-            targetValue = 5,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Solo",
+                type = ChallengeEngine.ChallengeType.DAILY_STREAK,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "c1",
+                createdByUserId = "u1",
+                startDate = today,
+                endDate = today.plus(1, DateTimeUnit.DAY),
+                targetValue = 5,
+                clock = fixedClock,
+            )
         assertFalse(challenge.isTeamChallenge)
     }
 }
 
 class ChallengeEngineJoinChallengeTest {
-
     private lateinit var engine: ChallengeEngine
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
     private val today: LocalDate
         get() = fixedClock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -888,8 +896,8 @@ class ChallengeEngineJoinChallengeTest {
         engine = ChallengeEngine()
     }
 
-    private fun createActiveChallenge(creator: String = "creator"): ChallengeEngine.Challenge {
-        return engine.createChallenge(
+    private fun createActiveChallenge(creator: String = "creator"): ChallengeEngine.Challenge =
+        engine.createChallenge(
             title = "Test",
             type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
@@ -898,9 +906,8 @@ class ChallengeEngineJoinChallengeTest {
             startDate = today,
             endDate = today.plus(7, DateTimeUnit.DAY),
             targetValue = 100,
-            clock = fixedClock
+            clock = fixedClock,
         )
-    }
 
     @Test
     fun joinChallengeReturnsNewParticipant() {
@@ -925,17 +932,18 @@ class ChallengeEngineJoinChallengeTest {
     @Test
     fun joinChallengeAllowsUpcomingChallenge() {
         val futureDate = today.plus(5, DateTimeUnit.DAY)
-        val challenge = engine.createChallenge(
-            title = "Future",
-            type = ChallengeEngine.ChallengeType.DAILY_STREAK,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
-            createdByUserId = "creator",
-            startDate = futureDate,
-            endDate = futureDate.plus(7, DateTimeUnit.DAY),
-            targetValue = 5,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Future",
+                type = ChallengeEngine.ChallengeType.DAILY_STREAK,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "c1",
+                createdByUserId = "creator",
+                startDate = futureDate,
+                endDate = futureDate.plus(7, DateTimeUnit.DAY),
+                targetValue = 5,
+                clock = fixedClock,
+            )
         assertEquals(ChallengeEngine.ChallengeStatus.UPCOMING, challenge.status)
         val participant = engine.joinChallenge(challenge.challengeId, "user2", fixedClock)
         assertNotNull(participant)
@@ -968,11 +976,11 @@ class ChallengeEngineJoinChallengeTest {
 }
 
 class ChallengeEngineRecordProgressTest {
-
     private lateinit var engine: ChallengeEngine
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
     private val today: LocalDate
         get() = fixedClock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -984,9 +992,9 @@ class ChallengeEngineRecordProgressTest {
     private fun createActiveChallenge(
         target: Int = 100,
         isTeam: Boolean = false,
-        creator: String = "creator"
-    ): ChallengeEngine.Challenge {
-        return engine.createChallenge(
+        creator: String = "creator",
+    ): ChallengeEngine.Challenge =
+        engine.createChallenge(
             title = "Test",
             type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
@@ -996,9 +1004,8 @@ class ChallengeEngineRecordProgressTest {
             endDate = today.plus(7, DateTimeUnit.DAY),
             targetValue = target,
             isTeamChallenge = isTeam,
-            clock = fixedClock
+            clock = fixedClock,
         )
-    }
 
     @Test
     fun recordProgressIncrementsCurrentProgress() {
@@ -1079,11 +1086,11 @@ class ChallengeEngineRecordProgressTest {
 }
 
 class ChallengeEngineFinalizeChallengeTest {
-
     private lateinit var engine: ChallengeEngine
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
     private val today: LocalDate
         get() = fixedClock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -1095,9 +1102,9 @@ class ChallengeEngineFinalizeChallengeTest {
     private fun createActiveChallenge(
         type: ChallengeEngine.ChallengeType = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
         target: Int = 100,
-        isTeam: Boolean = false
-    ): ChallengeEngine.Challenge {
-        return engine.createChallenge(
+        isTeam: Boolean = false,
+    ): ChallengeEngine.Challenge =
+        engine.createChallenge(
             title = "Test",
             type = type,
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
@@ -1107,9 +1114,8 @@ class ChallengeEngineFinalizeChallengeTest {
             endDate = today.plus(7, DateTimeUnit.DAY),
             targetValue = target,
             isTeamChallenge = isTeam,
-            clock = fixedClock
+            clock = fixedClock,
         )
-    }
 
     @Test
     fun finalizeChallengeMarksChallengeCompleted() {
@@ -1170,10 +1176,11 @@ class ChallengeEngineFinalizeChallengeTest {
 
     @Test
     fun finalizeReduceEmptyCaloriesLowerWins() {
-        val challenge = createActiveChallenge(
-            type = ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES,
-            target = 100
-        )
+        val challenge =
+            createActiveChallenge(
+                type = ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES,
+                target = 100,
+            )
         engine.joinChallenge(challenge.challengeId, "user2", fixedClock)
         engine.joinChallenge(challenge.challengeId, "user3", fixedClock)
 
@@ -1221,11 +1228,11 @@ class ChallengeEngineFinalizeChallengeTest {
 }
 
 class ChallengeEngineCancelChallengeTest {
-
     private lateinit var engine: ChallengeEngine
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
     private val today: LocalDate
         get() = fixedClock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -1234,8 +1241,8 @@ class ChallengeEngineCancelChallengeTest {
         engine = ChallengeEngine()
     }
 
-    private fun createActiveChallenge(creator: String = "creator"): ChallengeEngine.Challenge {
-        return engine.createChallenge(
+    private fun createActiveChallenge(creator: String = "creator"): ChallengeEngine.Challenge =
+        engine.createChallenge(
             title = "Test",
             type = ChallengeEngine.ChallengeType.DAILY_STREAK,
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
@@ -1244,9 +1251,8 @@ class ChallengeEngineCancelChallengeTest {
             startDate = today,
             endDate = today.plus(7, DateTimeUnit.DAY),
             targetValue = 5,
-            clock = fixedClock
+            clock = fixedClock,
         )
-    }
 
     @Test
     fun cancelChallengeReturnsTrue() {
@@ -1287,11 +1293,11 @@ class ChallengeEngineCancelChallengeTest {
 }
 
 class ChallengeEngineQueryTest {
-
     private lateinit var engine: ChallengeEngine
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
     private val today: LocalDate
         get() = fixedClock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -1302,9 +1308,9 @@ class ChallengeEngineQueryTest {
 
     private fun createActiveChallenge(
         scopeId: String = "c1",
-        creator: String = "creator"
-    ): ChallengeEngine.Challenge {
-        return engine.createChallenge(
+        creator: String = "creator",
+    ): ChallengeEngine.Challenge =
+        engine.createChallenge(
             title = "Test",
             type = ChallengeEngine.ChallengeType.DAILY_STREAK,
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
@@ -1313,9 +1319,8 @@ class ChallengeEngineQueryTest {
             startDate = today,
             endDate = today.plus(7, DateTimeUnit.DAY),
             targetValue = 5,
-            clock = fixedClock
+            clock = fixedClock,
         )
-    }
 
     @Test
     fun getChallengesForScopeReturnsEmpty() {
@@ -1366,11 +1371,11 @@ class ChallengeEngineQueryTest {
 }
 
 class ChallengeEngineLeaderboardTest {
-
     private lateinit var engine: ChallengeEngine
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
     private val today: LocalDate
         get() = fixedClock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -1381,17 +1386,18 @@ class ChallengeEngineLeaderboardTest {
 
     @Test
     fun getLeaderboardSortedDescendingByDefault() {
-        val challenge = engine.createChallenge(
-            title = "Test",
-            type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
-            createdByUserId = "user1",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
-            targetValue = 100,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Test",
+                type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "c1",
+                createdByUserId = "user1",
+                startDate = today,
+                endDate = today.plus(7, DateTimeUnit.DAY),
+                targetValue = 100,
+                clock = fixedClock,
+            )
         engine.joinChallenge(challenge.challengeId, "user2", fixedClock)
         engine.joinChallenge(challenge.challengeId, "user3", fixedClock)
 
@@ -1407,17 +1413,18 @@ class ChallengeEngineLeaderboardTest {
 
     @Test
     fun getLeaderboardAscendingForReduceEmptyCalories() {
-        val challenge = engine.createChallenge(
-            title = "Reduce",
-            type = ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "c1",
-            createdByUserId = "user1",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
-            targetValue = 100,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Reduce",
+                type = ChallengeEngine.ChallengeType.REDUCE_EMPTY_CALORIES,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "c1",
+                createdByUserId = "user1",
+                startDate = today,
+                endDate = today.plus(7, DateTimeUnit.DAY),
+                targetValue = 100,
+                clock = fixedClock,
+            )
         engine.joinChallenge(challenge.challengeId, "user2", fixedClock)
         engine.joinChallenge(challenge.challengeId, "user3", fixedClock)
 
@@ -1441,11 +1448,11 @@ class ChallengeEngineLeaderboardTest {
 }
 
 class ChallengeEngineProgressPercentTest {
-
     private lateinit var engine: ChallengeEngine
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
     private val today: LocalDate
         get() = fixedClock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -1454,8 +1461,8 @@ class ChallengeEngineProgressPercentTest {
         engine = ChallengeEngine()
     }
 
-    private fun createActiveChallenge(target: Int = 100): ChallengeEngine.Challenge {
-        return engine.createChallenge(
+    private fun createActiveChallenge(target: Int = 100): ChallengeEngine.Challenge =
+        engine.createChallenge(
             title = "Test",
             type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
             scope = ChallengeEngine.ChallengeScope.CIRCLE,
@@ -1464,9 +1471,8 @@ class ChallengeEngineProgressPercentTest {
             startDate = today,
             endDate = today.plus(7, DateTimeUnit.DAY),
             targetValue = target,
-            clock = fixedClock
+            clock = fixedClock,
         )
-    }
 
     @Test
     fun progressPercentReturnsZeroForNonParticipant() {
@@ -1521,7 +1527,6 @@ class ChallengeEngineProgressPercentTest {
 // =============================================================================
 
 class CircleManagerEnumTest {
-
     @Test
     fun circleRoleHasTwoValues() {
         val values = CircleManager.CircleRole.entries
@@ -1540,7 +1545,6 @@ class CircleManagerEnumTest {
 }
 
 class CircleManagerConstantsTest {
-
     @Test
     fun minCircleSizeIsTwo() {
         assertEquals(2, CircleManager.MIN_CIRCLE_SIZE)
@@ -1563,11 +1567,11 @@ class CircleManagerConstantsTest {
 }
 
 class CircleManagerCreateCircleTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -1576,11 +1580,12 @@ class CircleManagerCreateCircleTest {
 
     @Test
     fun createCircleReturnsCircle() {
-        val circle = manager.createCircle(
-            name = "Focus Group",
-            creatorUserId = "user1",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                name = "Focus Group",
+                creatorUserId = "user1",
+                clock = fixedClock,
+            )
         assertEquals("Focus Group", circle.name)
         assertEquals("user1", circle.createdByUserId)
         assertTrue(circle.isActive)
@@ -1588,73 +1593,80 @@ class CircleManagerCreateCircleTest {
 
     @Test
     fun createCircleTrimsName() {
-        val circle = manager.createCircle(
-            name = "  Trimmed  ",
-            creatorUserId = "user1",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                name = "  Trimmed  ",
+                creatorUserId = "user1",
+                clock = fixedClock,
+            )
         assertEquals("Trimmed", circle.name)
     }
 
     @Test
     fun createCircleTrimsDescription() {
-        val circle = manager.createCircle(
-            name = "Test",
-            description = "  Trimmed Description  ",
-            creatorUserId = "user1",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                name = "Test",
+                description = "  Trimmed Description  ",
+                creatorUserId = "user1",
+                clock = fixedClock,
+            )
         assertEquals("Trimmed Description", circle.description)
     }
 
     @Test
     fun createCircleDefaultsToPrivate() {
-        val circle = manager.createCircle(
-            name = "Test",
-            creatorUserId = "user1",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                name = "Test",
+                creatorUserId = "user1",
+                clock = fixedClock,
+            )
         assertEquals(CircleManager.CircleVisibility.PRIVATE, circle.visibility)
     }
 
     @Test
     fun createCircleRespectsPublicVisibility() {
-        val circle = manager.createCircle(
-            name = "Public Circle",
-            visibility = CircleManager.CircleVisibility.PUBLIC,
-            creatorUserId = "user1",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                name = "Public Circle",
+                visibility = CircleManager.CircleVisibility.PUBLIC,
+                creatorUserId = "user1",
+                clock = fixedClock,
+            )
         assertEquals(CircleManager.CircleVisibility.PUBLIC, circle.visibility)
     }
 
     @Test
     fun createCircleSetsCreatedAt() {
-        val circle = manager.createCircle(
-            name = "Test",
-            creatorUserId = "user1",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                name = "Test",
+                creatorUserId = "user1",
+                clock = fixedClock,
+            )
         assertEquals(fixedClock.now(), circle.createdAt)
     }
 
     @Test
     fun createCircleGeneratesInviteCode() {
-        val circle = manager.createCircle(
-            name = "Test",
-            creatorUserId = "user1",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                name = "Test",
+                creatorUserId = "user1",
+                clock = fixedClock,
+            )
         assertTrue(circle.inviteCode.isNotBlank())
     }
 
     @Test
     fun createCircleCreatorBecomesAdmin() {
-        val circle = manager.createCircle(
-            name = "Test",
-            creatorUserId = "user1",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                name = "Test",
+                creatorUserId = "user1",
+                clock = fixedClock,
+            )
         val memberships = manager.getActiveMemberships(circle.circleId)
         assertEquals(1, memberships.size)
         assertEquals("user1", memberships[0].userId)
@@ -1667,7 +1679,7 @@ class CircleManagerCreateCircleTest {
             manager.createCircle(
                 name = "   ",
                 creatorUserId = "user1",
-                clock = fixedClock
+                clock = fixedClock,
             )
         }
     }
@@ -1678,28 +1690,29 @@ class CircleManagerCreateCircleTest {
             manager.createCircle(
                 name = "",
                 creatorUserId = "user1",
-                clock = fixedClock
+                clock = fixedClock,
             )
         }
     }
 
     @Test
     fun createCircleDefaultsDescriptionToEmpty() {
-        val circle = manager.createCircle(
-            name = "Test",
-            creatorUserId = "user1",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                name = "Test",
+                creatorUserId = "user1",
+                clock = fixedClock,
+            )
         assertEquals("", circle.description)
     }
 }
 
 class CircleManagerJoinByInviteCodeTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -1734,11 +1747,11 @@ class CircleManagerJoinByInviteCodeTest {
 }
 
 class CircleManagerJoinCircleTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -1801,11 +1814,11 @@ class CircleManagerJoinCircleTest {
 }
 
 class CircleManagerLeaveCircleTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -1845,9 +1858,10 @@ class CircleManagerLeaveCircleTest {
     @Test
     fun leaveCircleAdminPromotesNextMember() {
         val circle = manager.createCircle("Test", creatorUserId = "admin1", clock = fixedClock)
-        val laterClock = object : Clock {
-            override fun now(): Instant = Instant.parse("2025-06-01T13:00:00Z")
-        }
+        val laterClock =
+            object : Clock {
+                override fun now(): Instant = Instant.parse("2025-06-01T13:00:00Z")
+            }
         manager.joinCircle(circle.circleId, "user2", fixedClock)
         manager.joinCircle(circle.circleId, "user3", laterClock)
 
@@ -1894,11 +1908,11 @@ class CircleManagerLeaveCircleTest {
 }
 
 class CircleManagerRemoveMemberTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -1953,11 +1967,11 @@ class CircleManagerRemoveMemberTest {
 }
 
 class CircleManagerPromoteToAdminTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -2004,11 +2018,11 @@ class CircleManagerPromoteToAdminTest {
 }
 
 class CircleManagerGetActiveMembershipsTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -2045,11 +2059,11 @@ class CircleManagerGetActiveMembershipsTest {
 }
 
 class CircleManagerGetCirclesForUserTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -2092,11 +2106,11 @@ class CircleManagerGetCirclesForUserTest {
 }
 
 class CircleManagerGetCircleTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -2123,11 +2137,11 @@ class CircleManagerGetCircleTest {
 }
 
 class CircleManagerGetPublicCirclesTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -2149,18 +2163,24 @@ class CircleManagerGetPublicCirclesTest {
 
     @Test
     fun getPublicCirclesExcludesInactive() {
-        val circle = manager.createCircle("Public", visibility = CircleManager.CircleVisibility.PUBLIC, creatorUserId = "u1", clock = fixedClock)
+        val circle =
+            manager.createCircle(
+                "Public",
+                visibility = CircleManager.CircleVisibility.PUBLIC,
+                creatorUserId = "u1",
+                clock = fixedClock,
+            )
         manager.leaveCircle(circle.circleId, "u1") // deactivates
         assertEquals(0, manager.getPublicCircles().size)
     }
 }
 
 class CircleManagerGetMemberCountTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -2195,11 +2215,11 @@ class CircleManagerGetMemberCountTest {
 }
 
 class CircleManagerUpdateCircleTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -2243,13 +2263,14 @@ class CircleManagerUpdateCircleTest {
 
     @Test
     fun updateCirclePreservesUnchangedFields() {
-        val circle = manager.createCircle(
-            "Original",
-            description = "Desc",
-            visibility = CircleManager.CircleVisibility.PUBLIC,
-            creatorUserId = "admin",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                "Original",
+                description = "Desc",
+                visibility = CircleManager.CircleVisibility.PUBLIC,
+                creatorUserId = "admin",
+                clock = fixedClock,
+            )
         val updated = manager.updateCircle(circle.circleId, "admin", name = "Updated")
         assertEquals("Updated", updated.name)
         assertEquals("Desc", updated.description)
@@ -2275,11 +2296,11 @@ class CircleManagerUpdateCircleTest {
 }
 
 class CircleManagerRegenerateInviteCodeTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -2346,7 +2367,6 @@ class CircleManagerRegenerateInviteCodeTest {
 // =============================================================================
 
 class LeaderboardCalculatorEnumTest {
-
     @Test
     fun leaderboardCategoryHasSixValues() {
         assertEquals(6, LeaderboardCalculator.LeaderboardCategory.entries.size)
@@ -2365,13 +2385,16 @@ class LeaderboardCalculatorEnumTest {
 }
 
 class LeaderboardCalculatorComputeTest {
-
     private val calculator = LeaderboardCalculator()
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
-    private fun stats(userId: String, displayName: String = userId): LeaderboardCalculator.UserStats =
+    private fun stats(
+        userId: String,
+        displayName: String = userId,
+    ): LeaderboardCalculator.UserStats =
         LeaderboardCalculator.UserStats(
             userId = userId,
             displayName = displayName,
@@ -2380,14 +2403,42 @@ class LeaderboardCalculatorComputeTest {
             emptyCalorieMinutes = 0,
             streakDays = 0,
             intentAccuracyPercent = 0f,
-            fpEarnedWeekly = 0
+            fpEarnedWeekly = 0,
         )
 
-    private val sampleStats = listOf(
-        LeaderboardCalculator.UserStats("u1", "Alice", fpBalance = 300, nutritiveMinutes = 120, emptyCalorieMinutes = 50, streakDays = 10, intentAccuracyPercent = 0.85f, fpEarnedWeekly = 200),
-        LeaderboardCalculator.UserStats("u2", "Bob", fpBalance = 500, nutritiveMinutes = 80, emptyCalorieMinutes = 20, streakDays = 15, intentAccuracyPercent = 0.92f, fpEarnedWeekly = 350),
-        LeaderboardCalculator.UserStats("u3", "Carol", fpBalance = 100, nutritiveMinutes = 200, emptyCalorieMinutes = 100, streakDays = 5, intentAccuracyPercent = 0.78f, fpEarnedWeekly = 150)
-    )
+    private val sampleStats =
+        listOf(
+            LeaderboardCalculator.UserStats(
+                "u1",
+                "Alice",
+                fpBalance = 300,
+                nutritiveMinutes = 120,
+                emptyCalorieMinutes = 50,
+                streakDays = 10,
+                intentAccuracyPercent = 0.85f,
+                fpEarnedWeekly = 200,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u2",
+                "Bob",
+                fpBalance = 500,
+                nutritiveMinutes = 80,
+                emptyCalorieMinutes = 20,
+                streakDays = 15,
+                intentAccuracyPercent = 0.92f,
+                fpEarnedWeekly = 350,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u3",
+                "Carol",
+                fpBalance = 100,
+                nutritiveMinutes = 200,
+                emptyCalorieMinutes = 100,
+                streakDays = 5,
+                intentAccuracyPercent = 0.78f,
+                fpEarnedWeekly = 150,
+            ),
+        )
 
     @Test
     fun computeFpBalanceDescending() {
@@ -2399,7 +2450,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeNutritiveminutesDescending() {
-        val board = calculator.compute("circle1", LeaderboardCalculator.LeaderboardCategory.NUTRITIVE_MINUTES, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "circle1",
+                LeaderboardCalculator.LeaderboardCategory.NUTRITIVE_MINUTES,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals("u3", board.entries[0].userId) // 200
         assertEquals("u1", board.entries[1].userId) // 120
         assertEquals("u2", board.entries[2].userId) // 80
@@ -2407,7 +2465,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeFewestEmptyCaloriesAscending() {
-        val board = calculator.compute("circle1", LeaderboardCalculator.LeaderboardCategory.FEWEST_EMPTY_CALORIES, sampleStats, "u1", fixedClock)
+        val board =
+            calculator.compute(
+                "circle1",
+                LeaderboardCalculator.LeaderboardCategory.FEWEST_EMPTY_CALORIES,
+                sampleStats,
+                "u1",
+                fixedClock,
+            )
         assertEquals("u2", board.entries[0].userId) // 20 (lowest)
         assertEquals("u1", board.entries[1].userId) // 50
         assertEquals("u3", board.entries[2].userId) // 100
@@ -2461,7 +2526,14 @@ class LeaderboardCalculatorComputeTest {
 
     @Test
     fun computeCurrentUserRankNullIfNotInStats() {
-        val board = calculator.compute("circle1", LeaderboardCalculator.LeaderboardCategory.FP_BALANCE, sampleStats, "unknown_user", fixedClock)
+        val board =
+            calculator.compute(
+                "circle1",
+                LeaderboardCalculator.LeaderboardCategory.FP_BALANCE,
+                sampleStats,
+                "unknown_user",
+                fixedClock,
+            )
         assertNull(board.currentUserRank)
     }
 
@@ -2556,16 +2628,35 @@ class LeaderboardCalculatorComputeTest {
 }
 
 class LeaderboardCalculatorComputeAllTest {
-
     private val calculator = LeaderboardCalculator()
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
-    private val sampleStats = listOf(
-        LeaderboardCalculator.UserStats("u1", "Alice", fpBalance = 300, nutritiveMinutes = 120, emptyCalorieMinutes = 50, streakDays = 10, intentAccuracyPercent = 0.85f, fpEarnedWeekly = 200),
-        LeaderboardCalculator.UserStats("u2", "Bob", fpBalance = 500, nutritiveMinutes = 80, emptyCalorieMinutes = 20, streakDays = 15, intentAccuracyPercent = 0.92f, fpEarnedWeekly = 350)
-    )
+    private val sampleStats =
+        listOf(
+            LeaderboardCalculator.UserStats(
+                "u1",
+                "Alice",
+                fpBalance = 300,
+                nutritiveMinutes = 120,
+                emptyCalorieMinutes = 50,
+                streakDays = 10,
+                intentAccuracyPercent = 0.85f,
+                fpEarnedWeekly = 200,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u2",
+                "Bob",
+                fpBalance = 500,
+                nutritiveMinutes = 80,
+                emptyCalorieMinutes = 20,
+                streakDays = 15,
+                intentAccuracyPercent = 0.92f,
+                fpEarnedWeekly = 350,
+            ),
+        )
 
     @Test
     fun computeAllReturnsAllCategories() {
@@ -2603,17 +2694,45 @@ class LeaderboardCalculatorComputeAllTest {
 }
 
 class LeaderboardCalculatorSummarizeStandingTest {
-
     private val calculator = LeaderboardCalculator()
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
-    private val sampleStats = listOf(
-        LeaderboardCalculator.UserStats("u1", "Alice", fpBalance = 300, nutritiveMinutes = 120, emptyCalorieMinutes = 50, streakDays = 10, intentAccuracyPercent = 0.85f, fpEarnedWeekly = 200),
-        LeaderboardCalculator.UserStats("u2", "Bob", fpBalance = 500, nutritiveMinutes = 80, emptyCalorieMinutes = 20, streakDays = 15, intentAccuracyPercent = 0.92f, fpEarnedWeekly = 350),
-        LeaderboardCalculator.UserStats("u3", "Carol", fpBalance = 100, nutritiveMinutes = 200, emptyCalorieMinutes = 100, streakDays = 5, intentAccuracyPercent = 0.78f, fpEarnedWeekly = 150)
-    )
+    private val sampleStats =
+        listOf(
+            LeaderboardCalculator.UserStats(
+                "u1",
+                "Alice",
+                fpBalance = 300,
+                nutritiveMinutes = 120,
+                emptyCalorieMinutes = 50,
+                streakDays = 10,
+                intentAccuracyPercent = 0.85f,
+                fpEarnedWeekly = 200,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u2",
+                "Bob",
+                fpBalance = 500,
+                nutritiveMinutes = 80,
+                emptyCalorieMinutes = 20,
+                streakDays = 15,
+                intentAccuracyPercent = 0.92f,
+                fpEarnedWeekly = 350,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u3",
+                "Carol",
+                fpBalance = 100,
+                nutritiveMinutes = 200,
+                emptyCalorieMinutes = 100,
+                streakDays = 5,
+                intentAccuracyPercent = 0.78f,
+                fpEarnedWeekly = 150,
+            ),
+        )
 
     @Test
     fun summarizeStandingReturnsNoDataForEmptyLeaderboards() {
@@ -2665,19 +2784,65 @@ class LeaderboardCalculatorSummarizeStandingTest {
 }
 
 class LeaderboardCalculatorTopNTest {
-
     private val calculator = LeaderboardCalculator()
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
-    private val sampleStats = listOf(
-        LeaderboardCalculator.UserStats("u1", "Alice", fpBalance = 300, nutritiveMinutes = 0, emptyCalorieMinutes = 0, streakDays = 0, intentAccuracyPercent = 0f, fpEarnedWeekly = 0),
-        LeaderboardCalculator.UserStats("u2", "Bob", fpBalance = 500, nutritiveMinutes = 0, emptyCalorieMinutes = 0, streakDays = 0, intentAccuracyPercent = 0f, fpEarnedWeekly = 0),
-        LeaderboardCalculator.UserStats("u3", "Carol", fpBalance = 100, nutritiveMinutes = 0, emptyCalorieMinutes = 0, streakDays = 0, intentAccuracyPercent = 0f, fpEarnedWeekly = 0),
-        LeaderboardCalculator.UserStats("u4", "Dave", fpBalance = 400, nutritiveMinutes = 0, emptyCalorieMinutes = 0, streakDays = 0, intentAccuracyPercent = 0f, fpEarnedWeekly = 0),
-        LeaderboardCalculator.UserStats("u5", "Eve", fpBalance = 200, nutritiveMinutes = 0, emptyCalorieMinutes = 0, streakDays = 0, intentAccuracyPercent = 0f, fpEarnedWeekly = 0)
-    )
+    private val sampleStats =
+        listOf(
+            LeaderboardCalculator.UserStats(
+                "u1",
+                "Alice",
+                fpBalance = 300,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                streakDays = 0,
+                intentAccuracyPercent = 0f,
+                fpEarnedWeekly = 0,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u2",
+                "Bob",
+                fpBalance = 500,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                streakDays = 0,
+                intentAccuracyPercent = 0f,
+                fpEarnedWeekly = 0,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u3",
+                "Carol",
+                fpBalance = 100,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                streakDays = 0,
+                intentAccuracyPercent = 0f,
+                fpEarnedWeekly = 0,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u4",
+                "Dave",
+                fpBalance = 400,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                streakDays = 0,
+                intentAccuracyPercent = 0f,
+                fpEarnedWeekly = 0,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u5",
+                "Eve",
+                fpBalance = 200,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                streakDays = 0,
+                intentAccuracyPercent = 0f,
+                fpEarnedWeekly = 0,
+            ),
+        )
 
     @Test
     fun topNReturnsDefaultThree() {
@@ -2719,19 +2884,65 @@ class LeaderboardCalculatorTopNTest {
 }
 
 class LeaderboardCalculatorUserContextTest {
-
     private val calculator = LeaderboardCalculator()
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
-    private val sampleStats = listOf(
-        LeaderboardCalculator.UserStats("u1", "Alice", fpBalance = 500, nutritiveMinutes = 0, emptyCalorieMinutes = 0, streakDays = 0, intentAccuracyPercent = 0f, fpEarnedWeekly = 0),
-        LeaderboardCalculator.UserStats("u2", "Bob", fpBalance = 400, nutritiveMinutes = 0, emptyCalorieMinutes = 0, streakDays = 0, intentAccuracyPercent = 0f, fpEarnedWeekly = 0),
-        LeaderboardCalculator.UserStats("u3", "Carol", fpBalance = 300, nutritiveMinutes = 0, emptyCalorieMinutes = 0, streakDays = 0, intentAccuracyPercent = 0f, fpEarnedWeekly = 0),
-        LeaderboardCalculator.UserStats("u4", "Dave", fpBalance = 200, nutritiveMinutes = 0, emptyCalorieMinutes = 0, streakDays = 0, intentAccuracyPercent = 0f, fpEarnedWeekly = 0),
-        LeaderboardCalculator.UserStats("u5", "Eve", fpBalance = 100, nutritiveMinutes = 0, emptyCalorieMinutes = 0, streakDays = 0, intentAccuracyPercent = 0f, fpEarnedWeekly = 0)
-    )
+    private val sampleStats =
+        listOf(
+            LeaderboardCalculator.UserStats(
+                "u1",
+                "Alice",
+                fpBalance = 500,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                streakDays = 0,
+                intentAccuracyPercent = 0f,
+                fpEarnedWeekly = 0,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u2",
+                "Bob",
+                fpBalance = 400,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                streakDays = 0,
+                intentAccuracyPercent = 0f,
+                fpEarnedWeekly = 0,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u3",
+                "Carol",
+                fpBalance = 300,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                streakDays = 0,
+                intentAccuracyPercent = 0f,
+                fpEarnedWeekly = 0,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u4",
+                "Dave",
+                fpBalance = 200,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                streakDays = 0,
+                intentAccuracyPercent = 0f,
+                fpEarnedWeekly = 0,
+            ),
+            LeaderboardCalculator.UserStats(
+                "u5",
+                "Eve",
+                fpBalance = 100,
+                nutritiveMinutes = 0,
+                emptyCalorieMinutes = 0,
+                streakDays = 0,
+                intentAccuracyPercent = 0f,
+                fpEarnedWeekly = 0,
+            ),
+        )
 
     @Test
     fun userContextReturnsWindowAroundUser() {
@@ -2800,11 +3011,11 @@ class LeaderboardCalculatorUserContextTest {
 // =============================================================================
 
 class BuddyManagerIntegrationTest {
-
     private lateinit var manager: BuddyManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -2868,11 +3079,11 @@ class BuddyManagerIntegrationTest {
 }
 
 class ChallengeEngineIntegrationTest {
-
     private lateinit var engine: ChallengeEngine
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
     private val today: LocalDate
         get() = fixedClock.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
 
@@ -2884,17 +3095,18 @@ class ChallengeEngineIntegrationTest {
     @Test
     fun fullIndividualChallengeLifecycle() {
         // Create
-        val challenge = engine.createChallenge(
-            title = "Weekly Focus",
-            type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "circle1",
-            createdByUserId = "alice",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
-            targetValue = 100,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Weekly Focus",
+                type = ChallengeEngine.ChallengeType.EARN_NUTRITIVE_MINUTES,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "circle1",
+                createdByUserId = "alice",
+                startDate = today,
+                endDate = today.plus(7, DateTimeUnit.DAY),
+                targetValue = 100,
+                clock = fixedClock,
+            )
         assertEquals(ChallengeEngine.ChallengeStatus.ACTIVE, challenge.status)
 
         // Join
@@ -2916,7 +3128,7 @@ class ChallengeEngineIntegrationTest {
         val board = engine.getLeaderboard(challenge.challengeId)
         assertEquals("carol", board[0].userId) // 120
         assertEquals("alice", board[1].userId) // 105
-        assertEquals("bob", board[2].userId)   // 80
+        assertEquals("bob", board[2].userId) // 80
 
         // Finalize
         val result = engine.finalizeChallenge(challenge.challengeId, fixedClock)
@@ -2928,18 +3140,19 @@ class ChallengeEngineIntegrationTest {
 
     @Test
     fun fullTeamChallengeLifecycle() {
-        val challenge = engine.createChallenge(
-            title = "Team Goal",
-            type = ChallengeEngine.ChallengeType.GROUP_FP_POOL,
-            scope = ChallengeEngine.ChallengeScope.CIRCLE,
-            scopeId = "circle1",
-            createdByUserId = "alice",
-            startDate = today,
-            endDate = today.plus(7, DateTimeUnit.DAY),
-            targetValue = 200,
-            isTeamChallenge = true,
-            clock = fixedClock
-        )
+        val challenge =
+            engine.createChallenge(
+                title = "Team Goal",
+                type = ChallengeEngine.ChallengeType.GROUP_FP_POOL,
+                scope = ChallengeEngine.ChallengeScope.CIRCLE,
+                scopeId = "circle1",
+                createdByUserId = "alice",
+                startDate = today,
+                endDate = today.plus(7, DateTimeUnit.DAY),
+                targetValue = 200,
+                isTeamChallenge = true,
+                clock = fixedClock,
+            )
 
         engine.joinChallenge(challenge.challengeId, "bob", fixedClock)
 
@@ -2954,11 +3167,11 @@ class ChallengeEngineIntegrationTest {
 }
 
 class CircleManagerIntegrationTest {
-
     private lateinit var manager: CircleManager
-    private val fixedClock = object : Clock {
-        override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
-    }
+    private val fixedClock =
+        object : Clock {
+            override fun now(): Instant = Instant.parse("2025-06-01T12:00:00Z")
+        }
 
     @BeforeTest
     fun setup() {
@@ -2968,13 +3181,14 @@ class CircleManagerIntegrationTest {
     @Test
     fun fullCircleLifecycle() {
         // Create
-        val circle = manager.createCircle(
-            name = "Focus Friends",
-            description = "A circle for focused work",
-            visibility = CircleManager.CircleVisibility.PUBLIC,
-            creatorUserId = "alice",
-            clock = fixedClock
-        )
+        val circle =
+            manager.createCircle(
+                name = "Focus Friends",
+                description = "A circle for focused work",
+                visibility = CircleManager.CircleVisibility.PUBLIC,
+                creatorUserId = "alice",
+                clock = fixedClock,
+            )
 
         // Verify creation
         assertEquals(1, manager.getMemberCount(circle.circleId))

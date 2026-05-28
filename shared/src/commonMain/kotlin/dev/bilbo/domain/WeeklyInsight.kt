@@ -13,15 +13,18 @@ data class WeeklyInsight(
     val fpEarned: Int,
     val fpSpent: Int,
     val intentAccuracyPercent: Float,
-    val streakDays: Int
+    val streakDays: Int,
 )
 
 data class HeuristicInsight(
     val type: InsightType,
     val message: String,
-    val confidence: Float
+    val confidence: Float,
 )
 
 enum class InsightType {
-    CORRELATION, TREND, ANOMALY, ACHIEVEMENT
+    CORRELATION,
+    TREND,
+    ANOMALY,
+    ACHIEVEMENT,
 }

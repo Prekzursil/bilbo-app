@@ -21,7 +21,6 @@ import kotlinx.datetime.LocalDate
 class InsightRepository(
     private val apiService: BilboApiService,
 ) {
-
     // ── In-memory caches (production would use SQLDelight / DataStore) ─────────
 
     /** Cache of weekly insights keyed by weekStart date string. */
@@ -40,25 +39,27 @@ class InsightRepository(
      *
      * Emits [Result.Loading] first, then either [Result.Success] or [Result.Error].
      */
-    fun getDailyInsights(limit: Int = 30): Flow<Result<List<DailyInsight>>> = flow {
-        emit(Result.Loading)
-        try {
-            val insights = apiService.getDailyInsights(limit)
-            emit(Result.Success(insights))
-        } catch (e: Exception) {
-            emit(Result.Error(e))
+    fun getDailyInsights(limit: Int = 30): Flow<Result<List<DailyInsight>>> =
+        flow {
+            emit(Result.Loading)
+            try {
+                val insights = apiService.getDailyInsights(limit)
+                emit(Result.Success(insights))
+            } catch (e: Exception) {
+                emit(Result.Error(e))
+            }
         }
-    }
 
     /**
      * Requests AI-generated insight for the specified date.
      */
-    suspend fun generateInsight(date: String): Result<DailyInsight> = try {
-        val insight = apiService.generateAiInsight(date)
-        Result.Success(insight)
-    } catch (e: Exception) {
-        Result.Error(e)
-    }
+    suspend fun generateInsight(date: String): Result<DailyInsight> =
+        try {
+            val insight = apiService.generateAiInsight(date)
+            Result.Success(insight)
+        } catch (e: Exception) {
+            Result.Error(e)
+        }
 
     // ── Heuristic insights (Phase 8) ──────────────────────────────────────────
 
@@ -78,8 +79,7 @@ class InsightRepository(
     /**
      * Returns cached heuristic insights for [weekStart], or an empty list if none are stored.
      */
-    suspend fun getHeuristicInsights(weekStart: LocalDate): List<HeuristicInsight> =
-        heuristicCache[weekStart.toString()] ?: emptyList()
+    suspend fun getHeuristicInsights(weekStart: LocalDate): List<HeuristicInsight> = heuristicCache[weekStart.toString()] ?: emptyList()
 
     /**
      * Updates the correlation data cache for the given [weekStart].
@@ -95,8 +95,7 @@ class InsightRepository(
     /**
      * Returns cached correlation data for [weekStart], or an empty map.
      */
-    suspend fun getCorrelationCache(weekStart: LocalDate): Map<String, Float> =
-        correlationCache[weekStart.toString()] ?: emptyMap()
+    suspend fun getCorrelationCache(weekStart: LocalDate): Map<String, Float> = correlationCache[weekStart.toString()] ?: emptyMap()
 
     // ── Weekly insights (Phase 8) ─────────────────────────────────────────────
 
@@ -113,18 +112,15 @@ class InsightRepository(
     /**
      * Returns the most recent [WeeklyInsight], or null if none has been stored yet.
      */
-    suspend fun getLatestWeeklyInsight(): WeeklyInsight? =
-        weeklyInsightCache.values.maxByOrNull { it.weekStart.toString() }
+    suspend fun getLatestWeeklyInsight(): WeeklyInsight? = weeklyInsightCache.values.maxByOrNull { it.weekStart.toString() }
 
     /**
      * Returns the [WeeklyInsight] for [weekStart], or null if not yet generated.
      */
-    suspend fun getWeeklyInsight(weekStart: LocalDate): WeeklyInsight? =
-        weeklyInsightCache[weekStart.toString()]
+    suspend fun getWeeklyInsight(weekStart: LocalDate): WeeklyInsight? = weeklyInsightCache[weekStart.toString()]
 
     /**
      * Returns all stored weekly insights, sorted by weekStart descending (newest first).
      */
-    suspend fun getAllWeeklyInsights(): List<WeeklyInsight> =
-        weeklyInsightCache.values.sortedByDescending { it.weekStart.toString() }
+    suspend fun getAllWeeklyInsights(): List<WeeklyInsight> = weeklyInsightCache.values.sortedByDescending { it.weekStart.toString() }
 }

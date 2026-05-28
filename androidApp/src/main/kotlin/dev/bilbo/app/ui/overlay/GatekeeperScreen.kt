@@ -43,16 +43,15 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.bilbo.app.ui.theme.BilboTheme
 import dev.bilbo.tracking.AppInfo
 
 // ── Brand palette for the gatekeeper overlay ──────────────────────────────────
-private val GkBackground = Color(0x99000000)   // scrim
-private val GkCard       = Color(0xFF1A2C3D)   // dark teal-navy card
-private val GkPrimary    = Color(0xFF48B8A0)   // calming teal
-private val GkSurface    = Color(0xFF243344)   // slightly lighter surface
-private val GkOnSurface  = Color(0xFFE0EEF5)   // cool white text
-private val GkSubtle     = Color(0xFF8AAFC4)   // muted label
+private val GkBackground = Color(0x99000000) // scrim
+private val GkCard = Color(0xFF1A2C3D) // dark teal-navy card
+private val GkPrimary = Color(0xFF48B8A0) // calming teal
+private val GkSurface = Color(0xFF243344) // slightly lighter surface
+private val GkOnSurface = Color(0xFFE0EEF5) // cool white text
+private val GkSubtle = Color(0xFF8AAFC4) // muted label
 
 private val DURATION_OPTIONS = listOf(5, 10, 15, 20, 30, 60)
 
@@ -85,53 +84,58 @@ fun GatekeeperScreen(
     )
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(GkBackground),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(GkBackground),
         contentAlignment = Alignment.BottomCenter,
     ) {
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .graphicsLayer {
-                    translationY = size.height * slideProgress
-                },
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .graphicsLayer {
+                        translationY = size.height * slideProgress
+                    },
             shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
             colors = CardDefaults.cardColors(containerColor = GkCard),
             elevation = CardDefaults.cardElevation(defaultElevation = 12.dp),
         ) {
             Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-                    .padding(horizontal = 24.dp, vertical = 28.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .verticalScroll(rememberScrollState())
+                        .padding(horizontal = 24.dp, vertical = 28.dp),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-
                 // ── Drag handle ───────────────────────────────────────────────
                 Box(
-                    modifier = Modifier
-                        .size(width = 40.dp, height = 4.dp)
-                        .clip(RoundedCornerShape(2.dp))
-                        .background(GkSubtle.copy(alpha = 0.5f)),
+                    modifier =
+                        Modifier
+                            .size(width = 40.dp, height = 4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(GkSubtle.copy(alpha = 0.5f)),
                 )
 
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // ── App icon placeholder + name ───────────────────────────────
                 Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape)
-                        .background(GkPrimary.copy(alpha = 0.18f)),
+                    modifier =
+                        Modifier
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .background(GkPrimary.copy(alpha = 0.18f)),
                     contentAlignment = Alignment.Center,
                 ) {
                     Text(
                         text = appInfo.appLabel.take(2).uppercase(),
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = GkPrimary,
-                        ),
+                        style =
+                            MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = GkPrimary,
+                            ),
                     )
                 }
 
@@ -139,10 +143,11 @@ fun GatekeeperScreen(
 
                 Text(
                     text = appInfo.appLabel,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = GkOnSurface,
-                    ),
+                    style =
+                        MaterialTheme.typography.titleLarge.copy(
+                            fontWeight = FontWeight.SemiBold,
+                            color = GkOnSurface,
+                        ),
                     textAlign = TextAlign.Center,
                 )
 
@@ -151,10 +156,11 @@ fun GatekeeperScreen(
                 // ── Intention prompt ──────────────────────────────────────────
                 Text(
                     text = "What's your intention?",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = GkOnSurface,
-                        fontWeight = FontWeight.Medium,
-                    ),
+                    style =
+                        MaterialTheme.typography.titleMedium.copy(
+                            color = GkOnSurface,
+                            fontWeight = FontWeight.Medium,
+                        ),
                     modifier = Modifier.fillMaxWidth(),
                 )
 
@@ -173,15 +179,16 @@ fun GatekeeperScreen(
                     shape = RoundedCornerShape(14.dp),
                     singleLine = false,
                     maxLines = 3,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = GkPrimary,
-                        unfocusedBorderColor = GkSubtle.copy(alpha = 0.4f),
-                        focusedTextColor = GkOnSurface,
-                        unfocusedTextColor = GkOnSurface,
-                        cursorColor = GkPrimary,
-                        focusedContainerColor = GkSurface,
-                        unfocusedContainerColor = GkSurface,
-                    ),
+                    colors =
+                        OutlinedTextFieldDefaults.colors(
+                            focusedBorderColor = GkPrimary,
+                            unfocusedBorderColor = GkSubtle.copy(alpha = 0.4f),
+                            focusedTextColor = GkOnSurface,
+                            unfocusedTextColor = GkOnSurface,
+                            cursorColor = GkPrimary,
+                            focusedContainerColor = GkSurface,
+                            unfocusedContainerColor = GkSurface,
+                        ),
                     supportingText = {
                         Text(
                             text = "${intention.length}/100",
@@ -197,10 +204,11 @@ fun GatekeeperScreen(
                 // ── Duration picker ───────────────────────────────────────────
                 Text(
                     text = "How long?",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = GkOnSurface,
-                        fontWeight = FontWeight.Medium,
-                    ),
+                    style =
+                        MaterialTheme.typography.titleMedium.copy(
+                            color = GkOnSurface,
+                            fontWeight = FontWeight.Medium,
+                        ),
                     modifier = Modifier.fillMaxWidth(),
                 )
 
@@ -217,18 +225,20 @@ fun GatekeeperScreen(
                 // ── Action buttons ────────────────────────────────────────────
                 Button(
                     onClick = { onStart(intention.trim(), selectedDuration) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(52.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(52.dp),
                     shape = RoundedCornerShape(14.dp),
                     colors = ButtonDefaults.buttonColors(containerColor = GkPrimary),
                 ) {
                     Text(
-                        text = "Start ${selectedDuration} min",
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White,
-                        ),
+                        text = "Start $selectedDuration min",
+                        style =
+                            MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White,
+                            ),
                     )
                 }
 
@@ -240,9 +250,10 @@ fun GatekeeperScreen(
                 ) {
                     Text(
                         text = "Not now",
-                        style = MaterialTheme.typography.bodyLarge.copy(
-                            color = GkSubtle,
-                        ),
+                        style =
+                            MaterialTheme.typography.bodyLarge.copy(
+                                color = GkSubtle,
+                            ),
                     )
                 }
 
@@ -272,24 +283,27 @@ private fun DurationChipRow(
                 label = {
                     Text(
                         text = if (minutes < 60) "${minutes}m" else "1h",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                        ),
+                        style =
+                            MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                            ),
                     )
                 },
                 shape = RoundedCornerShape(20.dp),
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = GkPrimary,
-                    selectedLabelColor = Color.White,
-                    containerColor = GkSurface,
-                    labelColor = GkSubtle,
-                ),
-                border = FilterChipDefaults.filterChipBorder(
-                    enabled = true,
-                    selected = isSelected,
-                    selectedBorderColor = GkPrimary,
-                    borderColor = GkSubtle.copy(alpha = 0.3f),
-                ),
+                colors =
+                    FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = GkPrimary,
+                        selectedLabelColor = Color.White,
+                        containerColor = GkSurface,
+                        labelColor = GkSubtle,
+                    ),
+                border =
+                    FilterChipDefaults.filterChipBorder(
+                        enabled = true,
+                        selected = isSelected,
+                        selectedBorderColor = GkPrimary,
+                        borderColor = GkSubtle.copy(alpha = 0.3f),
+                    ),
             )
         }
     }

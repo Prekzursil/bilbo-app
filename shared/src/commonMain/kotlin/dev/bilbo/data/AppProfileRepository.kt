@@ -10,7 +10,6 @@ import kotlinx.coroutines.flow.Flow
  * Package name is the natural primary key.
  */
 interface AppProfileRepository {
-
     /**
      * Observe all app profiles, ordered by app label ascending.
      * Emits whenever the underlying data changes.
@@ -73,12 +72,18 @@ interface AppProfileRepository {
      * Override the category for a specific app, marking it as a custom
      * classification.
      */
-    suspend fun updateCategory(packageName: String, category: AppCategory)
+    suspend fun updateCategory(
+        packageName: String,
+        category: AppCategory,
+    )
 
     /**
      * Enable or disable the bypass flag for an app.
      */
-    suspend fun updateBypass(packageName: String, isBypassed: Boolean)
+    suspend fun updateBypass(
+        packageName: String,
+        isBypassed: Boolean,
+    )
 
     /**
      * Remove the profile for [packageName].

@@ -34,10 +34,11 @@ private data class AnalogSuggestionDto(
 
 // ── Lenient JSON parser (ignores unknown keys from future schema additions) ────
 
-private val json = Json {
-    ignoreUnknownKeys = true
-    isLenient = true
-}
+private val json =
+    Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }
 
 /**
  * Loads default seed data into the database on the first app launch.
@@ -64,7 +65,6 @@ class SeedDataLoader(
     private val resourceReader: ResourceReader,
     private val prefStore: SeedPreferenceStore,
 ) {
-
     /**
      * Loads seed data if it has not already been loaded.
      * Safe to call on every app start — idempotent after first run.
@@ -97,15 +97,16 @@ class SeedDataLoader(
         val dtos = json.decodeFromString<List<AppClassificationDto>>(raw)
 
         dtos.forEach { dto ->
-            val profile = AppProfile(
-                packageName             = dto.packageName,
-                appLabel                = dto.appLabel,
-                category                = dto.category.toAppCategory(),
-                enforcementMode         = dto.defaultEnforcementMode.toEnforcementMode(),
-                coolingOffEnabled       = false,
-                isBypassed              = false,
-                isCustomClassification  = false,
-            )
+            val profile =
+                AppProfile(
+                    packageName = dto.packageName,
+                    appLabel = dto.appLabel,
+                    category = dto.category.toAppCategory(),
+                    enforcementMode = dto.defaultEnforcementMode.toEnforcementMode(),
+                    coolingOffEnabled = false,
+                    isBypassed = false,
+                    isCustomClassification = false,
+                )
             // Upsert: skip if already stored by a prior seeding or user modification
             val existing = appProfileRepository.getByPackageName(dto.packageName)
             if (existing == null) {
@@ -123,53 +124,58 @@ class SeedDataLoader(
         if (existingCount > 0) return
 
         dtos.forEach { dto ->
-            val suggestion = AnalogSuggestion(
-                id         = 0,     // Let the DB assign the id
-                text       = dto.text,
-                category   = dto.category.toSuggestionCategory(),
-                tags       = dto.tags,
-                timeOfDay  = dto.timeOfDay?.toTimeOfDay(),
-                isCustom   = false,
-            )
+            val suggestion =
+                AnalogSuggestion(
+                    id = 0, // Let the DB assign the id
+                    text = dto.text,
+                    category = dto.category.toSuggestionCategory(),
+                    tags = dto.tags,
+                    timeOfDay = dto.timeOfDay?.toTimeOfDay(),
+                    isCustom = false,
+                )
             suggestionRepository.insert(suggestion)
         }
     }
 
     // ── String → enum conversions ──────────────────────────────────────────────
 
-    private fun String.toAppCategory(): AppCategory = when (uppercase()) {
-        "NUTRITIVE"      -> AppCategory.NUTRITIVE
-        "NEUTRAL"        -> AppCategory.NEUTRAL
-        "EMPTY_CALORIES" -> AppCategory.EMPTY_CALORIES
-        else             -> AppCategory.NEUTRAL   // safe default
-    }
+    private fun String.toAppCategory(): AppCategory =
+        when (uppercase()) {
+            "NUTRITIVE" -> AppCategory.NUTRITIVE
+            "NEUTRAL" -> AppCategory.NEUTRAL
+            "EMPTY_CALORIES" -> AppCategory.EMPTY_CALORIES
+            else -> AppCategory.NEUTRAL // safe default
+        }
 
-    private fun String.toEnforcementMode(): EnforcementMode = when (uppercase()) {
-        "HARD_LOCK" -> EnforcementMode.HARD_LOCK
-        else        -> EnforcementMode.NUDGE
-    }
+    private fun String.toEnforcementMode(): EnforcementMode =
+        when (uppercase()) {
+            "HARD_LOCK" -> EnforcementMode.HARD_LOCK
+            else -> EnforcementMode.NUDGE
+        }
 
-    private fun String.toSuggestionCategory(): SuggestionCategory = when (uppercase()) {
-        "EXERCISE"         -> SuggestionCategory.EXERCISE
-        "CREATIVE"         -> SuggestionCategory.CREATIVE
-        "SOCIAL"           -> SuggestionCategory.SOCIAL
-        "MINDFULNESS"      -> SuggestionCategory.MINDFULNESS
-        "LEARNING"         -> SuggestionCategory.LEARNING
-        "NATURE"           -> SuggestionCategory.NATURE
-        "COOKING"          -> SuggestionCategory.COOKING
-        "MUSIC"            -> SuggestionCategory.MUSIC
-        "GAMING_PHYSICAL"  -> SuggestionCategory.GAMING_PHYSICAL
-        "READING"          -> SuggestionCategory.READING
-        else               -> SuggestionCategory.READING  // safe default
-    }
+    private fun String.toSuggestionCategory(): SuggestionCategory =
+        when (uppercase()) {
+            "EXERCISE" -> SuggestionCategory.EXERCISE
+            "CREATIVE" -> SuggestionCategory.CREATIVE
+            "SOCIAL" -> SuggestionCategory.SOCIAL
+            "MINDFULNESS" -> SuggestionCategory.MINDFULNESS
+            "LEARNING" -> SuggestionCategory.LEARNING
+            "NATURE" -> SuggestionCategory.NATURE
+            "COOKING" -> SuggestionCategory.COOKING
+            "MUSIC" -> SuggestionCategory.MUSIC
+            "GAMING_PHYSICAL" -> SuggestionCategory.GAMING_PHYSICAL
+            "READING" -> SuggestionCategory.READING
+            else -> SuggestionCategory.READING // safe default
+        }
 
-    private fun String.toTimeOfDay(): TimeOfDay = when (uppercase()) {
-        "MORNING"   -> TimeOfDay.MORNING
-        "AFTERNOON" -> TimeOfDay.AFTERNOON
-        "EVENING"   -> TimeOfDay.EVENING
-        "NIGHT"     -> TimeOfDay.NIGHT
-        else        -> TimeOfDay.MORNING
-    }
+    private fun String.toTimeOfDay(): TimeOfDay =
+        when (uppercase()) {
+            "MORNING" -> TimeOfDay.MORNING
+            "AFTERNOON" -> TimeOfDay.AFTERNOON
+            "EVENING" -> TimeOfDay.EVENING
+            "NIGHT" -> TimeOfDay.NIGHT
+            else -> TimeOfDay.MORNING
+        }
 }
 
 // ── Platform abstractions ──────────────────────────────────────────────────────

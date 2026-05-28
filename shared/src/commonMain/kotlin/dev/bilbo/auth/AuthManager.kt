@@ -1,16 +1,13 @@
 package dev.bilbo.auth
 
 import io.github.jan.supabase.SupabaseClient
-import io.github.jan.supabase.auth.Auth
 import io.github.jan.supabase.auth.auth
 import io.github.jan.supabase.auth.providers.Google
 import io.github.jan.supabase.auth.providers.builtin.Email
 import io.github.jan.supabase.auth.user.UserInfo
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
 
 /**
  * Manages Supabase Auth state for the Bilbo social layer.
@@ -26,7 +23,6 @@ import kotlinx.coroutines.flow.map
 class AuthManager(
     private val supabaseClient: SupabaseClient,
 ) {
-
     // ── Auth state ────────────────────────────────────────────────────────────
 
     sealed class AuthState {
@@ -37,15 +33,22 @@ class AuthManager(
         data object Loading : AuthState()
 
         /** A user is signed in and the session is valid. */
-        data class Authenticated(val user: UserInfo) : AuthState()
+        data class Authenticated(
+            val user: UserInfo,
+        ) : AuthState()
 
         /** An error occurred during sign-in or token refresh. */
-        data class Error(val message: String) : AuthState()
+        data class Error(
+            val message: String,
+        ) : AuthState()
     }
 
     sealed class AuthResult {
         data object Success : AuthResult()
-        data class Failure(val message: String) : AuthResult()
+
+        data class Failure(
+            val message: String,
+        ) : AuthResult()
     }
 
     private val _authState = MutableStateFlow<AuthState>(AuthState.Unauthenticated)
@@ -93,7 +96,10 @@ class AuthManager(
      *
      * This method is called *lazily* — only when the user initiates a social action.
      */
-    suspend fun signInWithEmail(email: String, password: String): AuthResult {
+    suspend fun signInWithEmail(
+        email: String,
+        password: String,
+    ): AuthResult {
         _authState.value = AuthState.Loading
         return runCatching {
             supabaseClient.auth.signInWith(Email) {
@@ -116,7 +122,10 @@ class AuthManager(
      * After sign-up, the user typically needs to confirm their email before the session
      * becomes valid. Until then, [authState] stays [AuthState.Unauthenticated].
      */
-    suspend fun signUpWithEmail(email: String, password: String): AuthResult {
+    suspend fun signUpWithEmail(
+        email: String,
+        password: String,
+    ): AuthResult {
         _authState.value = AuthState.Loading
         return runCatching {
             supabaseClient.auth.signUpWith(Email) {
@@ -129,7 +138,7 @@ class AuthManager(
                 val user = supabaseClient.auth.retrieveUserForCurrentSession(updateSession = true)
                 _authState.value = AuthState.Authenticated(user)
             } else {
-                _authState.value = AuthState.Unauthenticated  // awaiting email confirmation
+                _authState.value = AuthState.Unauthenticated // awaiting email confirmation
             }
             AuthResult.Success
         }.getOrElse { e ->
@@ -166,8 +175,8 @@ class AuthManager(
      *
      * @param url The full redirect URL containing the OAuth code/tokens.
      */
-    suspend fun handleOAuthCallback(url: String): AuthResult {
-        return runCatching {
+    suspend fun handleOAuthCallback(url: String): AuthResult =
+        runCatching {
             supabaseClient.auth.importAuthToken(url)
             val user = supabaseClient.auth.retrieveUserForCurrentSession(updateSession = true)
             _authState.value = AuthState.Authenticated(user)
@@ -177,7 +186,6 @@ class AuthManager(
             _authState.value = AuthState.Error(msg)
             AuthResult.Failure(msg)
         }
-    }
 
     // ── Sign-out ──────────────────────────────────────────────────────────────
 
@@ -199,8 +207,8 @@ class AuthManager(
      * Normally not needed — the Supabase SDK refreshes tokens automatically.
      * Call if you receive a 401 from a Supabase edge function and want to retry.
      */
-    suspend fun refreshToken(): AuthResult {
-        return runCatching {
+    suspend fun refreshToken(): AuthResult =
+        runCatching {
             supabaseClient.auth.refreshCurrentSession()
             val user = supabaseClient.auth.retrieveUserForCurrentSession(updateSession = false)
             _authState.value = AuthState.Authenticated(user)
@@ -210,7 +218,6 @@ class AuthManager(
             _authState.value = AuthState.Error(msg)
             AuthResult.Failure(msg)
         }
-    }
 
     // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -218,8 +225,7 @@ class AuthManager(
      * Returns the current JWT access token, or null if unauthenticated.
      * Used to set the `Authorization: Bearer …` header on manual HTTP calls.
      */
-    suspend fun getAccessToken(): String? =
-        supabaseClient.auth.currentSessionOrNull()?.accessToken
+    suspend fun getAccessToken(): String? = supabaseClient.auth.currentSessionOrNull()?.accessToken
 
     /**
      * Returns the current user's UUID (Supabase `auth.users.id`), or null.

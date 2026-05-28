@@ -11,7 +11,7 @@ package dev.bilbo.tracking
 data class AppInfo(
     val packageName: String,
     val appLabel: String,
-    val category: dev.bilbo.domain.AppCategory?
+    val category: dev.bilbo.domain.AppCategory?,
 )
 
 /**
@@ -27,7 +27,6 @@ data class AppInfo(
  * interact with this interface.
  */
 interface AppMonitor {
-
     /**
      * Return the app currently in the foreground, or null if it cannot be
      * determined (e.g. permission not granted, screen off).

@@ -1,6 +1,5 @@
 package dev.bilbo.app.ui.screen
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -14,21 +13,24 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import dev.bilbo.social.CircleManager
 
 // ── UI models ─────────────────────────────────────────────────────────────────
 
 sealed class CircleScreenMode {
     /** Show the list of user's circles. */
     data object List : CircleScreenMode()
+
     /** Detail view for a specific circle. */
-    data class Detail(val circleId: String) : CircleScreenMode()
+    data class Detail(
+        val circleId: String,
+    ) : CircleScreenMode()
+
     /** Create circle form. */
     data object Create : CircleScreenMode()
+
     /** Join circle by code. */
     data object Join : CircleScreenMode()
 }
@@ -96,12 +98,13 @@ fun CircleScreen(
             TopAppBar(
                 title = {
                     Text(
-                        text = when (mode) {
-                            CircleScreenMode.List   -> "Focus Circles"
-                            is CircleScreenMode.Detail -> state.selectedCircle?.name ?: "Circle"
-                            CircleScreenMode.Create -> "Create Circle"
-                            CircleScreenMode.Join   -> "Join Circle"
-                        },
+                        text =
+                            when (mode) {
+                                CircleScreenMode.List -> "Focus Circles"
+                                is CircleScreenMode.Detail -> state.selectedCircle?.name ?: "Circle"
+                                CircleScreenMode.Create -> "Create Circle"
+                                CircleScreenMode.Join -> "Join Circle"
+                            },
                         fontWeight = FontWeight.SemiBold,
                     )
                 },
@@ -141,13 +144,17 @@ fun CircleScreen(
     ) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().padding(paddingValues)) {
             when (mode) {
-                CircleScreenMode.List -> CircleListContent(
-                    circles = state.circles,
-                    isLoading = state.isLoading,
-                    onCreate = { onModeChange(CircleScreenMode.Create) },
-                    onJoin = { onModeChange(CircleScreenMode.Join) },
-                    onCircleTap = { onCircleTap(it); onModeChange(CircleScreenMode.Detail(it)) },
-                )
+                CircleScreenMode.List ->
+                    CircleListContent(
+                        circles = state.circles,
+                        isLoading = state.isLoading,
+                        onCreate = { onModeChange(CircleScreenMode.Create) },
+                        onJoin = { onModeChange(CircleScreenMode.Join) },
+                        onCircleTap = {
+                            onCircleTap(it)
+                            onModeChange(CircleScreenMode.Detail(it))
+                        },
+                    )
                 is CircleScreenMode.Detail -> {
                     val circle = state.selectedCircle
                     if (circle != null) {
@@ -207,8 +214,18 @@ private fun CircleListContent(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
-                    Icon(Icons.Outlined.Group, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f), modifier = Modifier.size(48.dp))
-                    Text("No circles yet. Create one or join with an invite code!", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant, textAlign = TextAlign.Center)
+                    Icon(
+                        Icons.Outlined.Group,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.35f),
+                        modifier = Modifier.size(48.dp),
+                    )
+                    Text(
+                        "No circles yet. Create one or join with an invite code!",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        textAlign = TextAlign.Center,
+                    )
                 }
             }
         } else {
@@ -220,7 +237,10 @@ private fun CircleListContent(
 }
 
 @Composable
-private fun CircleListCard(circle: CircleListUiItem, onClick: () -> Unit) {
+private fun CircleListCard(
+    circle: CircleListUiItem,
+    onClick: () -> Unit,
+) {
     Card(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth(),
@@ -233,19 +253,32 @@ private fun CircleListCard(circle: CircleListUiItem, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
-            Surface(shape = RoundedCornerShape(12.dp), color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.size(48.dp)) {
+            Surface(
+                shape = RoundedCornerShape(12.dp),
+                color = MaterialTheme.colorScheme.secondaryContainer,
+                modifier = Modifier.size(48.dp),
+            ) {
                 Box(contentAlignment = Alignment.Center) {
                     Icon(Icons.Outlined.Group, contentDescription = null, tint = MaterialTheme.colorScheme.onSecondaryContainer)
                 }
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(circle.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                Text("${circle.memberCount} members · ${circle.goalSummary}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    "${circle.memberCount} members · ${circle.goalSummary}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
                 circle.daysRemaining?.let {
                     Text("$it days remaining", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                 }
             }
-            Icon(Icons.Default.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+            Icon(
+                Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(18.dp),
+            )
         }
     }
 }
@@ -270,9 +303,22 @@ private fun CircleDetailContent(
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
             ) {
                 Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text(circle.name, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                    Text("Goal: ${circle.goal}", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onPrimaryContainer)
-                    Text("${circle.daysRemaining} days remaining", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f))
+                    Text(
+                        circle.name,
+                        style = MaterialTheme.typography.titleLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    Text(
+                        "Goal: ${circle.goal}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    )
+                    Text(
+                        "${circle.daysRemaining} days remaining",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                    )
                 }
             }
         }
@@ -286,7 +332,12 @@ private fun CircleDetailContent(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Text("Group Progress", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                    Text("${circle.aggregateProgressPercent}%", style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.primary, fontWeight = FontWeight.Bold)
+                    Text(
+                        "${circle.aggregateProgressPercent}%",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                    )
                 }
                 LinearProgressIndicator(
                     progress = { circle.aggregateProgressPercent / 100f },
@@ -309,10 +360,22 @@ private fun CircleDetailContent(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Icon(Icons.Outlined.Share, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+                    Icon(
+                        Icons.Outlined.Share,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp),
+                    )
                     Column {
                         Text("Invite code", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                        Text(circle.inviteCode, style = MaterialTheme.typography.bodyMedium.copy(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace), fontWeight = FontWeight.Bold)
+                        Text(
+                            circle.inviteCode,
+                            style =
+                                MaterialTheme.typography.bodyMedium.copy(
+                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                                ),
+                            fontWeight = FontWeight.Bold,
+                        )
                     }
                 }
             }
@@ -339,11 +402,15 @@ private fun MemberCard(member: CircleMemberUiItem) {
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (member.isCurrentUser)
-                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
-            else MaterialTheme.colorScheme.surface,
-        ),
+        colors =
+            CardDefaults.cardColors(
+                containerColor =
+                    if (member.isCurrentUser) {
+                        MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                    } else {
+                        MaterialTheme.colorScheme.surface
+                    },
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (member.isCurrentUser) 0.dp else 2.dp),
     ) {
         Row(
@@ -353,7 +420,12 @@ private fun MemberCard(member: CircleMemberUiItem) {
         ) {
             Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer, modifier = Modifier.size(40.dp)) {
                 Box(contentAlignment = Alignment.Center) {
-                    Text(member.displayName.take(1).uppercase(), style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Bold, color = MaterialTheme.colorScheme.onSecondaryContainer)
+                    Text(
+                        member.displayName.take(1).uppercase(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer,
+                    )
                 }
             }
 
@@ -362,18 +434,28 @@ private fun MemberCard(member: CircleMemberUiItem) {
                     Text(member.displayName, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.SemiBold)
                     if (member.isCurrentUser) {
                         Surface(shape = RoundedCornerShape(6.dp), color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)) {
-                            Text("You", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary, modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp))
+                            Text(
+                                "You",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.padding(horizontal = 5.dp, vertical = 2.dp),
+                            )
                         }
                     }
                 }
                 // Stats visible per sharing level
-                val parts = buildList {
-                    member.fpBalance?.let { add("$it FP") }
-                    member.streakDays?.let { add("${it}d streak") }
-                    member.nutritiveMinutes?.let { add("${it}m nutritive") }
-                }
+                val parts =
+                    buildList {
+                        member.fpBalance?.let { add("$it FP") }
+                        member.streakDays?.let { add("${it}d streak") }
+                        member.nutritiveMinutes?.let { add("${it}m nutritive") }
+                    }
                 if (parts.isNotEmpty()) {
-                    Text(parts.joinToString(" · "), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text(
+                        parts.joinToString(" · "),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    )
                 }
             }
         }
@@ -383,9 +465,7 @@ private fun MemberCard(member: CircleMemberUiItem) {
 // ── Create circle form ────────────────────────────────────────────────────────
 
 @Composable
-private fun CreateCircleForm(
-    onCreate: (name: String, goal: String, durationDays: Int, maxMembers: Int) -> Unit,
-) {
+private fun CreateCircleForm(onCreate: (name: String, goal: String, durationDays: Int, maxMembers: Int) -> Unit) {
     var name by remember { mutableStateOf("") }
     var goal by remember { mutableStateOf("") }
     var duration by remember { mutableStateOf(14) }
@@ -402,7 +482,11 @@ private fun CreateCircleForm(
         item {
             Text("Create a Focus Circle", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
             Spacer(Modifier.height(4.dp))
-            Text("Invite friends to hold each other accountable.", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            Text(
+                "Invite friends to hold each other accountable.",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
         }
 
         item {
@@ -478,9 +562,10 @@ private fun JoinCircleForm(onJoin: (String) -> Unit) {
     var code by remember { mutableStateOf("") }
 
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(24.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(24.dp),
         verticalArrangement = Arrangement.spacedBy(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
@@ -511,11 +596,14 @@ private fun JoinCircleForm(onJoin: (String) -> Unit) {
             placeholder = { Text("XXXXXXXX") },
             singleLine = true,
             modifier = Modifier.fillMaxWidth(),
-            textStyle = MaterialTheme.typography.titleLarge.copy(
-                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                textAlign = TextAlign.Center,
-                letterSpacing = androidx.compose.ui.unit.TextUnit(4f, androidx.compose.ui.unit.TextUnitType.Sp),
-            ),
+            textStyle =
+                MaterialTheme.typography.titleLarge.copy(
+                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                    textAlign = TextAlign.Center,
+                    letterSpacing =
+                        androidx.compose.ui.unit
+                            .TextUnit(4f, androidx.compose.ui.unit.TextUnitType.Sp),
+                ),
         )
 
         Button(

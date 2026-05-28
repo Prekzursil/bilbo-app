@@ -11,19 +11,19 @@ import dev.bilbo.data.BilboDatabase
  *
  * @param context An Android [Context] used to open or create the database file.
  */
-class AndroidDatabaseDriver(private val context: Context) : DatabaseDriverFactory {
-
+class AndroidDatabaseDriver(
+    private val context: Context,
+) : DatabaseDriverFactory {
     /**
      * Create (or open) the "bilbo.db" SQLite database and return a configured driver.
      * The [BilboDatabase.Schema] callback handles CREATE TABLE / migration statements.
      */
-    override fun createDriver(): SqlDriver {
-        return AndroidSqliteDriver(
+    override fun createDriver(): SqlDriver =
+        AndroidSqliteDriver(
             schema = BilboDatabase.Schema,
             context = context,
-            name = DATABASE_NAME
+            name = DATABASE_NAME,
         )
-    }
 
     companion object {
         const val DATABASE_NAME = "bilbo.db"

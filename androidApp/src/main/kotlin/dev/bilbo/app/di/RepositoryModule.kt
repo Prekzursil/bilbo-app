@@ -46,7 +46,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RepositoryModule {
-
     // ── Repository bindings ──────────────────────────────────────────────────
 
     @Provides
@@ -77,9 +76,7 @@ object RepositoryModule {
 
     @Provides
     @Singleton
-    fun provideCooldownPersistence(
-        impl: SharedPrefsCooldownPersistence,
-    ): CooldownPersistence = impl
+    fun provideCooldownPersistence(impl: SharedPrefsCooldownPersistence): CooldownPersistence = impl
 
     // ── NotificationManager ──────────────────────────────────────────────────
 
@@ -87,8 +84,7 @@ object RepositoryModule {
     @Singleton
     fun provideNotificationManager(
         @ApplicationContext context: Context,
-    ): NotificationManager =
-        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    ): NotificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     // ── EmotionalFlowSettings ────────────────────────────────────────────────
 
@@ -104,7 +100,6 @@ object RepositoryModule {
 // ── UsageRepository ──────────────────────────────────────────────────────────
 
 private class InMemoryUsageRepository : UsageRepository {
-
     // Hot state — every write re-emits so collectors (e.g. DashboardViewModel) update live.
     private val state = MutableStateFlow<List<UsageSession>>(emptyList())
     private var nextId = 1L
@@ -121,24 +116,22 @@ private class InMemoryUsageRepository : UsageRepository {
 
     override suspend fun getAll(): List<UsageSession> = sessions
 
-    override suspend fun getById(id: Long): UsageSession? =
-        sessions.firstOrNull { it.id == id }
+    override suspend fun getById(id: Long): UsageSession? = sessions.firstOrNull { it.id == id }
 
-    override suspend fun getByPackageName(packageName: String): List<UsageSession> =
-        sessions.filter { it.packageName == packageName }
+    override suspend fun getByPackageName(packageName: String): List<UsageSession> = sessions.filter { it.packageName == packageName }
 
-    override suspend fun getByDateRange(from: Instant, to: Instant): List<UsageSession> =
-        sessions.filter { it.startTime in from..to }
+    override suspend fun getByDateRange(
+        from: Instant,
+        to: Instant,
+    ): List<UsageSession> = sessions.filter { it.startTime in from..to }
 
-    override suspend fun getByCategory(category: AppCategory): List<UsageSession> =
-        sessions.filter { it.category == category }
+    override suspend fun getByCategory(category: AppCategory): List<UsageSession> = sessions.filter { it.category == category }
 
     override suspend fun getByDateRangeAndCategory(
         from: Instant,
         to: Instant,
         category: AppCategory,
-    ): List<UsageSession> =
-        sessions.filter { it.startTime in from..to && it.category == category }
+    ): List<UsageSession> = sessions.filter { it.startTime in from..to && it.category == category }
 
     override suspend fun insert(session: UsageSession): Long {
         val id = nextId++
@@ -146,7 +139,11 @@ private class InMemoryUsageRepository : UsageRepository {
         return id
     }
 
-    override suspend fun updateEndTime(id: Long, endTime: Instant, durationSeconds: Long) {
+    override suspend fun updateEndTime(
+        id: Long,
+        endTime: Instant,
+        durationSeconds: Long,
+    ) {
         mutate { list ->
             val idx = list.indexOfFirst { it.id == id }
             if (idx >= 0) {
@@ -163,10 +160,12 @@ private class InMemoryUsageRepository : UsageRepository {
         mutate { it.removeAll { s -> s.startTime < before } }
     }
 
-    override suspend fun countByPackageName(packageName: String): Long =
-        sessions.count { it.packageName == packageName }.toLong()
+    override suspend fun countByPackageName(packageName: String): Long = sessions.count { it.packageName == packageName }.toLong()
 
-    override suspend fun sumDurationByCategory(from: Instant, to: Instant): Map<AppCategory, Long> =
+    override suspend fun sumDurationByCategory(
+        from: Instant,
+        to: Instant,
+    ): Map<AppCategory, Long> =
         sessions
             .filter { it.startTime in from..to }
             .groupBy { it.category }
@@ -176,7 +175,6 @@ private class InMemoryUsageRepository : UsageRepository {
 // ── AppProfileRepository ─────────────────────────────────────────────────────
 
 private class InMemoryAppProfileRepository : AppProfileRepository {
-
     private val state = MutableStateFlow<Map<String, AppProfile>>(emptyMap())
     private val profiles: Map<String, AppProfile> get() = state.value
 
@@ -186,28 +184,22 @@ private class InMemoryAppProfileRepository : AppProfileRepository {
         state.value = draft.toMap()
     }
 
-    override fun observeAll(): Flow<List<AppProfile>> =
-        state.asStateFlow().map { it.values.toList() }
+    override fun observeAll(): Flow<List<AppProfile>> = state.asStateFlow().map { it.values.toList() }
 
     override suspend fun getAll(): List<AppProfile> = profiles.values.toList()
 
-    override suspend fun getByPackageName(packageName: String): AppProfile? =
-        profiles[packageName]
+    override suspend fun getByPackageName(packageName: String): AppProfile? = profiles[packageName]
 
-    override fun observeByPackageName(packageName: String): Flow<AppProfile?> =
-        state.asStateFlow().map { it[packageName] }
+    override fun observeByPackageName(packageName: String): Flow<AppProfile?> = state.asStateFlow().map { it[packageName] }
 
-    override suspend fun getByCategory(category: AppCategory): List<AppProfile> =
-        profiles.values.filter { it.category == category }
+    override suspend fun getByCategory(category: AppCategory): List<AppProfile> = profiles.values.filter { it.category == category }
 
     override suspend fun getByEnforcementMode(enforcementMode: EnforcementMode): List<AppProfile> =
         profiles.values.filter { it.enforcementMode == enforcementMode }
 
-    override suspend fun getBypassed(): List<AppProfile> =
-        profiles.values.filter { it.isBypassed }
+    override suspend fun getBypassed(): List<AppProfile> = profiles.values.filter { it.isBypassed }
 
-    override suspend fun getCustomClassified(): List<AppProfile> =
-        profiles.values.filter { it.isCustomClassification }
+    override suspend fun getCustomClassified(): List<AppProfile> = profiles.values.filter { it.isCustomClassification }
 
     override suspend fun insert(profile: AppProfile) {
         require(!profiles.containsKey(profile.packageName)) {
@@ -224,18 +216,25 @@ private class InMemoryAppProfileRepository : AppProfileRepository {
         mutate { it[profile.packageName] = profile }
     }
 
-    override suspend fun updateCategory(packageName: String, category: AppCategory) {
+    override suspend fun updateCategory(
+        packageName: String,
+        category: AppCategory,
+    ) {
         mutate { map ->
             map[packageName]?.let { existing ->
-                map[packageName] = existing.copy(
-                    category = category,
-                    isCustomClassification = true,
-                )
+                map[packageName] =
+                    existing.copy(
+                        category = category,
+                        isCustomClassification = true,
+                    )
             }
         }
     }
 
-    override suspend fun updateBypass(packageName: String, isBypassed: Boolean) {
+    override suspend fun updateBypass(
+        packageName: String,
+        isBypassed: Boolean,
+    ) {
         mutate { map ->
             map[packageName]?.let { existing ->
                 map[packageName] = existing.copy(isBypassed = isBypassed)
@@ -251,7 +250,6 @@ private class InMemoryAppProfileRepository : AppProfileRepository {
 // ── IntentRepository ─────────────────────────────────────────────────────────
 
 private class InMemoryIntentRepository : IntentRepository {
-
     private val declarations = mutableListOf<IntentDeclaration>()
     private var nextId = 1L
 
@@ -259,17 +257,16 @@ private class InMemoryIntentRepository : IntentRepository {
 
     override suspend fun getAll(): List<IntentDeclaration> = declarations.toList()
 
-    override suspend fun getById(id: Long): IntentDeclaration? =
-        declarations.firstOrNull { it.id == id }
+    override suspend fun getById(id: Long): IntentDeclaration? = declarations.firstOrNull { it.id == id }
 
-    override suspend fun getByApp(packageName: String): List<IntentDeclaration> =
-        declarations.filter { it.declaredApp == packageName }
+    override suspend fun getByApp(packageName: String): List<IntentDeclaration> = declarations.filter { it.declaredApp == packageName }
 
-    override suspend fun getByDateRange(from: Instant, to: Instant): List<IntentDeclaration> =
-        declarations.filter { it.timestamp in from..to }
+    override suspend fun getByDateRange(
+        from: Instant,
+        to: Instant,
+    ): List<IntentDeclaration> = declarations.filter { it.timestamp in from..to }
 
-    override suspend fun getOverridden(): List<IntentDeclaration> =
-        declarations.filter { it.wasOverridden }
+    override suspend fun getOverridden(): List<IntentDeclaration> = declarations.filter { it.wasOverridden }
 
     override suspend fun insert(declaration: IntentDeclaration): Long {
         val id = nextId++
@@ -277,7 +274,10 @@ private class InMemoryIntentRepository : IntentRepository {
         return id
     }
 
-    override suspend fun updateActualDuration(id: Long, actualDurationMinutes: Int) {
+    override suspend fun updateActualDuration(
+        id: Long,
+        actualDurationMinutes: Int,
+    ) {
         val idx = declarations.indexOfFirst { it.id == id }
         if (idx >= 0) {
             declarations[idx] = declarations[idx].copy(actualDurationMinutes = actualDurationMinutes)
@@ -292,11 +292,12 @@ private class InMemoryIntentRepository : IntentRepository {
     ) {
         val idx = declarations.indexOfFirst { it.id == id }
         if (idx >= 0) {
-            declarations[idx] = declarations[idx].copy(
-                wasEnforced = wasEnforced,
-                enforcementType = enforcementType,
-                wasOverridden = wasOverridden,
-            )
+            declarations[idx] =
+                declarations[idx].copy(
+                    wasEnforced = wasEnforced,
+                    enforcementType = enforcementType,
+                    wasOverridden = wasOverridden,
+                )
         }
     }
 
@@ -304,7 +305,10 @@ private class InMemoryIntentRepository : IntentRepository {
         declarations.removeAll { it.id == id }
     }
 
-    override suspend fun countAccurate(from: Instant, to: Instant): Long {
+    override suspend fun countAccurate(
+        from: Instant,
+        to: Instant,
+    ): Long {
         return declarations
             .filter { it.timestamp in from..to }
             .count { intent ->
@@ -313,18 +317,18 @@ private class InMemoryIntentRepository : IntentRepository {
                 if (declared == 0) return@count false
                 val delta = kotlin.math.abs(actual - declared).toDouble() / declared
                 delta <= 0.20
-            }
-            .toLong()
+            }.toLong()
     }
 
-    override suspend fun countTotal(from: Instant, to: Instant): Long =
-        declarations.count { it.timestamp in from..to }.toLong()
+    override suspend fun countTotal(
+        from: Instant,
+        to: Instant,
+    ): Long = declarations.count { it.timestamp in from..to }.toLong()
 }
 
 // ── EmotionRepository ────────────────────────────────────────────────────────
 
 private class InMemoryEmotionRepository : EmotionRepository {
-
     private val checkIns = mutableListOf<EmotionalCheckIn>()
     private var nextId = 1L
 
@@ -332,14 +336,14 @@ private class InMemoryEmotionRepository : EmotionRepository {
 
     override suspend fun getAll(): List<EmotionalCheckIn> = checkIns.toList()
 
-    override suspend fun getById(id: Long): EmotionalCheckIn? =
-        checkIns.firstOrNull { it.id == id }
+    override suspend fun getById(id: Long): EmotionalCheckIn? = checkIns.firstOrNull { it.id == id }
 
-    override suspend fun getByDateRange(from: Instant, to: Instant): List<EmotionalCheckIn> =
-        checkIns.filter { it.timestamp in from..to }
+    override suspend fun getByDateRange(
+        from: Instant,
+        to: Instant,
+    ): List<EmotionalCheckIn> = checkIns.filter { it.timestamp in from..to }
 
-    override suspend fun getByIntentId(intentId: Long): EmotionalCheckIn? =
-        checkIns.firstOrNull { it.linkedIntentId == intentId }
+    override suspend fun getByIntentId(intentId: Long): EmotionalCheckIn? = checkIns.firstOrNull { it.linkedIntentId == intentId }
 
     override suspend fun insert(checkIn: EmotionalCheckIn): Long {
         val id = nextId++
@@ -347,7 +351,10 @@ private class InMemoryEmotionRepository : EmotionRepository {
         return id
     }
 
-    override suspend fun updatePostMood(id: Long, postMood: Emotion) {
+    override suspend fun updatePostMood(
+        id: Long,
+        postMood: Emotion,
+    ) {
         val idx = checkIns.indexOfFirst { it.id == id }
         if (idx >= 0) {
             checkIns[idx] = checkIns[idx].copy(postSessionMood = postMood)
@@ -362,25 +369,22 @@ private class InMemoryEmotionRepository : EmotionRepository {
 // ── BudgetRepository ─────────────────────────────────────────────────────────
 
 private class InMemoryBudgetRepository : BudgetRepository {
-
     private val budgets = mutableMapOf<LocalDate, DopamineBudget>()
 
-    override fun observeAll(): Flow<List<DopamineBudget>> =
-        flowOf(budgets.values.sortedByDescending { it.date })
+    override fun observeAll(): Flow<List<DopamineBudget>> = flowOf(budgets.values.sortedByDescending { it.date })
 
-    override suspend fun getAll(): List<DopamineBudget> =
-        budgets.values.sortedByDescending { it.date }
+    override suspend fun getAll(): List<DopamineBudget> = budgets.values.sortedByDescending { it.date }
 
     override suspend fun getByDate(date: LocalDate): DopamineBudget? = budgets[date]
 
-    override fun observeByDate(date: LocalDate): Flow<DopamineBudget?> =
-        flowOf(budgets[date])
+    override fun observeByDate(date: LocalDate): Flow<DopamineBudget?> = flowOf(budgets[date])
 
-    override suspend fun getByDateRange(from: LocalDate, to: LocalDate): List<DopamineBudget> =
-        budgets.values.filter { it.date in from..to }.sortedBy { it.date }
+    override suspend fun getByDateRange(
+        from: LocalDate,
+        to: LocalDate,
+    ): List<DopamineBudget> = budgets.values.filter { it.date in from..to }.sortedBy { it.date }
 
-    override suspend fun getRecent(limit: Long): List<DopamineBudget> =
-        budgets.values.sortedByDescending { it.date }.take(limit.toInt())
+    override suspend fun getRecent(limit: Long): List<DopamineBudget> = budgets.values.sortedByDescending { it.date }.take(limit.toInt())
 
     override suspend fun insert(budget: DopamineBudget) {
         budgets[budget.date] = budget
@@ -394,50 +398,65 @@ private class InMemoryBudgetRepository : BudgetRepository {
         budgets[budget.date] = budget
     }
 
-    override suspend fun incrementFpEarned(date: LocalDate, amount: Int) {
-        budgets[date] = (budgets[date] ?: defaultBudget(date)).let {
-            it.copy(fpEarned = it.fpEarned + amount)
-        }
+    override suspend fun incrementFpEarned(
+        date: LocalDate,
+        amount: Int,
+    ) {
+        budgets[date] =
+            (budgets[date] ?: defaultBudget(date)).let {
+                it.copy(fpEarned = it.fpEarned + amount)
+            }
     }
 
-    override suspend fun incrementFpSpent(date: LocalDate, amount: Int) {
-        budgets[date] = (budgets[date] ?: defaultBudget(date)).let {
-            it.copy(fpSpent = it.fpSpent + amount)
-        }
+    override suspend fun incrementFpSpent(
+        date: LocalDate,
+        amount: Int,
+    ) {
+        budgets[date] =
+            (budgets[date] ?: defaultBudget(date)).let {
+                it.copy(fpSpent = it.fpSpent + amount)
+            }
     }
 
-    override suspend fun incrementFpBonus(date: LocalDate, amount: Int) {
-        budgets[date] = (budgets[date] ?: defaultBudget(date)).let {
-            it.copy(fpBonus = it.fpBonus + amount)
-        }
+    override suspend fun incrementFpBonus(
+        date: LocalDate,
+        amount: Int,
+    ) {
+        budgets[date] =
+            (budgets[date] ?: defaultBudget(date)).let {
+                it.copy(fpBonus = it.fpBonus + amount)
+            }
     }
 
     override suspend fun deleteByDate(date: LocalDate) {
         budgets.remove(date)
     }
 
-    override suspend fun sumFpEarned(from: LocalDate, to: LocalDate): Long =
+    override suspend fun sumFpEarned(
+        from: LocalDate,
+        to: LocalDate,
+    ): Long =
         budgets.values
             .filter { it.date in from..to }
             .sumOf { it.fpEarned.toLong() }
 
-    private fun defaultBudget(date: LocalDate) = DopamineBudget(
-        date = date,
-        fpEarned = 0,
-        fpSpent = 0,
-        fpBonus = 0,
-        fpRolloverIn = 0,
-        fpRolloverOut = 0,
-        nutritiveMinutes = 0,
-        emptyCalorieMinutes = 0,
-        neutralMinutes = 0,
-    )
+    private fun defaultBudget(date: LocalDate) =
+        DopamineBudget(
+            date = date,
+            fpEarned = 0,
+            fpSpent = 0,
+            fpBonus = 0,
+            fpRolloverIn = 0,
+            fpRolloverOut = 0,
+            nutritiveMinutes = 0,
+            emptyCalorieMinutes = 0,
+            neutralMinutes = 0,
+        )
 }
 
 // ── SuggestionRepository ─────────────────────────────────────────────────────
 
 private class InMemorySuggestionRepository : SuggestionRepository {
-
     private val suggestions = mutableListOf<AnalogSuggestion>()
     private var nextId = 1L
 
@@ -445,8 +464,7 @@ private class InMemorySuggestionRepository : SuggestionRepository {
 
     override suspend fun getAll(): List<AnalogSuggestion> = suggestions.toList()
 
-    override suspend fun getById(id: Long): AnalogSuggestion? =
-        suggestions.firstOrNull { it.id == id }
+    override suspend fun getById(id: Long): AnalogSuggestion? = suggestions.firstOrNull { it.id == id }
 
     override suspend fun getByCategory(category: SuggestionCategory): List<AnalogSuggestion> =
         suggestions
@@ -466,8 +484,7 @@ private class InMemorySuggestionRepository : SuggestionRepository {
             .filter { it.category == category && (it.timeOfDay == null || it.timeOfDay == timeOfDay) }
             .sortedByDescending { it.timesAccepted }
 
-    override suspend fun getCustom(): List<AnalogSuggestion> =
-        suggestions.filter { it.isCustom }
+    override suspend fun getCustom(): List<AnalogSuggestion> = suggestions.filter { it.isCustom }
 
     override suspend fun getTopAccepted(limit: Long): List<AnalogSuggestion> =
         suggestions.sortedByDescending { it.timesAccepted }.take(limit.toInt())

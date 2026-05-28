@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.BarChart
 import androidx.compose.material.icons.filled.GridView
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.ui.unit.dp
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -40,6 +39,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -113,13 +113,14 @@ private data class BottomNavItem(
     val selectedIcon: ImageVector = icon,
 )
 
-private val bottomNavItems = listOf(
-    BottomNavItem(BilboRoute.DASHBOARD, "Dashboard", Icons.Filled.GridView),
-    BottomNavItem(BilboRoute.FOCUS, "Focus", Icons.Filled.Shield),
-    BottomNavItem(BilboRoute.INSIGHTS, "Insights", Icons.Filled.BarChart),
-    BottomNavItem(BilboRoute.SOCIAL, "Social", Icons.Filled.People),
-    BottomNavItem(BilboRoute.SETTINGS, "Settings", Icons.Filled.Settings),
-)
+private val bottomNavItems =
+    listOf(
+        BottomNavItem(BilboRoute.DASHBOARD, "Dashboard", Icons.Filled.GridView),
+        BottomNavItem(BilboRoute.FOCUS, "Focus", Icons.Filled.Shield),
+        BottomNavItem(BilboRoute.INSIGHTS, "Insights", Icons.Filled.BarChart),
+        BottomNavItem(BilboRoute.SOCIAL, "Social", Icons.Filled.People),
+        BottomNavItem(BilboRoute.SETTINGS, "Settings", Icons.Filled.Settings),
+    )
 
 // Routes that do NOT show the bottom bar
 private val fullScreenRoutes = setOf(BilboRoute.ONBOARDING)
@@ -136,9 +137,10 @@ fun BilboNavHost(
     val currentBackStack by navController.currentBackStackEntryAsState()
     val currentRoute = currentBackStack?.destination?.route
 
-    val showBottomBar = currentRoute?.let { route ->
-        fullScreenRoutes.none { route.startsWith(it) }
-    } ?: true
+    val showBottomBar =
+        currentRoute?.let { route ->
+            fullScreenRoutes.none { route.startsWith(it) }
+        } ?: true
 
     Scaffold(
         modifier = modifier,
@@ -160,7 +162,6 @@ fun BilboNavHost(
             popEnterTransition = { fadeIn() + slideInHorizontally { -it / 4 } },
             popExitTransition = { fadeOut() + slideOutHorizontally { it / 4 } },
         ) {
-
             // ── Onboarding ───────────────────────────────────────────────
             composable(BilboRoute.ONBOARDING) {
                 OnboardingNavHost(
@@ -236,7 +237,8 @@ fun BilboNavHost(
                 )
             }
             composable(BilboRoute.BUDDY_PAIRS) {
-                dev.bilbo.app.ui.screen.BuddyPairScreen(onBack = { navController.popBackStack() })
+                dev.bilbo.app.ui.screen
+                    .BuddyPairScreen(onBack = { navController.popBackStack() })
             }
             composable(BilboRoute.CIRCLES) {
                 CircleScreen(onBack = { navController.popBackStack() })
@@ -312,8 +314,9 @@ private fun FocusPlaceholder() {
         contentAlignment = Alignment.Center,
     ) {
         Text(
-            text = "Focus sessions start from outside the app — open a tracked app " +
-                "and Bilbo will intercept with the Intent Gatekeeper.",
+            text =
+                "Focus sessions start from outside the app — open a tracked app " +
+                    "and Bilbo will intercept with the Intent Gatekeeper.",
             modifier = Modifier.padding(24.dp),
         )
     }
@@ -331,7 +334,10 @@ private fun InterestsReconfigurePlaceholder(onDone: () -> Unit) {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun SettingsSubPlaceholder(title: String, onBack: () -> Unit) {
+private fun SettingsSubPlaceholder(
+    title: String,
+    onBack: () -> Unit,
+) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -348,9 +354,10 @@ private fun SettingsSubPlaceholder(title: String, onBack: () -> Unit) {
         },
     ) { padding ->
         Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(padding),
             contentAlignment = Alignment.Center,
         ) {
             Text("$title settings coming soon")

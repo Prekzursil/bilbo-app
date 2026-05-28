@@ -19,9 +19,9 @@ import androidx.core.app.ServiceCompat
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
 import dev.bilbo.app.R
+import dev.bilbo.app.overlay.GatekeeperController
 import dev.bilbo.data.AppProfileRepository
 import dev.bilbo.data.UsageRepository
-import dev.bilbo.app.overlay.GatekeeperController
 import dev.bilbo.tracking.AppMonitor
 import dev.bilbo.tracking.SessionTracker
 import kotlinx.coroutines.CoroutineScope
@@ -52,7 +52,6 @@ import javax.inject.Inject
  */
 @AndroidEntryPoint
 class UsageTrackingService : android.app.Service() {
-
     companion object {
         const val NOTIFICATION_ID = 1001
         const val CHANNEL_ID = "bilbo_tracking_channel"
@@ -68,10 +67,11 @@ class UsageTrackingService : android.app.Service() {
         fun requestBatteryOptimisationExemption(context: Context) {
             val pm = context.getSystemService(Context.POWER_SERVICE) as PowerManager
             if (!pm.isIgnoringBatteryOptimizations(context.packageName)) {
-                val intent = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
-                    data = Uri.parse("package:${context.packageName}")
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
-                }
+                val intent =
+                    Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS).apply {
+                        data = Uri.parse("package:${context.packageName}")
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                    }
                 context.startActivity(intent)
             }
         }
@@ -80,8 +80,11 @@ class UsageTrackingService : android.app.Service() {
     // ── Hilt injected ─────────────────────────────────────────────────────────
 
     @Inject lateinit var appMonitor: AppMonitor
+
     @Inject lateinit var usageRepository: UsageRepository
+
     @Inject lateinit var appProfileRepository: AppProfileRepository
+
     @Inject lateinit var gatekeeperController: GatekeeperController
 
     // ── Internal state ────────────────────────────────────────────────────────
@@ -90,27 +93,31 @@ class UsageTrackingService : android.app.Service() {
     private lateinit var sessionTracker: SessionTracker
 
     /** Handles screen on/off events inside the service boundary. */
-    private val screenReceiver = object : BroadcastReceiver() {
-        override fun onReceive(ctx: Context?, intent: Intent?) {
-            when (intent?.action) {
-                Intent.ACTION_SCREEN_OFF -> {
-                    Timber.d("UsageTrackingService: screen off")
-                    appMonitor.stopMonitoring()
-                    sessionTracker.onScreenOff()
-                }
-                Intent.ACTION_USER_PRESENT -> {
-                    Timber.d("UsageTrackingService: user present (unlocked)")
-                    sessionTracker.onScreenOn()
-                    appMonitor.startMonitoring()
-                }
-                Intent.ACTION_SCREEN_ON -> {
-                    // Screen on but still on lock screen — monitoring starts on
-                    // ACTION_USER_PRESENT (unlock) instead.
-                    Timber.d("UsageTrackingService: screen on (lock screen)")
+    private val screenReceiver =
+        object : BroadcastReceiver() {
+            override fun onReceive(
+                ctx: Context?,
+                intent: Intent?,
+            ) {
+                when (intent?.action) {
+                    Intent.ACTION_SCREEN_OFF -> {
+                        Timber.d("UsageTrackingService: screen off")
+                        appMonitor.stopMonitoring()
+                        sessionTracker.onScreenOff()
+                    }
+                    Intent.ACTION_USER_PRESENT -> {
+                        Timber.d("UsageTrackingService: user present (unlocked)")
+                        sessionTracker.onScreenOn()
+                        appMonitor.startMonitoring()
+                    }
+                    Intent.ACTION_SCREEN_ON -> {
+                        // Screen on but still on lock screen — monitoring starts on
+                        // ACTION_USER_PRESENT (unlock) instead.
+                        Timber.d("UsageTrackingService: screen on (lock screen)")
+                    }
                 }
             }
         }
-    }
 
     // ── Service lifecycle ─────────────────────────────────────────────────────
 
@@ -120,7 +127,11 @@ class UsageTrackingService : android.app.Service() {
         sessionTracker = SessionTracker(usageRepository, appProfileRepository)
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         when (intent?.action) {
             ACTION_STOP -> {
                 stopSelf()
@@ -158,7 +169,9 @@ class UsageTrackingService : android.app.Service() {
         gatekeeperController.dismiss()
         try {
             unregisterReceiver(screenReceiver)
-        } catch (_: IllegalArgumentException) { /* not registered */ }
+        } catch (_: IllegalArgumentException) {
+            // not registered
+        }
         serviceScope.cancel()
         Timber.d("UsageTrackingService: destroyed")
     }
@@ -172,11 +185,12 @@ class UsageTrackingService : android.app.Service() {
     }
 
     private fun registerScreenReceiver() {
-        val filter = IntentFilter().apply {
-            addAction(Intent.ACTION_SCREEN_OFF)
-            addAction(Intent.ACTION_SCREEN_ON)
-            addAction(Intent.ACTION_USER_PRESENT)
-        }
+        val filter =
+            IntentFilter().apply {
+                addAction(Intent.ACTION_SCREEN_OFF)
+                addAction(Intent.ACTION_SCREEN_ON)
+                addAction(Intent.ACTION_USER_PRESENT)
+            }
         ContextCompat.registerReceiver(
             this,
             screenReceiver,
@@ -189,25 +203,31 @@ class UsageTrackingService : android.app.Service() {
 
     private fun buildNotification(): Notification {
         // Tap the notification to open the app
-        val contentIntent = packageManager
-            .getLaunchIntentForPackage(packageName)
-            ?.let { launchIntent ->
-                PendingIntent.getActivity(
-                    this, 0, launchIntent,
-                    PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-                )
-            }
+        val contentIntent =
+            packageManager
+                .getLaunchIntentForPackage(packageName)
+                ?.let { launchIntent ->
+                    PendingIntent.getActivity(
+                        this,
+                        0,
+                        launchIntent,
+                        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+                    )
+                }
 
         // "Stop" action
-        val stopIntent = PendingIntent.getService(
-            this, 1,
-            Intent(this, UsageTrackingService::class.java).apply {
-                action = ACTION_STOP
-            },
-            PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
-        )
+        val stopIntent =
+            PendingIntent.getService(
+                this,
+                1,
+                Intent(this, UsageTrackingService::class.java).apply {
+                    action = ACTION_STOP
+                },
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT,
+            )
 
-        return NotificationCompat.Builder(this, CHANNEL_ID)
+        return NotificationCompat
+            .Builder(this, CHANNEL_ID)
             .setContentTitle("Bilbo is monitoring your screen time")
             .setContentText("Helping you build mindful digital habits")
             .setSmallIcon(R.drawable.ic_notification)
@@ -220,14 +240,15 @@ class UsageTrackingService : android.app.Service() {
     }
 
     private fun createNotificationChannel() {
-        val channel = NotificationChannel(
-            CHANNEL_ID,
-            "Bilbo Tracking",
-            NotificationManager.IMPORTANCE_LOW,
-        ).apply {
-            description = "Tracks your app usage to provide wellness insights"
-            setShowBadge(false)
-        }
+        val channel =
+            NotificationChannel(
+                CHANNEL_ID,
+                "Bilbo Tracking",
+                NotificationManager.IMPORTANCE_LOW,
+            ).apply {
+                description = "Tracks your app usage to provide wellness insights"
+                setShowBadge(false)
+            }
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)
     }

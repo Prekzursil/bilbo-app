@@ -33,7 +33,7 @@ data class BuddyPairDetailItem(
     val pairId: String,
     val buddyDisplayName: String,
     val sharingLevel: BuddyManager.SharingLevel,
-    val statusSummary: String,         // e.g. "312 FP today · 5-day streak"
+    val statusSummary: String, // e.g. "312 FP today · 5-day streak"
     val isOnline: Boolean = false,
 )
 
@@ -91,13 +91,13 @@ fun BuddyPairScreen(
         },
     ) { paddingValues ->
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
             contentPadding = PaddingValues(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
-
             // Action buttons
             item {
                 Row(
@@ -149,9 +149,10 @@ fun BuddyPairScreen(
             if (state.pairs.isEmpty()) {
                 item {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 32.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(vertical = 32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
@@ -178,7 +179,10 @@ fun BuddyPairScreen(
                         pair = pair,
                         onSharingLevelChange = { level -> onSharingLevelChange(pair.pairId, level) },
                         onRemove = { onRemovePair(pair.pairId) },
-                        onSendEncouragement = { encouragementTarget = pair.pairId; encouragementText = "" },
+                        onSendEncouragement = {
+                            encouragementTarget = pair.pairId
+                            encouragementText = ""
+                        },
                     )
                 }
             }
@@ -217,10 +221,13 @@ fun BuddyPairScreen(
                         onValueChange = { if (it.length <= 6) codeInput = it.uppercase() },
                         placeholder = { Text("XXXXXX") },
                         singleLine = true,
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(
-                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                            letterSpacing = androidx.compose.ui.unit.TextUnit(4f, androidx.compose.ui.unit.TextUnitType.Sp),
-                        ),
+                        textStyle =
+                            MaterialTheme.typography.bodyLarge.copy(
+                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                                letterSpacing =
+                                    androidx.compose.ui.unit
+                                        .TextUnit(4f, androidx.compose.ui.unit.TextUnitType.Sp),
+                            ),
                     )
                 }
             },
@@ -262,15 +269,19 @@ fun BuddyPairScreen(
                     ) {
                         Text(
                             text = state.generatedInviteCode,
-                            style = MaterialTheme.typography.displaySmall.copy(
-                                fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
-                                letterSpacing = androidx.compose.ui.unit.TextUnit(6f, androidx.compose.ui.unit.TextUnitType.Sp),
-                            ),
+                            style =
+                                MaterialTheme.typography.displaySmall.copy(
+                                    fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace,
+                                    letterSpacing =
+                                        androidx.compose.ui.unit
+                                            .TextUnit(6f, androidx.compose.ui.unit.TextUnitType.Sp),
+                                ),
                             color = MaterialTheme.colorScheme.onPrimaryContainer,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(20.dp),
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .padding(20.dp),
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                         )
                     }
@@ -342,9 +353,10 @@ private fun BuddyPairCard(
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // Header
@@ -369,11 +381,12 @@ private fun BuddyPairCard(
                     }
                     if (pair.isOnline) {
                         Box(
-                            modifier = Modifier
-                                .size(12.dp)
-                                .clip(CircleShape)
-                                .background(Color(0xFF4CAF50))
-                                .align(Alignment.BottomEnd),
+                            modifier =
+                                Modifier
+                                    .size(12.dp)
+                                    .clip(CircleShape)
+                                    .background(Color(0xFF4CAF50))
+                                    .align(Alignment.BottomEnd),
                         )
                     }
                 }
@@ -397,7 +410,9 @@ private fun BuddyPairCard(
                 Text("Sharing level:", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 TextButton(onClick = { showLevelPicker = true }) {
                     Text(
-                        pair.sharingLevel.name.lowercase().replaceFirstChar { it.uppercase() },
+                        pair.sharingLevel.name
+                            .lowercase()
+                            .replaceFirstChar { it.uppercase() },
                         style = MaterialTheme.typography.bodySmall,
                         fontWeight = FontWeight.SemiBold,
                     )
@@ -426,12 +441,13 @@ private fun BuddyPairCard(
             text = {
                 Column {
                     BuddyManager.SharingLevel.entries.forEach { level ->
-                        val description = when (level) {
-                            BuddyManager.SharingLevel.MINIMAL  -> "Presence only — buddy knows you're here"
-                            BuddyManager.SharingLevel.BASIC    -> "FP balance and streak"
-                            BuddyManager.SharingLevel.STANDARD -> "Daily FP summary"
-                            BuddyManager.SharingLevel.DETAILED -> "Full breakdown including app categories"
-                        }
+                        val description =
+                            when (level) {
+                                BuddyManager.SharingLevel.MINIMAL -> "Presence only — buddy knows you're here"
+                                BuddyManager.SharingLevel.BASIC -> "FP balance and streak"
+                                BuddyManager.SharingLevel.STANDARD -> "Daily FP summary"
+                                BuddyManager.SharingLevel.DETAILED -> "Full breakdown including app categories"
+                            }
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             verticalAlignment = Alignment.CenterVertically,
@@ -444,8 +460,15 @@ private fun BuddyPairCard(
                                 },
                             )
                             Column {
-                                Text(level.name.lowercase().replaceFirstChar { it.uppercase() }, style = MaterialTheme.typography.bodyMedium)
-                                Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                                Text(
+                                    level.name.lowercase().replaceFirstChar { it.uppercase() },
+                                    style = MaterialTheme.typography.bodyMedium,
+                                )
+                                Text(
+                                    description,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
                             }
                         }
                     }
@@ -480,28 +503,36 @@ private fun BuddyPairCard(
 }
 
 @Composable
-private fun NudgeCard(nudge: NudgeItem, onDismiss: () -> Unit) {
+private fun NudgeCard(
+    nudge: NudgeItem,
+    onDismiss: () -> Unit,
+) {
     Surface(
         shape = RoundedCornerShape(14.dp),
-        color = if (nudge.isUnread)
-            MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
-        else MaterialTheme.colorScheme.surfaceVariant,
+        color =
+            if (nudge.isUnread) {
+                MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+            } else {
+                MaterialTheme.colorScheme.surfaceVariant
+            },
         modifier = Modifier.fillMaxWidth(),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(14.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(14.dp),
             verticalAlignment = Alignment.Top,
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             if (nudge.isUnread) {
                 Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                        .padding(top = 6.dp),
+                    modifier =
+                        Modifier
+                            .size(8.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary)
+                            .padding(top = 6.dp),
                 )
             }
 
