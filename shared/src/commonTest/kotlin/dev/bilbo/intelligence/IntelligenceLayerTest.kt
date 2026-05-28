@@ -831,14 +831,14 @@ class GamingDetectorProductionTest {
                 session(id = 2, category = AppCategory.NEUTRAL, durationSeconds = 600),
                 session(id = 3, category = AppCategory.NUTRITIVE, durationSeconds = 120, startEpoch = 1_000_100),
             )
-        val result = detector.auditDay(sessions, timeZone = UTC)
+        val result = detector.auditDay(sessions)
         assertEquals(1, result.auditedSessions.size)
         assertEquals(2, result.cappedFP) // 120/60 = 2
     }
 
     @Test
     fun auditDay_emptySessionList() {
-        val result = detector.auditDay(emptyList(), timeZone = UTC)
+        val result = detector.auditDay(emptyList())
         assertEquals(0, result.auditedSessions.size)
         assertEquals(0, result.totalRawFP)
         assertEquals(0, result.cappedFP)
@@ -859,7 +859,7 @@ class GamingDetectorProductionTest {
                     startEpoch = 1_000_000L + i * 2000,
                 )
             }
-        val result = detector.auditDay(sessions, timeZone = UTC)
+        val result = detector.auditDay(sessions)
         assertEquals(80, result.totalRawFP)
         assertEquals(60, result.cappedFP)
         assertTrue(result.capHit)
@@ -871,7 +871,7 @@ class GamingDetectorProductionTest {
             listOf(
                 session(id = 1, category = AppCategory.NUTRITIVE, durationSeconds = 300, startEpoch = 1_000_000),
             )
-        val result = detector.auditDay(sessions, timeZone = UTC)
+        val result = detector.auditDay(sessions)
         assertEquals(5, result.totalRawFP)
         assertEquals(5, result.cappedFP)
         assertFalse(result.capHit)
@@ -889,7 +889,7 @@ class GamingDetectorProductionTest {
                     startEpoch = 1_000_000,
                 ),
             )
-        val result = detector.auditDay(sessions, screenOffPackages = setOf("com.flagged"), timeZone = UTC)
+        val result = detector.auditDay(sessions, screenOffPackages = setOf("com.flagged"))
         assertTrue("com.flagged" in result.flaggedPackages)
         assertEquals(0, result.cappedFP)
     }
@@ -907,7 +907,7 @@ class GamingDetectorProductionTest {
                     startEpoch = 1_000_000L + i * 200,
                 )
             }
-        val result = detector.auditDay(sessions, timeZone = UTC)
+        val result = detector.auditDay(sessions)
         // First 20 sessions have launch count 0..19 (< 20) -> eligible
         // Session at index 20 has launch count 20 -> flagged
         val flaggedResults =
@@ -1418,7 +1418,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = checkIns,
                 intents = emptyList(),
@@ -1440,7 +1439,6 @@ class HeuristicEngineTest {
             )
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1465,7 +1463,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1487,7 +1484,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1516,7 +1512,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = currentSessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1544,7 +1539,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = currentSessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1569,7 +1563,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1600,7 +1593,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = emptyList(),
                 intents = intents,
@@ -1630,7 +1622,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = emptyList(),
                 intents = intents,
@@ -1659,7 +1650,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = emptyList(),
                 intents = intents,
@@ -1679,7 +1669,6 @@ class HeuristicEngineTest {
         val weekStart = LocalDate(2025, 3, 10)
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1709,7 +1698,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = emptyList(),
                 intents = intents,
@@ -1744,7 +1732,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = emptyList(),
                 intents = intents,
@@ -1774,7 +1761,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = emptyList(),
                 intents = intents,
@@ -1799,7 +1785,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1824,7 +1809,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1849,7 +1833,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1874,7 +1857,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1906,7 +1888,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = checkIns,
                 intents = emptyList(),
@@ -1936,7 +1917,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = checkIns,
                 intents = emptyList(),
@@ -1966,7 +1946,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = checkIns,
                 intents = emptyList(),
@@ -1994,7 +1973,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = checkIns,
                 intents = emptyList(),
@@ -2021,7 +1999,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -2047,7 +2024,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -2071,7 +2047,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -2107,7 +2082,6 @@ class HeuristicEngineTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = checkIns,
                 intents = emptyList(),

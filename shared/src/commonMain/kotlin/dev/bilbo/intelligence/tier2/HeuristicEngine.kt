@@ -6,7 +6,6 @@ import dev.bilbo.domain.HeuristicInsight
 import dev.bilbo.domain.InsightType
 import dev.bilbo.domain.IntentDeclaration
 import dev.bilbo.domain.UsageSession
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
@@ -18,7 +17,6 @@ import kotlinx.datetime.toLocalDateTime
 class HeuristicEngine(
     private val correlationAnalyzer: CorrelationAnalyzer = CorrelationAnalyzer(),
     private val trendDetector: TrendDetector = TrendDetector(),
-    private val gamingDetector: GamingDetector = GamingDetector(),
 ) {
     companion object {
         private const val INTENT_ACCURACY_POOR_THRESHOLD = 0.50f
@@ -26,20 +24,25 @@ class HeuristicEngine(
         private const val STRONG_CORRELATION_THRESHOLD = 0.60
         private const val INSIGHT_CONFIDENCE_HIGH = 0.9f
         private const val INSIGHT_CONFIDENCE_MEDIUM = 0.65f
-        private const val INSIGHT_CONFIDENCE_LOW = 0.4f
+
+        private const val PERCENT = 100
+        private const val ACCURATE_DELTA = 0.20
+        private const val WEEK_OVER_WEEK_DROP = -0.10
+        private const val WEEK_OVER_WEEK_RISE = 0.20
+        private const val OVERRIDE_RATE_THRESHOLD = 0.30f
+        private const val STREAK_THRESHOLD = 3
+        private const val LATE_NIGHT_END_HOUR = 4
+        private const val SECONDS_PER_MINUTE = 60L
+        private const val STRESSED_CHECKIN_THRESHOLD = 3
     }
 
     /**
-     * Full week analysis. Returns a list of [HeuristicInsight] ordered by confidence (descending).
-     *
-     * @param weekStart The Monday (or Sunday) of the week being analyzed.
-     * @param sessions All usage sessions recorded during the week.
-     * @param checkIns All emotional check-ins recorded during the week.
-     * @param intents All intent declarations recorded during the week.
-     * @param priorWeekSessions Sessions from the previous week (used for trend comparison).
+     * Full week analysis. Returns a list of [HeuristicInsight] ordered by
+     * confidence (descending), covering emotion correlations, day-of-week
+     * trends, intent accuracy and anomalies for the supplied [sessions],
+     * [checkIns] and [intents]. [priorWeekSessions] enables trend comparison.
      */
     fun analyzeWeek(
-        weekStart: LocalDate,
         sessions: List<UsageSession>,
         checkIns: List<EmotionalCheckIn>,
         intents: List<IntentDeclaration>,
@@ -119,25 +122,27 @@ class HeuristicEngine(
 
         // Spike days
         summary.spikeDays.forEach { day ->
+            val dayLabel = day.date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }
+            val abovePct =
+                ((day.totalMinutes - summary.overallAverage) / summary.overallAverage * PERCENT).toInt()
             insights +=
                 HeuristicInsight(
                     type = InsightType.ANOMALY,
                     message =
-                        "${day.date.dayOfWeek.name.lowercase().replaceFirstChar { it.uppercase() }} was a " +
-                            "high-usage day — ${day.totalMinutes} min total, " +
-                            "${((day.totalMinutes - summary.overallAverage) / summary.overallAverage * 100).toInt()}% " +
-                            "above your weekly average.",
+                        "$dayLabel was a high-usage day — ${day.totalMinutes} min total, " +
+                            "$abovePct% above your weekly average.",
                     confidence = INSIGHT_CONFIDENCE_HIGH,
                 )
         }
 
         // Busiest day-of-week pattern
         summary.busiestDayOfWeek?.let { dow ->
+            val dowLabel = dow.name.lowercase().replaceFirstChar { it.uppercase() }
             insights +=
                 HeuristicInsight(
                     type = InsightType.TREND,
                     message =
-                        "${dow.name.lowercase().replaceFirstChar { it.uppercase() }}s tend to be your highest-usage day. " +
+                        "${dowLabel}s tend to be your highest-usage day. " +
                             "Consider scheduling a focus block.",
                     confidence = INSIGHT_CONFIDENCE_MEDIUM,
                 )
@@ -145,16 +150,16 @@ class HeuristicEngine(
 
         // Week-over-week improvement
         summary.weekOverWeekChange?.let { change ->
-            if (change < -0.10) {
-                val pct = (-change * 100).toInt()
+            if (change < WEEK_OVER_WEEK_DROP) {
+                val pct = (-change * PERCENT).toInt()
                 insights +=
                     HeuristicInsight(
                         type = InsightType.ACHIEVEMENT,
                         message = "Great week! Your scrolling time dropped $pct% compared to last week.",
                         confidence = INSIGHT_CONFIDENCE_HIGH,
                     )
-            } else if (change > 0.20) {
-                val pct = (change * 100).toInt()
+            } else if (change > WEEK_OVER_WEEK_RISE) {
+                val pct = (change * PERCENT).toInt()
                 insights +=
                     HeuristicInsight(
                         type = InsightType.TREND,
@@ -165,11 +170,13 @@ class HeuristicEngine(
         }
 
         // Streak
-        if (summary.longestStreak >= 3) {
+        if (summary.longestStreak >= STREAK_THRESHOLD) {
             insights +=
                 HeuristicInsight(
                     type = InsightType.ACHIEVEMENT,
-                    message = "You stayed under your daily average for ${summary.longestStreak} days in a row this week.",
+                    message =
+                        "You stayed under your daily average for " +
+                            "${summary.longestStreak} days in a row this week.",
                     confidence = INSIGHT_CONFIDENCE_HIGH,
                 )
         }
@@ -194,17 +201,20 @@ class HeuristicEngine(
                 val actual = intent.actualDurationMinutes ?: return@count false
                 // "Accurate" = actual within 20% of declared
                 val delta = kotlin.math.abs(actual - declared).toDouble() / declared
-                delta <= 0.20
+                delta <= ACCURATE_DELTA
             }
 
         val accuracy = accurate.toFloat() / completed.size.toFloat()
 
         when {
             accuracy >= INTENT_ACCURACY_GOOD_THRESHOLD -> {
+                val accuracyPct = (accuracy * PERCENT).toInt()
                 insights +=
                     HeuristicInsight(
                         type = InsightType.ACHIEVEMENT,
-                        message = "You stuck to your declared session times ${(accuracy * 100).toInt()}% of the time this week. Excellent self-awareness!",
+                        message =
+                            "You stuck to your declared session times $accuracyPct% of the time " +
+                                "this week. Excellent self-awareness!",
                         confidence = INSIGHT_CONFIDENCE_HIGH,
                     )
             }
@@ -212,7 +222,9 @@ class HeuristicEngine(
                 insights +=
                     HeuristicInsight(
                         type = InsightType.TREND,
-                        message = "Your actual session times often exceeded what you planned. Try setting slightly shorter intentions.",
+                        message =
+                            "Your actual session times often exceeded what you planned. " +
+                                "Try setting slightly shorter intentions.",
                         confidence = INSIGHT_CONFIDENCE_MEDIUM,
                     )
             }
@@ -220,12 +232,13 @@ class HeuristicEngine(
 
         // Override analysis
         val overrideRate = intents.count { it.wasOverridden }.toFloat() / intents.size.toFloat()
-        if (overrideRate > 0.30f) {
+        if (overrideRate > OVERRIDE_RATE_THRESHOLD) {
+            val overridePct = (overrideRate * PERCENT).toInt()
             insights +=
                 HeuristicInsight(
                     type = InsightType.TREND,
                     message =
-                        "You overrode Bilbo's time limits ${(overrideRate * 100).toInt()}% of the time. " +
+                        "You overrode Bilbo's time limits $overridePct% of the time. " +
                             "Consider switching to Nudge mode for a gentler approach.",
                     confidence = INSIGHT_CONFIDENCE_MEDIUM,
                 )
@@ -249,14 +262,16 @@ class HeuristicEngine(
         val lateNightSessions =
             sessions.filter { session ->
                 val hour = session.startTime.toLocalDateTime(timeZone).hour
-                hour in 0..4
+                hour in 0..LATE_NIGHT_END_HOUR
             }
         if (lateNightSessions.isNotEmpty()) {
-            val totalMinutes = lateNightSessions.sumOf { it.durationSeconds } / 60L
+            val totalMinutes = lateNightSessions.sumOf { it.durationSeconds } / SECONDS_PER_MINUTE
             insights +=
                 HeuristicInsight(
                     type = InsightType.ANOMALY,
-                    message = "You used your phone for $totalMinutes min between midnight and 5 AM this week. Late-night scrolling can disrupt sleep.",
+                    message =
+                        "You used your phone for $totalMinutes min between midnight and 5 AM " +
+                            "this week. Late-night scrolling can disrupt sleep.",
                     confidence = INSIGHT_CONFIDENCE_MEDIUM,
                 )
         }
@@ -266,11 +281,13 @@ class HeuristicEngine(
             checkIns.filter {
                 it.preSessionEmotion == Emotion.STRESSED || it.preSessionEmotion == Emotion.ANXIOUS
             }
-        if (stressedCheckIns.size >= 3) {
+        if (stressedCheckIns.size >= STRESSED_CHECKIN_THRESHOLD) {
             insights +=
                 HeuristicInsight(
                     type = InsightType.CORRELATION,
-                    message = "You checked in feeling stressed or anxious ${stressedCheckIns.size} times this week. Consider a mindfulness suggestion next time.",
+                    message =
+                        "You checked in feeling stressed or anxious ${stressedCheckIns.size} times " +
+                            "this week. Consider a mindfulness suggestion next time.",
                     confidence = INSIGHT_CONFIDENCE_MEDIUM,
                 )
         }
@@ -279,10 +296,13 @@ class HeuristicEngine(
         val dailySummaries = trendDetector.buildDailySummaries(sessions, timeZone)
         val zeroDays = dailySummaries.count { it.emptyCalorieMinutes == 0L }
         if (zeroDays >= 1) {
+            val dayWord = if (zeroDays > 1) "s" else ""
             insights +=
                 HeuristicInsight(
                     type = InsightType.ACHIEVEMENT,
-                    message = "You had $zeroDays day${if (zeroDays > 1) "s" else ""} this week with zero scrolling app usage. Keep it up!",
+                    message =
+                        "You had $zeroDays day$dayWord this week with zero scrolling app usage. " +
+                            "Keep it up!",
                     confidence = INSIGHT_CONFIDENCE_HIGH,
                 )
         }

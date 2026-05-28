@@ -15,6 +15,18 @@ class CorrelationAnalyzer {
         const val MIN_DATA_POINTS = 14
         const val STRONG_CORRELATION_THRESHOLD = 0.6f
         const val MODERATE_CORRELATION_THRESHOLD = 0.3f
+
+        // Numeric encoding of emotional valence (higher = more positive/calm).
+        private const val EMOTION_SCORE_HAPPY = 6.0
+        private const val EMOTION_SCORE_CALM = 5.0
+        private const val EMOTION_SCORE_BORED = 3.0
+        private const val EMOTION_SCORE_LOW = 2.0
+        private const val EMOTION_SCORE_ANXIOUS = 1.0
+
+        // Sessions are correlated with a check-in if they start within this window.
+        private const val CORRELATION_WINDOW_MINUTES = 5
+        private const val SECONDS_PER_MINUTE = 60L
+        private const val SECONDS_PER_MINUTE_D = 60.0
     }
 
     /**
@@ -31,12 +43,12 @@ class CorrelationAnalyzer {
      */
     fun encodeEmotion(emotion: Emotion): Double =
         when (emotion) {
-            Emotion.HAPPY -> 6.0
-            Emotion.CALM -> 5.0
-            Emotion.BORED -> 3.0
-            Emotion.LONELY -> 2.0
-            Emotion.SAD -> 2.0
-            Emotion.ANXIOUS -> 1.0
+            Emotion.HAPPY -> EMOTION_SCORE_HAPPY
+            Emotion.CALM -> EMOTION_SCORE_CALM
+            Emotion.BORED -> EMOTION_SCORE_BORED
+            Emotion.LONELY -> EMOTION_SCORE_LOW
+            Emotion.SAD -> EMOTION_SCORE_LOW
+            Emotion.ANXIOUS -> EMOTION_SCORE_ANXIOUS
             Emotion.STRESSED -> 0.0
         }
 
@@ -151,7 +163,7 @@ class CorrelationAnalyzer {
         checkIns.map { checkIn ->
             // Find sessions that started within 5 minutes after the check-in
             val windowStartEpoch = checkIn.timestamp.epochSeconds
-            val windowEndEpoch = windowStartEpoch + 5 * 60L
+            val windowEndEpoch = windowStartEpoch + CORRELATION_WINDOW_MINUTES * SECONDS_PER_MINUTE
 
             val totalEmptyMinutes =
                 sessions
@@ -159,7 +171,7 @@ class CorrelationAnalyzer {
                         s.category == AppCategory.EMPTY_CALORIES &&
                             s.startTime.epochSeconds >= windowStartEpoch &&
                             s.startTime.epochSeconds < windowEndEpoch
-                    }.sumOf { it.durationSeconds / 60.0 }
+                    }.sumOf { it.durationSeconds / SECONDS_PER_MINUTE_D }
 
             EmotionSessionPair(checkIn.preSessionEmotion, totalEmptyMinutes)
         }
@@ -170,7 +182,7 @@ class CorrelationAnalyzer {
     ): List<EmotionSessionPair> =
         checkIns.map { checkIn ->
             val windowStartEpoch = checkIn.timestamp.epochSeconds
-            val windowEndEpoch = windowStartEpoch + 5 * 60L
+            val windowEndEpoch = windowStartEpoch + CORRELATION_WINDOW_MINUTES * SECONDS_PER_MINUTE
 
             val totalNutritiveMinutes =
                 sessions
@@ -178,7 +190,7 @@ class CorrelationAnalyzer {
                         s.category == AppCategory.NUTRITIVE &&
                             s.startTime.epochSeconds >= windowStartEpoch &&
                             s.startTime.epochSeconds < windowEndEpoch
-                    }.sumOf { it.durationSeconds / 60.0 }
+                    }.sumOf { it.durationSeconds / SECONDS_PER_MINUTE_D }
 
             EmotionSessionPair(checkIn.preSessionEmotion, totalNutritiveMinutes)
         }

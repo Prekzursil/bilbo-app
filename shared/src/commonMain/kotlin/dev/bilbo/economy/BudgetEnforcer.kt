@@ -71,11 +71,9 @@ class BudgetEnforcer(
     }
 
     /**
-     * Ensures we have a valid budget for today. If [existingBudget] is from a prior
-     * day (or null), creates a new one with appropriate rollover.
-     *
-     * @param existingBudget The last stored budget, or null if none exists.
-     * @return A valid [DopamineBudget] for today.
+     * Ensures we have a valid budget for today. If [existingBudget] is from a
+     * prior day (or null), creates a new one with appropriate rollover, and
+     * returns a valid [DopamineBudget] for today.
      */
     fun ensureTodayBudget(
         existingBudget: DopamineBudget?,
@@ -176,7 +174,13 @@ class BudgetEnforcer(
     ) {
         /** Percentage of the daily earn cap achieved (0–100). */
         val earnCapPercent: Int get() =
-            ((fpEarned.toFloat() / FPEconomy.DAILY_EARN_CAP) * 100).toInt().coerceIn(0, 100)
+            ((fpEarned.toFloat() / FPEconomy.DAILY_EARN_CAP) * PERCENT)
+                .toInt()
+                .coerceIn(0, PERCENT)
+
+        private companion object {
+            const val PERCENT = 100
+        }
     }
 
     // -------------------------------------------------------------------------

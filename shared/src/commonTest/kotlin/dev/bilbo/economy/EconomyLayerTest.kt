@@ -109,7 +109,7 @@ class FocusPointsEngineBonusPenaltyTest {
         )
 
     @Test fun applyBonusAddsToFpBonus() {
-        val updated = engine.applyBonus(baseBudget, 10, "test")
+        val updated = engine.applyBonus(baseBudget, 10)
         assertEquals(10, updated.fpBonus)
     }
 
@@ -120,7 +120,7 @@ class FocusPointsEngineBonusPenaltyTest {
     }
 
     @Test fun applyPenaltyAddsToFpSpent() {
-        val updated = engine.applyPenalty(baseBudget, 7, "test")
+        val updated = engine.applyPenalty(baseBudget, 7)
         assertEquals(7, updated.fpSpent)
     }
 

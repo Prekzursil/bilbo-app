@@ -11,7 +11,6 @@ import dev.bilbo.intelligence.tier1.EnforcementAction
 import dev.bilbo.intelligence.tier1.LaunchDecision
 import dev.bilbo.intelligence.tier1.RuleEngine
 import dev.bilbo.intelligence.tier2.CorrelationAnalyzer
-import dev.bilbo.intelligence.tier2.GamingDetector
 import dev.bilbo.intelligence.tier2.HeuristicEngine
 import dev.bilbo.intelligence.tier2.TrendDetector
 import dev.bilbo.intelligence.tier3.CloudInsightClient
@@ -44,7 +43,6 @@ class DecisionEngine(
         HeuristicEngine(
             correlationAnalyzer = CorrelationAnalyzer(),
             trendDetector = TrendDetector(),
-            gamingDetector = GamingDetector(),
         ),
     private val promptBuilder: InsightPromptBuilder = InsightPromptBuilder(),
 ) {
@@ -84,7 +82,6 @@ class DecisionEngine(
     ): WeeklyInsight {
         val heuristicInsights =
             heuristicEngine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = checkIns,
                 intents = intents,
@@ -158,9 +155,9 @@ class DecisionEngine(
     }
 
     /**
-     * Full weekly pipeline: Tier-2 analysis followed by optional Tier-3 cloud enrichment.
-     *
-     * @param attemptCloudNarrative Set false to skip the cloud call (e.g. offline mode).
+     * Full weekly pipeline: Tier-2 analysis followed by optional Tier-3 cloud
+     * enrichment. Set [attemptCloudNarrative] to false to skip the cloud call
+     * (e.g. offline mode).
      */
     suspend fun runFullWeeklyPipeline(
         weekStart: LocalDate,
@@ -210,7 +207,7 @@ class DecisionEngine(
                 val declared = intent.declaredDurationMinutes
                 val actual = intent.actualDurationMinutes ?: return@count false
                 val delta = kotlin.math.abs(actual - declared).toDouble() / declared
-                delta <= 0.20
+                delta <= INTENT_ACCURACY_TOLERANCE
             }
         return accurate.toFloat() / completed.size.toFloat()
     }
@@ -240,5 +237,10 @@ class DecisionEngine(
             current = current.minus(1, DateTimeUnit.DAY)
         }
         return streak
+    }
+
+    private companion object {
+        // An intent is "accurate" when actual duration is within 20% of declared.
+        const val INTENT_ACCURACY_TOLERANCE = 0.20
     }
 }

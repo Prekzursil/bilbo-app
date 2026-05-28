@@ -3,7 +3,6 @@ package dev.bilbo.intelligence.tier2
 import dev.bilbo.domain.AppCategory
 import dev.bilbo.domain.FPEconomy
 import dev.bilbo.domain.UsageSession
-import kotlinx.datetime.TimeZone
 
 /**
  * Anti-gaming heuristics for the FP economy.
@@ -18,6 +17,7 @@ class GamingDetector {
     companion object {
         private const val MIN_SESSION_SECONDS = FPEconomy.MIN_SESSION_SECONDS.toLong()
         private const val MAX_LAUNCHES_PER_DAY = 20
+        private const val SECONDS_PER_MINUTE = 60L
         private val DAILY_EARN_CAP = FPEconomy.DAILY_EARN_CAP
     }
 
@@ -80,7 +80,7 @@ class GamingDetector {
         val isEligible = flags.isEmpty()
         val earned =
             if (isEligible) {
-                (session.durationSeconds / 60L).toInt().coerceAtMost(DAILY_EARN_CAP)
+                (session.durationSeconds / SECONDS_PER_MINUTE).toInt().coerceAtMost(DAILY_EARN_CAP)
             } else {
                 0
             }
@@ -94,16 +94,14 @@ class GamingDetector {
     }
 
     /**
-     * Audits all Nutritive sessions for a single calendar day, applying the daily earn cap.
-     *
-     * @param sessions all sessions for the day (any category — non-Nutritive are skipped)
-     * @param screenOffPackages set of packageNames that had screen-off events during their sessions
-     * @param timeZone used to verify all sessions are on the same calendar day
+     * Audits all Nutritive sessions for a single calendar day, applying the
+     * daily earn cap. [sessions] may contain any category (non-Nutritive are
+     * skipped); [screenOffPackages] lists packages that had screen-off events
+     * during their sessions.
      */
     fun auditDay(
         sessions: List<UsageSession>,
         screenOffPackages: Set<String> = emptySet(),
-        timeZone: TimeZone = TimeZone.currentSystemDefault(),
     ): DailyEarnResult {
         val nutritiveSessions =
             sessions

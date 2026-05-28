@@ -61,33 +61,21 @@ class FocusPointsEngine {
     }
 
     /**
-     * Applies a positive bonus to the budget (e.g. breathing exercise, analog activity).
-     * Bonus FP do NOT count against the daily earn cap.
-     *
-     * @param budget Current budget.
-     * @param bonusAmount FP to add.
-     * @param reason Human-readable reason for the bonus (for logging).
-     * @return Updated budget.
+     * Applies a positive [bonusAmount] to the [budget] (e.g. breathing exercise,
+     * analog activity). Bonus FP do NOT count against the daily earn cap.
      */
     fun applyBonus(
         budget: DopamineBudget,
         bonusAmount: Int,
-        reason: String = "",
     ): DopamineBudget = budget.copy(fpBonus = budget.fpBonus + bonusAmount)
 
     /**
-     * Applies a penalty (e.g. overriding a hard lock, ignoring a nudge).
-     * Penalties are implemented as additional spend.
-     *
-     * @param budget Current budget.
-     * @param penaltyAmount FP to deduct.
-     * @param reason Human-readable reason (for logging).
-     * @return Updated budget.
+     * Applies a [penaltyAmount] to the [budget] (e.g. overriding a hard lock,
+     * ignoring a nudge). Penalties are implemented as additional spend.
      */
     fun applyPenalty(
         budget: DopamineBudget,
         penaltyAmount: Int,
-        reason: String = "",
     ): DopamineBudget = budget.copy(fpSpent = budget.fpSpent + penaltyAmount)
 
     /**
@@ -102,19 +90,19 @@ class FocusPointsEngine {
 
     /** Awards the breathing exercise bonus. */
     fun awardBreathingBonus(budget: DopamineBudget): DopamineBudget =
-        applyBonus(budget, FPEconomy.BONUS_BREATHING_EXERCISE, "Breathing exercise completed")
+        applyBonus(budget, FPEconomy.BONUS_BREATHING_EXERCISE)
 
     /** Awards the analog activity accepted bonus. */
     fun awardAnalogBonus(budget: DopamineBudget): DopamineBudget =
-        applyBonus(budget, FPEconomy.BONUS_ANALOG_ACCEPTED, "Analog suggestion accepted")
+        applyBonus(budget, FPEconomy.BONUS_ANALOG_ACCEPTED)
 
     /** Awards the accurate intent bonus. */
     fun awardAccurateIntentBonus(budget: DopamineBudget): DopamineBudget =
-        applyBonus(budget, FPEconomy.BONUS_ACCURATE_INTENT, "Intent declared and respected")
+        applyBonus(budget, FPEconomy.BONUS_ACCURATE_INTENT)
 
     /** Awards the 7-day streak bonus. */
     fun awardStreakBonus(budget: DopamineBudget): DopamineBudget =
-        applyBonus(budget, FPEconomy.STREAK_BONUS_7_DAY, "7-day streak achieved!")
+        applyBonus(budget, FPEconomy.STREAK_BONUS_7_DAY)
 
     // -------------------------------------------------------------------------
     // Preset penalty helpers
@@ -122,10 +110,11 @@ class FocusPointsEngine {
 
     /** Applies the hard-lock override penalty. */
     fun penalizeHardLockOverride(budget: DopamineBudget): DopamineBudget =
-        applyPenalty(budget, FPEconomy.PENALTY_HARD_LOCK_OVERRIDE, "Hard lock overridden")
+        applyPenalty(budget, FPEconomy.PENALTY_HARD_LOCK_OVERRIDE)
 
     /** Applies the nudge-ignored penalty. */
-    fun penalizeNudgeIgnored(budget: DopamineBudget): DopamineBudget = applyPenalty(budget, FPEconomy.PENALTY_NUDGE_IGNORE, "Nudge ignored")
+    fun penalizeNudgeIgnored(budget: DopamineBudget): DopamineBudget =
+        applyPenalty(budget, FPEconomy.PENALTY_NUDGE_IGNORE)
 
     // -------------------------------------------------------------------------
     // Rollover calculation

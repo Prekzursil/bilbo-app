@@ -258,7 +258,6 @@ class HeuristicEngineEmotionCorrelationBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = checkIns,
                 intents = emptyList(),
@@ -298,7 +297,6 @@ class HeuristicEngineEmotionCorrelationBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = checkIns,
                 intents = emptyList(),
@@ -328,7 +326,6 @@ class HeuristicEngineDayOfWeekTrendBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -349,7 +346,6 @@ class HeuristicEngineDayOfWeekTrendBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -373,7 +369,6 @@ class HeuristicEngineDayOfWeekTrendBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -405,7 +400,6 @@ class HeuristicEngineDayOfWeekTrendBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = currentSessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -437,7 +431,6 @@ class HeuristicEngineDayOfWeekTrendBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -474,7 +467,6 @@ class HeuristicEngineIntentAccuracyBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = emptyList(),
                 intents = intents,
@@ -507,7 +499,6 @@ class HeuristicEngineIntentAccuracyBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = emptyList(),
                 intents = intents,
@@ -532,7 +523,6 @@ class HeuristicEngineAnomalyBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -556,7 +546,6 @@ class HeuristicEngineAnomalyBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = emptyList(),
                 checkIns = checkIns,
                 intents = emptyList(),
@@ -577,7 +566,6 @@ class HeuristicEngineAnomalyBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -601,7 +589,6 @@ class HeuristicEngineAnomalyBranchTest {
 
         val insights =
             engine.analyzeWeek(
-                weekStart = weekStart,
                 sessions = sessions,
                 checkIns = emptyList(),
                 intents = emptyList(),
@@ -1724,7 +1711,7 @@ class GamingDetectorAuditDayEdgeCaseTest {
                     startEpoch = 1_000_000,
                 ),
             )
-        val result = detector.auditDay(sessions, timeZone = UTC)
+        val result = detector.auditDay(sessions)
         assertEquals(1, result.auditedSessions.size)
         assertTrue(result.auditedSessions[0].isEligible)
         assertEquals(1, result.auditedSessions[0].earnedFP) // 60/60 = 1
@@ -1752,7 +1739,7 @@ class GamingDetectorAuditDayEdgeCaseTest {
                     startEpoch = 1_001_000,
                 ),
             )
-        val result = detector.auditDay(sessions, timeZone = UTC)
+        val result = detector.auditDay(sessions)
         assertEquals(2, result.auditedSessions.size)
         assertTrue(result.flaggedPackages.contains("com.bad.app"))
         assertFalse(result.flaggedPackages.contains("com.good.app"))
@@ -1772,7 +1759,7 @@ class GamingDetectorAuditDayEdgeCaseTest {
                     startEpoch = 1_000_000,
                 ),
             )
-        val result = detector.auditDay(sessions, timeZone = UTC)
+        val result = detector.auditDay(sessions)
         assertEquals(60, result.totalRawFP)
         assertEquals(60, result.cappedFP)
         assertFalse(result.capHit) // 60 > 60 is false
