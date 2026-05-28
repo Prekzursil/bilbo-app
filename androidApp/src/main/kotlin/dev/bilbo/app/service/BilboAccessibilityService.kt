@@ -60,8 +60,8 @@ class BilboAccessibilityService : AccessibilityService() {
         try {
             dev.bilbo.app.tracking.ForegroundAppBridge.foregroundAppLiveData
                 .postValue(appInfo)
-        } catch (e: Exception) {
-            Timber.e(e, "BilboAccessibilityService: failed to post foreground app")
+        } catch (expected: Exception) {
+            Timber.e(expected, "BilboAccessibilityService: failed to post foreground app")
         }
     }
 

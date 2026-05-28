@@ -57,8 +57,8 @@ class UnlockReceiver : BroadcastReceiver() {
             } else {
                 context.startService(serviceIntent)
             }
-        } catch (e: Exception) {
-            Timber.e(e, "UnlockReceiver: failed to start UsageTrackingService")
+        } catch (expected: Exception) {
+            Timber.e(expected, "UnlockReceiver: failed to start UsageTrackingService")
         }
     }
 

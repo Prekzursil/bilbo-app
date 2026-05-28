@@ -117,8 +117,8 @@ class OverlayManager
                 windowManager.addView(composeView, params)
                 currentOverlayView = composeView
                 Timber.d("OverlayManager: overlay shown for ${appInfo.packageName}")
-            } catch (e: Exception) {
-                Timber.e(e, "OverlayManager: failed to add overlay view")
+            } catch (expected: Exception) {
+                Timber.e(expected, "OverlayManager: failed to add overlay view")
                 lco.stop()
                 lifecycleOwner = null
             }
@@ -130,8 +130,8 @@ class OverlayManager
                 try {
                     windowManager.removeView(view)
                     Timber.d("OverlayManager: overlay dismissed")
-                } catch (e: Exception) {
-                    Timber.e(e, "OverlayManager: error removing overlay view")
+                } catch (expected: Exception) {
+                    Timber.e(expected, "OverlayManager: error removing overlay view")
                 }
             }
             currentOverlayView = null

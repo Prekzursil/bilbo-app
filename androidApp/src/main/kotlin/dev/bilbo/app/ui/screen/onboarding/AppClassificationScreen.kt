@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -262,7 +261,7 @@ private fun loadTopApps(context: Context): List<ClassifiableApp> {
         val name =
             try {
                 pm.getApplicationLabel(info).toString()
-            } catch (e: Exception) {
+            } catch (ignored: Exception) {
                 info.packageName
             }
         val defaultClass =

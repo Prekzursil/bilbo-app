@@ -108,7 +108,7 @@ class EnforcementController
             LocalBroadcastManager.getInstance(context).unregisterReceiver(timerExpiredReceiver)
             try {
                 context.unregisterReceiver(timerExpiredReceiver)
-            } catch (e: Exception) {
+            } catch (ignored: Exception) {
                 // already unregistered
             }
             Timber.d("EnforcementController: unregistered")
@@ -180,8 +180,8 @@ class EnforcementController
                             showHardLockOnMainThread(appPackage, appLabel, remainingSecs, suggestion, fpBalance)
                         }
                     }
-                } catch (e: Exception) {
-                    Timber.e(e, "EnforcementController: error handling timer expiry for $appLabel")
+                } catch (expected: Exception) {
+                    Timber.e(expected, "EnforcementController: error handling timer expiry for $appLabel")
                 }
             }
         }
@@ -271,8 +271,8 @@ class EnforcementController
                 Timber.d(
                     "EnforcementController: nudge extension granted for $appLabel (−${NUDGE_EXTENSION_FP_COST} FP)",
                 )
-            } catch (e: Exception) {
-                Timber.e(e, "EnforcementController: error handling nudge extension")
+            } catch (expected: Exception) {
+                Timber.e(expected, "EnforcementController: error handling nudge extension")
             }
         }
 
@@ -284,8 +284,8 @@ class EnforcementController
                 Timber.d(
                     "EnforcementController: hard lock override for $appPackage (−${HARD_LOCK_OVERRIDE_FP_COST} FP)",
                 )
-            } catch (e: Exception) {
-                Timber.e(e, "EnforcementController: error handling hard lock override")
+            } catch (expected: Exception) {
+                Timber.e(expected, "EnforcementController: error handling hard lock override")
             }
         }
 
@@ -321,8 +321,8 @@ class EnforcementController
                     enforcementType = mode,
                     wasOverridden = false,
                 )
-            } catch (e: Exception) {
-                Timber.e(e, "EnforcementController: could not mark declaration $declarationId as enforced")
+            } catch (expected: Exception) {
+                Timber.e(expected, "EnforcementController: could not mark declaration $declarationId as enforced")
             }
         }
 
@@ -332,7 +332,7 @@ class EnforcementController
                 val nowSecs = Clock.System.now().epochSeconds
                 val startSecs = declaration.timestamp.epochSeconds
                 ((nowSecs - startSecs) / 60).toInt()
-            } catch (e: Exception) {
+            } catch (ignored: Exception) {
                 0
             }
         }
@@ -340,14 +340,14 @@ class EnforcementController
         private suspend fun getDeclarationDuration(declarationId: Long): Int =
             try {
                 intentRepository.getById(declarationId)?.declaredDurationMinutes ?: 0
-            } catch (e: Exception) {
+            } catch (ignored: Exception) {
                 0
             }
 
         private suspend fun getSuggestion(): String =
             try {
                 suggestionRepository.getAll().randomOrNull()?.text ?: "Take a short walk outside 🚶"
-            } catch (e: Exception) {
+            } catch (ignored: Exception) {
                 "Take a short walk outside 🚶"
             }
 

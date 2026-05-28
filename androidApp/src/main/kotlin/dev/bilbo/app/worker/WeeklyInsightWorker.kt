@@ -315,7 +315,7 @@ class WeeklyInsightWorker
                     is CloudInsightClient.InsightResult.Success -> result.narrative
                     else -> null
                 }
-            } catch (e: Exception) {
+            } catch (ignored: Exception) {
                 null // Silently fall back to Tier-2
             }
         }

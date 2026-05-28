@@ -129,8 +129,8 @@ class GatekeeperController
                     )
                     // Broadcast to TimerService
                     broadcastTimerStart(declarationId, durationMinutes)
-                } catch (e: Exception) {
-                    Timber.e(e, "GatekeeperController: failed to save declaration")
+                } catch (expected: Exception) {
+                    Timber.e(expected, "GatekeeperController: failed to save declaration")
                 }
             }
         }
@@ -160,8 +160,8 @@ class GatekeeperController
                             (declaration.declaredDurationMinutes * 60L)
                     now.epochSeconds < endEpoch
                 }
-            } catch (e: Exception) {
-                Timber.e(e, "GatekeeperController: error checking active declarations")
+            } catch (expected: Exception) {
+                Timber.e(expected, "GatekeeperController: error checking active declarations")
                 false
             }
     }

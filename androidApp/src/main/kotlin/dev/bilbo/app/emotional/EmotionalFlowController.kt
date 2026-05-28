@@ -254,8 +254,8 @@ class EmotionalFlowController
                         linkedIntentId = declarationId,
                     ),
                 )
-            } catch (e: Exception) {
-                Timber.e(e, "EmotionalFlowController: failed to persist check-in")
+            } catch (expected: Exception) {
+                Timber.e(expected, "EmotionalFlowController: failed to persist check-in")
                 -1L
             }
 
@@ -266,8 +266,8 @@ class EmotionalFlowController
             try {
                 emotionRepository.updatePostMood(checkInId, emotion)
                 Timber.d("EmotionalFlowController: post-session mood saved — $emotion for checkIn $checkInId")
-            } catch (e: Exception) {
-                Timber.e(e, "EmotionalFlowController: failed to update post-session mood")
+            } catch (expected: Exception) {
+                Timber.e(expected, "EmotionalFlowController: failed to update post-session mood")
             }
         }
 
@@ -278,8 +278,8 @@ class EmotionalFlowController
                 val today = now.toLocalDateTime(tz).date
                 budgetRepository.incrementFpBonus(today, FPEconomy.BONUS_BREATHING_EXERCISE)
                 Timber.d("EmotionalFlowController: awarded ${FPEconomy.BONUS_BREATHING_EXERCISE} FP breathing bonus")
-            } catch (e: Exception) {
-                Timber.e(e, "EmotionalFlowController: failed to award breathing bonus")
+            } catch (expected: Exception) {
+                Timber.e(expected, "EmotionalFlowController: failed to award breathing bonus")
             }
         }
 
@@ -326,8 +326,8 @@ class EmotionalFlowController
                     avgDurationMins = avgDuration,
                     typicalPostMood = typicalPostMood,
                 )
-            } catch (e: Exception) {
-                Timber.e(e, "EmotionalFlowController: error computing emotion pattern")
+            } catch (expected: Exception) {
+                Timber.e(expected, "EmotionalFlowController: error computing emotion pattern")
                 null
             }
         }

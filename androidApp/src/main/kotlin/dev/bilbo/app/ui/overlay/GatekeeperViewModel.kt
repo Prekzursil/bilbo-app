@@ -67,8 +67,8 @@ class GatekeeperViewModel
                             isEmptyCaloriesApp = profile?.category == AppCategory.EMPTY_CALORIES,
                         )
                     }
-                } catch (e: Exception) {
-                    Timber.e(e, "GatekeeperViewModel: failed to load app profile")
+                } catch (expected: Exception) {
+                    Timber.e(expected, "GatekeeperViewModel: failed to load app profile")
                 }
             }
         }
@@ -112,8 +112,8 @@ class GatekeeperViewModel
                     _uiState.update { it.copy(isLoading = false, activeDeclarationId = id) }
                     Timber.d("GatekeeperViewModel: created declaration $id for ${appInfo.packageName}")
                     onTimerStart(id, state.selectedDurationMinutes)
-                } catch (e: Exception) {
-                    Timber.e(e, "GatekeeperViewModel: failed to save declaration")
+                } catch (expected: Exception) {
+                    Timber.e(expected, "GatekeeperViewModel: failed to save declaration")
                     _uiState.update { it.copy(isLoading = false, error = "Could not save intent. Please try again.") }
                 }
             }
@@ -143,8 +143,8 @@ class GatekeeperViewModel
                                 now.epochSeconds < endEpoch
                             }
                     onResult(active)
-                } catch (e: Exception) {
-                    Timber.e(e, "GatekeeperViewModel: failed to check active declaration")
+                } catch (expected: Exception) {
+                    Timber.e(expected, "GatekeeperViewModel: failed to check active declaration")
                     onResult(null)
                 }
             }

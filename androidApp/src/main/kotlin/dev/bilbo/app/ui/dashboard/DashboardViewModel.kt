@@ -95,8 +95,8 @@ class DashboardViewModel
                 try {
                     val sessions = usageRepository.getAll()
                     aggregateAndEmit(sessions)
-                } catch (e: Exception) {
-                    Timber.e(e, "DashboardViewModel: refresh failed")
+                } catch (expected: Exception) {
+                    Timber.e(expected, "DashboardViewModel: refresh failed")
                     _uiState.value =
                         _uiState.value.copy(
                             isLoading = false,
@@ -144,8 +144,8 @@ class DashboardViewModel
                         val profile =
                             try {
                                 appProfileRepository.getByPackageName(pkg)
-                            } catch (e: Exception) {
-                                Timber.w(e, "DashboardViewModel: profile lookup failed for $pkg")
+                            } catch (expected: Exception) {
+                                Timber.w(expected, "DashboardViewModel: profile lookup failed for $pkg")
                                 null
                             }
                         AppUsage(

@@ -44,8 +44,8 @@ class SyncWorker
                 // Until then the worker acts as a heartbeat that keeps the chain alive.
                 Timber.d("SyncWorker: sync complete")
                 Result.success()
-            } catch (e: Exception) {
-                Timber.e(e, "SyncWorker: sync failed")
+            } catch (expected: Exception) {
+                Timber.e(expected, "SyncWorker: sync failed")
                 if (runAttemptCount < 3) Result.retry() else Result.failure()
             }
         }
