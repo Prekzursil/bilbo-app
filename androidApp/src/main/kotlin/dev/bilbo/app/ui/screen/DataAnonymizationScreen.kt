@@ -232,41 +232,7 @@ private fun JsonPayloadCard(
             ),
     ) {
         Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween,
-            ) {
-                Text(
-                    text = "Payload Preview",
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                )
-
-                OutlinedButton(
-                    onClick = onRefresh,
-                    enabled = !isRefreshing,
-                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
-                ) {
-                    if (isRefreshing) {
-                        CircularProgressIndicator(
-                            modifier = Modifier.size(14.dp),
-                            strokeWidth = 2.dp,
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Refresh,
-                            contentDescription = null,
-                            modifier = Modifier.size(14.dp),
-                        )
-                    }
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = "Refresh preview",
-                        style = MaterialTheme.typography.labelSmall,
-                    )
-                }
-            }
+            JsonPayloadHeader(isRefreshing = isRefreshing, onRefresh = onRefresh)
 
             Divider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
 
@@ -297,6 +263,38 @@ private fun JsonPayloadCard(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun JsonPayloadHeader(
+    isRefreshing: Boolean,
+    onRefresh: () -> Unit,
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween,
+    ) {
+        Text(
+            text = "Payload Preview",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+        )
+
+        OutlinedButton(
+            onClick = onRefresh,
+            enabled = !isRefreshing,
+            contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+        ) {
+            if (isRefreshing) {
+                CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
+            } else {
+                Icon(imageVector = Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(14.dp))
+            }
+            Spacer(Modifier.width(4.dp))
+            Text(text = "Refresh preview", style = MaterialTheme.typography.labelSmall)
         }
     }
 }
@@ -334,54 +332,68 @@ private fun PrivacyReassuranceCard() {
  * Minimal pretty-printer: adds newlines after each comma/brace at the top level.
  * Good enough for display purposes without pulling in a JSON library.
  */
-private fun String.formatJson(): String {
-    val sb = StringBuilder()
-    var indent = 0
-    var inString = false
+private class JsonPrettyPrinter {
+    private val sb = StringBuilder()
+    private var indent = 0
 
-    for (i in indices) {
-        val c = this[i]
-        val prev = if (i > 0) this[i - 1] else ' '
+    private fun newlineIndent() {
+        sb.append('\n')
+        sb.append("  ".repeat(indent))
+    }
 
-        if (c == '"' && prev != '\\') inString = !inString
+    fun append(
+        c: Char,
+        inString: Boolean,
+    ) {
+        if (inString) sb.append(c) else appendStructural(c)
+    }
 
-        if (!inString) {
-            when (c) {
-                '{', '[' -> {
-                    sb.append(c)
-                    indent++
-                    sb.append('\n')
-                    sb.append("  ".repeat(indent))
-                }
-                '}', ']' -> {
-                    sb.append('\n')
-                    indent--
-                    sb.append("  ".repeat(indent))
-                    sb.append(c)
-                }
-                ',' -> {
-                    sb.append(c)
-                    sb.append('\n')
-                    sb.append("  ".repeat(indent))
-                }
-                ':' -> {
-                    sb.append(c)
-                    sb.append(' ')
-                }
-                ' ' -> { /* skip raw spaces */ }
-                else -> sb.append(c)
+    private fun appendStructural(c: Char) {
+        when (c) {
+            '{', '[' -> {
+                sb.append(c)
+                indent++
+                newlineIndent()
             }
-        } else {
-            sb.append(c)
+            '}', ']' -> {
+                indent--
+                newlineIndent()
+                sb.append(c)
+            }
+            ',' -> {
+                sb.append(c)
+                newlineIndent()
+            }
+            ':' -> sb.append("$c ")
+            ' ' -> Unit // skip raw spaces outside strings
+            else -> sb.append(c)
         }
     }
 
-    return sb.toString()
+    override fun toString(): String = sb.toString()
 }
+
+private fun String.formatJson(): String {
+    val printer = JsonPrettyPrinter()
+    var inString = false
+    forEachIndexed { i, c ->
+        inString = togglesStringState(c, prevChar(i), inString)
+        printer.append(c, inString)
+    }
+    return printer.toString()
+}
+
+private fun String.prevChar(index: Int): Char = if (index > 0) this[index - 1] else ' '
+
+private fun togglesStringState(
+    c: Char,
+    prev: Char,
+    inString: Boolean,
+): Boolean = if (c == '"' && prev != '\\') !inString else inString
 
 // ── Sample payload for previews ───────────────────────────────────────────────
 
-private val SAMPLE_PAYLOAD =
+private const val SAMPLE_PAYLOAD =
     """{"weekStart":"2026-04-07","totalScreenTimeMinutes":312,""" +
         """"emptyCalorieMinutes":148,"nutritiveMinutes":87,"neutralMinutes":77,""" +
         """"fpEarned":105,"fpSpent":60,"fpBalance":60,"intentAccuracyPercent":0.78,""" +

@@ -27,14 +27,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import dev.bilbo.app.ui.dashboard.DashboardViewModel
 import dev.bilbo.app.ui.dashboard.DashboardViewModel.AppUsage
 import dev.bilbo.app.ui.dashboard.DashboardViewModel.DashboardUiState
-import dev.bilbo.app.ui.theme.BilboTheme
 import dev.bilbo.domain.AppCategory
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -74,54 +72,53 @@ internal fun DashboardScreenContent(
             )
         },
     ) { paddingValues ->
-        when {
-            uiState.isLoading && uiState.apps.isEmpty() -> {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    CircularProgressIndicator()
-                }
+        if (uiState.isLoading && uiState.apps.isEmpty()) {
+            Box(
+                modifier =
+                    Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                contentAlignment = Alignment.Center,
+            ) {
+                CircularProgressIndicator()
             }
+        } else {
+            DashboardBody(uiState = uiState, modifier = Modifier.fillMaxSize().padding(paddingValues))
+        }
+    }
+}
 
-            else -> {
-                Column(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues)
-                            .verticalScroll(rememberScrollState())
-                            .padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(16.dp),
-                ) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    ScreenTimeSummaryCard(uiState)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    Text(
-                        text = "Today's Apps",
-                        style = MaterialTheme.typography.titleMedium,
-                    )
-                    if (uiState.apps.isEmpty()) {
-                        EmptyAppsCard()
-                    } else {
-                        uiState.apps.forEach { app ->
-                            AppUsageRow(app = app)
-                        }
-                    }
-                    uiState.error?.let { msg ->
-                        Text(
-                            text = msg,
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.error,
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(16.dp))
-                }
+@Composable
+private fun DashboardBody(
+    uiState: DashboardUiState,
+    modifier: Modifier = Modifier,
+) {
+    Column(
+        modifier =
+            modifier
+                .verticalScroll(rememberScrollState())
+                .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp),
+    ) {
+        Spacer(modifier = Modifier.height(8.dp))
+        ScreenTimeSummaryCard(uiState)
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(text = "Today's Apps", style = MaterialTheme.typography.titleMedium)
+        if (uiState.apps.isEmpty()) {
+            EmptyAppsCard()
+        } else {
+            uiState.apps.forEach { app ->
+                AppUsageRow(app = app)
             }
         }
+        uiState.error?.let { msg ->
+            Text(
+                text = msg,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error,
+            )
+        }
+        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -196,25 +193,3 @@ private fun AppCategory.displayLabel(): String =
         AppCategory.NEUTRAL -> "Neutral"
         AppCategory.EMPTY_CALORIES -> "Empty calories"
     }
-
-@Preview(showBackground = true)
-@Composable
-private fun DashboardScreenPreview() {
-    BilboTheme {
-        DashboardScreenContent(
-            uiState =
-                DashboardUiState(
-                    isLoading = false,
-                    totalMinutes = 135,
-                    apps =
-                        listOf(
-                            AppUsage("com.instagram.android", "Instagram", 45, AppCategory.EMPTY_CALORIES),
-                            AppUsage("com.google.android.youtube", "YouTube", 60, AppCategory.NEUTRAL),
-                            AppUsage("com.duolingo", "Duolingo", 30, AppCategory.NUTRITIVE),
-                        ),
-                ),
-            onNavigateToInsights = {},
-            onNavigateToSettings = {},
-        )
-    }
-}
