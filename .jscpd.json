@@ -14,5 +14,8 @@
     "**/src/commonTest/**",
     "**/src/test/**",
     "**/src/androidTest/**"
+  ],
+  "ignorePattern": [
+    "^\\s*(package|import)\\s+[\\w\\.\\*]+\\s*$"
   ]
 }

@@ -59,6 +59,46 @@ fun SettingsDivider() {
     )
 }
 
+private const val ROW_HORIZONTAL_PADDING_DP = 16
+private const val ROW_VERTICAL_PADDING_TIGHT_DP = 4
+private const val ROW_VERTICAL_PADDING_DP = 14
+private const val ROW_ICON_SIZE_DP = 22
+private const val ROW_TRAILING_ICON_SIZE_DP = 20
+private const val ROW_SPACER_DP = 12
+private const val ROW_TRAILING_SPACER_DP = 4
+private const val PROGRESS_STROKE_DP = 2
+
+@Composable
+private fun SettingsRowScaffold(
+    icon: ImageVector,
+    onClick: (() -> Unit)?,
+    enabled: Boolean = true,
+    verticalPaddingDp: Int = ROW_VERTICAL_PADDING_DP,
+    iconTint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary,
+    content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit,
+) {
+    val base =
+        Modifier
+            .fillMaxWidth()
+            .let { m -> if (onClick != null) m.clickable(enabled = enabled, onClick = onClick) else m }
+            .padding(horizontal = ROW_HORIZONTAL_PADDING_DP.dp, vertical = verticalPaddingDp.dp)
+    Row(modifier = base, verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(ROW_ICON_SIZE_DP.dp))
+        Spacer(modifier = Modifier.width(ROW_SPACER_DP.dp))
+        content()
+    }
+}
+
+@Composable
+private fun ChevronTrailing() {
+    Icon(
+        Icons.Filled.ChevronRight,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.size(ROW_TRAILING_ICON_SIZE_DP.dp),
+    )
+}
+
 @Composable
 fun SettingsSwitchRow(
     icon: ImageVector,
@@ -66,15 +106,11 @@ fun SettingsSwitchRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
 ) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 4.dp),
-        verticalAlignment = Alignment.CenterVertically,
+    SettingsRowScaffold(
+        icon = icon,
+        onClick = null,
+        verticalPaddingDp = ROW_VERTICAL_PADDING_TIGHT_DP,
     ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
-        Spacer(modifier = Modifier.width(12.dp))
         Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
         Switch(checked = checked, onCheckedChange = onCheckedChange)
     }
@@ -87,25 +123,11 @@ fun SettingsPickerRow(
     value: String,
     onClick: () -> Unit,
 ) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
-        Spacer(modifier = Modifier.width(12.dp))
+    SettingsRowScaffold(icon = icon, onClick = onClick) {
         Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
         Text(value, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-        Spacer(modifier = Modifier.width(4.dp))
-        Icon(
-            Icons.Filled.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
-        )
+        Spacer(modifier = Modifier.width(ROW_TRAILING_SPACER_DP.dp))
+        ChevronTrailing()
     }
 }
 
@@ -115,23 +137,9 @@ fun SettingsArrowRow(
     label: String,
     onClick: () -> Unit = {},
 ) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable(onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
-        Spacer(modifier = Modifier.width(12.dp))
+    SettingsRowScaffold(icon = icon, onClick = onClick) {
         Text(label, modifier = Modifier.weight(1f), style = MaterialTheme.typography.bodyLarge)
-        Icon(
-            Icons.Filled.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp),
-        )
+        ChevronTrailing()
     }
 }
 
@@ -143,21 +151,8 @@ fun SettingsActionRow(
     isDestructive: Boolean = false,
     isLoading: Boolean = false,
 ) {
-    Row(
-        modifier =
-            Modifier
-                .fillMaxWidth()
-                .clickable(enabled = !isLoading, onClick = onClick)
-                .padding(horizontal = 16.dp, vertical = 14.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Icon(
-            icon,
-            contentDescription = null,
-            tint = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(22.dp),
-        )
-        Spacer(modifier = Modifier.width(12.dp))
+    val tint = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+    SettingsRowScaffold(icon = icon, onClick = onClick, enabled = !isLoading, iconTint = tint) {
         Text(
             label,
             modifier = Modifier.weight(1f),
@@ -165,7 +160,10 @@ fun SettingsActionRow(
             color = if (isDestructive) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurface,
         )
         if (isLoading) {
-            CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+            CircularProgressIndicator(
+                modifier = Modifier.size(ROW_TRAILING_ICON_SIZE_DP.dp),
+                strokeWidth = PROGRESS_STROKE_DP.dp,
+            )
         }
     }
 }
