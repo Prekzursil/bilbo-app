@@ -32,12 +32,12 @@ $GRADLE ktlintCheck
 echo "==> [2/6] detekt (static analysis + complexity, CCN <= 10)"
 $GRADLE detekt
 
-echo "==> [3/6] unit tests (shared + androidApp)"
-$GRADLE :shared:testDebugUnitTest :androidApp:testDebugUnitTest
+echo "==> [3/6] unit tests (shared + androidApp playstoreDebug)"
+$GRADLE :shared:testDebugUnitTest :androidApp:testPlaystoreDebugUnitTest
 
 echo "==> [4/6] Kover coverage report + 100% line/branch verification"
 $GRADLE :shared:koverXmlReport :shared:koverVerify \
-        :androidApp:koverXmlReport :androidApp:koverVerify
+        :androidApp:koverXmlReportPlaystoreDebug :androidApp:koverVerifyPlaystoreDebug
 
 echo "==> [5/6] lizard (cyclomatic complexity ceiling 10, Kotlin)"
 if command -v lizard >/dev/null 2>&1; then
