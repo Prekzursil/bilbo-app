@@ -35,6 +35,34 @@ import kotlin.time.Clock
 @Module
 @InstallIn(SingletonComponent::class)
 object EngineModule {
+    // ── Helpers ──────────────────────────────────────────────────────────────
+
+    /**
+     * Builds the today-or-empty [DopamineBudget] provider lambda shared by
+     * [provideRuleEngine] and [provideDecisionEngine]. Extracted to keep both
+     * provider methods small and free of duplication.
+     */
+    private fun dailyBudgetProvider(budgetRepository: BudgetRepository): () -> dev.bilbo.domain.DopamineBudget =
+        {
+            val today =
+                Clock.System
+                    .now()
+                    .toLocalDateTime(TimeZone.currentSystemDefault())
+                    .date
+            runBlocking { budgetRepository.getByDate(today) }
+                ?: dev.bilbo.domain.DopamineBudget(
+                    date = today,
+                    fpEarned = 0,
+                    fpSpent = 0,
+                    fpBonus = 0,
+                    fpRolloverIn = 0,
+                    fpRolloverOut = 0,
+                    nutritiveMinutes = 0,
+                    emptyCalorieMinutes = 0,
+                    neutralMinutes = 0,
+                )
+        }
+
     // ── Economy layer ────────────────────────────────────────────────────────
 
     @Provides
@@ -91,30 +119,7 @@ object EngineModule {
             appProfileProvider = { packageName ->
                 runBlocking { appProfileRepository.getByPackageName(packageName) }
             },
-            budgetProvider = {
-                runBlocking {
-                    budgetRepository.getByDate(
-                        Clock.System
-                            .now()
-                            .toLocalDateTime(TimeZone.currentSystemDefault())
-                            .date,
-                    )
-                } ?: dev.bilbo.domain.DopamineBudget(
-                    date =
-                        Clock.System
-                            .now()
-                            .toLocalDateTime(TimeZone.currentSystemDefault())
-                            .date,
-                    fpEarned = 0,
-                    fpSpent = 0,
-                    fpBonus = 0,
-                    fpRolloverIn = 0,
-                    fpRolloverOut = 0,
-                    nutritiveMinutes = 0,
-                    emptyCalorieMinutes = 0,
-                    neutralMinutes = 0,
-                )
-            },
+            budgetProvider = dailyBudgetProvider(budgetRepository),
             cooldownChecker = { packageName ->
                 cooldownManager.getRemainingMinutes(packageName)
             },
@@ -149,30 +154,7 @@ object EngineModule {
         val appProfileProvider: (String) -> dev.bilbo.domain.AppProfile? = { packageName ->
             runBlocking { appProfileRepository.getByPackageName(packageName) }
         }
-        val budgetProvider: () -> dev.bilbo.domain.DopamineBudget = {
-            runBlocking {
-                budgetRepository.getByDate(
-                    Clock.System
-                        .now()
-                        .toLocalDateTime(TimeZone.currentSystemDefault())
-                        .date,
-                )
-            } ?: dev.bilbo.domain.DopamineBudget(
-                date =
-                    Clock.System
-                        .now()
-                        .toLocalDateTime(TimeZone.currentSystemDefault())
-                        .date,
-                fpEarned = 0,
-                fpSpent = 0,
-                fpBonus = 0,
-                fpRolloverIn = 0,
-                fpRolloverOut = 0,
-                nutritiveMinutes = 0,
-                emptyCalorieMinutes = 0,
-                neutralMinutes = 0,
-            )
-        }
+        val budgetProvider: () -> dev.bilbo.domain.DopamineBudget = dailyBudgetProvider(budgetRepository)
         val cooldownChecker: (String) -> Int? = { packageName ->
             cooldownManager.getRemainingMinutes(packageName)
         }
