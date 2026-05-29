@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -75,7 +76,7 @@ private fun SettingsRowScaffold(
     enabled: Boolean = true,
     verticalPaddingDp: Int = ROW_VERTICAL_PADDING_DP,
     iconTint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.primary,
-    content: @Composable androidx.compose.foundation.layout.RowScope.() -> Unit,
+    content: @Composable RowScope.() -> Unit,
 ) {
     val base =
         Modifier

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -70,6 +71,40 @@ private const val ARGB_DETAILED = 0xFF4CAF50
 private const val TAB_BUDDIES = 0
 private const val TAB_CIRCLES = 1
 private const val TAB_CHALLENGES = 2
+
+private const val LIST_CARD_CORNER_DP = 14
+private const val LIST_CARD_ELEVATION_DP = 2
+private const val LIST_CARD_PADDING_DP = 14
+private const val LIST_CARD_SPACING_DP = 12
+
+@Composable
+private fun SocialListCard(
+    onClick: () -> Unit,
+    content: @Composable () -> Unit,
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(LIST_CARD_CORNER_DP.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = LIST_CARD_ELEVATION_DP.dp),
+    ) {
+        content()
+    }
+}
+
+@Composable
+private fun SocialListRow(content: @Composable RowScope.() -> Unit) {
+    Row(
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .padding(LIST_CARD_PADDING_DP.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(LIST_CARD_SPACING_DP.dp),
+        content = content,
+    )
+}
 
 // ── UI state models ───────────────────────────────────────────────────────────
 
@@ -283,21 +318,8 @@ private fun BuddyPairListItem(
     pair: BuddyPairUiItem,
     onClick: () -> Unit,
 ) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+    SocialListCard(onClick = onClick) {
+        SocialListRow {
             Surface(
                 shape = CircleShape,
                 color = MaterialTheme.colorScheme.primaryContainer,
@@ -412,21 +434,8 @@ private fun CircleListItem(
     circle: CircleUiItem,
     onClick: () -> Unit,
 ) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
-        Row(
-            modifier =
-                Modifier
-                    .fillMaxWidth()
-                    .padding(14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp),
-        ) {
+    SocialListCard(onClick = onClick) {
+        SocialListRow {
             Surface(
                 shape = RoundedCornerShape(10.dp),
                 color = MaterialTheme.colorScheme.secondaryContainer,
@@ -501,18 +510,12 @@ private fun ChallengeListItem(
     challenge: ChallengeUiItem,
     onClick: () -> Unit,
 ) {
-    Card(
-        onClick = onClick,
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(14.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-    ) {
+    SocialListCard(onClick = onClick) {
         Column(
             modifier =
                 Modifier
                     .fillMaxWidth()
-                    .padding(14.dp),
+                    .padding(LIST_CARD_PADDING_DP.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
