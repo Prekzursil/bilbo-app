@@ -99,6 +99,7 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+            isReturnDefaultValues = true
         }
     }
 }
@@ -228,6 +229,18 @@ dependencies {
     testImplementation(libs.mockk)
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.turbine)
+    // Robolectric + Compose UI test stack — Linux-buildable instrumentation
+    // surrogate so :androidApp Composable/Hilt/WorkManager code can be exercised
+    // from `testPlaystoreDebugUnitTest` rather than only on macOS / device.
+    testImplementation(libs.robolectric)
+    testImplementation(libs.androidx.test.core)
+    testImplementation(libs.androidx.test.ext.junit)
+    testImplementation(libs.workmanager.testing)
+    testImplementation(libs.hilt.android.testing)
+    testImplementation(platform(libs.compose.bom))
+    testImplementation(libs.compose.ui.test.junit4)
+    testImplementation(libs.compose.ui.test.manifest)
+    kspTest(libs.hilt.android.compiler)
     androidTestImplementation(platform(libs.compose.bom))
     androidTestImplementation(libs.compose.ui.test.junit4)
 }
