@@ -416,8 +416,7 @@ private fun CooldownCounterDisplay(remainingSeconds: Long) {
                     BORDER_THIN_DP.dp,
                     LockPurple.copy(alpha = ALPHA_COUNTDOWN_BORDER),
                     RoundedCornerShape(COUNTDOWN_CORNER_DP.dp),
-                )
-                .padding(horizontal = COUNTDOWN_PAD_H_DP.dp, vertical = COUNTDOWN_PAD_V_DP.dp),
+                ).padding(horizontal = COUNTDOWN_PAD_H_DP.dp, vertical = COUNTDOWN_PAD_V_DP.dp),
         contentAlignment = Alignment.Center,
     ) {
         Text(

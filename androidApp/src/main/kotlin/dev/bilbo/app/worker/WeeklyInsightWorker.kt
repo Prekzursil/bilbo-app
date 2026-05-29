@@ -36,18 +36,6 @@ import java.util.concurrent.TimeUnit
 import kotlin.time.Clock
 
 /**
- * HiltWorker that fires once per week on Sunday evening (~8 PM local time).
- *
- * Responsibilities:
- *  1. Load trailing 7-day data from local repositories.
- *  2. Run Tier-2 [HeuristicEngine.analyzeWeek] to generate local insights.
- *  3. If cloud AI is enabled in preferences: build an anonymized payload via
- *     [InsightPromptBuilder], send to [CloudInsightClient], and store the narrative.
- *  4. If cloud is disabled or the call fails: use Tier-2 template insights as fallback.
- *  5. Persist the final [WeeklyInsight] in the repository.
- *  6. Post a "Your weekly insight is ready" notification.
- */
-/**
  * Bundles the repositories and intelligence collaborators the weekly worker needs,
  * so the worker's assisted constructor stays within the parameter-count budget.
  */
@@ -64,6 +52,18 @@ class WeeklyInsightDependencies
         val promptBuilder: InsightPromptBuilder,
     )
 
+/**
+ * HiltWorker that fires once per week on Sunday evening (~8 PM local time).
+ *
+ * Responsibilities:
+ *  1. Load trailing 7-day data from local repositories.
+ *  2. Run Tier-2 [HeuristicEngine.analyzeWeek] to generate local insights.
+ *  3. If cloud AI is enabled in preferences: build an anonymized payload via
+ *     [InsightPromptBuilder], send to [CloudInsightClient], and store the narrative.
+ *  4. If cloud is disabled or the call fails: use Tier-2 template insights as fallback.
+ *  5. Persist the final [WeeklyInsight] in the repository.
+ *  6. Post a "Your weekly insight is ready" notification.
+ */
 @HiltWorker
 class WeeklyInsightWorker
     @AssistedInject

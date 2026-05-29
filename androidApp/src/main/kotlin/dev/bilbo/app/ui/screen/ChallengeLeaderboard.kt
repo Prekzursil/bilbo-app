@@ -32,9 +32,7 @@ private const val LB_RANK_WIDTH_DP = 32
 private const val LB_TONAL_ELEVATION_DP = 2
 private const val LB_ALPHA_CURRENT_USER = 0.4f
 
-internal fun LazyListScope.leaderboardSection(
-    leaderboard: kotlin.collections.List<ChallengeLeaderboardEntry>,
-) {
+internal fun LazyListScope.leaderboardSection(leaderboard: kotlin.collections.List<ChallengeLeaderboardEntry>) {
     if (leaderboard.isEmpty()) return
     item {
         Text("Leaderboard", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)

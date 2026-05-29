@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import dev.bilbo.app.ui.components.SuggestionVisuals.emoji
 import dev.bilbo.app.ui.components.SuggestionVisuals.label
 import dev.bilbo.domain.AnalogSuggestion
-import dev.bilbo.domain.SuggestionCategory
 
 private const val ARGB_CARD_GREEN = 0xFF2D6A4F
 private const val ARGB_CARD_GREEN_LIGHT = 0xFF52B788
