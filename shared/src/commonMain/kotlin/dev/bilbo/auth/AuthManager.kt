@@ -74,15 +74,24 @@ class AuthManager(
         _authState.value = AuthState.Loading
         runCatching {
             supabaseClient.auth.awaitInitialization()
-            val session = supabaseClient.auth.currentSessionOrNull()
-            if (session != null) {
-                val user = supabaseClient.auth.retrieveUserForCurrentSession(updateSession = true)
-                _authState.value = AuthState.Authenticated(user)
-            } else {
-                _authState.value = AuthState.Unauthenticated
-            }
+            applyCurrentSession()
         }.onFailure { e ->
             _authState.value = AuthState.Error(e.message ?: "Failed to restore session")
+        }
+    }
+
+    /**
+     * Reads the SDK's current session and pushes the matching [AuthState].
+     * Extracted so it can be reused after restore and sign-up without
+     * duplicating the present/absent branching.
+     */
+    private suspend fun applyCurrentSession() {
+        val session = supabaseClient.auth.currentSessionOrNull()
+        if (session != null) {
+            val user = supabaseClient.auth.retrieveUserForCurrentSession(updateSession = true)
+            _authState.value = AuthState.Authenticated(user)
+        } else {
+            _authState.value = AuthState.Unauthenticated
         }
     }
 
@@ -133,13 +142,7 @@ class AuthManager(
                 this.password = password
             }
             // After sign-up, session may not be active yet (email confirmation required)
-            val session = supabaseClient.auth.currentSessionOrNull()
-            if (session != null) {
-                val user = supabaseClient.auth.retrieveUserForCurrentSession(updateSession = true)
-                _authState.value = AuthState.Authenticated(user)
-            } else {
-                _authState.value = AuthState.Unauthenticated // awaiting email confirmation
-            }
+            applyCurrentSession()
             AuthResult.Success
         }.getOrElse { e ->
             val msg = e.message ?: "Sign-up failed"
