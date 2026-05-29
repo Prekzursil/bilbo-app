@@ -94,6 +94,31 @@ private fun SocialListCard(
 }
 
 @Composable
+private fun TrailingChevron() {
+    Icon(
+        Icons.Default.ChevronRight,
+        contentDescription = null,
+        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.size(18.dp),
+    )
+}
+
+@Composable
+private fun RowScope.TitleSubtitle(
+    title: String,
+    subtitle: String,
+) {
+    Column(modifier = Modifier.weight(1f)) {
+        Text(title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
+        Text(
+            subtitle,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
+    }
+}
+
+@Composable
 private fun SocialListRow(content: @Composable RowScope.() -> Unit) {
     Row(
         modifier =
@@ -335,27 +360,11 @@ private fun BuddyPairListItem(
                 }
             }
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    pair.buddyDisplayName,
-                    style = MaterialTheme.typography.bodyLarge,
-                    fontWeight = FontWeight.SemiBold,
-                )
-                Text(
-                    pair.statusSummary,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
+            TitleSubtitle(title = pair.buddyDisplayName, subtitle = pair.statusSummary)
 
             SharingLevelChip(level = pair.sharingLevel)
 
-            Icon(
-                Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp),
-            )
+            TrailingChevron()
         }
     }
 }
@@ -450,21 +459,10 @@ private fun CircleListItem(
                 }
             }
 
-            Column(modifier = Modifier.weight(1f)) {
-                Text(circle.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                Text(
-                    "${circle.memberCount} member${if (circle.memberCount != 1) "s" else ""} · ${circle.goalSummary}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                )
-            }
-
-            Icon(
-                Icons.Default.ChevronRight,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.size(18.dp),
-            )
+            val memberWord = if (circle.memberCount != 1) "s" else ""
+            val subtitle = "${circle.memberCount} member$memberWord · ${circle.goalSummary}"
+            TitleSubtitle(title = circle.name, subtitle = subtitle)
+            TrailingChevron()
         }
     }
 }
@@ -523,20 +521,11 @@ private fun ChallengeListItem(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(challenge.title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold)
-                    Text(
-                        "${if (challenge.isTeam) "Team" else "Individual"} · ${challenge.daysRemaining}d left",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                }
-                Icon(
-                    Icons.Default.ChevronRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.size(18.dp),
+                TitleSubtitle(
+                    title = challenge.title,
+                    subtitle = "${if (challenge.isTeam) "Team" else "Individual"} · ${challenge.daysRemaining}d left",
                 )
+                TrailingChevron()
             }
 
             LinearProgressIndicator(
