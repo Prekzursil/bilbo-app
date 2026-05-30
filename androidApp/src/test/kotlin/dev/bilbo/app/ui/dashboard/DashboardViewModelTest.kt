@@ -338,4 +338,157 @@ class DashboardViewModelTest {
         assertEquals("50 min over your daily goal", state.goalDeltaCopy)
         assertEquals("3h 20m", state.formattedTotal)
     }
+
+    // ── refresh() ────────────────────────────────────────────────────────────
+
+    @Test
+    fun `refresh() re-aggregates sessions and updates state`() =
+        runTest(dispatcher) {
+            val tz = TimeZone.currentSystemDefault()
+            val start =
+                Clock.System.now().toLocalDateTime(tz).date.atStartOfDayIn(tz).plus(1.hours)
+            val repo = FakeUsageRepository(listOf(session(1, "com.x", "X", minutes = 20, start = start)))
+            val vm = DashboardViewModel(repo, FakeAppProfileRepository())
+            advanceUntilIdle()
+            vm.refresh()
+            advanceUntilIdle()
+            vm.uiState.test {
+                var state = awaitItem()
+                while (state.isLoading) state = awaitItem()
+                assertEquals(1, state.apps.size)
+                assertEquals("com.x", state.apps[0].packageName)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    @Test
+    fun `refresh() sets error state when getAll throws`() =
+        runTest(dispatcher) {
+            // Build a custom UsageRepository whose getAll() throws
+            val throwingRepo = buildThrowingUsageRepo()
+            val vm = DashboardViewModel(throwingRepo, FakeAppProfileRepository())
+            advanceUntilIdle()
+            vm.refresh()
+            advanceUntilIdle()
+            vm.uiState.test {
+                val state = awaitItem()
+                assertEquals("Could not refresh dashboard", state.error)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    // ── startObserving() catch branch ─────────────────────────────────────────
+
+    @Test
+    fun `observeAll stream error emits error state`() =
+        runTest(dispatcher) {
+            val errorRepo = buildStreamErrorUsageRepo()
+            val vm = DashboardViewModel(errorRepo, FakeAppProfileRepository())
+            advanceUntilIdle()
+            vm.uiState.test {
+                val state = awaitItem()
+                assertEquals("Could not load usage data", state.error)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    // ── aggregateAndEmit: profile exception handler ───────────────────────────
+
+    @Test
+    fun `profile lookup exception falls back to session data`() =
+        runTest(dispatcher) {
+            val tz = TimeZone.currentSystemDefault()
+            val start =
+                Clock.System.now().toLocalDateTime(tz).date.atStartOfDayIn(tz).plus(1.hours)
+            val repo = FakeUsageRepository(listOf(session(1, "com.app", "App", minutes = 30, start = start)))
+            val throwingProfileRepo = buildThrowingProfileRepo()
+            val vm = DashboardViewModel(repo, throwingProfileRepo)
+            advanceUntilIdle()
+            vm.uiState.test {
+                var state = awaitItem()
+                while (state.isLoading) state = awaitItem()
+                // Falls back to session label/category when profile lookup throws
+                assertEquals(1, state.apps.size)
+                assertEquals("com.app", state.apps[0].packageName)
+                cancelAndIgnoreRemainingEvents()
+            }
+        }
+
+    // ── formattedTotal: hours == 0 branch ─────────────────────────────────────
+
+    @Test
+    fun `formattedTotal shows only minutes when under one hour`() {
+        val state = DashboardViewModel.DashboardUiState(isLoading = false, totalMinutes = 45)
+        assertEquals("45m", state.formattedTotal)
+    }
+
+    // ── goalDeltaCopy: exactly at goal ────────────────────────────────────────
+
+    @Test
+    fun `goalDeltaCopy shows 0 min under when at goal`() {
+        val state = DashboardViewModel.DashboardUiState(
+            isLoading = false,
+            totalMinutes = 150,
+            dailyGoalMinutes = 150,
+        )
+        assertEquals("0 min under your daily goal", state.goalDeltaCopy)
+    }
+
+    // ── Error-repo factory helpers ────────────────────────────────────────────
+
+    private fun buildThrowingUsageRepo(): UsageRepository =
+        object : UsageRepository {
+            override fun observeAll(): Flow<List<UsageSession>> =
+                kotlinx.coroutines.flow.flowOf(emptyList())
+            override suspend fun getAll(): List<UsageSession> = throw RuntimeException("db error")
+            override suspend fun getById(id: Long): UsageSession? = null
+            override suspend fun getByPackageName(packageName: String): List<UsageSession> = emptyList()
+            override suspend fun getByDateRange(from: Instant, to: Instant): List<UsageSession> = emptyList()
+            override suspend fun getByCategory(category: AppCategory): List<UsageSession> = emptyList()
+            override suspend fun getByDateRangeAndCategory(from: Instant, to: Instant, category: AppCategory): List<UsageSession> = emptyList()
+            override suspend fun insert(session: UsageSession): Long = 0L
+            override suspend fun updateEndTime(id: Long, endTime: Instant, durationSeconds: Long) = Unit
+            override suspend fun deleteById(id: Long) = Unit
+            override suspend fun deleteOlderThan(before: Instant) = Unit
+            override suspend fun countByPackageName(packageName: String): Long = 0L
+            override suspend fun sumDurationByCategory(from: Instant, to: Instant): Map<AppCategory, Long> = emptyMap()
+        }
+
+    private fun buildStreamErrorUsageRepo(): UsageRepository =
+        object : UsageRepository {
+            override fun observeAll(): Flow<List<UsageSession>> =
+                kotlinx.coroutines.flow.flow { throw RuntimeException("stream failure") }
+            override suspend fun getAll(): List<UsageSession> = emptyList()
+            override suspend fun getById(id: Long): UsageSession? = null
+            override suspend fun getByPackageName(packageName: String): List<UsageSession> = emptyList()
+            override suspend fun getByDateRange(from: Instant, to: Instant): List<UsageSession> = emptyList()
+            override suspend fun getByCategory(category: AppCategory): List<UsageSession> = emptyList()
+            override suspend fun getByDateRangeAndCategory(from: Instant, to: Instant, category: AppCategory): List<UsageSession> = emptyList()
+            override suspend fun insert(session: UsageSession): Long = 0L
+            override suspend fun updateEndTime(id: Long, endTime: Instant, durationSeconds: Long) = Unit
+            override suspend fun deleteById(id: Long) = Unit
+            override suspend fun deleteOlderThan(before: Instant) = Unit
+            override suspend fun countByPackageName(packageName: String): Long = 0L
+            override suspend fun sumDurationByCategory(from: Instant, to: Instant): Map<AppCategory, Long> = emptyMap()
+        }
+
+    private fun buildThrowingProfileRepo(): AppProfileRepository =
+        object : AppProfileRepository {
+            override fun observeAll(): Flow<List<AppProfile>> = kotlinx.coroutines.flow.flowOf(emptyList())
+            override suspend fun getAll(): List<AppProfile> = emptyList()
+            override suspend fun getByPackageName(packageName: String): AppProfile? =
+                throw RuntimeException("profile error")
+            override fun observeByPackageName(packageName: String): Flow<AppProfile?> =
+                kotlinx.coroutines.flow.flowOf(null)
+            override suspend fun getByCategory(category: AppCategory): List<AppProfile> = emptyList()
+            override suspend fun getByEnforcementMode(enforcementMode: EnforcementMode): List<AppProfile> = emptyList()
+            override suspend fun getBypassed(): List<AppProfile> = emptyList()
+            override suspend fun getCustomClassified(): List<AppProfile> = emptyList()
+            override suspend fun insert(profile: AppProfile) = Unit
+            override suspend fun update(profile: AppProfile) = Unit
+            override suspend fun upsert(profile: AppProfile) = Unit
+            override suspend fun updateCategory(packageName: String, category: AppCategory) = Unit
+            override suspend fun updateBypass(packageName: String, isBypassed: Boolean) = Unit
+            override suspend fun deleteByPackageName(packageName: String) = Unit
+        }
 }
