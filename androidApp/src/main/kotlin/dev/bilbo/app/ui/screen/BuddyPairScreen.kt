@@ -1,6 +1,7 @@
 package dev.bilbo.app.ui.screen
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -641,7 +642,11 @@ private fun SharingLevelDialog(
             Column {
                 BuddyManager.SharingLevel.entries.forEach { level ->
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .clickable { onSelect(level) }
+                                .padding(vertical = TINY_GAP_DP.dp),
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         RadioButton(selected = current == level, onClick = { onSelect(level) })
