@@ -103,7 +103,13 @@ jobs:
           curl -sSfL "$url" -o osv-scanner && chmod +x osv-scanner
           sudo mv osv-scanner /usr/local/bin/
       - name: Scan dependencies
-        run: osv-scanner scan source -r . || osv-scanner -r .
+        # OSV-Scanner scans any lockfiles/SBOMs it can parse. This repo declares
+        # Gradle deps via a version catalog (gradle/libs.versions.toml), which
+        # OSV cannot parse as a lockfile, and commits no gradle.lockfile, so OSV
+        # legitimately finds no package sources here. --allow-no-lockfiles makes
+        # that a pass rather than a hard error; Dependabot (the other half of the
+        # lean deps gate) is the substantive Gradle/npm/actions vuln scanner.
+        run: osv-scanner scan source -r . --allow-no-lockfiles
 
   quality:
     name: quality

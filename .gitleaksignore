@@ -1,0 +1,17 @@
+# .gitleaksignore — accepted/handled gitleaks findings (by fingerprint).
+#
+# Each entry MUST be a real, investigated finding. Never silence a live secret
+# that still needs handling — list it here ONLY once it has been removed from
+# the working tree and flagged for rotation.
+#
+# ----------------------------------------------------------------------------
+# Perplexity agent-proxy AUTH_TOKEN committed to .mcp.json in history.
+#   - The current .mcp.json carries an EMPTY AUTH_TOKEN (sanitized); the secret
+#     exists only in historical commit d686af50.
+#   - Because this is a PUBLIC repo, the token is already exposed and MUST be
+#     rotated at the Perplexity portal (operator action — cannot be done in
+#     code; recorded as an escalation). Purging it from history would require a
+#     force-push, which the lean-gate rails forbid.
+#   - Suppressed here so the lean `Secrets (gitleaks)` gate reflects the clean
+#     current tree while the historical exposure is handled out-of-band.
+d686af502947f06489cf544e6f5ef9d2c9a22a35:.mcp.json:generic-api-key:13
