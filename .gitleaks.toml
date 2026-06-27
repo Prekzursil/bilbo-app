@@ -28,6 +28,19 @@ useDefault = true
 [allowlist]
 description = "Bilbo project allowlist for false positives"
 
+# Historical-commit allowlist: the Perplexity agent-proxy AUTH_TOKEN was
+# committed to .mcp.json in commit d686af50 (a package-rename refactor) and
+# sanitized afterwards (current .mcp.json carries an empty token). Because this
+# is a PUBLIC repo the token is already exposed and MUST be rotated at the
+# Perplexity portal (operator action — recorded as an escalation); purging it
+# from history would require a force-push, which the lean-gate rails forbid.
+# Allowlisting this single immutable past commit is version-independent (unlike
+# a .gitleaksignore fingerprint, which the older CI gitleaks did not honor) and
+# can never hide a future finding. See also .gitleaksignore.
+commits = [
+    "d686af502947f06489cf544e6f5ef9d2c9a22a35",
+]
+
 # Per-rule: false-positive matches of the `linkedin-client-id` regex against
 # Kotlin identifier names like `linkedIntentId`, which contain the substring
 # "linkedin" (a sequence of characters from "linkedIntentId" being misread as
