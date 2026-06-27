@@ -131,7 +131,7 @@ opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api", ve
 junit = { group = "junit", name = "junit", version = "4.13.2" }
 kotlin-test = { group = "org.jetbrains.kotlin", name = "kotlin-test", version.ref = "kotlin" }
 kotlin-test-junit = { group = "org.jetbrains.kotlin", name = "kotlin-test-junit", version.ref = "kotlin" }
-mockk = { group = "io.mockk", name = "mockk", version = "1.14.9" }
+mockk = { group = "io.mockk", name = "mockk", version = "1.14.11" }
 turbine = { group = "app.cash.turbine", name = "turbine", version = "1.2.1" }
 
 [plugins]
