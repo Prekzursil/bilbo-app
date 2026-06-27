@@ -88,7 +88,7 @@ configurations.all {
         }
         if (requested.group == "io.netty") {
             useVersion(libs.versions.netty.get())
-            because("dependabot — pin io.netty to 4.1.133.Final (9 CVEs)")
+            because("dependabot — pin io.netty to 4.1.135.Final (transitive CVEs)")
         }
         if (requested.group == "io.opentelemetry") {
             useVersion(libs.versions.opentelemetry.get())

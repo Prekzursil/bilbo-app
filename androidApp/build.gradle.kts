@@ -117,7 +117,7 @@ configurations.all {
         }
         if (requested.group == "io.netty") {
             useVersion(libs.versions.netty.get())
-            because("dependabot — pin io.netty to 4.1.133.Final (9 CVEs)")
+            because("dependabot — pin io.netty to 4.1.135.Final (transitive CVEs)")
         }
         if (requested.group == "io.opentelemetry") {
             useVersion(libs.versions.opentelemetry.get())
@@ -138,10 +138,11 @@ dependencies {
         implementation(libs.bouncycastle.bcpkix) {
             because("WU-B12.dependabot — pin to >= 1.84")
         }
-        implementation(libs.netty.codec) { because("dependabot — io.netty >= 4.1.133.Final") }
-        implementation(libs.netty.codec.http) { because("dependabot — io.netty >= 4.1.133.Final") }
-        implementation(libs.netty.codec.http2) { because("dependabot — io.netty >= 4.1.133.Final") }
-        implementation(libs.netty.handler.proxy) { because("dependabot — io.netty >= 4.1.133.Final") }
+        implementation(libs.netty.codec) { because("dependabot — io.netty >= 4.1.135.Final") }
+        implementation(libs.netty.codec.http) { because("dependabot — io.netty >= 4.1.135.Final") }
+        implementation(libs.netty.codec.http2) { because("dependabot — io.netty >= 4.1.135.Final") }
+        implementation(libs.netty.handler) { because("dependabot — io.netty >= 4.1.135.Final") }
+        implementation(libs.netty.handler.proxy) { because("dependabot — io.netty >= 4.1.135.Final") }
         implementation(libs.opentelemetry.api) { because("dependabot — io.opentelemetry >= 1.62.0") }
     }
 

@@ -6,9 +6,9 @@
 bouncycastle = "1.84"
 # Security: transitive deps pulled via ktor / supabase-kt / posthog flagged by
 # Dependabot. Pinned to the first patched versions.
-#   - io.netty 4.1.133.Final (9 CVEs in netty-codec/-http/-http2/-handler-proxy)
+#   - io.netty 4.1.135.Final (CVEs in netty-codec/-http/-http2/-handler/-handler-proxy)
 #   - io.opentelemetry 1.62.0 (GHSA-rcgg-9c38-7xpx, opentelemetry-api)
-netty = "4.1.133.Final"
+netty = "4.1.135.Final"
 opentelemetry = "1.62.0"
 kover = "0.9.8"
 kotlin = "2.3.21"
@@ -123,6 +123,7 @@ bouncycastle-bcpkix = { group = "org.bouncycastle", name = "bcpkix-jdk18on", ver
 netty-codec = { group = "io.netty", name = "netty-codec", version.ref = "netty" }
 netty-codec-http = { group = "io.netty", name = "netty-codec-http", version.ref = "netty" }
 netty-codec-http2 = { group = "io.netty", name = "netty-codec-http2", version.ref = "netty" }
+netty-handler = { group = "io.netty", name = "netty-handler", version.ref = "netty" }
 netty-handler-proxy = { group = "io.netty", name = "netty-handler-proxy", version.ref = "netty" }
 opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api", version.ref = "opentelemetry" }
 
