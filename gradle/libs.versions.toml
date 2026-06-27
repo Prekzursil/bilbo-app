@@ -9,7 +9,7 @@ bouncycastle = "1.84"
 #   - io.netty 4.1.133.Final (9 CVEs in netty-codec/-http/-http2/-handler-proxy)
 #   - io.opentelemetry 1.62.0 (GHSA-rcgg-9c38-7xpx, opentelemetry-api)
 netty = "4.1.133.Final"
-opentelemetry = "1.62.0"
+opentelemetry = "1.63.0"
 kover = "0.9.8"
 kotlin = "2.3.21"
 agp = "9.2.0"
