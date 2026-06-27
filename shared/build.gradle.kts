@@ -86,6 +86,14 @@ configurations.all {
             useVersion(libs.versions.bouncycastle.get())
             because("WU-B12.dependabot — pin to >= 1.84 to mitigate 3 CVEs")
         }
+        if (requested.group == "io.netty") {
+            useVersion(libs.versions.netty.get())
+            because("dependabot — pin io.netty to 4.1.133.Final (9 CVEs)")
+        }
+        if (requested.group == "io.opentelemetry") {
+            useVersion(libs.versions.opentelemetry.get())
+            because("dependabot — pin io.opentelemetry to 1.62.0 (GHSA-rcgg-9c38-7xpx)")
+        }
     }
 }
 

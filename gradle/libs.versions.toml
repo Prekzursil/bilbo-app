@@ -4,6 +4,12 @@
 # (covert timing channel, LDAP injection, broken cryptographic algorithm).
 # All three are fixed in 1.84. See: WU-B12.dependabot.
 bouncycastle = "1.84"
+# Security: transitive deps pulled via ktor / supabase-kt / posthog flagged by
+# Dependabot. Pinned to the first patched versions.
+#   - io.netty 4.1.133.Final (9 CVEs in netty-codec/-http/-http2/-handler-proxy)
+#   - io.opentelemetry 1.62.0 (GHSA-rcgg-9c38-7xpx, opentelemetry-api)
+netty = "4.1.133.Final"
+opentelemetry = "1.62.0"
 kover = "0.9.8"
 kotlin = "2.3.21"
 agp = "9.2.0"
@@ -114,6 +120,11 @@ timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "tim
 # Security pins (transitive — declared explicitly so Dependabot tracks fixes)
 bouncycastle-bcprov = { group = "org.bouncycastle", name = "bcprov-jdk18on", version.ref = "bouncycastle" }
 bouncycastle-bcpkix = { group = "org.bouncycastle", name = "bcpkix-jdk18on", version.ref = "bouncycastle" }
+netty-codec = { group = "io.netty", name = "netty-codec", version.ref = "netty" }
+netty-codec-http = { group = "io.netty", name = "netty-codec-http", version.ref = "netty" }
+netty-codec-http2 = { group = "io.netty", name = "netty-codec-http2", version.ref = "netty" }
+netty-handler-proxy = { group = "io.netty", name = "netty-handler-proxy", version.ref = "netty" }
+opentelemetry-api = { group = "io.opentelemetry", name = "opentelemetry-api", version.ref = "opentelemetry" }
 
 # Test
 junit = { group = "junit", name = "junit", version = "4.13.2" }
