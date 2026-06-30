@@ -1,0 +1,109 @@
+name: Autofix (GitHub Models)
+
+# Tier 2 of the CI automation (free, in-Actions, PRIMARY auto-fix).
+# When the Quality Gate fails on a push to `main`, ask a free GitHub Models
+# model to draft a minimal patch and, if it applies cleanly, open a PR labelled
+# `autofix`. The PR is NEVER auto-merged — a human and the normal CI gate it.
+# Bounded: only on default-branch CI failure, capped tokens, one PR per run.
+# If Models cannot produce an applyable patch, the run records the analysis in
+# its job summary and a human escalates (Tier 3: assign the issue to @copilot).
+
+on:
+  workflow_run:
+    workflows: ["Quality Gate"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  actions: read
+  models: read
+
+jobs:
+  draft-fix:
+    # Only on a FAILED Quality Gate from a push to main.
+    if: >-
+      ${{ github.event.workflow_run.conclusion == 'failure'
+          && github.event.workflow_run.head_branch == 'main'
+          && github.event.workflow_run.event == 'push' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout main
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Collect failure logs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          set -euo pipefail
+          gh run view "$RUN_ID" -R "$GITHUB_REPOSITORY" --log-failed > full-failure.log 2>&1 || true
+          # Keep the prompt bounded: last ~500 lines, capped at 12000 chars.
+          tail -n 500 full-failure.log | tail -c 12000 > failure.log
+          {
+            echo "Repository: $GITHUB_REPOSITORY"
+            echo "Failed run: ${{ github.event.workflow_run.html_url }}"
+            echo
+            echo "=== Failing CI log (tail) ==="
+            cat failure.log
+          } > prompt.txt
+
+      - name: System prompt
+        run: |
+          cat > system.txt <<'EOF'
+          You are a senior build engineer fixing a failing CI run for a Kotlin
+          Multiplatform / Android (Gradle, version-catalog) repository.
+          Given the failing CI log, output ONLY a single unified diff (git apply
+          format, paths relative to repo root, a/ and b/ prefixes) that makes the
+          MINIMAL real change to fix the failure. Do not lower coverage
+          thresholds, disable checks, or weaken gates. If you cannot determine a
+          safe fix, output exactly: NO_FIX
+          Output the diff with no prose, no markdown fences.
+          EOF
+
+      - name: Draft fix with GitHub Models
+        id: ai
+        uses: actions/ai-inference@a7805884c80886efc241e94a5351df715968a0ad # v2.1.1
+        with:
+          model: openai/gpt-4o-mini
+          prompt-file: prompt.txt
+          system-prompt-file: system.txt
+          max-completion-tokens: '1500'
+
+      - name: Apply patch and open PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RESPONSE_FILE: ${{ steps.ai.outputs.response-file }}
+        run: |
+          set -uo pipefail
+          # Strip any accidental markdown fences from the model output.
+          sed -e 's/^```diff$//' -e 's/^```$//' "$RESPONSE_FILE" > patch.diff
+          if grep -q 'NO_FIX' patch.diff || ! grep -q '^diff --git\|^--- ' patch.diff; then
+            echo "Models did not produce an applyable patch." >> "$GITHUB_STEP_SUMMARY"
+            echo "Escalate: assign the tracking issue to @copilot (Tier 3)." >> "$GITHUB_STEP_SUMMARY"
+            { echo '### Model analysis'; echo '```'; cat patch.diff; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if ! git apply --3way --whitespace=nowarn patch.diff; then
+            echo "Proposed patch did not apply cleanly; not opening a PR." >> "$GITHUB_STEP_SUMMARY"
+            { echo '### Rejected patch'; echo '```diff'; cat patch.diff; echo '```'; } >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          if git diff --quiet; then
+            echo "Patch applied but produced no changes." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          BRANCH="autofix/models-${RUN_ID:-$GITHUB_RUN_ID}"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$BRANCH"
+          git commit -am "fix(ci): autofix drafted by GitHub Models for failing Quality Gate"
+          git push origin "$BRANCH"
+          gh pr create -R "$GITHUB_REPOSITORY" \
+            --base main --head "$BRANCH" \
+            --title "Autofix: Quality Gate failure on main" \
+            --label autofix \
+            --body "Drafted by the free GitHub Models autofix workflow in response to a failed Quality Gate run on \`main\` (${{ github.event.workflow_run.html_url }}). **Review carefully — not auto-merged.** CI gates this PR like any other. If it is wrong or insufficient, close it and escalate (Tier 3: assign a tracking issue to @copilot)."
