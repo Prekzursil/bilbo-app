@@ -169,6 +169,12 @@ dependencies {
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
     ksp(libs.hilt.android.compiler)
+    // Dagger/Hilt 2.60's generated component code references
+    // @com.google.errorprone.annotations.CanIgnoreReturnValue, but Dagger does
+    // not bring error_prone_annotations onto the compile classpath transitively.
+    // Without it, :androidApp:hiltJavaCompile* fails with "cannot find symbol
+    // class CanIgnoreReturnValue". CLASS-retention annotation -> compileOnly.
+    compileOnly(libs.errorprone.annotations)
 
     // WorkManager
     implementation(libs.workmanager.ktx)
