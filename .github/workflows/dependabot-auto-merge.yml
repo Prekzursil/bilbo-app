@@ -1,0 +1,27 @@
+name: Dependabot auto-merge
+
+# Tier 1 of the CI automation (free, native).
+# Enables GitHub's native auto-merge on Dependabot PRs. GitHub then squash-merges
+# the PR automatically ONLY once all required status checks pass (branch
+# protection on `main` requires the `quality` gate). Red PRs are never merged —
+# they simply wait, and a human resolves or closes them.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  auto-merge:
+    # Only act on PRs authored by Dependabot.
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Enable auto-merge (squash)
+        run: gh pr merge --auto --squash "$PR_URL"
+        env:
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
