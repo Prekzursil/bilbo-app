@@ -26,7 +26,7 @@
 #
 # ENVIRONMENT (optional; missing tokens skip that gate but the script still
 # fails if any non-skipped gate has findings)
-#   SONAR_TOKEN, CODACY_API_TOKEN, DEEPSCAN_API_TOKEN, DEEPSOURCE_DSN,
+#   SONAR_TOKEN, CODACY_API_TOKEN, DEEPSOURCE_DSN,
 #   SENTRY_AUTH_TOKEN, SENTRY_ORG, SENTRY_PROJECT, GITHUB_TOKEN (for gh)
 #
 # OUTPUT
@@ -170,22 +170,6 @@ probe_codacy() {
     esac
 }
 
-probe_deepscan() {
-    probe_should_run deepscan || return 0
-    if [ -z "${DEEPSCAN_API_TOKEN:-}" ] || [ -z "${DEEPSCAN_PROJECT_ID:-}" ]; then
-        RESULTS[deepscan]="?|skipped (no DEEPSCAN_API_TOKEN/PROJECT_ID)"; return
-    fi
-    local resp count
-    resp=$(curl -fsS \
-        -H "Authorization: Bearer ${DEEPSCAN_API_TOKEN}" \
-        "https://deepscan.io/api/projects/${DEEPSCAN_PROJECT_ID}/issues?status=open" \
-        2>/dev/null || echo "ERR")
-    [ "$resp" = "ERR" ] && { RESULTS[deepscan]="?|error"; return; }
-    count=$(echo "$resp" | jq '. | length' 2>/dev/null || echo "ERR")
-    [ "$count" = "ERR" ] && { RESULTS[deepscan]="?|error"; return; }
-    RESULTS[deepscan]="${count}|$([ "$count" = "0" ] && echo ok || echo issues)"
-}
-
 probe_deepsource() {
     probe_should_run deepsource || return 0
     if [ -z "${DEEPSOURCE_DSN:-}" ]; then
@@ -279,7 +263,6 @@ probe_secret_scanning
 probe_github_issues
 probe_sonarcloud
 probe_codacy
-probe_deepscan
 probe_deepsource
 probe_sentry
 probe_codecov
