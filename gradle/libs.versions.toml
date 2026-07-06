@@ -18,7 +18,7 @@ kover = "0.9.8"
 # ecosystem; hold at 2.3.21 until Hilt+KSP ship 2.4.0 support. See PR #80.
 kotlin = "2.3.21"
 agp = "9.2.1"
-compose-bom = "2026.06.00"
+compose-bom = "2026.06.01"
 sqldelight = "2.3.2"
 ktor = "3.5.1"
 coroutines = "1.11.0"
