@@ -16,7 +16,7 @@ kover = "0.9.8"
 # :androidApp:hiltJavaCompile) nor the latest KSP (2.3.9, Kotlin 2.3.x) can read
 # yet. Dependabot (#80) bumped Kotlin ahead of its annotation-processor
 # ecosystem; hold at 2.3.21 until Hilt+KSP ship 2.4.0 support. See PR #80.
-kotlin = "2.3.21"
+kotlin = "2.4.0"
 agp = "9.2.1"
 compose-bom = "2026.06.00"
 sqldelight = "2.3.2"
