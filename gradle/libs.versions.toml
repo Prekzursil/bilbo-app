@@ -8,7 +8,7 @@ bouncycastle = "1.85"
 # Dependabot. Pinned to the first patched versions.
 #   - io.netty 4.1.135.Final (CVEs in netty-codec/-http/-http2/-handler/-handler-proxy)
 #   - io.opentelemetry 1.62.0 (GHSA-rcgg-9c38-7xpx, opentelemetry-api)
-netty = "4.2.15.Final"
+netty = "4.2.16.Final"
 opentelemetry = "1.64.0"
 kover = "0.9.8"
 # Pinned to 2.3.21: Kotlin 2.4.0 emits class metadata v2.4.0, which neither the
