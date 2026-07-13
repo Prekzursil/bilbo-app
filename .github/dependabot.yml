@@ -15,6 +15,11 @@ updates:
       - "dependencies"
       - "gradle"
     open-pull-requests-limit: 10
+    # Dependabot security alerts for this dependency can be triggered even when
+    # the project is already on the latest non-vulnerable release, which causes
+    # "security_update_not_needed" failures in Dependabot jobs.
+    ignore:
+      - dependency-name: "org.bouncycastle:bcprov-jdk18on"
     # Group patch and minor updates to reduce noise
     groups:
       kotlin-ecosystem:
