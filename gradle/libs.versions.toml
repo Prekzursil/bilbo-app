@@ -3,7 +3,7 @@
 # against transitive dependencies pulled in via supabase-kt / ktor-client-auth
 # (covert timing channel, LDAP injection, broken cryptographic algorithm).
 # All three are fixed in 1.84. See: WU-B12.dependabot.
-bouncycastle = "1.84"
+bouncycastle = "1.85"
 # Security: transitive deps pulled via ktor / supabase-kt / posthog flagged by
 # Dependabot. Pinned to the first patched versions.
 #   - io.netty 4.1.135.Final (CVEs in netty-codec/-http/-http2/-handler/-handler-proxy)
