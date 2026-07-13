@@ -129,15 +129,8 @@ configurations.all {
 dependencies {
     implementation(project(":shared"))
 
-    // Explicit constraint pin so Dependabot tracks this dependency directly
-    // and reports any future CVEs against the version we're using.
+    // Explicit constraints for critical transitive dependencies.
     constraints {
-        implementation(libs.bouncycastle.bcprov) {
-            because("WU-B12.dependabot — pin to >= 1.84")
-        }
-        implementation(libs.bouncycastle.bcpkix) {
-            because("WU-B12.dependabot — pin to >= 1.84")
-        }
         implementation(libs.netty.codec) { because("dependabot — io.netty >= 4.1.135.Final") }
         implementation(libs.netty.codec.http) { because("dependabot — io.netty >= 4.1.135.Final") }
         implementation(libs.netty.codec.http2) { because("dependabot — io.netty >= 4.1.135.Final") }
