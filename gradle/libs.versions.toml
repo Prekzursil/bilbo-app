@@ -28,7 +28,7 @@ hilt = "2.60"
 # @com.google.errorprone.annotations.CanIgnoreReturnValue but does not bring the
 # artifact transitively; added as compileOnly to satisfy the generated-Java compile.
 errorprone = "2.50.0"
-ksp = "2.3.9"
+ksp = "2.3.10"
 supabase-kt = "3.6.0"
 posthog = "3.53.2"
 sentry = "8.47.0"
