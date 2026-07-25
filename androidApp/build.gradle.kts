@@ -17,7 +17,15 @@ kotlin {
 
 android {
     namespace = "dev.bilbo.app"
-    compileSdk = 36
+    // compileSdk 37 is required by androidx.hilt:hilt-navigation-compose:1.4.0,
+    // androidx.hilt:hilt-lifecycle-viewmodel-compose:1.4.0 and
+    // androidx.lifecycle:*-compose-android:2.11.0, all of which declare
+    // minCompileSdk=37 in their AAR metadata. Without this,
+    // :androidApp:checkPlaystoreDebugAarMetadata fails the quality gate.
+    // compileSdk only — targetSdk deliberately stays at 36 so runtime
+    // behaviour for users is unchanged (see AGP's own guidance: compileSdk,
+    // targetSdk and minSdk are updated independently).
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "dev.bilbo.app"
