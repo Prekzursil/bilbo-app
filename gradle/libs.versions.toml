@@ -29,7 +29,7 @@ hilt = "2.60.1"
 # artifact transitively; added as compileOnly to satisfy the generated-Java compile.
 errorprone = "2.50.0"
 ksp = "2.3.10"
-supabase-kt = "3.6.0"
+supabase-kt = "3.7.0"
 posthog = "3.55.2"
 sentry = "8.50.1"
 detekt = "1.23.8"
