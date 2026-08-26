@@ -181,3 +181,7 @@ crash-reports/
 # ralph-loop session state
 .claude/.ralph-loop.local.md
 .claude/scheduled_tasks.lock
+
+.beads/last-dashboard-check.json
+*.bak-canonsync-*
+
