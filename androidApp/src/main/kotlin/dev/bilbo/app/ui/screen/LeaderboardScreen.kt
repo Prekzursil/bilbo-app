@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.bilbo.social.LeaderboardCalculator
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 // ── UI models ─────────────────────────────────────────────────────────────────
 

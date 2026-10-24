@@ -1,6 +1,6 @@
 package dev.bilbo.domain.social
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDate
 
 /**

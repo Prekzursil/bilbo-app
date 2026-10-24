@@ -3,7 +3,7 @@ package dev.bilbo.data
 import dev.bilbo.domain.Emotion
 import dev.bilbo.domain.EmotionalCheckIn
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Repository for persisting and querying [EmotionalCheckIn] records.

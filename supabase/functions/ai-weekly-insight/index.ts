@@ -40,17 +40,16 @@
  *   { "error": "Rate limited", "next_eligible_at": "2026-04-06T00:00:00Z" }
  */
 
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
-const ANTHROPIC_MODEL = "claude-sonnet-4-20250514";
-const ANTHROPIC_API_URL = "https://api.anthropic.com/v1/messages";
+const ANTHROPIC_MODEL = 'claude-sonnet-4-20250514';
+const ANTHROPIC_API_URL = 'https://api.anthropic.com/v1/messages';
 const MAX_TOKENS = 512;
 
 function getISOWeekStart(): string {
@@ -59,13 +58,13 @@ function getISOWeekStart(): string {
   const diff = day === 0 ? -6 : 1 - day;
   const monday = new Date(now);
   monday.setUTCDate(now.getUTCDate() + diff);
-  return monday.toISOString().split("T")[0];
+  return monday.toISOString().split('T')[0];
 }
 
 function getNextWeekStart(weekStart: string): string {
   const d = new Date(weekStart);
   d.setUTCDate(d.getUTCDate() + 7);
-  return d.toISOString().split("T")[0];
+  return d.toISOString().split('T')[0];
 }
 
 function isValidDate(dateStr: string): boolean {
@@ -80,17 +79,18 @@ interface WeeklySummary {
   intent_honor_rate: number;
   top_struggle_times?: string[];
   analog_activities_completed?: number;
-  emotional_trend?: "improving" | "stable" | "declining";
+  emotional_trend?: 'improving' | 'stable' | 'declining';
   biggest_win?: string;
   focus_area?: string;
 }
 
 /** Builds the Anthropic prompt from the user's anonymized summary. */
 function buildPrompt(summary: WeeklySummary, weekStart: string): string {
-  const screenChangeText = summary.prev_week_screen_time_hours != null
-    ? `Previous week: ${summary.prev_week_screen_time_hours}h average. ` +
-      `Change: ${(summary.avg_screen_time_hours - summary.prev_week_screen_time_hours).toFixed(1)}h.`
-    : "";
+  const screenChangeText =
+    summary.prev_week_screen_time_hours != null
+      ? `Previous week: ${summary.prev_week_screen_time_hours}h average. ` +
+        `Change: ${(summary.avg_screen_time_hours - summary.prev_week_screen_time_hours).toFixed(1)}h.`
+      : '';
 
   return `You are Bilbo, a compassionate AI wellness coach helping someone reclaim their focus and mental health by reducing phone addiction.
 
@@ -101,34 +101,29 @@ Average daily screen time: ${summary.avg_screen_time_hours} hours. ${screenChang
 Focus Points earned: ${summary.focus_points_earned} FP
 Current streak: ${summary.streak_days} days
 Intent honor rate: ${Math.round(summary.intent_honor_rate * 100)}% (declared intent matched actual behavior)
-${summary.top_struggle_times?.length ? `Highest-risk time windows: ${summary.top_struggle_times.join(", ")}` : ""}
-${summary.analog_activities_completed != null ? `Analog activities completed: ${summary.analog_activities_completed}` : ""}
-${summary.emotional_trend ? `Emotional trend: ${summary.emotional_trend}` : ""}
-${summary.biggest_win ? `Biggest win this week: "${summary.biggest_win}"` : ""}
-${summary.focus_area ? `User's chosen focus area for next week: "${summary.focus_area}"` : ""}
+${summary.top_struggle_times?.length ? `Highest-risk time windows: ${summary.top_struggle_times.join(', ')}` : ''}
+${summary.analog_activities_completed != null ? `Analog activities completed: ${summary.analog_activities_completed}` : ''}
+${summary.emotional_trend ? `Emotional trend: ${summary.emotional_trend}` : ''}
+${summary.biggest_win ? `Biggest win this week: "${summary.biggest_win}"` : ''}
+${summary.focus_area ? `User's chosen focus area for next week: "${summary.focus_area}"` : ''}
 --- END SUMMARY ---
 
 Write the 200-word insight now:`;
 }
 
 /** Calls the Anthropic Messages API and returns the generated text. */
-async function callAnthropicAPI(
-  prompt: string,
-  apiKey: string,
-): Promise<string> {
+async function callAnthropicAPI(prompt: string, apiKey: string): Promise<string> {
   const response = await fetch(ANTHROPIC_API_URL, {
-    method: "POST",
+    method: 'POST',
     headers: {
-      "Content-Type": "application/json",
-      "x-api-key": apiKey,
-      "anthropic-version": "2023-06-01",
+      'Content-Type': 'application/json',
+      'x-api-key': apiKey,
+      'anthropic-version': '2023-06-01',
     },
     body: JSON.stringify({
       model: ANTHROPIC_MODEL,
       max_tokens: MAX_TOKENS,
-      messages: [
-        { role: "user", content: prompt },
-      ],
+      messages: [{ role: 'user', content: prompt }],
     }),
   });
 
@@ -139,41 +134,41 @@ async function callAnthropicAPI(
 
   const data = await response.json();
   const content = data.content?.[0];
-  if (!content || content.type !== "text") {
-    throw new Error("Unexpected Anthropic API response format");
+  if (!content || content.type !== 'text') {
+    throw new Error('Unexpected Anthropic API response format');
   }
 
   return content.text.trim();
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
-  if (req.method !== "POST") {
-    return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return new Response(
-      JSON.stringify({ error: "Missing or invalid Authorization header" }),
-      { status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'Missing or invalid Authorization header' }), {
+      status: 401,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   let body: { week_start?: string; summary?: Partial<WeeklySummary> };
   try {
     body = await req.json();
   } catch {
-    return new Response(
-      JSON.stringify({ error: "Invalid JSON body" }),
-      { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+      status: 400,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   const { week_start, summary } = body;
@@ -181,62 +176,65 @@ Deno.serve(async (req: Request): Promise<Response> => {
   if (!week_start || !isValidDate(week_start)) {
     return new Response(
       JSON.stringify({ error: "Field 'week_start' must be a valid ISO date (YYYY-MM-DD)" }),
-      { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      { status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } },
     );
   }
 
-  if (!summary || typeof summary !== "object") {
+  if (!summary || typeof summary !== 'object') {
     return new Response(
       JSON.stringify({ error: "Field 'summary' is required and must be an object" }),
-      { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      { status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } },
     );
   }
 
   // Validate required summary fields
-  if (typeof summary.avg_screen_time_hours !== "number" || summary.avg_screen_time_hours < 0) {
+  if (typeof summary.avg_screen_time_hours !== 'number' || summary.avg_screen_time_hours < 0) {
     return new Response(
-      JSON.stringify({ error: "summary.avg_screen_time_hours must be a non-negative number" }),
-      { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      JSON.stringify({ error: 'summary.avg_screen_time_hours must be a non-negative number' }),
+      { status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } },
     );
   }
-  if (typeof summary.focus_points_earned !== "number") {
-    return new Response(
-      JSON.stringify({ error: "summary.focus_points_earned is required" }),
-      { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+  if (typeof summary.focus_points_earned !== 'number') {
+    return new Response(JSON.stringify({ error: 'summary.focus_points_earned is required' }), {
+      status: 400,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const anthropicApiKey = Deno.env.get("ANTHROPIC_API_KEY");
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const anthropicApiKey = Deno.env.get('ANTHROPIC_API_KEY');
 
   if (!supabaseUrl || !supabaseAnonKey || !serviceRoleKey || !anthropicApiKey) {
-    return new Response(
-      JSON.stringify({ error: "Server configuration error" }),
-      { status: 500, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      status: 500,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
     global: { headers: { Authorization: authHeader } },
   });
-  const { data: { user }, error: authError } = await supabaseUser.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabaseUser.auth.getUser();
   if (authError || !user) {
-    return new Response(
-      JSON.stringify({ error: "Unauthorized" }),
-      { status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   const supabaseAdmin = createClient(supabaseUrl, serviceRoleKey);
 
   // Check rate limit: 1 insight per user per week
   const { data: existingInsight } = await supabaseAdmin
-    .from("ai_insights")
-    .select("id, insight, generated_at")
-    .eq("user_id", user.id)
-    .eq("week_start", week_start)
+    .from('ai_insights')
+    .select('id, insight, generated_at')
+    .eq('user_id', user.id)
+    .eq('week_start', week_start)
     .maybeSingle();
 
   if (existingInsight) {
@@ -251,7 +249,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
       }),
       {
         status: 200,
-        headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+        headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
       },
     );
   }
@@ -261,37 +259,39 @@ Deno.serve(async (req: Request): Promise<Response> => {
   const previousWeekStart = (() => {
     const d = new Date(currentWeekStart);
     d.setUTCDate(d.getUTCDate() - 7);
-    return d.toISOString().split("T")[0];
+    return d.toISOString().split('T')[0];
   })();
 
   if (week_start !== currentWeekStart && week_start !== previousWeekStart) {
     return new Response(
-      JSON.stringify({ error: "Insights can only be generated for the current or previous week" }),
-      { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      JSON.stringify({ error: 'Insights can only be generated for the current or previous week' }),
+      { status: 400, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } },
     );
   }
 
   // Check rate limit table: hard cap of 1 generation per user per week
   const { data: rateLimitRecord } = await supabaseAdmin
-    .from("ai_insight_rate_limits")
-    .select("used_at")
-    .eq("user_id", user.id)
-    .eq("week_start", week_start)
+    .from('ai_insight_rate_limits')
+    .select('used_at')
+    .eq('user_id', user.id)
+    .eq('week_start', week_start)
     .maybeSingle();
 
   if (rateLimitRecord) {
     const nextEligibleAt = `${getNextWeekStart(week_start)}T00:00:00Z`;
     return new Response(
       JSON.stringify({
-        error: "Rate limited: AI insight already generated for this week",
+        error: 'Rate limited: AI insight already generated for this week',
         next_eligible_at: nextEligibleAt,
       }),
       {
         status: 429,
         headers: {
           ...CORS_HEADERS,
-          "Content-Type": "application/json",
-          "Retry-After": String(Math.ceil((new Date(nextEligibleAt).getTime() - Date.now()) / 1000)),
+          'Content-Type': 'application/json',
+          'Retry-After': String(
+            Math.ceil((new Date(nextEligibleAt).getTime() - Date.now()) / 1000),
+          ),
         },
       },
     );
@@ -303,34 +303,32 @@ Deno.serve(async (req: Request): Promise<Response> => {
   try {
     insightText = await callAnthropicAPI(prompt, anthropicApiKey);
   } catch (err) {
-    console.error("ai-weekly-insight: Anthropic API error", err);
+    console.error('ai-weekly-insight: Anthropic API error', err);
     return new Response(
-      JSON.stringify({ error: "Failed to generate insight. Please try again later." }),
-      { status: 502, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      JSON.stringify({ error: 'Failed to generate insight. Please try again later.' }),
+      { status: 502, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } },
     );
   }
 
   const generatedAt = new Date().toISOString();
 
   // Persist the insight
-  const { error: insightInsertError } = await supabaseAdmin
-    .from("ai_insights")
-    .insert({
-      user_id: user.id,
-      week_start,
-      insight: insightText,
-      model: ANTHROPIC_MODEL,
-      generated_at: generatedAt,
-    });
+  const { error: insightInsertError } = await supabaseAdmin.from('ai_insights').insert({
+    user_id: user.id,
+    week_start,
+    insight: insightText,
+    model: ANTHROPIC_MODEL,
+    generated_at: generatedAt,
+  });
 
   if (insightInsertError) {
-    console.error("ai-weekly-insight: insight insert error", insightInsertError);
+    console.error('ai-weekly-insight: insight insert error', insightInsertError);
     // Still return the insight even if caching fails
   }
 
   // Record rate limit usage
   await supabaseAdmin
-    .from("ai_insight_rate_limits")
+    .from('ai_insight_rate_limits')
     .insert({ user_id: user.id, week_start, used_at: generatedAt });
 
   return new Response(
@@ -343,7 +341,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
     }),
     {
       status: 200,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
     },
   );
 });
