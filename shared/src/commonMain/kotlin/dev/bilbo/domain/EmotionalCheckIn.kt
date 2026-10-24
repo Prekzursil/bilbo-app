@@ -1,6 +1,6 @@
 package dev.bilbo.domain
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 data class EmotionalCheckIn(
     val id: Long = 0,

@@ -5,6 +5,7 @@ import dev.bilbo.shared.domain.model.*
 import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
 import dev.bilbo.shared.util.*
 import dev.bilbo.util.*
+import kotlin.time.Instant
 import kotlinx.datetime.*
 import kotlinx.serialization.json.Json
 import kotlin.test.*
