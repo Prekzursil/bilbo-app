@@ -41,6 +41,16 @@ buildscript {
                 version { require("[1.84,2.0)") }
                 because("keep Bouncy Castle modules in lockstep with bcprov-jdk18on")
             }
+            // Kover 0.9.11 (the latest) reaches FreeMarker 2.3.32 through
+            // kover-features-jvm -> intellij-coverage-reporter -> coverage-report 1.0.25,
+            // which is GHSA-27j2-h3m2-8237 / CVE-2026-84939 (critical, template-loader
+            // path traversal, >= 2.2.0 <= 2.3.34). Same buildscript-classpath shape as
+            // Bouncy Castle above, so the same fix: a bounded floor at the first patched
+            // release.
+            add("classpath", "org.freemarker:freemarker") {
+                version { require("[2.3.35,2.4)") }
+                because("GHSA-27j2-h3m2-8237 / CVE-2026-84939 — Kover's report stack pulls 2.3.32")
+            }
         }
     }
 }
