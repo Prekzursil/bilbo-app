@@ -115,9 +115,10 @@ Deno.serve(async (req: Request): Promise<Response> => {
   // Fetch all status summaries for the current week (anonymized — no user_id in response)
   const { data: summaries, error: summaryError } = await supabaseAdmin
     .from('status_summaries')
+    // One string literal, not a concatenation: supabase-js derives the row type
+    // from the literal, and a computed `string` types every row as an error.
     .select(
-      'user_id, total_screen_time_seconds, focus_points_earned, streak_days, ' +
-        'intent_sessions_total, intent_sessions_honored, analog_time_seconds, emotional_avg_mood',
+      'user_id, total_screen_time_seconds, focus_points_earned, streak_days, intent_sessions_total, intent_sessions_honored, analog_time_seconds, emotional_avg_mood',
     )
     .gte('date', weekStart)
     .lte('date', weekEnd);
