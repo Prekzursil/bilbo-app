@@ -1,7 +1,8 @@
 name: Autofix (GitHub Models)
 
 # Tier 2 of the CI automation (free, in-Actions, PRIMARY auto-fix).
-# When the Quality Gate fails on a push to `main`, ask a free GitHub Models
+# When a gate workflow (the QZP lean gate `quality`, or the `KMP Gate` that
+# carries the Kotlin checks) fails on a push to `main`, ask a free GitHub Models
 # model to draft a minimal patch and, if it applies cleanly, open a PR labelled
 # `autofix`. The PR is NEVER auto-merged — a human and the normal CI gate it.
 # Bounded: only on default-branch CI failure, capped tokens, one PR per run.
@@ -10,7 +11,7 @@ name: Autofix (GitHub Models)
 
 on:
   workflow_run:
-    workflows: ["Quality Gate"]
+    workflows: ["quality", "KMP Gate"]
     types: [completed]
 
 permissions:
@@ -21,7 +22,7 @@ permissions:
 
 jobs:
   draft-fix:
-    # Only on a FAILED Quality Gate from a push to main.
+    # Only on a FAILED gate run from a push to main.
     if: >-
       ${{ github.event.workflow_run.conclusion == 'failure'
           && github.event.workflow_run.head_branch == 'main'

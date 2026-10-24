@@ -1,0 +1,121 @@
+name: KMP Gate
+
+# The checks the QZP lean gate (quality.yml -> `quality / quality`) does not
+# run for this repository. They moved here, unchanged, from the in-repo
+# `Quality Gate` this repository used before the lean-gate caller:
+#   - Android Lint                 -> :androidApp:lintPlaystoreDebug
+#   - KMP tests + 100% coverage    -> :shared:allTests + :shared:koverVerify
+#                                     (100% line+branch) + :androidApp unit tests
+#   - bilbo Semgrep rules          -> .semgrep.yml (hardcoded Supabase/Anthropic/
+#                                     Perplexity keys, string-built SQL); the lean
+#                                     gate's opengrep runs .quality/opengrep only
+#   - gitleaks over full history   -> the lean gate scans a depth-1 checkout
+# Dependencies are not re-checked here: the lean gate's osv-scanner (gate 6)
+# replaced the old OSV job.
+#
+# `kmp-gate` is the fail-closed aggregate of the jobs above. CodeQL runs in its
+# own workflow (codeql.yml).
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  merge_group:
+    types: [checks_requested]
+
+permissions:
+  contents: read
+
+concurrency:
+  # never `quality-...`: the lean-gate caller owns that group, and sharing it
+  # would let one workflow cancel the other on the same pull request
+  group: kmp-gate-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  lint:
+    name: KMP lint (Android Lint)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - run: chmod +x gradlew
+      - name: Android Lint
+        run: ./gradlew :androidApp:lintPlaystoreDebug --no-daemon
+
+  tests-coverage:
+    name: KMP tests + 100% coverage (Kover)
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+      - uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+      - uses: gradle/actions/setup-gradle@3f5f9adaf7d9fecd50b5935e54106014257a94e6 # v6.4.0
+      - run: chmod +x gradlew
+      - name: Shared module tests
+        run: ./gradlew :shared:allTests --no-daemon
+      - name: Verify 100% line+branch coverage (Kover)
+        run: ./gradlew :shared:koverVerify --no-daemon
+      - name: Android unit tests
+        run: ./gradlew :androidApp:testPlaystoreDebugUnitTest --no-daemon
+
+  sast:
+    name: SAST (bilbo Semgrep rules)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+      - name: Install Semgrep CE
+        run: pipx install semgrep
+      - name: Run Semgrep
+        run: semgrep --config=.semgrep.yml --error --metrics=off
+
+  secrets:
+    name: Secrets (gitleaks, full history)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          fetch-depth: 0
+      - name: Install gitleaks
+        run: |
+          curl -sSfL https://github.com/gitleaks/gitleaks/releases/download/v8.18.4/gitleaks_8.18.4_linux_x64.tar.gz | tar -xz gitleaks
+          sudo mv gitleaks /usr/local/bin/
+      - name: Scan for secrets
+        run: gitleaks detect --source . --config .gitleaks.toml --redact --no-banner
+
+  kmp-gate:
+    name: kmp-gate
+    runs-on: ubuntu-latest
+    needs: [lint, tests-coverage, sast, secrets]
+    # Fail closed: run even when a needed job failed or was skipped, and pass
+    # only when every one of them succeeded. A plain `needs` aggregate is
+    # SKIPPED when a dependency fails, and a skipped check satisfies branch
+    # protection, so the old aggregate let red pull requests merge.
+    if: always()
+    timeout-minutes: 5
+    steps:
+      - name: All KMP gates passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          echo "needs results: $RESULTS"
+          for r in $RESULTS; do
+            if [ "$r" != "success" ]; then
+              echo "::error title=kmp-gate::a KMP gate job did not succeed (results: $RESULTS)"
+              exit 1
+            fi
+          done
+          echo "KMP gate green - Android Lint, KMP tests + 100% Kover coverage, Semgrep rules, full-history gitleaks."

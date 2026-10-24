@@ -17,7 +17,8 @@ Workflow: [`.github/workflows/dependabot-auto-merge.yml`](../.github/workflows/d
 
 Workflow: [`.github/workflows/autofix-models.yml`](../.github/workflows/autofix-models.yml)
 
-- Triggers on a **failed `Quality Gate` run on a push to `main`** (`workflow_run`
+- Triggers on a **failed gate run on a push to `main`**: the QZP lean gate
+  (`quality`) or the `KMP Gate` that carries the Kotlin checks (`workflow_run`
   with `conclusion == failure`).
 - Uses the free **GitHub Models** inference action (`actions/ai-inference`,
   model `openai/gpt-4o-mini`) with the built-in `GITHUB_TOKEN` to draft a
