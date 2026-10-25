@@ -15,6 +15,7 @@ import dev.bilbo.social.ChallengeEngine
 import dev.bilbo.social.CircleManager
 import dev.bilbo.social.LeaderboardCalculator
 import dev.bilbo.util.*
+import kotlin.time.Instant
 import kotlinx.coroutines.test.runTest
 import kotlin.time.Clock
 import kotlinx.datetime.*

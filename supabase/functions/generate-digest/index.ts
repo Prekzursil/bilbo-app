@@ -33,13 +33,12 @@
  *   }
  */
 
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'GET, OPTIONS',
 };
 
 /** Returns the Monday of the current ISO week as an ISO date string. */
@@ -49,13 +48,13 @@ function getWeekStart(): string {
   const diff = day === 0 ? -6 : 1 - day;
   const monday = new Date(now);
   monday.setUTCDate(now.getUTCDate() + diff);
-  return monday.toISOString().split("T")[0];
+  return monday.toISOString().split('T')[0];
 }
 
 function getWeekEnd(weekStart: string): string {
   const d = new Date(weekStart);
   d.setUTCDate(d.getUTCDate() + 6);
-  return d.toISOString().split("T")[0];
+  return d.toISOString().split('T')[0];
 }
 
 function average(arr: number[]): number {
@@ -67,9 +66,7 @@ function median(arr: number[]): number {
   if (arr.length === 0) return 0;
   const sorted = [...arr].sort((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
-  return sorted.length % 2 !== 0
-    ? sorted[mid]
-    : (sorted[mid - 1] + sorted[mid]) / 2;
+  return sorted.length % 2 !== 0 ? sorted[mid] : (sorted[mid - 1] + sorted[mid]) / 2;
 }
 
 /** Returns the Nth percentile value from a sorted array. */
@@ -80,33 +77,33 @@ function percentile(sortedArr: number[], p: number): number {
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
-  if (req.method !== "GET") {
-    return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+  if (req.method !== 'GET') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return new Response(
-      JSON.stringify({ error: "Missing or invalid Authorization header" }),
-      { status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'Missing or invalid Authorization header' }), {
+      status: 401,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const serviceRoleKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
   if (!supabaseUrl || !serviceRoleKey) {
-    return new Response(
-      JSON.stringify({ error: "Server configuration error" }),
-      { status: 500, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      status: 500,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   // Only allow service-role or admin access
@@ -117,39 +114,47 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // Fetch all status summaries for the current week (anonymized — no user_id in response)
   const { data: summaries, error: summaryError } = await supabaseAdmin
-    .from("status_summaries")
+    .from('status_summaries')
+    // One string literal, not a concatenation: supabase-js derives the row type
+    // from the literal, and a computed `string` types every row as an error.
     .select(
-      "user_id, total_screen_time_seconds, focus_points_earned, streak_days, " +
-      "intent_sessions_total, intent_sessions_honored, analog_time_seconds, emotional_avg_mood",
+      'user_id, total_screen_time_seconds, focus_points_earned, streak_days, intent_sessions_total, intent_sessions_honored, analog_time_seconds, emotional_avg_mood',
     )
-    .gte("date", weekStart)
-    .lte("date", weekEnd);
+    .gte('date', weekStart)
+    .lte('date', weekEnd);
 
   if (summaryError) {
-    console.error("generate-digest: summaries query error", summaryError);
-    return new Response(
-      JSON.stringify({ error: "Failed to fetch status summaries" }),
-      { status: 500, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+    console.error('generate-digest: summaries query error', summaryError);
+    return new Response(JSON.stringify({ error: 'Failed to fetch status summaries' }), {
+      status: 500,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   // Aggregate per-user totals (a user may have multiple rows per week)
-  const userTotals: Record<string, {
-    screenTime: number;
-    fp: number;
-    streak: number;
-    intentTotal: number;
-    intentHonored: number;
-    analog: number;
-    moodReadings: number[];
-  }> = {};
+  const userTotals: Record<
+    string,
+    {
+      screenTime: number;
+      fp: number;
+      streak: number;
+      intentTotal: number;
+      intentHonored: number;
+      analog: number;
+      moodReadings: number[];
+    }
+  > = {};
 
   for (const row of summaries ?? []) {
     if (!userTotals[row.user_id]) {
       userTotals[row.user_id] = {
-        screenTime: 0, fp: 0, streak: 0,
-        intentTotal: 0, intentHonored: 0,
-        analog: 0, moodReadings: [],
+        screenTime: 0,
+        fp: 0,
+        streak: 0,
+        intentTotal: 0,
+        intentHonored: 0,
+        analog: 0,
+        moodReadings: [],
       };
     }
     const u = userTotals[row.user_id];
@@ -186,16 +191,16 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // Count nudge events this week
   const { count: nudgeCount } = await supabaseAdmin
-    .from("nudge_events")
-    .select("id", { count: "exact", head: true })
-    .gte("created_at", `${weekStart}T00:00:00Z`);
+    .from('nudge_events')
+    .select('id', { count: 'exact', head: true })
+    .gte('created_at', `${weekStart}T00:00:00Z`);
 
   // Count completed challenge participations this week
   const { count: challengesCompleted } = await supabaseAdmin
-    .from("challenge_participations")
-    .select("id", { count: "exact", head: true })
-    .eq("status", "completed")
-    .gte("completed_at", `${weekStart}T00:00:00Z`);
+    .from('challenge_participations')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'completed')
+    .gte('completed_at', `${weekStart}T00:00:00Z`);
 
   const digest = {
     week_start: weekStart,
@@ -209,9 +214,8 @@ Deno.serve(async (req: Request): Promise<Response> => {
       avg_streak_days: Math.round(average(streakValues) * 10) / 10,
       avg_intent_honor_rate: Math.round(average(intentHonorRates) * 1000) / 1000,
       total_analog_time_seconds: totalAnalogTime,
-      avg_emotional_mood: allMoodReadings.length > 0
-        ? Math.round(average(allMoodReadings) * 100) / 100
-        : null,
+      avg_emotional_mood:
+        allMoodReadings.length > 0 ? Math.round(average(allMoodReadings) * 100) / 100 : null,
       total_nudges_sent: nudgeCount ?? 0,
       total_challenges_completed: challengesCompleted ?? 0,
       top_improvement_percentile: Math.round(p25ScreenTime),
@@ -220,17 +224,14 @@ Deno.serve(async (req: Request): Promise<Response> => {
 
   // Store the digest for historical reference
   await supabaseAdmin
-    .from("weekly_digests")
+    .from('weekly_digests')
     .upsert(
       { week_start: weekStart, payload: digest, generated_at: digest.generated_at },
-      { onConflict: "week_start" },
+      { onConflict: 'week_start' },
     );
 
-  return new Response(
-    JSON.stringify(digest),
-    {
-      status: 200,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    },
-  );
+  return new Response(JSON.stringify(digest), {
+    status: 200,
+    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+  });
 });

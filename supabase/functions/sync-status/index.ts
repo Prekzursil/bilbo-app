@@ -28,13 +28,12 @@
  *   { "synced": true, "summary_id": "<uuid>" }
  */
 
-import { createClient } from "npm:@supabase/supabase-js@2";
+import { createClient } from 'npm:@supabase/supabase-js@2';
 
 const CORS_HEADERS = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers":
-    "authorization, x-client-info, apikey, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 interface StatusSummaryPayload {
@@ -60,17 +59,17 @@ function validatePayload(payload: Partial<StatusSummaryPayload>): string | null 
     return "Field 'date' must be a valid ISO date string (YYYY-MM-DD)";
   }
   const numericFields: (keyof StatusSummaryPayload)[] = [
-    "total_screen_time_seconds",
-    "focus_points_earned",
-    "focus_points_spent",
-    "streak_days",
-    "intent_sessions_total",
-    "intent_sessions_honored",
-    "analog_time_seconds",
+    'total_screen_time_seconds',
+    'focus_points_earned',
+    'focus_points_spent',
+    'streak_days',
+    'intent_sessions_total',
+    'intent_sessions_honored',
+    'analog_time_seconds',
   ];
   for (const field of numericFields) {
     const val = payload[field];
-    if (val === undefined || val === null || typeof val !== "number" || val < 0) {
+    if (val === undefined || val === null || typeof val !== 'number' || val < 0) {
       return `Field '${field}' must be a non-negative number`;
     }
   }
@@ -92,63 +91,66 @@ function validatePayload(payload: Partial<StatusSummaryPayload>): string | null 
 }
 
 Deno.serve(async (req: Request): Promise<Response> => {
-  if (req.method === "OPTIONS") {
+  if (req.method === 'OPTIONS') {
     return new Response(null, { status: 204, headers: CORS_HEADERS });
   }
 
-  if (req.method !== "POST") {
-    return new Response(
-      JSON.stringify({ error: "Method not allowed" }),
-      { status: 405, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+  if (req.method !== 'POST') {
+    return new Response(JSON.stringify({ error: 'Method not allowed' }), {
+      status: 405,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
-  const authHeader = req.headers.get("Authorization");
-  if (!authHeader?.startsWith("Bearer ")) {
-    return new Response(
-      JSON.stringify({ error: "Missing or invalid Authorization header" }),
-      { status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+  const authHeader = req.headers.get('Authorization');
+  if (!authHeader?.startsWith('Bearer ')) {
+    return new Response(JSON.stringify({ error: 'Missing or invalid Authorization header' }), {
+      status: 401,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   let body: Partial<StatusSummaryPayload>;
   try {
     body = await req.json();
   } catch {
-    return new Response(
-      JSON.stringify({ error: "Invalid JSON body" }),
-      { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: 'Invalid JSON body' }), {
+      status: 400,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   const validationError = validatePayload(body);
   if (validationError) {
-    return new Response(
-      JSON.stringify({ error: validationError }),
-      { status: 400, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: validationError }), {
+      status: 400,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
-  const supabaseUrl = Deno.env.get("SUPABASE_URL");
-  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY");
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY');
 
   if (!supabaseUrl || !supabaseAnonKey) {
-    return new Response(
-      JSON.stringify({ error: "Server configuration error" }),
-      { status: 500, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: 'Server configuration error' }), {
+      status: 500,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   const supabase = createClient(supabaseUrl, supabaseAnonKey, {
     global: { headers: { Authorization: authHeader } },
   });
 
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
   if (authError || !user) {
-    return new Response(
-      JSON.stringify({ error: "Unauthorized" }),
-      { status: 401, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
-    );
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401,
+      headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+    });
   }
 
   // Upsert status summary (unique on user_id + date)
@@ -169,24 +171,21 @@ Deno.serve(async (req: Request): Promise<Response> => {
   };
 
   const { data: summary, error: upsertError } = await supabase
-    .from("status_summaries")
-    .upsert(upsertData, { onConflict: "user_id,date" })
-    .select("id")
+    .from('status_summaries')
+    .upsert(upsertData, { onConflict: 'user_id,date' })
+    .select('id')
     .single();
 
   if (upsertError || !summary) {
-    console.error("sync-status: upsert error", upsertError);
+    console.error('sync-status: upsert error', upsertError);
     return new Response(
-      JSON.stringify({ error: "Failed to sync status", detail: upsertError?.message }),
-      { status: 500, headers: { ...CORS_HEADERS, "Content-Type": "application/json" } },
+      JSON.stringify({ error: 'Failed to sync status', detail: upsertError?.message }),
+      { status: 500, headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' } },
     );
   }
 
-  return new Response(
-    JSON.stringify({ synced: true, summary_id: summary.id }),
-    {
-      status: 200,
-      headers: { ...CORS_HEADERS, "Content-Type": "application/json" },
-    },
-  );
+  return new Response(JSON.stringify({ synced: true, summary_id: summary.id }), {
+    status: 200,
+    headers: { ...CORS_HEADERS, 'Content-Type': 'application/json' },
+  });
 });

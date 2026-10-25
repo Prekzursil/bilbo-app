@@ -1,6 +1,6 @@
 package dev.bilbo.domain.social
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Represents a one-to-one accountability pairing between two users.
