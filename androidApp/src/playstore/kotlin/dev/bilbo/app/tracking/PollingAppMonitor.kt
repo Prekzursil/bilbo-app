@@ -178,12 +178,12 @@ class PollingAppMonitor @Inject constructor(
 
     private fun hasUsageStatsPermission(): Boolean {
         return try {
-            AppOpsManagerCompat.unsafeCheckOp(
+            AppOpsManagerCompat.noteOpNoThrow(
                 context,
                 AppOpsManager.OPSTR_GET_USAGE_STATS,
                 Process.myUid(),
                 context.packageName,
-            ) == AppOpsManager.MODE_ALLOWED
+            ) == AppOpsManagerCompat.MODE_ALLOWED
         } catch (e: Exception) {
             false
         }

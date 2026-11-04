@@ -253,12 +253,12 @@ private fun buildPermissionItems(context: Context): List<PermissionItem> = listO
 
 private fun hasUsageAccess(context: Context): Boolean =
     try {
-        AppOpsManagerCompat.unsafeCheckOp(
+        AppOpsManagerCompat.noteOpNoThrow(
             context,
             AppOpsManager.OPSTR_GET_USAGE_STATS,
             android.os.Process.myUid(),
             context.packageName
-        ) == AppOpsManager.MODE_ALLOWED
+        ) == AppOpsManagerCompat.MODE_ALLOWED
     } catch (e: Exception) {
         false
     }
