@@ -3,14 +3,14 @@ package dev.bilbo.intelligence.tier1
 import dev.bilbo.domain.*
 
 sealed class LaunchDecision {
-    data object Allow : LaunchDecision()
+    object Allow : LaunchDecision()
     data class Block(val remainingMinutes: Int) : LaunchDecision()
     data class InsufficientFP(val balance: Int) : LaunchDecision()
-    data object RequiresIntent : LaunchDecision()
+    object RequiresIntent : LaunchDecision()
 }
 
 sealed class EnforcementAction {
-    data object ShowNudge : EnforcementAction()
+    object ShowNudge : EnforcementAction()
     data class HardLock(val cooldownMinutes: Int = 30) : EnforcementAction()
 }
 

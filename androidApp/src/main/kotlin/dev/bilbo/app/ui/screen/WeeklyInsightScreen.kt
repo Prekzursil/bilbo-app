@@ -149,7 +149,6 @@ private fun WeeklyInsightContent(
     isCloudInsight: Boolean,
     canRefresh: Boolean,
 ) {
-    val colorScheme = MaterialTheme.colorScheme
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -215,8 +214,6 @@ private fun NarrativeHeroCard(
     narrative: String,
     isCloudInsight: Boolean,
 ) {
-    val primary = MaterialTheme.colorScheme.primary
-    val surfaceVariant = MaterialTheme.colorScheme.surfaceVariant
 
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -416,7 +413,7 @@ private fun TrendChartCard(dailyMinutes: List<Int>) {
                 val points = values.mapIndexed { i, v ->
                     Offset(
                         x = i * stepX,
-                        y = height - padding - (v / maxVal) * (height - padding * 2),
+                        y = (height - padding) - ((v / maxVal) * (height - padding * 2)),
                     )
                 }
 
@@ -491,7 +488,6 @@ private fun InsightCard(insight: HeuristicInsight) {
         InsightType.ACHIEVEMENT -> Pair(Icons.Outlined.EmojiEvents, Color(0xFF4CAF50))
     }
 
-    val confidencePct = (insight.confidence * 100).toInt()
     val confidenceLabel = when {
         insight.confidence >= 0.8f -> "High"
         insight.confidence >= 0.6f -> "Medium"

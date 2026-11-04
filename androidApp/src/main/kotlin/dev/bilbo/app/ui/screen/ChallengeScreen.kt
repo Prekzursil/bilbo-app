@@ -28,9 +28,9 @@ import kotlinx.datetime.toLocalDateTime
 // ── UI models ─────────────────────────────────────────────────────────────────
 
 sealed class ChallengeScreenMode {
-    data object List : ChallengeScreenMode()
+    object List : ChallengeScreenMode()
     data class Detail(val challengeId: String) : ChallengeScreenMode()
-    data object Create : ChallengeScreenMode()
+    object Create : ChallengeScreenMode()
 }
 
 data class ChallengeDetailUiState(

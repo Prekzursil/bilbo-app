@@ -165,6 +165,7 @@ dependencies {
     implementation(libs.compose.foundation)
     implementation(libs.compose.animation)
     implementation(libs.activity.compose)
+    implementation(libs.androidx.core.ktx) { because("AppOpsManagerCompat — non-deprecated usage-stats check (CodeQL java/deprecated-call)") }
     implementation(libs.navigation.compose)
 
     // Lifecycle

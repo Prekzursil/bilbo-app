@@ -113,8 +113,6 @@ class CircleManager {
         joiningUserId: String,
         clock: Clock = Clock.System
     ): CircleMembership {
-        val now = clock.now()
-
         // Look up circle by invite code
         val circle = circles.values.firstOrNull {
             it.inviteCode == inviteCode && it.isActive

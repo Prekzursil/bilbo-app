@@ -6,7 +6,7 @@ package dev.bilbo.shared.util
  * Kotlin flows across both Android and iOS targets.
  */
 sealed class Result<out T> {
-    data object Loading : Result<Nothing>()
+    object Loading : Result<Nothing>()
     data class Success<T>(val data: T) : Result<T>()
     data class Error(val exception: Throwable) : Result<Nothing>()
 }

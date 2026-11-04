@@ -238,9 +238,7 @@ private fun WeeklyChart(
     val dotColor = MaterialTheme.colorScheme.primary
     val lineColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
     val todayColor = FpGreen
-    val labelColor = MaterialTheme.colorScheme.onSurfaceVariant
 
-    val dayLabels = listOf("Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun")
     val data = balances.takeLast(7).let { list ->
         if (list.size < 7) List(7 - list.size) { 0 } + list else list
     }
