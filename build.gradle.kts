@@ -51,6 +51,18 @@ buildscript {
                 version { require("[2.3.35,2.4)") }
                 because("GHSA-27j2-h3m2-8237 / CVE-2026-84939 — Kover's report stack pulls 2.3.32")
             }
+            // Guava rides the same buildscript classpath through AGP's tooling
+            // (com.android.tools:* declare it), resolving to 33.4.0-jre — that is
+            // Dependabot alert #52: GHSA-xxph-c9ww-hj94 (CompactHashMap /
+            // CompactHashSet / MapMakerInternalMap deserialization triggers
+            // uncontrolled memory allocation; vulnerable >= 4.0 <= 33.7.1, first
+            // patched 33.7.2). Same shape and same fix as Bouncy Castle above: a
+            // bounded floor on the buildscript classpath at the first patched
+            // release; project-level resolutionStrategy blocks cannot reach it.
+            add("classpath", "com.google.guava:guava") {
+                version { require("[33.7.2,34.0)") }
+                because("GHSA-xxph-c9ww-hj94 / Dependabot alert #52 — AGP's buildscript classpath pulls 33.4.0-jre")
+            }
         }
     }
 }
