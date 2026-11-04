@@ -122,6 +122,12 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      # brew BEFORE the CodeQL tracer wraps the environment: with init first,
+      # brew runs in a Rosetta 2 context and dies with 'Cannot install under
+      # Rosetta 2 in ARM default prefix (/opt/homebrew)' (run 41892925010).
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
@@ -137,9 +143,6 @@ jobs:
 
       - name: Select Xcode version
         run: sudo xcode-select -s /Applications/Xcode_16.1.app
-
-      - name: Install XcodeGen
-        run: brew install xcodegen
 
       - name: Generate iosApp.xcodeproj
         working-directory: iosApp
