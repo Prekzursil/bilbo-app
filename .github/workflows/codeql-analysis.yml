@@ -151,7 +151,16 @@ jobs:
       - name: Build iOS app (traced by CodeQL)
         working-directory: iosApp
         run: |
-          xcodebuild \n            -project iosApp.xcodeproj \n            -scheme iosApp \n            -destination 'generic/platform=iOS Simulator' \n            -configuration Debug \n            -derivedDataPath build \n            CODE_SIGN_IDENTITY="" \n            CODE_SIGNING_REQUIRED=NO \n            CODE_SIGNING_ALLOWED=NO \n            build
+          xcodebuild \
+            -project iosApp.xcodeproj \
+            -scheme iosApp \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
