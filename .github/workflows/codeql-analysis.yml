@@ -84,23 +84,106 @@ jobs:
         with:
           category: "/language:${{ matrix.language }}"
 
+  # Swift analysis: separate job (jobs.<id>.if cannot reference the matrix
+  # context) running ONLY on the weekly schedule and manual dispatch. The
+  # Swift extractor must trace a full xcodebuild (Gradle XCFramework +
+  # XcodeGen project generation first — ~40+ min of macOS runner time), and
+  # macOS minutes bill at 10x: on every push/PR that would exhaust the
+  # account's macOS quota and stall ALL required checks fleet-wide. Weekly
+  # keeps the language covered without that operational failure mode.
+  analyze-swift:
+    name: Analyze (swift)
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    runs-on: macos-15
+    timeout-minutes: 120
+
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          languages: swift
+          build-mode: manual
+          queries: security-extended,security-and-quality
+
+      # The app links the Kotlin shared framework: reproduce the iOS CI build
+      # exactly (framework -> xcodegen -> xcodebuild, signing off) with the
+      # CodeQL tracer wrapping the xcodebuild compilation.
+      - name: Build shared XCFramework for Swift analysis
+        run: ./gradlew :shared:assembleSharedDebugXCFramework --no-daemon
+
+      - name: Select Xcode version
+        run: sudo xcode-select -s /Applications/Xcode_16.1.app
+
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      - name: Generate iosApp.xcodeproj
+        working-directory: iosApp
+        run: xcodegen generate
+
+      - name: Build iOS app (traced by CodeQL)
+        working-directory: iosApp
+        run: |
+          xcodebuild             -project iosApp.xcodeproj             -scheme iosApp             -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest'             -configuration Debug             -derivedDataPath build             CODE_SIGN_IDENTITY=""             CODE_SIGNING_REQUIRED=NO             CODE_SIGNING_ALLOWED=NO             build
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          category: "/language:swift"
+
   # Fail-closed gate: the branch-protection required check `CodeQL` must never
   # be satisfied by a skipped, cancelled, failed, or unreported analysis.
   codeql-gate:
     name: CodeQL
     if: ${{ always() }}
-    needs: [analyze]
+    needs: [analyze, analyze-swift]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions: {}
     steps:
-      - name: Every analysis passed
+      - name: Every analysis for this trigger passed
         env:
           RESULTS: ${{ join(needs.*.result, ' ') }}
+          EVENT: ${{ github.event_name }}
         run: |
           set -euo pipefail
           [ -n "$RESULTS" ] || { echo "::error title=CodeQL gate::no analysis results to gate on"; exit 1; }
-          for r in $RESULTS; do
-            [ "$r" = success ] || { echo "::error title=CodeQL gate::an analysis ended with '$r' (all: $RESULTS)"; exit 1; }
-          done
-          echo "all CodeQL analyses passed: $RESULTS"
+          # push/PR: the always-on matrix must all succeed; swift is skipped
+          # by design. schedule/dispatch: the FULL matrix, swift included.
+          case "$EVENT" in
+            schedule|workflow_dispatch)
+              for r in $RESULTS; do
+                [ "$r" = success ] || { echo "::error title=CodeQL gate::an analysis ended with '$r' (all: $RESULTS) on a $EVENT run"; exit 1; }
+              done
+              ;;
+            *)
+              for r in $RESULTS; do
+                [ "$r" = success ] || [ "$r" = skipped ] || { echo "::error title=CodeQL gate::an analysis ended with '$r' (all: $RESULTS)"; exit 1; }
+              done
+              ;;
+          esac
+          echo "CodeQL analyses passed for this trigger: $RESULTS"
