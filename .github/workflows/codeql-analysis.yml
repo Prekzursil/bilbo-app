@@ -168,13 +168,17 @@ jobs:
         working-directory: iosApp
         run: xcodegen generate
 
+      # SDK-based build (no -destination): destination resolution needs the
+      # simulator RUNTIME, which the drifting macos-15 image intermittently
+      # lacks (4 dispatch attempts: runs 41892925010, 41915307478, 41920185244,
+      # 41930620068); the SDK itself is always present (xcrun probe passes).
       - name: Build iOS app (traced by CodeQL)
         working-directory: iosApp
         run: |
           xcodebuild \
             -project iosApp.xcodeproj \
             -scheme iosApp \
-            -destination 'generic/platform=iOS Simulator' \
+            -sdk iphonesimulator \
             -configuration Debug \
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="" \
