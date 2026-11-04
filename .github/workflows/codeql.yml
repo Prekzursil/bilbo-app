@@ -1,42 +1,185 @@
-# CodeQL baseline — thin caller of quality-zero-platform's reusable workflow.
+# Advanced CodeQL analysis (fleet standard 2026-11): BOTH query suites —
+# security-extended + security-and-quality (strictly subsumes the default suite
+# AND the extended suite) — matrixed over every language this repo actually
+# ships: Kotlin (shared + androidApp), TypeScript (supabase/functions, Deno),
+# Swift (iosApp), and the GitHub Actions workflows themselves. Triggers: push
+# to main, pull_request targeting main, weekly schedule (+ workflow_dispatch).
+# Each language's SARIF is uploaded to code scanning under its own category.
 #
-# Replaces the previous in-repo advanced wrapper (javascript-typescript,
-# security-extended) with the platform-managed analysis: query suite raised
-# to security-and-quality, languages resolved from the repo's QZP profile,
-# fail-closed unless the analysis succeeds, and every action the wrapper
-# runs is SHA-pinned by the platform. The platform is checked out at this
-# file's own workflow SHA (job.workflow_sha), so a PR head can never pick
-# or drift from the scripts it runs.
+# Swift runs on macOS ONLY on the weekly schedule and manual dispatch: the
+# Swift extractor must trace a full xcodebuild (Gradle XCFramework + XcodeGen
+# project generation first — ~40+ min of macOS runner time per run), and
+# macOS minutes bill at 10x. Running it on every push/PR would exhaust the
+# account's macOS quota and stall ALL required checks fleet-wide; weekly keeps
+# the language covered without that operational failure mode.
 #
-# The Kotlin/Java sources are not part of this analysis (same as before
-# this change); adding the java language is tracked as a follow-up.
-name: CodeQL
+# Default setup was disabled via the API (PATCH /code-scanning/default-setup
+# state=not-configured): GitHub rejects advanced-configuration SARIF uploads
+# while default setup is enabled (proven on abbyy-finereader-ocr-mcp run
+# 41679903544), and it covered neither Kotlin nor Swift anyway.
+#
+# The repo's own test/coverage suite stays wired beside this: Android CI,
+# KMP Gate, Shared Module Tests (koverVerify — 100% line+branch), iOS CI,
+# backend CI (deno lint+test), and the QZP lean gate (quality.yml).
+name: CodeQL Security Analysis
 
 permissions:
+  security-events: write
+  packages: read
   actions: read
   contents: read
-  security-events: write
 
 on:
   push:
-    branches: [main]
+    branches: [ "main" ]
   pull_request:
-    branches: [main]
-  merge_group:
-    types: [checks_requested]
+    branches: [ "main" ]
   schedule:
-    # Run every Monday at 08:00 UTC
-    - cron: "0 8 * * 1"
+    - cron: "29 4 * * 1"
   workflow_dispatch:
 
 jobs:
-  codeql:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: ${{ matrix.timeout-minutes }}
+    # Swift: schedule + manual dispatch only (macOS-minutes rationale above).
+    if: ${{ matrix.language != 'swift' || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+
     permissions:
+      security-events: write
+      packages: read
       actions: read
       contents: read
-      security-events: write
-    uses: Prekzursil/quality-zero-platform/.github/workflows/reusable-codeql.yml@d441b32790c4aa10e1f209539ec0ddc25114968b
-    with:
-      repo_slug: ${{ github.repository }}
-      event_name: ${{ github.event_name }}
-      sha: ${{ github.event.pull_request.head.sha || github.sha }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            os: ubuntu-latest
+            build-mode: manual
+            timeout-minutes: 90
+          - language: javascript-typescript
+            os: ubuntu-latest
+            build-mode: none
+            timeout-minutes: 30
+          - language: actions
+            os: ubuntu-latest
+            build-mode: none
+            timeout-minutes: 30
+          - language: swift
+            os: macos-15
+            build-mode: manual
+            timeout-minutes: 120
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          persist-credentials: false
+
+      # java-kotlin + swift both need the Gradle/JDK toolchain to compile.
+      - name: Set up JDK 17
+        if: ${{ matrix.language == 'java-kotlin' || matrix.language == 'swift' }}
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Gradle
+        if: ${{ matrix.language == 'java-kotlin' || matrix.language == 'swift' }}
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+
+      - name: Grant execute permission for gradlew
+        if: ${{ matrix.language == 'java-kotlin' || matrix.language == 'swift' }}
+        run: chmod +x gradlew
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # Both suites per the fleet CODEQL DECISION — strictly subsumes the
+          # default suite and the extended suite (the old workflow here ran
+          # security-extended only, and only for javascript-typescript).
+          queries: security-extended,security-and-quality
+
+      # Kotlin: compile the shared KMP module and the Android app. Manual (not
+      # autobuild) so the build stops at compilation — `gradlew build` would
+      # also run lint, which Android CI tolerates only as continue-on-error.
+      - name: Build Kotlin (shared + androidApp)
+        if: ${{ matrix.language == 'java-kotlin' }}
+        run: ./gradlew :shared:assemble :androidApp:assemblePlaystoreDebug --no-daemon
+
+      # Swift: the app links the Kotlin shared framework, so reproduce the
+      # iOS CI build exactly (framework -> xcodegen -> xcodebuild, signing off)
+      # with the CodeQL tracer wrapping the xcodebuild compilation.
+      - name: Build shared XCFramework for Swift analysis
+        if: ${{ matrix.language == 'swift' }}
+        run: ./gradlew :shared:assembleSharedDebugXCFramework --no-daemon
+
+      - name: Select Xcode version
+        if: ${{ matrix.language == 'swift' }}
+        run: sudo xcode-select -s /Applications/Xcode_16.1.app
+
+      - name: Install XcodeGen
+        if: ${{ matrix.language == 'swift' }}
+        run: brew install xcodegen
+
+      - name: Generate iosApp.xcodeproj
+        if: ${{ matrix.language == 'swift' }}
+        working-directory: iosApp
+        run: xcodegen generate
+
+      - name: Build iOS app (traced by CodeQL)
+        if: ${{ matrix.language == 'swift' }}
+        working-directory: iosApp
+        run: |
+          xcodebuild \
+            -project iosApp.xcodeproj \
+            -scheme iosApp \
+            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -configuration Debug \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  # Fail-closed gate: the branch-protection required check `CodeQL` must never
+  # be satisfied by a skipped, cancelled, failed, or unreported analysis. The
+  # empty-result guard prevents the vacuous-pass bug (seen on
+  # abbyy-finereader-ocr-mcp run 41679903544) where a single matrix need made
+  # join() evaluate empty.
+  codeql-gate:
+    name: CodeQL
+    if: ${{ always() }}
+    needs: [analyze]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Every non-swift analysis passed (swift runs weekly)
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          [ -n "$RESULTS" ] || { echo "::error title=CodeQL gate::no analysis results to gate on"; exit 1; }
+          for r in $RESULTS; do
+            [ "$r" = success ] || [ "$r" = skipped ] || { echo "::error title=CodeQL gate::an analysis ended with '$r' (all: $RESULTS)"; exit 1; }
+          done
+          case "$EVENT" in
+            schedule|workflow_dispatch)
+              echo "full matrix (incl. swift) required on $EVENT"
+              echo "$RESULTS" | grep -q skipped && { echo "::error title=CodeQL gate::swift analysis skipped on a $EVENT run"; exit 1; } || true
+              ;;
+          esac
+          echo "CodeQL analyses passed for this trigger: $RESULTS"
