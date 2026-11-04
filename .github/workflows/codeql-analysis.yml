@@ -1,0 +1,106 @@
+# Advanced CodeQL analysis (fleet standard 2026-11) — see the PR description
+# for the full rationale. Renamed from codeql.yml: that workflow entity had a
+# failing/disabled history and refused to start (0s "workflow file issue"
+# failures with zero jobs and no annotations — runs 41885342968/41886098238).
+name: CodeQL Security Analysis
+
+permissions:
+  security-events: write
+  packages: read
+  actions: read
+  contents: read
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  schedule:
+    - cron: "29 4 * * 1"
+  workflow_dispatch:
+
+jobs:
+  analyze:
+    name: Analyze (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: java-kotlin
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+          - language: actions
+            build-mode: none
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
+        with:
+          persist-credentials: false
+
+      - name: Set up JDK 17
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: actions/setup-java@b843ebf9b913146b38da2eaa7aeddf76074ae1ad # v6.1.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Gradle
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+
+      - name: Grant execute permission for gradlew
+        if: ${{ matrix.language == 'java-kotlin' }}
+        run: chmod +x gradlew
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # Both suites per the fleet CODEQL DECISION — strictly subsumes the
+          # default suite and the extended suite.
+          queries: security-extended,security-and-quality
+
+      # Compile only (not `gradlew build`): the full build also runs lint,
+      # which Android CI tolerates only as continue-on-error.
+      - name: Build Kotlin (shared + androidApp)
+        if: ${{ matrix.language == 'java-kotlin' }}
+        run: ./gradlew :shared:assemble :androidApp:assemblePlaystoreDebug --no-daemon
+
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  # Fail-closed gate: the branch-protection required check `CodeQL` must never
+  # be satisfied by a skipped, cancelled, failed, or unreported analysis.
+  codeql-gate:
+    name: CodeQL
+    if: ${{ always() }}
+    needs: [analyze]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Every analysis passed
+        env:
+          RESULTS: ${{ join(needs.*.result, ' ') }}
+        run: |
+          set -euo pipefail
+          [ -n "$RESULTS" ] || { echo "::error title=CodeQL gate::no analysis results to gate on"; exit 1; }
+          for r in $RESULTS; do
+            [ "$r" = success ] || { echo "::error title=CodeQL gate::an analysis ended with '$r' (all: $RESULTS)"; exit 1; }
+          done
+          echo "all CodeQL analyses passed: $RESULTS"
