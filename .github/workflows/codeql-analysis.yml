@@ -141,8 +141,28 @@ jobs:
       - name: Build shared XCFramework for Swift analysis
         run: ./gradlew :shared:assembleSharedDebugXCFramework --no-daemon
 
-      - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_16.1.app
+      # The macos-15 image drifts: some runners ship Xcode 16.1 WITHOUT the
+      # iOS Simulator platform installed, and xcodebuild then fails every
+      # destination (concrete 'iPhone 16' and generic alike) with exit 70
+      # ('iOS 18.1 is not installed'). Prefer the pinned 16.1, but fall back
+      # to any installed Xcode that actually has the iphonesimulator SDK.
+      - name: Select an Xcode with the iOS Simulator platform
+        run: |
+          set -euo pipefail
+          pick=""
+          for xc in /Applications/Xcode_16.1.app /Applications/Xcode*.app; do
+            [ -d "$xc" ] || continue
+            sudo xcode-select -s "$xc" 2>/dev/null || continue
+            if xcrun --sdk iphonesimulator --show-sdk-version >/dev/null 2>&1; then
+              pick="$xc"; break
+            fi
+          done
+          if [ -z "$pick" ]; then
+            echo "::error::no installed Xcode has the iOS Simulator SDK"
+            ls /Applications/ | grep -i xcode || true
+            exit 1
+          fi
+          echo "using $(basename "$pick") (simulator SDK $(xcrun --sdk iphonesimulator --show-sdk-version))"
 
       - name: Generate iosApp.xcodeproj
         working-directory: iosApp
