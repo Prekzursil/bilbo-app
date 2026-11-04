@@ -34,7 +34,7 @@ class CloudInsightClient(
 
     sealed class InsightResult {
         data class Success(val narrative: String) : InsightResult()
-        data object RateLimited : InsightResult()
+        object RateLimited : InsightResult()
         data class NetworkError(val message: String) : InsightResult()
         data class ServerError(val statusCode: Int, val body: String) : InsightResult()
     }
