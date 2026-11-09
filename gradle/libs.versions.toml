@@ -9,7 +9,7 @@ bouncycastle = "1.85"
 #   - io.netty 4.1.135.Final (CVEs in netty-codec/-http/-http2/-handler/-handler-proxy)
 #   - io.opentelemetry 1.62.0 (GHSA-rcgg-9c38-7xpx, opentelemetry-api)
 guava = "33.8.0-jre"
-netty = "4.2.19.Final"
+netty = "4.2.20.Final"
 opentelemetry = "1.67.0"
 kover = "0.9.11"
 # Pinned to 2.3.21: Kotlin 2.4.0 emits class metadata v2.4.0, which neither the
