@@ -1,3 +1,72 @@
+// Raise Bouncy Castle on the *buildscript* (plugin) classpath.
+//
+// The Android Gradle Plugin drags Bouncy Castle 1.79 onto this classpath through its
+// APK signing/zip stack — com.android.tools.build:builder, :apkzlib and
+// com.android.tools:sdk-common all declare bcprov-jdk18on:1.79. That is what
+// GHSA-574f-3g2m-x479 / CVE-2025-14813 (critical, CVSS 4.0 9.3 — GOST 28147 CTR
+// keystream reuse) is reported against, attributed to settings.gradle.kts because
+// that is the build entry point GitHub's dependency submission records.
+//
+// The `configurations.all { resolutionStrategy }` blocks in androidApp/build.gradle.kts
+// and shared/build.gradle.kts CANNOT fix it: they iterate *project* configurations,
+// while plugins are resolved into the root project's `buildscript` classpath. That is
+// why the bouncycastle = "1.85" pin in gradle/libs.versions.toml never applied here.
+// Bumping AGP does not help either — builder 9.3.0, 9.3.1 and 9.4.0-alpha01 all still
+// declare 1.79.
+//
+// Floor is 1.84, NOT the 1.80.2 GitHub reports as "first patched": this one advisory
+// has three disjoint vulnerable ranges for bcprov-jdk18on —
+//   >= 1.59, <= 1.80.1  (fixed 1.80.2)
+//   = 1.81.0            (fixed 1.81.1)
+//   >= 1.82, <= 1.83    (fixed 1.84)
+// so a 1.80.2 floor would still admit 1.81.0/1.82/1.83, all still vulnerable to the
+// SAME advisory. Only >= 1.84 clears all three.
+//
+// A bounded range, not an exact pin: Gradle takes the highest in range (1.85 today)
+// and Dependabot can still raise it, instead of reporting the requirement as already
+// satisfied. bcpkix/bcutil ride the same range — Bouncy Castle modules must move in
+// lockstep or AGP hits NoSuchMethodError at build time.
+buildscript {
+    dependencies {
+        constraints {
+            add("classpath", "org.bouncycastle:bcprov-jdk18on") {
+                version { require("[1.84,2.0)") }
+                because("GHSA-574f-3g2m-x479 / CVE-2025-14813 — AGP's buildscript classpath pulls 1.79")
+            }
+            add("classpath", "org.bouncycastle:bcpkix-jdk18on") {
+                version { require("[1.84,2.0)") }
+                because("keep Bouncy Castle modules in lockstep with bcprov-jdk18on")
+            }
+            add("classpath", "org.bouncycastle:bcutil-jdk18on") {
+                version { require("[1.84,2.0)") }
+                because("keep Bouncy Castle modules in lockstep with bcprov-jdk18on")
+            }
+            // Kover 0.9.11 (the latest) reaches FreeMarker 2.3.32 through
+            // kover-features-jvm -> intellij-coverage-reporter -> coverage-report 1.0.25,
+            // which is GHSA-27j2-h3m2-8237 / CVE-2026-84939 (critical, template-loader
+            // path traversal, >= 2.2.0 <= 2.3.34). Same buildscript-classpath shape as
+            // Bouncy Castle above, so the same fix: a bounded floor at the first patched
+            // release.
+            add("classpath", "org.freemarker:freemarker") {
+                version { require("[2.3.35,2.4)") }
+                because("GHSA-27j2-h3m2-8237 / CVE-2026-84939 — Kover's report stack pulls 2.3.32")
+            }
+            // Guava rides the same buildscript classpath through AGP's tooling
+            // (com.android.tools:* declare it), resolving to 33.4.0-jre — that is
+            // Dependabot alert #52: GHSA-xxph-c9ww-hj94 (CompactHashMap /
+            // CompactHashSet / MapMakerInternalMap deserialization triggers
+            // uncontrolled memory allocation; vulnerable >= 4.0 <= 33.7.1, first
+            // patched 33.7.2). Same shape and same fix as Bouncy Castle above: a
+            // bounded floor on the buildscript classpath at the first patched
+            // release; project-level resolutionStrategy blocks cannot reach it.
+            add("classpath", "com.google.guava:guava") {
+                version { require("[33.7.2,34.0)") }
+                because("GHSA-xxph-c9ww-hj94 / Dependabot alert #52 — AGP's buildscript classpath pulls 33.4.0-jre")
+            }
+        }
+    }
+}
+
 plugins {
     alias(libs.plugins.androidApplication) apply false
     alias(libs.plugins.androidLibrary) apply false

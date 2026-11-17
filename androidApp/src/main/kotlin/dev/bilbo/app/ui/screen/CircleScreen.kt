@@ -24,13 +24,13 @@ import dev.bilbo.social.CircleManager
 
 sealed class CircleScreenMode {
     /** Show the list of user's circles. */
-    data object List : CircleScreenMode()
+    object List : CircleScreenMode()
     /** Detail view for a specific circle. */
     data class Detail(val circleId: String) : CircleScreenMode()
     /** Create circle form. */
-    data object Create : CircleScreenMode()
+    object Create : CircleScreenMode()
     /** Join circle by code. */
-    data object Join : CircleScreenMode()
+    object Join : CircleScreenMode()
 }
 
 data class CircleDetailUiState(

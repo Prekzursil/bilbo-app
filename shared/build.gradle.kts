@@ -90,6 +90,10 @@ configurations.all {
             useVersion(libs.versions.netty.get())
             because("dependabot — pin io.netty to 4.1.135.Final (transitive CVEs)")
         }
+        if (requested.group == "com.google.guava" && requested.name == "guava") {
+            useVersion(libs.versions.guava.get())
+            because("GHSA-xxph-c9ww-hj94 / Dependabot alert #52 — project classpath resolves 33.6.0-jre (<= 33.7.1)")
+        }
         if (requested.group == "io.opentelemetry") {
             useVersion(libs.versions.opentelemetry.get())
             because("dependabot — pin io.opentelemetry to 1.62.0 (GHSA-rcgg-9c38-7xpx)")

@@ -3,7 +3,7 @@ package dev.bilbo.data
 import dev.bilbo.domain.AppCategory
 import dev.bilbo.domain.UsageSession
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Repository for persisting and querying [UsageSession] records.

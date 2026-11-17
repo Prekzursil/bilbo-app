@@ -9,6 +9,7 @@ import dev.bilbo.intelligence.tier2.GamingDetector
 import dev.bilbo.intelligence.tier2.HeuristicEngine
 import dev.bilbo.intelligence.tier2.TrendDetector
 import dev.bilbo.intelligence.tier3.InsightPromptBuilder
+import kotlin.time.Instant
 import kotlinx.datetime.*
 import kotlin.test.*
 

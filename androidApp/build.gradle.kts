@@ -17,7 +17,15 @@ kotlin {
 
 android {
     namespace = "dev.bilbo.app"
-    compileSdk = 36
+    // compileSdk 37 is required by androidx.hilt:hilt-navigation-compose:1.4.0,
+    // androidx.hilt:hilt-lifecycle-viewmodel-compose:1.4.0 and
+    // androidx.lifecycle:*-compose-android:2.11.0, all of which declare
+    // minCompileSdk=37 in their AAR metadata. Without this,
+    // :androidApp:checkPlaystoreDebugAarMetadata fails the quality gate.
+    // compileSdk only — targetSdk deliberately stays at 36 so runtime
+    // behaviour for users is unchanged (see AGP's own guidance: compileSdk,
+    // targetSdk and minSdk are updated independently).
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "dev.bilbo.app"
@@ -119,6 +127,10 @@ configurations.all {
             useVersion(libs.versions.netty.get())
             because("dependabot — pin io.netty to 4.1.135.Final (transitive CVEs)")
         }
+        if (requested.group == "com.google.guava" && requested.name == "guava") {
+            useVersion(libs.versions.guava.get())
+            because("GHSA-xxph-c9ww-hj94 / Dependabot alert #52 — project classpath resolves 33.6.0-jre (<= 33.7.1)")
+        }
         if (requested.group == "io.opentelemetry") {
             useVersion(libs.versions.opentelemetry.get())
             because("dependabot — pin io.opentelemetry to 1.62.0 (GHSA-rcgg-9c38-7xpx)")
@@ -150,6 +162,7 @@ dependencies {
     implementation(libs.compose.foundation)
     implementation(libs.compose.animation)
     implementation(libs.activity.compose)
+    implementation(libs.androidx.core.ktx) { because("AppOpsManagerCompat — non-deprecated usage-stats check (CodeQL java/deprecated-call)") }
     implementation(libs.navigation.compose)
 
     // Lifecycle

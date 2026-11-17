@@ -18,13 +18,13 @@ class BudgetEnforcer(
 
     sealed class EnforcementGate {
         /** App access is fully permitted. */
-        data object Permitted : EnforcementGate()
+        object Permitted : EnforcementGate()
         /** Balance is negative — user should be warned but not hard-blocked (NUDGE mode). */
         data class LowBalance(val balance: Int) : EnforcementGate()
         /** Balance is depleted and the app is in HARD_LOCK mode — access denied. */
         data class HardBlocked(val balance: Int) : EnforcementGate()
         /** Budget for today hasn't been created yet — create it first. */
-        data object NoBudgetForToday : EnforcementGate()
+        object NoBudgetForToday : EnforcementGate()
     }
 
     // -------------------------------------------------------------------------

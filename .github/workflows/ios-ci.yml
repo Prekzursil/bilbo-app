@@ -17,22 +17,22 @@ concurrency:
 jobs:
   build-kotlin-framework:
     name: Build Kotlin Shared XCFramework
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 45
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Set up JDK 17
-        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: gradle
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -41,7 +41,7 @@ jobs:
         run: ./gradlew :shared:assembleSharedDebugXCFramework --no-daemon
 
       - name: Upload XCFramework artifact
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: Shared-debug-xcframework
           path: shared/build/XCFrameworks/debug/
@@ -49,12 +49,12 @@ jobs:
 
   swiftlint:
     name: SwiftLint
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 10
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Install SwiftLint
         run: brew install swiftlint
@@ -66,23 +66,23 @@ jobs:
 
   build-ios-app:
     name: Build iOS App
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 60
     needs: [build-kotlin-framework]
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Set up JDK 17
-        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5
+        uses: actions/setup-java@77dd5b2ce225ea11469928ac317850245a74ae78 # v6.2.0
         with:
           java-version: '17'
           distribution: 'temurin'
           cache: gradle
 
       - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
 
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
@@ -90,8 +90,28 @@ jobs:
       - name: Build Shared XCFramework
         run: ./gradlew :shared:assembleSharedDebugXCFramework --no-daemon
 
-      - name: Select Xcode version
-        run: sudo xcode-select -s /Applications/Xcode_16.1.app
+      # The macos-15 image drifts: some runners ship Xcode 16.1 WITHOUT the
+      # iOS Simulator platform installed, and xcodebuild then fails every
+      # destination (concrete 'iPhone 16' and generic alike) with exit 70
+      # ('iOS 18.1 is not installed'). Prefer the pinned 16.1, but fall back
+      # to any installed Xcode that actually has the iphonesimulator SDK.
+      - name: Select an Xcode with the iOS Simulator platform
+        run: |
+          set -euo pipefail
+          pick=""
+          for xc in /Applications/Xcode_16.1.app /Applications/Xcode*.app; do
+            [ -d "$xc" ] || continue
+            sudo xcode-select -s "$xc" 2>/dev/null || continue
+            if xcrun --sdk iphonesimulator --show-sdk-version >/dev/null 2>&1; then
+              pick="$xc"; break
+            fi
+          done
+          if [ -z "$pick" ]; then
+            echo "::error::no installed Xcode has the iOS Simulator SDK"
+            ls /Applications/ | grep -i xcode || true
+            exit 1
+          fi
+          echo "using $(basename "$pick") (simulator SDK $(xcrun --sdk iphonesimulator --show-sdk-version))"
 
       - name: Install XcodeGen
         run: brew install xcodegen
@@ -107,7 +127,7 @@ jobs:
           xcodebuild \
             -project iosApp.xcodeproj \
             -scheme iosApp \
-            -destination 'platform=iOS Simulator,name=iPhone 16,OS=latest' \
+            -destination 'generic/platform=iOS Simulator' \
             -configuration Debug \
             -derivedDataPath build \
             CODE_SIGN_IDENTITY="" \
@@ -133,7 +153,7 @@ jobs:
 
       - name: Upload iOS app artifact
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: Bilbo-iOS-unsigned
           path: iosApp/release-artifacts/Bilbo-iOS-unsigned.zip
@@ -155,10 +175,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v6
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v6
 
       - name: Download iOS app zip
-        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8.0.1
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
         with:
           name: Bilbo-iOS-unsigned
           path: release-artifacts/

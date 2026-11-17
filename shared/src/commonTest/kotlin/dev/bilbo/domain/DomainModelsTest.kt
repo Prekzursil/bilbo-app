@@ -3,6 +3,7 @@ package dev.bilbo.domain
 import dev.bilbo.domain.social.*
 import dev.bilbo.shared.domain.model.*
 import dev.bilbo.shared.domain.model.AppCategory as SharedAppCategory
+import kotlin.time.Instant
 import kotlinx.datetime.*
 import kotlinx.serialization.json.Json
 import kotlin.test.*

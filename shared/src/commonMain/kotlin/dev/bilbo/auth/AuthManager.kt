@@ -31,10 +31,10 @@ class AuthManager(
 
     sealed class AuthState {
         /** No user signed in. Social features unavailable. */
-        data object Unauthenticated : AuthState()
+        object Unauthenticated : AuthState()
 
         /** Sign-in (or token refresh) is in progress. */
-        data object Loading : AuthState()
+        object Loading : AuthState()
 
         /** A user is signed in and the session is valid. */
         data class Authenticated(val user: UserInfo) : AuthState()
@@ -44,7 +44,7 @@ class AuthManager(
     }
 
     sealed class AuthResult {
-        data object Success : AuthResult()
+        object Success : AuthResult()
         data class Failure(val message: String) : AuthResult()
     }
 

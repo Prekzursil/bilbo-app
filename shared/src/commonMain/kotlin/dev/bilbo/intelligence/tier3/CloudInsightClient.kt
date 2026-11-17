@@ -6,6 +6,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
 import kotlin.time.Clock
+import kotlin.time.Instant
 import kotlinx.datetime.*
 
 /**
@@ -33,7 +34,7 @@ class CloudInsightClient(
 
     sealed class InsightResult {
         data class Success(val narrative: String) : InsightResult()
-        data object RateLimited : InsightResult()
+        object RateLimited : InsightResult()
         data class NetworkError(val message: String) : InsightResult()
         data class ServerError(val statusCode: Int, val body: String) : InsightResult()
     }

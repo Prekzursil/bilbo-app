@@ -1,6 +1,6 @@
 package dev.bilbo.domain.social
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * A named group of users who share wellness progress with each other.

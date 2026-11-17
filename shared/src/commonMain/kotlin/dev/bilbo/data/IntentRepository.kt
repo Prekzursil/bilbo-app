@@ -3,7 +3,7 @@ package dev.bilbo.data
 import dev.bilbo.domain.EnforcementMode
 import dev.bilbo.domain.IntentDeclaration
 import kotlinx.coroutines.flow.Flow
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 
 /**
  * Repository for persisting and querying [IntentDeclaration] records.
