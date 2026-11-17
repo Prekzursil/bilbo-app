@@ -74,11 +74,15 @@ function resultMessage(result) {
 }
 
 function ruleId(result, ruleTables) {
-  // `rule` may be the id string directly; `ruleIndex` indexes into ONE of
-  // the tool's rule tables (driver.rules OR any tool.extensions[].rules —
-  // CodeQL splits query suites across extensions). Resolve against all.
+  // Observed shapes (raw CodeQL java-kotlin SARIF, bilbo-app analyses
+  // 2189643927 / 2190148480): `rule` is an OBJECT {"id": ..., "index": N,
+  // "toolComponent": {...}}; some renderings carry a plain `ruleId` string;
+  // `ruleIndex` may index into driver.rules OR tool.extensions[].rules.
+  // Handle all of them.
   const r = result?.rule;
   if (typeof r === 'string') return r;
+  if (r && typeof r === 'object' && typeof r.id === 'string') return r.id;
+  if (typeof result?.ruleId === 'string') return result.ruleId;
   const idx = result?.ruleIndex;
   if (typeof idx !== 'number') return null;
   for (const rules of ruleTables) {
