@@ -66,15 +66,25 @@ if (!dir) {
 }
 
 function resultMessage(result) {
-  return result?.message?.text ?? '';
+  // GitHub/CodeQL render placeholder references as markdown links, e.g.
+  // "called [$stable](1) in a superclass" (the link points at
+  // relatedLocations id 1, whose own message is the bare "$stable").
+  // Normalize both forms to the bare text before matching.
+  return (result?.message?.text ?? '').replace(/\[([^\]]+)\]\(\d+\)/g, '$1');
 }
 
-function ruleId(result, toolComponentRules) {
-  const idx = result?.rule ?? result?.ruleIndex;
-  if (typeof idx === 'number' && toolComponentRules[idx]) {
-    return toolComponentRules[idx].id ?? null;
+function ruleId(result, ruleTables) {
+  // `rule` may be the id string directly; `ruleIndex` indexes into ONE of
+  // the tool's rule tables (driver.rules OR any tool.extensions[].rules —
+  // CodeQL splits query suites across extensions). Resolve against all.
+  const r = result?.rule;
+  if (typeof r === 'string') return r;
+  const idx = result?.ruleIndex;
+  if (typeof idx !== 'number') return null;
+  for (const rules of ruleTables) {
+    if (rules[idx]) return rules[idx].id ?? null;
   }
-  return typeof idx === 'string' ? idx : null;
+  return null;
 }
 
 function primaryLocationPath(result) {
@@ -96,10 +106,13 @@ for (const file of fs.readdirSync(dir)) {
   const full = path.join(dir, file);
   const sarif = JSON.parse(fs.readFileSync(full, 'utf8'));
   for (const run of sarif.runs ?? []) {
-    const rules = run?.tool?.driver?.rules ?? [];
+    const ruleTables = [
+      run?.tool?.driver?.rules ?? [],
+      ...(run?.tool?.extensions ?? []).map((e) => e?.rules ?? []),
+    ];
     const results = run.results ?? [];
     const kept = results.filter((r) => {
-      const rid = ruleId(r, rules);
+      const rid = ruleId(r, ruleTables);
       const msg = resultMessage(r);
       const excluded = rid === RULE_ID && msg.includes(`called ${SYNTHETIC_FIELD} in a superclass`);
       if (excluded) {
