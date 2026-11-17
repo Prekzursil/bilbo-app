@@ -79,7 +79,45 @@ jobs:
         if: ${{ matrix.language == 'java-kotlin' }}
         run: ./gradlew :shared:assemble :androidApp:assemblePlaystoreDebug --no-daemon
 
+      - name: Perform CodeQL Analysis (write SARIF, defer upload)
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: "/language:java-kotlin"
+          output: ../sarif-jk
+          upload: false
+
+      # OWNER-DIRECTED GENERATED-CODE FILTER (2026-11-17, SwitchAI
+      # precedent): the Kotlin Compose compiler synthesizes `$stable` fields
+      # on stability-inferred classes; the generated subclass `$stable`
+      # "masks" the generated superclass `$stable`, producing two
+      # java/field-masks-super-field alerts with NO source construct behind
+      # them (verified: grep finds no "stable" in either file):
+      #   alert #32 androidApp/src/main/kotlin/dev/bilbo/app/ui/screen/ChallengeScreen.kt:1
+      #   alert #33 androidApp/src/main/kotlin/dev/bilbo/app/ui/screen/CircleScreen.kt:1
+      # All five documented CodeQL exclusion mechanisms fail on a traced
+      # java-kotlin database (details in
+      # .github/scripts/filter-generated-sarif.js). The filter is
+      # deliberately narrow — rule java/field-masks-super-field AND a
+      # message naming the compiler-synthesized `$stable` field ONLY — real
+      # Kotlin findings keep flowing (canary: the script logs kept/removed
+      # counts; a kept count of 0 means the pipeline is broken, fix the
+      # pipeline, never widen the filter). No API dismissals: the next
+      # same-key SARIF upload closes the two alerts via normal code-scanning
+      # reconciliation.
+      - name: Filter Compose-compiler-generated $stable findings out of SARIF
+        if: ${{ matrix.language == 'java-kotlin' }}
+        run: node .github/scripts/filter-generated-sarif.js ../sarif-jk
+
+      - name: Upload filtered SARIF to code scanning
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: ../sarif-jk
+          category: "/language:java-kotlin"
+
       - name: Perform CodeQL Analysis
+        if: ${{ matrix.language != 'java-kotlin' }}
         uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           category: "/language:${{ matrix.language }}"
@@ -94,7 +132,15 @@ jobs:
   analyze-swift:
     name: Analyze (swift)
     if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
-    runs-on: macos-15
+    # OWNER-DIRECTED (2026-11-17): macos-14 instead of macos-15. The
+    # macos-15 image drifts — intermittently ships Xcode 16.1 WITHOUT the
+    # iOS Simulator platform/runtime (a GitHub image regression), which
+    # killed every traced swift analysis so far (runs 41892925010,
+    # 41915307478, 41920185244, 41930620068, and the 2026-11-16 scheduled
+    # run 43871596027: "Found no destinations for the scheme 'iosApp'",
+    # exit 70, even with the SDK-based no-destination build). macos-14
+    # ships stable Xcode 15.x images with the simulator platform intact.
+    runs-on: macos-14
     timeout-minutes: 120
 
     permissions:
@@ -141,16 +187,15 @@ jobs:
       - name: Build shared XCFramework for Swift analysis
         run: ./gradlew :shared:assembleSharedDebugXCFramework --no-daemon
 
-      # The macos-15 image drifts: some runners ship Xcode 16.1 WITHOUT the
-      # iOS Simulator platform installed, and xcodebuild then fails every
-      # destination (concrete 'iPhone 16' and generic alike) with exit 70
-      # ('iOS 18.1 is not installed'). Prefer the pinned 16.1, but fall back
-      # to any installed Xcode that actually has the iphonesimulator SDK.
+      # Belt-and-braces Xcode selection (macos-14 ships stable Xcode 15.x,
+      # but the same probe guards against any future image drift): probe
+      # each installed Xcode for a usable iphonesimulator SDK and select the
+      # first one that has it, failing loudly if none does.
       - name: Select an Xcode with the iOS Simulator platform
         run: |
           set -euo pipefail
           pick=""
-          for xc in /Applications/Xcode_16.1.app /Applications/Xcode*.app; do
+          for xc in /Applications/Xcode*.app; do
             [ -d "$xc" ] || continue
             sudo xcode-select -s "$xc" 2>/dev/null || continue
             if xcrun --sdk iphonesimulator --show-sdk-version >/dev/null 2>&1; then
