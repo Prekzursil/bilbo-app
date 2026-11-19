@@ -1,0 +1,89 @@
+name: codeql
+
+# Fleet CODEQL DECISION (owner standard): ADVANCED configuration with BOTH
+# query suites — security-extended + security-and-quality (strictly subsumes
+# the default suite AND the extended suite) — over every CodeQL-supported
+# language this repository actually ships, triggered on push to the default
+# branch, pull_requests targeting it, and a weekly schedule; each language's
+# SARIF uploads to code scanning under its own category.
+#
+# REPO-SPECIFIC NOTE: Kotlin + Swift + TypeScript product tree; expect java-kotlin, swift, javascript.
+#
+# The matrix is DETECTED from the tracked tree at run time:
+#   - zero supported languages -> the analyze job is skipped, the workflow
+#     stays green (nothing to analyze; N/A documented here, in-file);
+#   - code ever lands here -> the fleet suite engages automatically.
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "41 5 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  detect:
+    name: detect languages
+    runs-on: ubuntu-latest
+    outputs:
+      languages: ${{ steps.set.outputs.languages }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Build CodeQL language matrix from the tracked tree
+        id: set
+        shell: bash
+        run: |
+          set -euo pipefail
+          langs=()
+          count() { git ls-files | grep -cE "$1" || true; }
+          [ "$(count '\.py$')" -gt 0 ] && langs+=("python")
+          [ "$(count '\.(js|mjs|cjs|ts|tsx|jsx)$')" -gt 0 ] && langs+=("javascript")
+          [ "$(count '\.go$')" -gt 0 ] && langs+=("go")
+          [ "$(count '\.java$')" -gt 0 ] && langs+=("java")
+          [ "$(count '\.kt$|\.kts$')" -gt 0 ] && langs+=("java-kotlin")
+          [ "$(count '\.cs$')" -gt 0 ] && langs+=("csharp")
+          [ "$(count '\.rb$')" -gt 0 ] && langs+=("ruby")
+          [ "$(count '\.swift$')" -gt 0 ] && langs+=("swift")
+          [ "$(count '\.(c|h|cpp|hpp|cc|cxx)$')" -gt 0 ] && langs+=("cpp")
+          printf -v joined '%s,' "${langs[@]}"
+          matrix="[${joined%,}]"
+          [ "${#langs[@]}" -eq 0 ] && matrix="[]"
+          echo "languages=$matrix" >> "$GITHUB_OUTPUT"
+          echo "Detected CodeQL languages: $matrix"
+
+  analyze:
+    name: analyze (${{ matrix.language }})
+    needs: detect
+    if: needs.detect.outputs.languages != '[]'
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      packages: read
+      contents: read
+      actions: read
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ${{ fromJSON(needs.detect.outputs.languages) }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: ${{ matrix.language }}
+          queries: security-extended,security-and-quality
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: "/language:${{ matrix.language }}"
