@@ -107,9 +107,16 @@ jobs:
             fi
           done
           if [ -z "$pick" ]; then
-            echo "::error::no installed Xcode has the iOS Simulator SDK"
-            ls /Applications/ | grep -i xcode || true
-            exit 1
+            # Image drift remediation (2026-11-18 run: every installed Xcode
+            # lacked the iOS Simulator platform): download the platform for
+            # the pinned Xcode (xcodebuild -downloadPlatform, Xcode 15+)
+            # instead of failing the lane. ~2-4 min, deterministic.
+            fallback="/Applications/Xcode_16.1.app"
+            [ -d "$fallback" ] || fallback="$(ls -d /Applications/Xcode*.app | head -1)"
+            echo "no Xcode has the iOS Simulator SDK - downloading it for $(basename "$fallback")"
+            sudo xcode-select -s "$fallback"
+            xcodebuild -downloadPlatform iOS
+            pick="$fallback"
           fi
           echo "using $(basename "$pick") (simulator SDK $(xcrun --sdk iphonesimulator --show-sdk-version))"
 
