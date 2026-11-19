@@ -119,6 +119,12 @@ jobs:
             pick="$fallback"
           fi
           echo "using $(basename "$pick") (simulator SDK $(xcrun --sdk iphonesimulator --show-sdk-version))"
+          # The SDK alone is not enough: xcodebuild's destinations also need
+          # the iOS platform RUNTIME (2026-11-19 run: "iOS 18.1 is not
+          # installed. To use with Xcode, first download and install the
+          # platform" even though the SDK probe passed). Ensure it exists;
+          # -downloadPlatform is a no-op when already installed.
+          xcodebuild -downloadPlatform iOS
 
       - name: Install XcodeGen
         run: brew install xcodegen
