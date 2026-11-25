@@ -63,6 +63,44 @@ buildscript {
                 version { require("[33.7.2,34.0)") }
                 because("GHSA-xxph-c9ww-hj94 / Dependabot alert #52 — AGP's buildscript classpath pulls 33.4.0-jre")
             }
+            // Four more AGP build-classpath transitives. Each one is a Dependabot
+            // alert that was dismissed by hand on 2026-04-09 as "no bandwidth"
+            // although a patched release already existed, and each is still
+            // resolved at a vulnerable version today (dependency-graph SBOM,
+            // 2026-11-25): build-time exposure only, but live. Same shape and
+            // same fix as above — a bounded floor at the first patched release,
+            // so Gradle takes the highest release on the declared line.
+            //
+            // bundletool 1.18.3 -> jose4j 0.9.5
+            //   alert #24, GHSA-3677-xxcr-wjqv / CVE-2024-29371 (high, 7.5 — DoS
+            //   via compressed JWE content), vulnerable < 0.9.6.
+            add("classpath", "org.bitbucket.b_c:jose4j") {
+                version { require("[0.9.6,0.10)") }
+                because("GHSA-3677-xxcr-wjqv / Dependabot alert #24 — AGP's bundletool pulls jose4j 0.9.5")
+            }
+            // jetifier-processor 1.0.0-beta10 -> jdom2 2.0.6
+            //   alert #21, GHSA-2363-cqg2-863c / CVE-2021-33813 (high, 7.5 — XXE),
+            //   vulnerable < 2.0.6.1.
+            add("classpath", "org.jdom:jdom2") {
+                version { require("[2.0.6.1,2.1)") }
+                because("GHSA-2363-cqg2-863c / Dependabot alert #21 — AGP's jetifier-processor pulls jdom2 2.0.6")
+            }
+            // commons-compress 1.27.1 -> commons-lang3 3.16.0
+            //   alert #28, GHSA-j288-q9x7-2f5v / CVE-2025-48924 (medium, 6.5 —
+            //   uncontrolled recursion on long inputs), vulnerable >= 3.0 < 3.18.0.
+            add("classpath", "org.apache.commons:commons-lang3") {
+                version { require("[3.18.0,4.0)") }
+                because("GHSA-j288-q9x7-2f5v / Dependabot alert #28 — commons-compress on AGP's classpath pulls commons-lang3 3.16.0")
+            }
+            // httpmime 4.5.6 -> httpclient 4.5.6
+            //   alert #27, GHSA-7r82-7xv7-xcpj / CVE-2020-13956 (medium, 5.3 —
+            //   cross-site scripting via a malformed authority section), vulnerable
+            //   < 4.5.13 (and 5.0.0 .. < 5.0.3). Held on the 4.5.x line: 5.x is a
+            //   different artifact (httpclient5) that httpmime 4.5.6 does not use.
+            add("classpath", "org.apache.httpcomponents:httpclient") {
+                version { require("[4.5.13,5.0)") }
+                because("GHSA-7r82-7xv7-xcpj / Dependabot alert #27 — httpmime on AGP's classpath pulls httpclient 4.5.6")
+            }
         }
     }
 }
