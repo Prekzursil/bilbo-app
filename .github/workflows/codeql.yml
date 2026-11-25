@@ -1,18 +1,40 @@
 name: codeql
 
 # Fleet CODEQL DECISION (owner standard): ADVANCED configuration with BOTH
-# query suites — security-extended + security-and-quality (strictly subsumes
-# the default suite AND the extended suite) — over every CodeQL-supported
-# language this repository actually ships, triggered on push to the default
-# branch, pull_requests targeting it, and a weekly schedule; each language's
-# SARIF uploads to code scanning under its own category.
+# query suites — security-extended + security-and-quality (strictly subsumes the
+# default suite AND the extended suite) — over every CodeQL-supported language
+# this repository actually ships, triggered on push to the default branch,
+# pull requests targeting it, and a weekly schedule; each language's SARIF
+# uploads to code scanning under its own category.
 #
-# REPO-SPECIFIC NOTE: Kotlin + Swift + TypeScript product tree; expect java-kotlin, swift, javascript.
+# ONE CodeQL workflow for this repository. Until 2026-11-26 two ran and both
+# were red on the default branch:
 #
-# The matrix is DETECTED from the tracked tree at run time:
-#   - zero supported languages -> the analyze job is skipped, the workflow
-#     stays green (nothing to analyze; N/A documented here, in-file);
-#   - code ever lands here -> the fleet suite engages automatically.
+#   - This file carried the fleet "detect languages at run time" template. Its
+#     detect step printed `[javascript,java-kotlin,swift]` — unquoted, so not
+#     JSON — and `fromJSON()` threw at matrix expansion: the analyze jobs were
+#     never created and the run failed one second after "detect languages"
+#     succeeded (run 45216956065 and every earlier run since the file landed
+#     on 2026-11-19). Swift analysis, meanwhile, has never produced results in
+#     this repository: all 11 historical /language:swift analyses are error
+#     stubs ("unsuccessful execution", sarif=None).
+#
+#   - `CodeQL Security Analysis` (codeql-analysis.yml) held the repo-specific
+#     traced build, but its Swift job ran on the retired `macos-14` image
+#     ("The configuration 'macos-14-arm64-us-default' is not supported", run
+#     45201227782), so the fail-closed gate failed every scheduled run.
+#
+# Both uploaded to the SAME `/language:*` categories, so whichever ran last
+# would have overwritten the other's analysis. Everything is merged here and
+# codeql-analysis.yml is retired (deleted) in the same change.
+#
+# WHY A STATIC MATRIX INSTEAD OF RUNTIME DETECTION: every language here needs
+# a different runner and build mode (Kotlin: traced Gradle build on ubuntu;
+# Swift: traced xcodebuild on macOS, weekly only — see analyze-swift), which a
+# detected matrix cannot express. The `coverage` job keeps the fleet guarantee
+# that the matrix covers the tree: it FAILS the run when a tracked file belongs
+# to a CodeQL-supported language the matrix does not analyze, so a new language
+# can never be skipped silently.
 
 on:
   push:
@@ -26,64 +48,354 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  # a pull request's runs share one group, so a newer push cancels the
+  # superseded run; every other event gets a group of its own commit, so no
+  # scheduled or dispatched analysis is ever cancelled half-way
+  group: codeql-${{ github.event_name == 'pull_request' && github.ref || github.sha }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 jobs:
-  detect:
-    name: detect languages
+  coverage:
+    name: language coverage
     runs-on: ubuntu-latest
-    outputs:
-      languages: ${{ steps.set.outputs.languages }}
+    timeout-minutes: 5
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - name: Build CodeQL language matrix from the tracked tree
-        id: set
+      - name: The matrix covers every CodeQL-supported language in the tree
         shell: bash
         run: |
           set -euo pipefail
-          langs=()
-          count() { git ls-files | grep -cE "$1" || true; }
-          [ "$(count '\.py$')" -gt 0 ] && langs+=("python")
-          [ "$(count '\.(js|mjs|cjs|ts|tsx|jsx)$')" -gt 0 ] && langs+=("javascript")
-          [ "$(count '\.go$')" -gt 0 ] && langs+=("go")
-          [ "$(count '\.java$')" -gt 0 ] && langs+=("java")
-          [ "$(count '\.kt$|\.kts$')" -gt 0 ] && langs+=("java-kotlin")
-          [ "$(count '\.cs$')" -gt 0 ] && langs+=("csharp")
-          [ "$(count '\.rb$')" -gt 0 ] && langs+=("ruby")
-          [ "$(count '\.swift$')" -gt 0 ] && langs+=("swift")
-          [ "$(count '\.(c|h|cpp|hpp|cc|cxx)$')" -gt 0 ] && langs+=("cpp")
-          printf -v joined '%s,' "${langs[@]}"
-          matrix="[${joined%,}]"
-          [ "${#langs[@]}" -eq 0 ] && matrix="[]"
-          echo "languages=$matrix" >> "$GITHUB_OUTPUT"
-          echo "Detected CodeQL languages: $matrix"
+          export LC_ALL=C
+          files="$(git ls-files)"
+
+          # CodeQL language identifier -> tracked files that belong to it.
+          detected="$(
+            {
+              grep -qE '\.py$'                            <<<"$files" && echo python
+              grep -qE '\.(js|mjs|cjs|ts|tsx|jsx)$'        <<<"$files" && echo javascript-typescript
+              grep -qE '\.go$'                            <<<"$files" && echo go
+              grep -qE '\.(java|kt|kts)$'                 <<<"$files" && echo java-kotlin
+              grep -qE '\.cs$'                            <<<"$files" && echo csharp
+              grep -qE '\.rb$'                            <<<"$files" && echo ruby
+              grep -qE '\.swift$'                         <<<"$files" && echo swift
+              grep -qE '\.(c|h|cpp|hpp|cc|cxx)$'          <<<"$files" && echo cpp-c
+              grep -qE '^\.github/workflows/[^/]+\.ya?ml$' <<<"$files" && echo actions
+              true
+            } | sort -u
+          )"
+
+          # The languages this workflow's analyze matrix declares (the
+          # `- language:` entries below) — one source of truth: the matrix.
+          declared="$(sed -nE 's/^[[:space:]]*- language: ([a-z-]+)[[:space:]]*$/\1/p' .github/workflows/codeql.yml | sort -u)"
+
+          # one line of space-separated words (pure bash: no external tool that
+          # could depend on the size of the environment). The argument is
+          # split on purpose, so word splitting is allowed for that one line.
+          # shellcheck disable=SC2086
+          flat() { local out="" w; for w in $1; do out="$out$w "; done; printf '%s' "$out"; }
+          echo "languages detected in the tree: $(flat "$detected")"
+          echo "languages declared by the matrix: $(flat "$declared")"
+
+          missing="$(comm -23 <(printf '%s\n' "$detected") <(printf '%s\n' "$declared") | sed '/^$/d')"
+          if [ -n "$missing" ]; then
+            echo "::error title=CodeQL language coverage::tracked files belong to CodeQL language(s) that the analyze matrix does not cover: $(flat "$missing"). Add each one to the matrix in .github/workflows/codeql.yml."
+            exit 1
+          fi
+          echo "CodeQL language coverage OK: every CodeQL-supported language in the tree is analyzed."
 
   analyze:
-    name: analyze (${{ matrix.language }})
-    needs: detect
-    if: needs.detect.outputs.languages != '[]'
+    name: Analyze (${{ matrix.language }})
     runs-on: ubuntu-latest
+    timeout-minutes: 90
+
     permissions:
       security-events: write
       packages: read
-      contents: read
       actions: read
+      contents: read
+
     strategy:
       fail-fast: false
       matrix:
-        language: ${{ fromJSON(needs.detect.outputs.languages) }}
+        include:
+          - language: java-kotlin
+            build-mode: manual
+          - language: javascript-typescript
+            build-mode: none
+          - language: actions
+            build-mode: none
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+
+      - name: Set up JDK 17
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Setup Gradle
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: gradle/actions/setup-gradle@8da46b539cd8fe6ab27ca75128919a18d757604c # v6.4.1
+
+      - name: Grant execute permission for gradlew
+        if: ${{ matrix.language == 'java-kotlin' }}
+        run: chmod +x gradlew
+
       - name: Initialize CodeQL
         uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+          # Both suites per the fleet CODEQL DECISION — strictly subsumes the
+          # default suite and the extended suite.
           queries: security-extended,security-and-quality
+
+      # Compile only (not `gradlew build`): the full build also runs lint,
+      # which Android CI tolerates only as continue-on-error.
+      - name: Build Kotlin (shared + androidApp)
+        if: ${{ matrix.language == 'java-kotlin' }}
+        run: ./gradlew :shared:assemble :androidApp:assemblePlaystoreDebug --no-daemon
+
+      - name: Perform CodeQL Analysis (write SARIF, defer upload)
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: "/language:java-kotlin"
+          output: ../sarif-jk
+          upload: false
+
+      # OWNER-DIRECTED GENERATED-CODE FILTER (2026-11-17, SwitchAI
+      # precedent): the Kotlin Compose compiler synthesizes `$stable` fields
+      # on stability-inferred classes; the generated subclass `$stable`
+      # "masks" the generated superclass `$stable`, producing two
+      # java/field-masks-super-field alerts with NO source construct behind
+      # them (verified: grep finds no "stable" in either file):
+      #   alert #32 androidApp/src/main/kotlin/dev/bilbo/app/ui/screen/ChallengeScreen.kt:1
+      #   alert #33 androidApp/src/main/kotlin/dev/bilbo/app/ui/screen/CircleScreen.kt:1
+      # All five documented CodeQL exclusion mechanisms fail on a traced
+      # java-kotlin database (details in
+      # .github/scripts/filter-generated-sarif.js). The filter is
+      # deliberately narrow — rule java/field-masks-super-field AND a
+      # message naming the compiler-synthesized `$stable` field ONLY — real
+      # Kotlin findings keep flowing (canary: the script logs kept/removed
+      # counts; a kept count of 0 means the pipeline is broken, fix the
+      # pipeline, never widen the filter). No API dismissals: the next
+      # same-key SARIF upload closes the two alerts via normal code-scanning
+      # reconciliation.
+      - name: Filter Compose-compiler-generated $stable findings out of SARIF
+        if: ${{ matrix.language == 'java-kotlin' }}
+        run: node .github/scripts/filter-generated-sarif.js ../sarif-jk
+
+      - name: Upload filtered SARIF to code scanning
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: github/codeql-action/upload-sarif@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          sarif_file: ../sarif-jk
+          category: "/language:java-kotlin"
+
+      - name: Perform CodeQL Analysis
+        if: ${{ matrix.language != 'java-kotlin' }}
+        uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  # Swift analysis: separate job (jobs.<id>.if cannot reference the matrix
+  # context) running ONLY on the weekly schedule and manual dispatch. It needs a
+  # macOS runner and a traced xcodebuild, and macOS minutes bill at 10x: on
+  # every push/PR that would exhaust the account's macOS quota and stall ALL
+  # required checks fleet-wide. Weekly keeps the language covered without that
+  # operational failure mode (owner-directed).
+  #
+  # The generated XcodeGen project is a pure Swift/SwiftUI app on Apple
+  # frameworks: iosApp/project.yml declares no framework dependency and no
+  # Swift source imports the Kotlin `Shared` module. Nothing here depends on
+  # the Gradle XCFramework, so no JDK/Gradle/XCFramework build runs in this job.
+  analyze-swift:
+    name: Analyze (swift)
+    if: ${{ github.event_name == 'schedule' || github.event_name == 'workflow_dispatch' }}
+    # macos-15 is the image iOS CI builds on. `macos-14` is retired: jobs
+    # targeting it are cancelled after one second with "The configuration
+    # 'macos-14-arm64-us-default' is not supported" (runs 44155993950,
+    # 44188604902, 44192460318, 45201227782).
+    runs-on: macos-15
+    timeout-minutes: 60
+
+    permissions:
+      security-events: write
+      packages: read
+      actions: read
+      contents: read
+
+    # The `language` entry is what the `coverage` job reads as "declared":
+    # every analyze job in this file states its language(s) as `- language:`
+    # matrix entries, so the coverage guard sees all of them.
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: swift
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # brew BEFORE the CodeQL tracer wraps the environment: with init first,
+      # brew runs in a Rosetta 2 context and dies with 'Cannot install under
+      # Rosetta 2 in ARM default prefix (/opt/homebrew)' (run 41892925010).
+      - name: Install XcodeGen
+        run: brew install xcodegen
+
+      # Probe each installed Xcode for a usable iOS *device* SDK (always
+      # shipped inside Xcode.app, unlike the iOS Simulator platform/runtime,
+      # whose absence on drifting macos-15 images ended every earlier Swift
+      # attempt with exit 70) and select the first one that has it, preferring
+      # the Xcode iOS CI pins, failing loudly if none does.
+      - name: Select an Xcode with the iOS SDK
+        run: |
+          set -euo pipefail
+          pick=""
+          for xc in /Applications/Xcode_16.1.app /Applications/Xcode*.app; do
+            [ -d "$xc" ] || continue
+            sudo xcode-select -s "$xc" 2>/dev/null || continue
+            if xcrun --sdk iphoneos --show-sdk-version >/dev/null 2>&1; then
+              pick="$xc"; break
+            fi
+          done
+          if [ -z "$pick" ]; then
+            echo "::error::no installed Xcode has the iOS device SDK"
+            ls -d /Applications/Xcode*.app 2>/dev/null || true
+            exit 1
+          fi
+          echo "using $(basename "$pick") ($(xcodebuild -version | tr '\n' ' '); iOS SDK $(xcrun --sdk iphoneos --show-sdk-version))"
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: manual
+          queries: security-extended,security-and-quality
+
+      - name: Generate iosApp.xcodeproj
+        working-directory: iosApp
+        run: xcodegen generate
+
+      # Strategy 1 (no simulator dependency): compile against the iOS device
+      # SDK for a generic device, signing off. Strategy 2 (only if 1 fails):
+      # the simulator build iOS CI uses, after making sure the simulator
+      # runtime exists. Both are plain `xcodebuild ... build` under the CodeQL
+      # tracer, which is all the Swift extractor needs.
+      - name: Build iOS app (traced by CodeQL)
+        working-directory: iosApp
+        run: |
+          set -uo pipefail
+          common=(
+            -project iosApp.xcodeproj
+            -scheme iosApp
+            -configuration Debug
+          )
+          signing=(
+            CODE_SIGN_IDENTITY=""
+            CODE_SIGNING_REQUIRED=NO
+            CODE_SIGNING_ALLOWED=NO
+          )
+
+          echo "::group::strategy 1 — iOS device SDK (generic/platform=iOS)"
+          xcodebuild "${common[@]}" -sdk iphoneos -destination 'generic/platform=iOS' \
+            -derivedDataPath build-device "${signing[@]}" build > ../device-build.log 2>&1
+          device_rc=$?
+          echo "::endgroup::"
+          if [ "$device_rc" -eq 0 ]; then
+            echo "traced build succeeded against the iOS device SDK"
+            grep -E '\*\* BUILD (SUCCEEDED|FAILED) \*\*' ../device-build.log || true
+            exit 0
+          fi
+
+          echo "::warning title=CodeQL swift::device-SDK build failed (exit $device_rc) — retrying with the iOS CI simulator build"
+          echo "--- last 60 lines of the device-SDK build log ---"
+          tail -n 60 ../device-build.log || true
+
+          echo "::group::strategy 2 — iOS Simulator (generic/platform=iOS Simulator)"
+          # CoreSimulator may still be bound to the Xcode that was selected
+          # before the xcode-select above; restart it so xcodebuild can connect
+          # (the earlier "Unable to connect to simulator", exit 70), then make
+          # sure the iOS runtime exists — -downloadPlatform is a no-op when it
+          # already is installed.
+          sudo killall -9 com.apple.CoreSimulator.CoreSimulatorService 2>/dev/null || true
+          sleep 10
+          if ! xcrun simctl list runtimes 2>/dev/null | grep -q 'iOS '; then
+            xcodebuild -downloadPlatform iOS
+          fi
+          xcodebuild "${common[@]}" -destination 'generic/platform=iOS Simulator' \
+            -derivedDataPath build-simulator "${signing[@]}" build > ../simulator-build.log 2>&1
+          sim_rc=$?
+          echo "::endgroup::"
+          if [ "$sim_rc" -ne 0 ]; then
+            echo "::error title=CodeQL swift::both traced builds failed (device-SDK exit $device_rc, simulator exit $sim_rc)"
+            echo "--- last 80 lines of the simulator build log ---"
+            tail -n 80 ../simulator-build.log || true
+            exit 1
+          fi
+          echo "traced build succeeded against the iOS Simulator SDK"
+          grep -E '\*\* BUILD (SUCCEEDED|FAILED) \*\*' ../simulator-build.log || true
+
+      - name: Upload traced build logs
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0ac2f93d22962f4752f3646cd9 # v7
+        with:
+          name: codeql-swift-build-logs
+          path: |
+            device-build.log
+            simulator-build.log
+          retention-days: 7
+          if-no-files-found: ignore
+
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
         with:
           category: "/language:${{ matrix.language }}"
+
+  # Fail-closed gate: the branch-protection required check `CodeQL` must never
+  # be satisfied by a skipped, cancelled, failed, or unreported analysis.
+  codeql-gate:
+    name: CodeQL
+    if: ${{ always() }}
+    needs: [coverage, analyze, analyze-swift]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions: {}
+    steps:
+      - name: Every analysis for this trigger passed
+        env:
+          COVERAGE: ${{ needs.coverage.result }}
+          ANALYZE: ${{ needs.analyze.result }}
+          SWIFT: ${{ needs.analyze-swift.result }}
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          fail() { echo "::error title=CodeQL gate::$1"; exit 1; }
+          # Always-on jobs: nothing but success counts.
+          [ "$COVERAGE" = success ] || fail "language coverage ended with '$COVERAGE'"
+          [ "$ANALYZE" = success ] || fail "an always-on analysis ended with '$ANALYZE' (coverage=$COVERAGE analyze=$ANALYZE swift=$SWIFT)"
+          # push/PR: the Swift analysis is skipped by design.
+          # schedule/dispatch: the FULL matrix, Swift included, must succeed.
+          case "$EVENT" in
+            schedule|workflow_dispatch)
+              [ "$SWIFT" = success ] || fail "the swift analysis ended with '$SWIFT' on a $EVENT run (coverage=$COVERAGE analyze=$ANALYZE swift=$SWIFT)"
+              ;;
+            *)
+              [ "$SWIFT" = skipped ] || [ "$SWIFT" = success ] || fail "the swift analysis ended with '$SWIFT' (coverage=$COVERAGE analyze=$ANALYZE swift=$SWIFT)"
+              ;;
+          esac
+          echo "CodeQL analyses passed for this trigger: coverage=$COVERAGE analyze=$ANALYZE swift=$SWIFT"
