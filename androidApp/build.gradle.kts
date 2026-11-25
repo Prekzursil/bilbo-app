@@ -25,7 +25,14 @@ android {
     // compileSdk only — targetSdk deliberately stays at 36 so runtime
     // behaviour for users is unchanged (see AGP's own guidance: compileSdk,
     // targetSdk and minSdk are updated independently).
+    //
+    // 37.1 (minor API level) is required by the Compose 1.13.0 artifacts that
+    // compose-bom 2026.11.01 resolves to (androidx.compose.foundation:
+    // foundation(-layout)-android, androidx.compose.ui:ui-tooling(-data)
+    // -android), all of which declare minCompileSdk=37.1 in their AAR
+    // metadata. Same rule as above: compileSdk only; targetSdk stays at 36.
     compileSdk = 37
+    compileSdkMinor = 1
 
     defaultConfig {
         applicationId = "dev.bilbo.app"
